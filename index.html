@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數位智財學習單 - 單頁窄邊界版</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        /* 針對 A4 單頁窄邊界優化 */
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #525659; margin: 0; padding: 0; }
+        .worksheet-container { 
+            background: white; 
+            width: 210mm; 
+            height: 297mm; 
+            margin: 0 auto; 
+            padding: 10mm; /* 窄邊界設定 */
+            box-sizing: border-box;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 { text-align: center; color: #2c3e50; font-size: 20pt; margin: 0 0 10px 0; border-bottom: 2px solid #3498db; }
+        .info-section { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 11pt; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        h2 { color: #2980b9; font-size: 14pt; margin: 12px 0 8px 0; border-left: 5px solid #2980b9; padding-left: 8px; }
+        
+        /* 縮緊表格間距 */
+        .match-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 10.5pt; }
+        .match-table td { border: 1px solid #dee2e6; padding: 6px 10px; }
+        .matching-input { width: 45px; padding: 2px; text-align: center; border: 1px solid #3498db; font-weight: bold; }
+
+        /* 是非題 */
+        .tf-item { margin-bottom: 8px; font-size: 10.5pt; line-height: 1.4; }
+        .options { margin-top: 3px; }
+        .options label { margin-right: 25px; cursor: pointer; }
+
+        /* 輸入框 */
+        .text-input { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 3px; margin-top: 4px; font-size: 10.5pt; }
+        textarea { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 3px; font-size: 10.5pt; resize: none; flex-grow: 1; }
+        
+        .footer-note { font-size: 9pt; color: #7f8c8d; margin-top: auto; text-align: right; border-top: 1px solid #eee; padding-top: 5px; }
+        
+        /* 懸浮按鈕 */
+        .download-btn { 
+            position: fixed; bottom: 20px; right: 20px;
+            background-color: #27ae60; color: white; padding: 12px 25px; 
+            border: none; border-radius: 50px; cursor: pointer; 
+            font-size: 16px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+        }
+        @media print { .download-btn { display: none; } }
+    </style>
+</head>
+<body>
+
+<div id="worksheet-content" class="worksheet-container">
+    <h1>數位智財與 AI 創作大挑戰</h1>
+    
+    <div class="info-section">
+        <span>姓名：<input type="text" style="width: 100px; border:none; border-bottom:1px solid #000;"></span>
+        <span>班級：<input type="text" style="width: 80px; border:none; border-bottom:1px solid #000;"></span>
+        <span>座號：<input type="text" style="width: 50px; border:none; border-bottom:1px solid #000;"></span>
+    </div>
+
+    <h2>一、 認識標章 (填入對應字母)</h2>
+    <table class="match-table">
+        <tr>
+            <td width="42%">(1) 人形 (BY) <input type="text" class="matching-input"></td>
+            <td width="58%">A. <strong>禁止改作</strong>：不可隨意變更作品內容</td>
+        </tr>
+        <tr>
+            <td>(2) 錢幣斜線 (NC) <input type="text" class="matching-input"></td>
+            <td>B. <strong>姓名標示</strong>：必須註明創作者姓名</td>
+        </tr>
+        <tr>
+            <td>(3) 等號 (ND) <input type="text" class="matching-input"></td>
+            <td>C. <strong>非商業性</strong>：不可作為賺錢使用</td>
+        </tr>
+        <tr>
+            <td>(4) 循環箭頭 (SA) <input type="text" class="matching-input"></td>
+            <td>D. <strong>相同方式分享</strong>：改作後須用原條款分享</td>
+        </tr>
+    </table>
+
+    <h2>二、 智慧財產小常識 (是非題)</h2>
+    <div class="tf-item">
+        1. 在台灣，作品完成即享有保護，期限一般為作者逝世後 50 年。
+        <div class="options"><label><input type="radio" name="tf1"> ○ 正確</label><label><input type="radio" name="tf1"> × 錯誤</label></div>
+    </div>
+    <div class="tf-item">
+        2. 只要是標示「免費」的圖片，使用時就絕對不會有侵權法律風險。
+        <div class="options"><label><input type="radio" name="tf2"> ○ 正確</label><label><input type="radio" name="tf2"> × 錯誤</label></div>
+    </div>
+    <div class="tf-item">
+        3. 單純用 AI 生成圖片（如：請畫一隻貓），這種隨機結果很難享有著作權。
+        <div class="options"><label><input type="radio" name="tf3"> ○ 正確</label><label><input type="radio" name="tf3"> × 錯誤</label></div>
+    </div>
+    <div class="tf-item">
+        4. 使用 AI 工具時應誠實揭露，並對 AI 產生的內容負責。
+        <div class="options"><label><input type="radio" name="tf4"> ○ 正確</label><label><input type="radio" name="tf4"> × 錯誤</label></div>
+    </div>
+
+    <h2>三、 生活情境題</h2>
+    <p style="font-size: 10.5pt; margin: 0;"><strong>情境：</strong>小華在報告中想用一張標註 <strong>CC BY-NC</strong> 的風景照。</p>
+    <div>
+        <p style="margin: 5px 0;">1. 小華把這張照片放進「非營利」的期末報告會違法嗎？為何？</p>
+        <input type="text" class="text-input">
+    </div>
+    <div>
+        <p style="margin: 5px 0;">2. 合法使用此照片，他「至少」要在照片旁標註什麼？</p>
+        <input type="text" class="text-input">
+    </div>
+
+    <h2>四、 AI 提示詞 (Prompt) 練習</h2>
+    <p style="margin: 0 0 5px 0;">請寫下一段指令，讓 AI 幫你總結一段文章重點：</p>
+    <textarea rows="3"></textarea>
+
+    <div class="footer-note">
+        參考檔案：08數位智財創用趣-高中版.pdf
+    </div>
+</div>
+
+<button class="download-btn" onclick="saveAsPDF()">下載 PDF 學習單</button>
+
+<script>
+    function saveAsPDF() {
+        const element = document.getElementById('worksheet-content');
+        const opt = {
+            margin:       0,
+            filename:     '數位智財學習單.pdf',
+            image:        { type: 'jpeg', quality: 1 },
+            html2canvas:  { scale: 3, useCORS: true, scrollY: 0 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+</script>
+
+</body>
+</html>

@@ -11,7 +11,7 @@
         .worksheet-container { 
             background: white; 
             width: 210mm; 
-            height: 297mm; 
+            height: 297mm; /* 修正回標準 A4 高度 */
             margin: 0 auto; 
             padding: 10mm; /* 窄邊界設定 */
             box-sizing: border-box;
@@ -34,9 +34,12 @@
         .options label { margin-right: 25px; cursor: pointer; }
 
         /* 輸入框 */
-        .text-input { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 3px; margin-top: 4px; font-size: 10.5pt; }
-        textarea { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 3px; font-size: 10.5pt; resize: none; flex-grow: 1; }
+        .text-input { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 3px; margin-top: 4px; font-size: 10.5pt; box-sizing: border-box; }
+        .reflection-box { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 3px; font-size: 10.5pt; resize: none; box-sizing: border-box; margin-bottom: 8px; height: 65px; }
         
+        /* PDF 專用隱藏區塊：合併後的心得 */
+        #combined-reflection { display: none; width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 3px; font-size: 11pt; line-height: 1.8; white-space: pre-wrap; flex-grow: 1; }
+
         .footer-note { font-size: 9pt; color: #7f8c8d; margin-top: auto; text-align: right; border-top: 1px solid #eee; padding-top: 5px; }
         
         /* 懸浮按鈕 */
@@ -52,7 +55,7 @@
 <body>
 
 <div id="worksheet-content" class="worksheet-container">
-    <h1>數位智財與 AI 創作大挑戰</h1>
+    <h1>數位智財與 AI 創作</h1>
     
     <div class="info-section">
         <span>姓名：<input type="text" style="width: 100px; border:none; border-bottom:1px solid #000;"></span>
@@ -90,7 +93,7 @@
         <div class="options"><label><input type="radio" name="tf2"> ○ 正確</label><label><input type="radio" name="tf2"> × 錯誤</label></div>
     </div>
     <div class="tf-item">
-        3. 單純用 AI 生成圖片（如：請畫一隻貓），這種隨機結果很難享有著作權。
+        3. 單純用 AI 生成圖片，這種隨機運算結果目前難以享有著作權。
         <div class="options"><label><input type="radio" name="tf3"> ○ 正確</label><label><input type="radio" name="tf3"> × 錯誤</label></div>
     </div>
     <div class="tf-item">
@@ -109,12 +112,22 @@
         <input type="text" class="text-input">
     </div>
 
-    <h2>四、 AI 提示詞 (Prompt) 練習</h2>
-    <p style="margin: 0 0 5px 0;">請寫下一段指令，讓 AI 幫你總結一段文章重點：</p>
-    <textarea rows="3"></textarea>
+    <h2>四、 學習心得與省思</h2>
+    <div id="reflection-guide-container" style="font-size: 10.5pt;">
+        <p style="margin: 5px 0;">1. 未來在網路上下載素材製作報告時，你會如何確認該素材是否能合法使用？</p>
+        <textarea class="reflection-box" id="ref1" placeholder="請回答..."></textarea>
+        
+        <p style="margin: 5px 0;">2. 當 AI 幫你產出內容時，你認為為什麼「正確引註 AI 來源」對數位誠信很重要？</p>
+        <textarea class="reflection-box" id="ref2" placeholder="請回答..."></textarea>
+        
+        <p style="margin: 5px 0;">3. 根據愛因斯坦「回饋世界」的觀點，你願意將創作分享給他人嗎？為什麼？</p>
+        <textarea class="reflection-box" id="ref3" placeholder="請回答..."></textarea>
+    </div>
+
+    <div id="combined-reflection"></div>
 
     <div class="footer-note">
-        參考檔案：08數位智財創用趣-高中版.pdf
+        參考資料：08數位智財創用趣-高中版.pdf (臺北市政府教育局出版)
     </div>
 </div>
 
@@ -122,6 +135,22 @@
 
 <script>
     function saveAsPDF() {
+        const guideContainer = document.getElementById('reflection-guide-container');
+        const combinedBox = document.getElementById('combined-reflection');
+        
+        // 取得三個框的內容
+        const r1 = document.getElementById('ref1').value;
+        const r2 = document.getElementById('ref2').value;
+        const r3 = document.getElementById('ref3').value;
+
+        // 合併內容，純換行，不增加額外文字
+        const combinedText = `${r1}\n\n${r2}\n\n${r3}`;
+
+        // 將合併後的文字放入區塊，並切換顯示狀態
+        combinedBox.innerText = combinedText;
+        combinedBox.style.display = 'block';
+        guideContainer.style.display = 'none';
+
         const element = document.getElementById('worksheet-content');
         const opt = {
             margin:       0,
@@ -130,7 +159,13 @@
             html2canvas:  { scale: 3, useCORS: true, scrollY: 0 },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-        html2pdf().set(opt).from(element).save();
+
+        // 下載 PDF
+        html2pdf().set(opt).from(element).save().then(() => {
+            // 下載後還原網頁狀態
+            combinedBox.style.display = 'none';
+            guideContainer.style.display = 'block';
+        });
     }
 </script>
 

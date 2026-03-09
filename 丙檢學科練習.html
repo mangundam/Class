@@ -1,93 +1,102 @@
-<style>
-    .control-panel { background: #f4f4f4; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-    .input-group { margin-bottom: 15px; }
-    .btn-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
-    
-    /* 大按鈕樣式 */
-    .toggle-btn {
-        padding: 10px 20px;
-        border: 2px solid #007bff;
-        background: white;
-        color: #007bff;
-        cursor: pointer;
-        border-radius: 5px;
-        font-weight: bold;
-        transition: 0.3s;
-    }
-    /* 按下後變藍色 */
-    .toggle-btn.active {
-        background: #007bff;
-        color: white;
-    }
-    input{
-		width:120px;
-		height:30px;
-		font-size:22px;
-		text-align: center;
-	}
-    .quiz-container { margin-top: 20px; }
-    .question-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
-    .analysis-box { background: #eef; padding: 10px; margin-top: 10px; display: none; border-left: 5px solid #000080; }
-    .correct { color: green; font-weight: bold; }
-    .wrong { color: red; font-weight: bold; }
-	.option-block {
-        display: block;
-        margin: 8px 0;
-        padding: 12px 15px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: 0.2s;
-        background: #fff;
-    }
-    /* 當 input:checked 時，改變外層 label 的顏色 */
-    .option-block:has(input:checked) {
-        background-color: #e3f2fd;
-        border-color: #2196f3;
-        font-weight: bold;
-    }
-    .option-block input {
-        margin-right: 10px;
-        transform: scale(1.2);
-    }
-    .option-block:hover {
-        background-color: #f5f5f5;
-    }
-</style>
-<div class="control-panel">
-    <div class="input-group">
-        學號：<input type="text" id="studentID"> 
-        姓名：<input type="text" id="studentName">
-    </div>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電丙學科練習</title>
+	<style>
+		.control-panel { background: #f4f4f4; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+		.input-group { margin-bottom: 15px; }
+		.btn-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+		
+		/* 大按鈕樣式 */
+		.toggle-btn {
+			padding: 10px 20px;
+			border: 2px solid #007bff;
+			background: white;
+			color: #007bff;
+			cursor: pointer;
+			border-radius: 5px;
+			font-weight: bold;
+			transition: 0.3s;
+		}
+		/* 按下後變藍色 */
+		.toggle-btn.active {
+			background: #007bff;
+			color: white;
+		}
+		input{
+			width:120px;
+			height:30px;
+			font-size:22px;
+			text-align: center;
+		}
+		.quiz-container { margin-top: 20px; }
+		.question-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
+		.analysis-box { background: #eef; padding: 10px; margin-top: 10px; display: none; border-left: 5px solid #000080; }
+		.correct { color: green; font-weight: bold; }
+		.wrong { color: red; font-weight: bold; }
+		.option-block {
+			display: block;
+			margin: 8px 0;
+			padding: 12px 15px;
+			border: 1px solid #ddd;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: 0.2s;
+			background: #fff;
+		}
+		/* 當 input:checked 時，改變外層 label 的顏色 */
+		.option-block:has(input:checked) {
+			background-color: #e3f2fd;
+			border-color: #2196f3;
+			font-weight: bold;
+		}
+		.option-block input {
+			margin-right: 10px;
+			transform: scale(1.2);
+		}
+		.option-block:hover {
+			background-color: #f5f5f5;
+		}
+	</style>
+</head>
+<body>
+	<div class="control-panel">
+		<div class="input-group">
+			學號：<input type="text" id="studentID"> 
+			姓名：<input type="text" id="studentName">
+		</div>
 
-    <p><b>工作項目：</b></p>
-    <div class="btn-container" id="workGroup">
-        <button class="toggle-btn" onclick="toggleGroup(this, '01')">01</button>
-        <button class="toggle-btn" onclick="toggleGroup(this, '02')">02</button>
-        <button class="toggle-btn" onclick="toggleGroup(this, '03')">03</button>
-        <button class="toggle-btn" onclick="toggleGroup(this, '04')">04</button>
-    </div>
+		<p><b>工作項目：</b></p>
+		<div class="btn-container" id="workGroup">
+			<button class="toggle-btn" onclick="toggleGroup(this, '01')">01</button>
+			<button class="toggle-btn" onclick="toggleGroup(this, '02')">02</button>
+			<button class="toggle-btn" onclick="toggleGroup(this, '03')">03</button>
+			<button class="toggle-btn" onclick="toggleGroup(this, '04')">04</button>
+		</div>
 
-    <p><b>共同科目：</b></p>
-    <div class="btn-container" id="commonGroup">
-        <button class="toggle-btn" onclick="toggleGroup(this, '共同-01')">共同-01</button>
-        <button class="toggle-btn" onclick="toggleGroup(this, '共同-02')">共同-02</button>
-        <button class="toggle-btn" onclick="toggleGroup(this, '共同-03')">共同-03</button>
-        <button class="toggle-btn" onclick="toggleGroup(this, '共同-04')">共同-04</button>
-        <button class="toggle-btn" onclick="toggleGroup(this, '共同-05')">共同-05</button>
-    </div>
+		<p><b>共同科目：</b></p>
+		<div class="btn-container" id="commonGroup">
+			<button class="toggle-btn" onclick="toggleGroup(this, '共同-01')">共同-01</button>
+			<button class="toggle-btn" onclick="toggleGroup(this, '共同-02')">共同-02</button>
+			<button class="toggle-btn" onclick="toggleGroup(this, '共同-03')">共同-03</button>
+			<button class="toggle-btn" onclick="toggleGroup(this, '共同-04')">共同-04</button>
+			<button class="toggle-btn" onclick="toggleGroup(this, '共同-05')">共同-05</button>
+		</div>
 
-    <div class="input-group">
-        抽出題數：<input type="number" id="drawCount" value="20" min="1">
-        <button onclick="startQuiz()" style="padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer;">開始抽題作答</button>
-    </div>
-</div>
+		<div class="input-group">
+			抽出題數：<input type="number" id="drawCount" value="20" min="1">
+			<button onclick="startQuiz()" style="padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer;">開始抽題作答</button>
+		</div>
+	</div>
 
-<div id="quizDisplay" class="quiz-container"></div>
+	<div id="quizDisplay" class="quiz-container"></div>
 
-<div id="submitArea" style="display:none; text-align: center; margin: 30px;">
-    <button onclick="submitResult()" style="padding: 15px 40px; font-size: 1.2em; background: #dc3545; color: white; border: none; cursor: pointer;">提交並查看解析</button>
-</div>
+	<div id="submitArea" style="display:none; text-align: center; margin: 30px;">
+		<button onclick="submitResult()" style="padding: 15px 40px; font-size: 1.2em; background: #dc3545; color: white; border: none; cursor: pointer;">提交並查看解析</button>
+	</div>
+</body>
 <script>
 // 1. 建立題庫資料 (建議將原本表格內容轉為此格式)
 const allQuestions = [

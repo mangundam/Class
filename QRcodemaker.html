@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>QR Coder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 350px;
+        }
+        h2 { color: #333; margin-bottom: 1.5rem; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box; /* 確保 padding 不會撐破寬度 */
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        button:hover { background-color: #45a049; }
+        #qrcode {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        p { font-size: 12px; color: #888; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>QR Coder</h2>
+    <input type="text" id="urlInput" placeholder="請輸入網址或文字">
+    <button onclick="generateQR()">生成</button>
+    
+    <div id="qrcode"></div>
+    
+    <p>生成後可直接「右鍵另存圖片」</p>
+</div>
+
+<script>
+    // 初始化 QR Code 物件
+    var qrcode = new QRCode(document.getElementById("qrcode"), {
+        width: 200,
+        height: 200
+    });
+
+    function generateQR() {
+        var userInput = document.getElementById("urlInput").value;
+        if (userInput.trim() === "") {
+            alert("請輸入內容喔！");
+            return;
+        }
+        // 清除舊的並生成新的
+        qrcode.makeCode(userInput);
+    }
+
+    // 預設生成一個初始碼
+    qrcode.makeCode("https://google.com");
+</script>
+
+</body>
+</html>

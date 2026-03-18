@@ -3,345 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>鸚鵡色彩實驗室 - 大畫布版</title>
+    <title>鸚鵡色彩部件實驗室 - 透明疊加版</title>
     <style>
         :root {
-            --primary: #2c3e50;
-            --accent: #3498db;
-            --success: #27ae60;
-            --warning: #f39c12;
-            --danger: #e74c3c;
-            --bg: #1a1a1a;
-            --card-bg: #ffffff;
+            --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --warning: #f39c12; --danger: #e74c3c;
+            --bg: #1a1a1a; --card-bg: #ffffff;
         }
-
         body {
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-            background-color: var(--bg);
-            margin: 0; padding: 10px;
-            display: flex; flex-direction: column; align-items: center;
+            font-family: 'PingFang TC', sans-serif; background-color: var(--bg);
+            margin: 0; padding: 5px; display: flex; justify-content: center;
         }
-
         .container {
-            max-width: 1400px; /* 增加容器寬度 */
-            width: 95%;
-            background: var(--card-bg);
-            padding: 20px; border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            max-width: 1150px; width: 98%; height: 840px; 
+            background: var(--card-bg); padding: 15px; border-radius: 12px;
+            display: grid; grid-template-columns: 160px 1fr 260px; gap: 15px;
+            box-sizing: border-box; overflow: hidden;
         }
-
-        h1 { text-align: center; color: var(--primary); margin: 0 0 10px 0; }
-        .desc { text-align: center; color: #666; margin-bottom: 20px; font-size: 14px; }
-
-        .mode-selector {
-            display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;
+        .sidebar { display: flex; flex-direction: column; gap: 5px; overflow-y: auto; }
+        .part-item {
+            padding: 8px; background: #f8f9fa; border: 1px solid #ddd;
+            border-radius: 5px; cursor: pointer; text-align: center; font-size: 13px; font-weight: bold;
         }
-
-        button {
-            padding: 8px 16px; border: none; border-radius: 6px;
-            cursor: pointer; font-weight: bold; transition: 0.3s;
+        .part-item.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .canvas-area { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+        .canvas-container {
+            position: relative; width: 450px; height: 450px;
+            background: #fff; border: 2px solid #333; border-radius: 5px;
         }
-
-        .btn-mode { background: #e0e0e0; color: #666; }
-        .btn-mode.active { background: var(--accent); color: white; }
-
-        /* 佈局：左側大網格，右側工具欄 */
-        .game-main {
-            display: grid;
-            grid-template-columns: 1fr 320px; /* 畫布佔據主要空間 */
-            gap: 20px;
-        }
-
-        /* 調整畫布格子：放大 minmax 寬度 */
-        .canvas-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); 
-            gap: 20px; background: #f0f2f5; padding: 20px; border-radius: 12px;
-            border: 1px inset #ccc;
-        }
-
-        .canvas-item { display: flex; flex-direction: column; align-items: center; }
-        .canvas-item span { margin-bottom: 10px; font-weight: bold; color: var(--primary); font-size: 16px; }
-        
-        /* 放大畫布顯示尺寸 */
-        canvas {
-            border: 3px solid #bbb; background-color: #fff;
-            cursor: crosshair; width: 100%; max-width: 450px; /* 這裡調大 */
-            aspect-ratio: 1/1;
-            touch-action: none; border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .side-panel { display: flex; flex-direction: column; gap: 15px; }
-        .preview-box {
-            border: 1px solid #eee; padding: 10px; text-align: center;
-            border-radius: 10px; background: #fff;
-        }
-
-        #resultCanvas { width: 100%; border: 2px solid #333; }
-        #questionImage { width: 100%; border-radius: 5px; border: 2px solid #e67e22; }
-
-        .score-display { font-size: 40px; font-weight: bold; color: var(--warning); margin: 5px 0; }
-
-        /* 控制列 */
+        canvas { position: absolute; top: 0; left: 0; width: 450px; height: 450px; }
+        #lineLayer { pointer-events: none; z-index: 100; opacity: 0.8; }
+        .side-panel { display: flex; flex-direction: column; gap: 8px; }
+        .preview-box { border: 1px solid #eee; padding: 5px; text-align: center; border-radius: 8px; background: #fafafa; }
+        #questionImage { width: 100%; max-height: 140px; object-fit: contain; }
+        #resultCanvas { width: 100%; height: auto; border: 1px solid #333; background: #000; }
+        .score-display { font-size: 28px; font-weight: bold; color: var(--warning); margin: 2px 0; }
         .controls {
-            margin-top: 20px; display: flex; flex-wrap: wrap; gap: 20px;
-            align-items: center; padding: 15px; background: #eee; border-radius: 10px;
+            grid-column: 1 / 4; display: flex; gap: 15px; align-items: center;
+            padding: 8px; background: #f1f1f1; border-radius: 10px; justify-content: center;
         }
-
-        .tool-selector { display: flex; gap: 8px; border-right: 2px solid #ccc; padding-right: 15px; }
-        .btn-tool { background: #fff; border: 1px solid #999; padding: 8px 12px; }
-        .btn-tool.active { background: var(--primary); color: white; }
-
-        .btn-action { background: var(--success); color: white; width: 100%; padding: 15px; font-size: 18px; }
-        .btn-hint { background: var(--warning); color: white; width: 100%; }
-        .btn-clear { background: var(--danger); color: white; width: 100%; }
-        
-        input[type=range] { width: 150px; }
+        .color-btn {
+            width: 55px; height: 35px; border-radius: 4px; border: 2px solid #fff;
+            cursor: pointer; font-weight: bold; color: white; text-shadow: 1px 1px 1px #000;
+        }
+        .color-btn.selected { outline: 2px solid var(--accent); box-shadow: 0 0 5px rgba(0,0,0,0.5); }
+        .tool-btn { padding: 8px 12px; background: #fff; border: 1px solid #999; border-radius: 5px; cursor: pointer; font-size: 13px; }
+        .tool-btn.active { background: var(--primary); color: white; }
+        input[type=range] { width: 70px; vertical-align: middle; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>鸚鵡色彩組合</h1>
-    
-    <div class="mode-selector">
-        <button id="modeRGB" class="btn-mode active" onclick="switchMode('RGB')">RGB 螢幕模式</button>
-        <button id="modeCMYK" class="btn-mode" onclick="switchMode('CMYK')">CMYK 印刷模式</button>
+    <div class="sidebar">
+        <h4 style="margin:5px 0">部位選擇</h4>
+        <div id="partsList"></div>
     </div>
+
+    <div class="canvas-area">
+        <div class="canvas-container" id="canvasContainer">
+            <canvas id="lineLayer" width="600" height="600"></canvas>
+        </div>
+        <p style="font-size:12px; color:#777; margin:8px 0 0 0">點擊色塊選色後，直接點擊圖中部位上色。</p>
+    </div>
+
+    <div class="side-panel">
+        <div class="preview-box">
+            <b>目標題目</b>
+            <img id="questionImage" src="" alt="目標">
+        </div>
+        <div class="preview-box">
+            <b>組合結果</b>
+            <canvas id="resultCanvas" width="600" height="600"></canvas>
+            <div id="score" class="score-display">0.0%</div>
+            <button style="background:var(--success); color:white; width:100%; padding:10px; border:none; border-radius:5px; cursor:pointer;" onclick="combineAndScore()">組合並評分</button>
+        </div>
+        <button style="background:var(--danger); color:white; border:none; padding:5px; border-radius:5px; cursor:pointer;" onclick="location.reload()">全部重來</button>
+    </div>
+
     <div class="controls">
-        <div class="tool-selector">
-            <button id="toolPencil" class="btn-tool active" onclick="setTool('pencil')">鉛筆</button>
-            <button id="toolEraser" class="btn-tool" onclick="setTool('eraser')">橡皮擦</button>
+        <div style="display:flex; gap:5px">
+            <button id="btnModeRGB" class="tool-btn active" onclick="switchMode('RGB')">RGB</button>
+            <button id="btnModeCMYK" class="tool-btn" onclick="switchMode('CMYK')">CMYK</button>
         </div>
-        <div>筆刷大小 <input type="range" id="brushSize" min="2" max="100" value="30"></div>
-        <div>不透明度 <input type="range" id="brushOpacity" min="10" max="100" value="30"></div>
-    </div>
-    <div class="game-main">
-        <div id="canvasGrid" class="canvas-grid">載入中...</div>
-
-        <div class="side-panel">
-            <div class="preview-box">
-                <b>目標題目</b>
-                <img id="questionImage" src="" alt="目標">
-            </div>
-            <div class="preview-box">
-                <b>組合結果</b>
-                <canvas id="resultCanvas" width="600" height="600"></canvas>
-                <div id="score" class="score-display">0.0%</div>
-            </div>
-            <button class="btn-action" onclick="combineImages()">組合並評分</button>
-            <button class="btn-hint" onclick="showHints()">顯示提示</button>
-            <button class="btn-clear" onclick="clearAll()">重新開始</button>
+        <div id="colorPickerArea" style="display:flex; gap:8px; border-left:1px solid #ccc; padding-left:15px"></div>
+        <div style="display:flex; gap:5px; border-left:1px solid #ccc; padding-left:15px">
+            <button id="btnToolBucket" class="tool-btn active" onclick="setTool('bucket')">油漆桶</button>
+            <button id="btnToolBrush" class="tool-btn" onclick="setTool('brush')">畫筆</button>
+        </div>
+        <div style="font-size:12px">
+            深淺 <input type="range" id="brushOpacity" min="5" max="100" value="40">
+            筆刷 <input type="range" id="brushSize" min="5" max="80" value="30">
         </div>
     </div>
-
-
 </div>
 
 <script>
     const folder = 'color_game/';
-    const outlineFile = 'Parrot.png'; 
+    const partsFolder = folder + 'parts/';
     const answerPool = ['牡丹.png','折衷.png','太平洋.png'];
+    const partDefinitions = [
+        {id:'head', file:'head.png', label:'頭部'}, {id:'body', file:'body.png', label:'身體'},
+        {id:'upwing', file:'upwing.png', label:'上翅膀'}, {id:'downwing', file:'downwing.png', label:'下翅膀'},
+        {id:'wingtail', file:'wingtail.png', label:'翅膀尾'}, {id:'tail', file:'tail.png', label:'尾巴'}, {id:'foot', file:'foot.png', label:'腳部'}
+    ];
+    const colorsConfig = {
+        'RGB': [{n:'紅', v:'rgb(255,0,0)'}, {n:'綠', v:'rgb(0,255,0)'}, {n:'藍', v:'rgb(0,0,255)'}],
+        'CMYK': [{n:'青', v:'rgb(0,255,255)'}, {n:'洋', v:'rgb(255,0,255)'}, {n:'黃', v:'rgb(255,255,0)'}, {n:'黑', v:'rgb(0,0,0)'}]
+    };
 
-    let currentMode = 'RGB';
-    let currentAnswer = '';
-    let currentTool = 'pencil';
-    let transparentOutlineURL = ''; 
-    let layers = []; 
-    let isDrawing = false;
-    let lastX = 0, lastY = 0;
+    let currentMode = 'RGB', currentPartId = 'head', currentTool = 'bucket', selectedColor = 'rgb(255,0,0)', isDrawing = false, lastX=0, lastY=0;
+    const partContexts = {}, partMasks = {}, hitCanvas = document.createElement('canvas');
+    hitCanvas.width = hitCanvas.height = 600;
+    const hitCtx = hitCanvas.getContext('2d');
 
-    const canvasGrid = document.getElementById('canvasGrid');
-    const resultCanvas = document.getElementById('resultCanvas');
-    const resultCtx = resultCanvas.getContext('2d');
-    const questionImgElement = document.getElementById('questionImage');
+    window.onload = async () => {
+        document.getElementById('questionImage').src = folder + answerPool[Math.floor(Math.random() * answerPool.length)];
+        const lineImg = new Image();
+        lineImg.src = partsFolder + 'line.png';
+        lineImg.onerror = () => lineImg.src = partsFolder + 'line.jpg';
+        lineImg.onload = () => document.getElementById('lineLayer').getContext('2d').drawImage(lineImg, 0, 0, 600, 600);
 
-    window.onload = () => switchMode('RGB');
+        const container = document.getElementById('canvasContainer');
+        const list = document.getElementById('partsList');
 
-    function setTool(tool) {
-        currentTool = tool;
-        document.querySelectorAll('.btn-tool').forEach(b => b.classList.remove('active'));
-        if (tool === 'pencil') document.getElementById('toolPencil').classList.add('active');
-        else document.getElementById('toolEraser').classList.add('active');
-    }
-
-    async function getProcessedOutline() {
-        if (transparentOutlineURL) return transparentOutlineURL;
-        return new Promise((resolve) => {
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.src = folder + outlineFile;
-            img.onload = () => {
-                const tempCvs = document.createElement('canvas');
-                tempCvs.width = img.width; tempCvs.height = img.height;
-                const tempCtx = tempCvs.getContext('2d');
-                tempCtx.drawImage(img, 0, 0);
-                const data = tempCtx.getImageData(0, 0, tempCvs.width, tempCvs.height).data;
-                // 去黑背景邏輯
-                for (let i = 0; i < data.length; i += 4) {
-                    if (data[i] < 45 && data[i+1] < 45 && data[i+2] < 45) data[i+3] = 0; 
-                }
-                tempCtx.putImageData(new ImageData(data, tempCvs.width, tempCvs.height), 0, 0);
-                transparentOutlineURL = tempCvs.toDataURL();
-                resolve(transparentOutlineURL);
-            };
-        });
-    }
-
-    async function switchMode(mode) {
-        currentMode = mode;
-        document.querySelectorAll('.btn-mode').forEach(b => b.classList.remove('active'));
-        document.getElementById('mode' + mode).classList.add('active');
-        currentAnswer = answerPool[Math.floor(Math.random() * answerPool.length)];
-        questionImgElement.src = folder + currentAnswer;
-        await setupCanvases();
-        resultCtx.clearRect(0, 0, 600, 600);
-        document.getElementById('score').innerText = '0.0%';
-    }
-
-    async function setupCanvases() {
-        canvasGrid.innerHTML = '載入中...';
-        layers = [];
-        const outlineURL = await getProcessedOutline();
-        canvasGrid.innerHTML = '';
-        const config = currentMode === 'RGB' ? ['Red (R)', 'Green (G)', 'Blue (B)'] : ['Cyan (C)', 'Magenta (M)', 'Yellow (Y)', 'Black (K)'];
-
-        config.forEach((name, index) => {
+        for (let i = 0; i < partDefinitions.length; i++) {
+            const p = partDefinitions[i];
             const div = document.createElement('div');
-            div.className = 'canvas-item';
-            div.innerHTML = `<span>${name}</span>`;
-            const cvs = document.createElement('canvas');
-            cvs.width = 600; cvs.height = 600; // 提升內部解析度，畫起來更細緻
-            cvs.dataset.index = index;
-            cvs.style.backgroundImage = `url(${outlineURL})`;
-            cvs.style.backgroundSize = 'contain';
-            div.appendChild(cvs);
-            canvasGrid.appendChild(div);
-            
-            const ctx = cvs.getContext('2d');
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            layers.push(ctx);
+            div.className = 'part-item'; div.id = 'btn-'+p.id; div.innerText = p.label;
+            div.onclick = () => selectPart(p.id);
+            list.appendChild(div);
 
-            cvs.onmousedown = startDrawing;
-            cvs.onmousemove = draw;
-            window.addEventListener('mouseup', stopDrawing);
-            cvs.addEventListener('touchstart', handleTouch, {passive: false});
-            cvs.addEventListener('touchmove', handleTouch, {passive: false});
-        });
-    }
+            const cvs = document.createElement('canvas'); cvs.width = cvs.height = 600;
+            container.insertBefore(cvs, document.getElementById('lineLayer'));
+            partContexts[p.id] = cvs.getContext('2d');
 
-    function getBrushColor(index) {
-        const opacity = document.getElementById('brushOpacity').value / 100;
-        const colors = currentMode === 'RGB' ? 
-            [`rgba(255,0,0,${opacity})`, `rgba(0,255,0,${opacity})`, `rgba(0,0,255,${opacity})`] : 
-            [`rgba(0,255,255,${opacity})`, `rgba(255,0,255,${opacity})`, `rgba(255,255,0,${opacity})`, `rgba(0,0,0,${opacity})` ];
-        return colors[index];
-    }
-
-    function startDrawing(e) {
-        isDrawing = true;
-        const rect = e.target.getBoundingClientRect();
-        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-        lastX = (clientX - rect.left) * (e.target.width / rect.width);
-        lastY = (clientY - rect.top) * (e.target.height / rect.height);
-        draw(e);
-    }
-
-    function stopDrawing() { isDrawing = false; }
-
-    function draw(e) {
-        if (!isDrawing) return;
-        const cvs = e.target;
-        if (cvs.tagName !== 'CANVAS') return;
-        const ctx = cvs.getContext('2d');
-        const rect = cvs.getBoundingClientRect();
-        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-        const curX = (clientX - rect.left) * (cvs.width / rect.width);
-        const curY = (clientY - rect.top) * (cvs.height / rect.height);
-
-        ctx.beginPath();
-        if (currentTool === 'eraser') {
-            ctx.globalCompositeOperation = 'destination-out';
-        } else {
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.strokeStyle = getBrushColor(cvs.dataset.index);
+            const mask = new Image(); mask.crossOrigin = "anonymous"; mask.src = partsFolder + p.file;
+            mask.onload = () => {
+                partMasks[p.id] = mask;
+                // 去背 PNG 專用點擊偵測邏輯
+                hitCtx.save();
+                hitCtx.fillStyle = `rgb(${i+1}, 0, 0)`;
+                hitCtx.drawImage(mask, 0, 0, 600, 600);
+                hitCtx.globalCompositeOperation = 'source-in'; // 只有 PNG 有像素的地方才填入索引色
+                hitCtx.fillRect(0, 0, 600, 600);
+                hitCtx.restore();
+            };
         }
+        switchMode('RGB');
+        selectPart('head');
+        container.onmousedown = handleDown;
+        container.onmousemove = handleMove;
+        window.onmouseup = () => isDrawing = false;
+    };
+
+    function switchMode(m) {
+        currentMode = m;
+        const area = document.getElementById('colorPickerArea'); area.innerHTML = '';
+        colorsConfig[m].forEach((c, i) => {
+            const b = document.createElement('button');
+            b.className = 'color-btn' + (i === 0 ? ' selected' : '');
+            b.style.backgroundColor = c.v; b.innerText = c.n;
+            b.onclick = () => { selectedColor = c.v; document.querySelectorAll('.color-btn').forEach(x => x.classList.remove('selected')); b.classList.add('selected'); };
+            area.appendChild(b);
+            if(i === 0) selectedColor = c.v;
+        });
+        document.getElementById('btnModeRGB').classList.toggle('active', m === 'RGB');
+        document.getElementById('btnModeCMYK').classList.toggle('active', m === 'CMYK');
+    }
+
+    function selectPart(id) {
+        currentPartId = id;
+        document.querySelectorAll('.part-item').forEach(el => el.classList.remove('active'));
+        if(document.getElementById('btn-'+id)) document.getElementById('btn-'+id).classList.add('active');
+    }
+
+    function setTool(t) {
+        currentTool = t;
+        document.getElementById('btnToolBucket').classList.toggle('active', t === 'bucket');
+        document.getElementById('btnToolBrush').classList.toggle('active', t === 'brush');
+    }
+
+    function handleDown(e) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (600 / rect.width);
+        const y = (e.clientY - rect.top) * (600 / rect.height);
+        const pix = hitCtx.getImageData(x, y, 1, 1).data;
+        if (pix[3] > 0 && pix[0] > 0) { // 有透明度且有索引值
+            const id = partDefinitions[pix[0]-1].id;
+            selectPart(id);
+            if (currentTool === 'bucket') fillOverlay(id, selectedColor);
+            else { isDrawing = true; [lastX, lastY] = [x, y]; }
+        }
+    }
+
+    function handleMove(e) {
+        if (!isDrawing || currentTool !== 'brush') return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (600 / rect.width);
+        const y = (e.clientY - rect.top) * (600 / rect.height);
+        const ctx = partContexts[currentPartId];
+        ctx.save();
+        ctx.globalCompositeOperation = (currentMode === 'RGB') ? 'screen' : 'multiply';
+        const opa = document.getElementById('brushOpacity').value / 100;
+        ctx.strokeStyle = selectedColor.replace('rgb', 'rgba').replace(')', `, ${opa})`);
         ctx.lineWidth = document.getElementById('brushSize').value;
-        ctx.moveTo(lastX, lastY);
-        ctx.lineTo(curX, curY);
-        ctx.stroke();
-        [lastX, lastY] = [curX, curY];
+        ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+        // 畫完立刻用 PNG 去背遮蓋，確保不畫出界
+        ctx.globalCompositeOperation = 'destination-in';
+        ctx.drawImage(partMasks[currentPartId], 0, 0, 600, 600);
+        ctx.restore();
+        [lastX, lastY] = [x, y];
     }
 
-    function handleTouch(e) { if (e.type === 'touchstart') startDrawing(e); else { e.preventDefault(); draw(e); } }
+    function fillOverlay(id, col) {
+        const ctx = partContexts[id];
+        const opa = document.getElementById('brushOpacity').value / 100;
+        const tmp = document.createElement('canvas'); tmp.width = tmp.height = 600;
+        const tCtx = tmp.getContext('2d');
+        tCtx.fillStyle = col; tCtx.globalAlpha = opa; tCtx.fillRect(0, 0, 600, 600);
+        tCtx.globalCompositeOperation = 'destination-in';
+        tCtx.drawImage(partMasks[id], 0, 0, 600, 600);
+        ctx.globalCompositeOperation = (currentMode === 'RGB') ? 'screen' : 'multiply';
+        ctx.drawImage(tmp, 0, 0);
+    }
 
-    async function showHints() {
+    async function combineAndScore() {
+        const resCanvas = document.getElementById('resultCanvas');
+        const resCtx = resCanvas.getContext('2d');
+        resCtx.globalCompositeOperation = 'source-over';
+        resCtx.fillStyle = currentMode === 'RGB' ? 'black' : 'white';
+        resCtx.fillRect(0, 0, 600, 600);
+        resCtx.globalCompositeOperation = currentMode === 'RGB' ? 'screen' : 'multiply';
+        partDefinitions.forEach(p => resCtx.drawImage(partContexts[p.id].canvas, 0, 0));
+        resCtx.globalCompositeOperation = 'source-over';
+        resCtx.drawImage(document.getElementById('lineLayer'), 0, 0, 600, 600);
+        
+        const user = resCtx.getImageData(0, 0, 600, 600).data;
         const ansImg = new Image(); ansImg.crossOrigin = "anonymous";
-        ansImg.src = folder + currentAnswer;
-        await new Promise(r => ansImg.onload = r);
-        const tc = document.createElement('canvas'); tc.width = 600; tc.height = 600;
-        const tt = tc.getContext('2d'); tt.drawImage(ansImg, 0, 0, 600, 600);
-        const data = tt.getImageData(0, 0, 600, 600).data;
-        layers.forEach((ctx, layerIdx) => {
-            ctx.clearRect(0,0,600,600);
-            ctx.globalCompositeOperation = 'source-over';
-            const ld = ctx.createImageData(600, 600);
-            for (let i = 0; i < data.length; i += 4) {
-                let r = data[i], g = data[i+1], b = data[i+2];
-                if (currentMode === 'RGB') {
-                    ld.data[i] = (layerIdx === 0) ? r : 0;
-                    ld.data[i+1] = (layerIdx === 1) ? g : 0;
-                    ld.data[i+2] = (layerIdx === 2) ? b : 0; ld.data[i+3] = 100;
-                } else {
-                    if (layerIdx === 0) { ld.data[i+1]=255; ld.data[i+2]=255; ld.data[i+3]=(255-r)*0.4; }
-                    if (layerIdx === 1) { ld.data[i]=255; ld.data[i+2]=255; ld.data[i+3]=(255-g)*0.4; }
-                    if (layerIdx === 2) { ld.data[i]=255; ld.data[i+1]=255; ld.data[i+3]=(255-b)*0.4; }
-                    if (layerIdx === 3) { ld.data[i]=0; ld.data[i+1]=0; ld.data[i+2]=0; ld.data[i+3]=(255-Math.max(r,g,b))*0.4; }
-                }
-            }
-            ctx.putImageData(ld, 0, 0);
-        });
-    }
-
-    function combineImages() {
-        resultCtx.clearRect(0, 0, 600, 600);
-        if (currentMode === 'RGB') {
-            resultCtx.globalCompositeOperation = 'screen';
-            resultCtx.fillStyle = 'black'; resultCtx.fillRect(0, 0, 600, 600);
-        } else {
-            resultCtx.globalCompositeOperation = 'multiply';
-            resultCtx.fillStyle = 'white'; resultCtx.fillRect(0, 0, 600, 600);
-        }
-        layers.forEach(ctx => resultCtx.drawImage(ctx.canvas, 0, 0));
-        resultCtx.globalCompositeOperation = 'source-over';
-        const outline = new Image(); outline.src = transparentOutlineURL;
-        outline.onload = () => { resultCtx.drawImage(outline, 0, 0, 600, 600); calculateScore(); };
-    }
-
-    async function calculateScore() {
-        const user = resultCtx.getImageData(0, 0, 600, 600).data;
-        const ansImg = new Image(); ansImg.crossOrigin = "anonymous";
-        ansImg.src = folder + currentAnswer;
+        ansImg.src = document.getElementById('questionImage').src;
         await new Promise(r => ansImg.onload = r);
         const tc = document.createElement('canvas'); tc.width = 600; tc.height = 600;
         const tt = tc.getContext('2d'); tt.drawImage(ansImg, 0, 0, 600, 600);
         const target = tt.getImageData(0, 0, 600, 600).data;
-        let totalDiff = 0, validPixels = 0;
+        let d = 0, v = 0;
         for (let i = 0; i < target.length; i += 4) {
-            if (target[i] > 15 || target[i+1] > 15 || target[i+2] > 15) {
-                validPixels++;
-                totalDiff += Math.abs(user[i]-target[i]) + Math.abs(user[i+1]-target[i+1]) + Math.abs(user[i+2]-target[i+2]);
+            if (target[i] > 20 || target[i+1] > 20 || target[i+2] > 20) {
+                v++; d += Math.abs(user[i]-target[i]) + Math.abs(user[i+1]-target[i+1]) + Math.abs(user[i+2]-target[i+2]);
             }
         }
-        let score = validPixels === 0 ? 0 : 100 - (totalDiff / (validPixels * 3 * 255) * 100);
-        document.getElementById('score').innerText = Math.max(0, score).toFixed(1) + '%';
+        document.getElementById('score').innerText = (100 - (d / (v * 3 * 255) * 100)).toFixed(1) + '%';
     }
-
-    function clearAll() { setupCanvases(); document.getElementById('score').innerText = '0.0%'; }
 </script>
 </body>
 </html>

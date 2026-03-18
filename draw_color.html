@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鸚鵡色彩實驗室</title>
+    <style>
+        :root { --bg: #f4f6f8; --accent: #007bff; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        #game-container { width: 1050px; height: 840px; background: white; border-radius: 12px; display: flex; padding: 15px; box-sizing: border-box; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        
+        /* 畫布區 */
+        .canvas-area { flex: 1.5; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        #canvas-stack { position: relative; width: 500px; height: 500px; background: white; border: 1px solid #ccc; cursor: crosshair; }
+        canvas { position: absolute; top: 0; left: 0; width: 500px; height: 500px; }
+        #draw-canvas { z-index: 15; pointer-events: none; } /* 畫筆塗鴉層 */
+
+        /* 側邊欄與工具 */
+        .sidebar { flex: 1; display: flex; flex-direction: column; gap: 10px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #eee; overflow-y: auto; }
+        .mission-box { background: #fffbe6; padding: 8px; border: 1px solid #ffe58f; text-align: center; border-radius: 6px; }
+        #target-img { max-height: 330spx; margin: 5px; border-radius: 4px; border: 1px solid #ddd; }
+        
+        .tool-box { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .tool-btn { padding: 8px; cursor: pointer; border: 1px solid #ccc; background: white; border-radius: 4px; text-align: center; font-size: 14px; }
+        .tool-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+        
+        .slider-group { background: white; padding: 8px; border-radius: 6px; border: 1px solid #eee; }
+        .mode-tabs { display: flex; margin-bottom: 5px; border-bottom: 1px solid #eee; }
+        .mode-tabs button { flex: 1; padding: 5px; cursor: pointer; border: none; background: none; font-weight: bold; color: #666; }
+        .mode-tabs button.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+        
+        .row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-family: monospace; font-size: 13px; }
+        input[type=range] { flex: 1; }
+        
+        .preview-box { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
+        .preview { width: 60px; height: 40px; border-radius: 4px; border: 1px solid #ddd; }
+        #color-str { font-family: monospace; font-size: 12px; flex: 1; text-align: center; }
+
+        .score-box { background: #e6f7ff; padding: 10px; border: 1px solid #91d5ff; border-radius: 6px; text-align: center; margin-top: auto; display: none; }
+        #score-num { font-size: 24px; font-weight: bold; color: var(--accent); }
+
+        .action-btn { padding: 10px; cursor: pointer; border-radius: 4px; font-weight: bold; border: none; text-align: center; }
+        .submit-btn { background: #52c41a; color: white; margin-top: auto; }
+        .reset-btn { background: #ff4d4f; color: white; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="canvas-area">
+        <h2 style="margin: 0 0 10px 0">鸚鵡色彩實驗室</h2>
+        <div id="canvas-stack">
+            <canvas id="base-canvas" width="500" height="500"></canvas>
+            <div id="parts-container"></div>
+            <canvas id="draw-canvas" width="500" height="500"></canvas>
+            <canvas id="top-canvas" width="500" height="500" style="pointer-events:none"></canvas>
+        </div>
+        <p style="font-size: 13px; color: #888; margin: 8px 0 0 0;">提示：使用畫筆補上小特徵，使用油漆桶快速填色</p>
+    </div>
+
+    <div class="sidebar">
+        <div class="mission-box">
+            <strong>挑戰題目：<span id="target-name">載入中</span>鸚鵡</strong><br>
+            <img id="target-img" src=""><br>
+            <button class="tool-btn" onclick="nextTask()" style="width: 100%; margin-top: 5px;">換一題</button>
+        </div>
+
+        <div class="tool-box">
+            <button id="btn-paint" class="tool-btn active" onclick="setTool('paint')">油漆桶</button>
+            <button id="btn-brush" class="tool-btn" onclick="setTool('brush')">畫筆</button>
+            <button id="btn-eraser" class="tool-btn" onclick="setTool('eraser')">橡皮擦</button>
+            <div style="display:flex; align-items:center; justify-content:center; font-size:12px;">
+                筆芯 <input type="range" id="brush-size" min="1" max="15" value="5" style="width:60px">
+            </div>
+        </div>
+
+        <div class="slider-group">
+            <div class="mode-tabs">
+                <button id="tab-rgb" class="active" onclick="setMode('RGB')">RGB</button>
+                <button id="tab-cmyk" onclick="setMode('CMYK')">CMYK</button>
+            </div>
+            <div id="ui-rgb">
+                <div class="row">R <input type="range" id="r" min="0" max="255" value="0" oninput="updateColor()"></div>
+                <div class="row">G <input type="range" id="g" min="0" max="255" value="0" oninput="updateColor()"></div>
+                <div class="row">B <input type="range" id="b" min="0" max="255" value="0" oninput="updateColor()"></div>
+            </div>
+            <div id="ui-cmyk" style="display:none">
+                <div class="row">C <input type="range" id="c" min="0" max="100" value="0" oninput="updateColor()"></div>
+                <div class="row">M <input type="range" id="m" min="0" max="100" value="0" oninput="updateColor()"></div>
+                <div class="row">Y <input type="range" id="y" min="0" max="100" value="0" oninput="updateColor()"></div>
+                <div class="row">K <input type="range" id="k" min="0" max="100" value="0" oninput="updateColor()"></div>
+            </div>
+            <div class="preview-box">
+                <div id="color-preview" class="preview"></div>
+                <div id="color-str">rgb(255, 0, 0)</div>
+            </div>
+        </div>
+
+        <div id="score-box" class="score-box">
+            <strong>評分結果</strong><br>
+            <span id="score-num">0</span> 分<br>
+            <span id="score-eval" style="font-size: 13px;"></span>
+        </div>
+
+        <button class="action-btn submit-btn" onclick="submitScore()">提交評分</button>
+        <button class="action-btn reset-btn" onclick="resetAll()">全部清空</button>
+    </div>
+</div>
+
+<script>
+    // 零件列表 (由底層到頂層排列)
+    const partNames = ['wingtail', 'head', 'upwing', 'downwing', 'tail', 'foot', 'body'];
+    const partsData = {}; // 儲存每個零件的 Image 和 Canvas Context
+    let currentColor = { r: 255, g: 0, b: 0 };
+    let currentTool = 'paint';
+    let currentMode = 'RGB';
+    let isDrawing = false;
+    let targetImgObj = new Image(); // 儲存題目圖片物件供比對用
+
+    const drawCanvas = document.getElementById('draw-canvas');
+    const drawCtx = drawCanvas.getContext('2d');
+
+    async function init() {
+        const container = document.getElementById('parts-container');
+        
+        // 1. 初始化底層與頂層線條
+        drawSimpleImg('base-canvas', 'color_game/parrot.png');
+        drawSimpleImg('top-canvas', 'color_game/parts/line.png');
+
+        // 2. 初始化所有部位的 Canvas (隱藏，用於像素偵測與填色)
+        for (const name of partNames) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 500; canvas.height = 500;
+            canvas.id = `canvas-${name}`;
+            container.appendChild(canvas);
+            
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.src = `color_game/parts/${name}.png`;
+            
+            await new Promise(resolve => {
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, 500, 500); // 先畫上白色原圖
+                    partsData[name] = { canvas, ctx, img };
+                    resolve();
+                };
+            });
+        }
+
+        // 3. 綁定滑鼠事件 (油漆桶與畫筆)
+        const stack = document.getElementById('canvas-stack');
+        stack.addEventListener('mousedown', startAction);
+        window.addEventListener('mousemove', doAction);
+        window.addEventListener('mouseup', stopAction);
+        
+        // 4. 初始化工具與題目
+        updateColor();
+        nextTask();
+    }
+
+    // 繪製簡單圖片到 Canvas
+    function drawSimpleImg(id, src) {
+        const c = document.getElementById(id);
+        const ctx = c.getContext('2d');
+        const img = new Image();
+        img.src = src;
+        img.onload = () => ctx.drawImage(img, 0, 0, 500, 500);
+    }
+
+    // =================工具邏輯=================
+
+    function startAction(e) {
+        const pos = getMousePos(e);
+        if (currentTool === 'paint') {
+            handleBucketClick(pos.x, pos.y);
+        } else if (currentTool === 'brush' || currentTool === 'eraser') {
+            isDrawing = true;
+            drawCtx.beginPath();
+            drawCtx.moveTo(pos.x, pos.y);
+            doAction(e); // 點擊當下也畫一點
+        }
+    }
+
+    function doAction(e) {
+        if (!isDrawing) return;
+        const pos = getMousePos(e);
+        
+        drawCtx.lineWidth = document.getElementById('brush-size').value;
+        drawCtx.lineCap = 'round';
+        drawCtx.lineJoin = 'round';
+
+        if (currentTool === 'brush') {
+            drawCtx.globalCompositeOperation = 'source-over'; // 正常塗鴉
+            drawCtx.strokeStyle = `rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`;
+        } else if (currentTool === 'eraser') {
+            drawCtx.globalCompositeOperation = 'destination-out'; // 擦除塗鴉層
+            drawCtx.strokeStyle = 'rgba(0,0,0,1)';
+        }
+        
+        drawCtx.lineTo(pos.x, pos.y);
+        drawCtx.stroke();
+    }
+
+    function stopAction() {
+        isDrawing = false;
+        drawCtx.closePath();
+    }
+
+    // 油漆桶填色邏輯 (像素判定)
+    function handleBucketClick(x, y) {
+        // 從最上層往底層檢查
+        for (let i = partNames.length - 1; i >= 0; i--) {
+            const name = partNames[i];
+            const p = partsData[name];
+            const pixel = p.ctx.getImageData(x, y, 1, 1).data;
+            
+            if (pixel[3] > 10) { // 點擊到非透明區域
+                applyBucketColor(name);
+                return; // 填完一層就停止
+            }
+        }
+    }
+
+    // 將特定部位染色
+    function applyBucketColor(name) {
+        const p = partsData[name];
+        p.ctx.clearRect(0, 0, 500, 500); // 清空
+        
+        // 使用 source-in 模式：新顏色只保留在原圖形範圍內
+        p.ctx.save();
+        p.ctx.drawImage(p.img, 0, 0, 500, 500);
+        p.ctx.globalCompositeOperation = 'source-in';
+        p.ctx.fillStyle = `rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`;
+        p.ctx.fillRect(0, 0, 500, 500);
+        p.ctx.restore();
+    }
+
+    // =================評分系統=================
+
+    function submitScore() {
+        // 1. 建立一個臨時畫布，合併學生所有的填色成果 (零件層 + 塗鴉層)
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 500; tempCanvas.height = 500;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        // 依序繪製零件 (由底到頂)
+        partNames.forEach(name => tempCtx.drawImage(partsData[name].canvas, 0, 0));
+        // 繪製塗鴉層
+        tempCtx.drawImage(drawCanvas, 0, 0);
+
+        // 2. 獲取學生畫布與目標圖片的像素資料
+        const studentData = tempCtx.getImageData(0, 0, 500, 500).data;
+        
+        // 將目標圖片繪製到臨時畫布以獲取像素
+        tempCtx.clearRect(0, 0, 500, 500);
+        tempCtx.drawImage(targetImgObj, 0, 0, 500, 500);
+        const targetData = tempCtx.getImageData(0, 0, 500, 500).data;
+
+        // 3. 比對像素 (只比對非透明區域)
+        let totalPixels = 0;
+        let diffScore = 0; // 累積誤差值
+
+        for (let i = 0; i < studentData.length; i += 4) {
+            // 如果目標圖片該位置不是完全透明，才納入比對
+            if (targetData[i + 3] > 50) {
+                totalPixels++;
+                // 計算 RGB 三色的絕對誤差和
+                const rDiff = Math.abs(studentData[i] - targetData[i]);
+                const gDiff = Math.abs(studentData[i + 1] - targetData[i + 1]);
+                const bDiff = Math.abs(studentData[i + 2] - targetData[i + 2]);
+                
+                // 誤差最大值為 255*3 = 765。將誤差歸一化為 0~1 之間
+                diffScore += (rDiff + gDiff + bDiff) / 765;
+            }
+        }
+
+        // 4. 計算最終分數 (百分比)
+        if (totalPixels === 0) return; // 避免除以零
+        let score = Math.round((1 - (diffScore / totalPixels)) * 100);
+        if (score < 0) score = 0;
+
+        // 5. 顯示結果
+        showScoreResult(score);
+    }
+
+    function showScoreResult(score) {
+        const box = document.getElementById('score-box');
+        const num = document.getElementById('score-num');
+        const eval = document.getElementById('score-eval');
+        
+        num.innerText = score;
+        let comment = "";
+        if (score >= 95) comment = "完美！顏色準確度極高。";
+        else if (score >= 85) comment = "很棒！非常接近目標了。";
+        else if (score >= 70) comment = "不錯，小特徵可以用畫筆補強。";
+        else if (score >= 50) comment = "有些部位顏色調錯囉，再試試。";
+        else comment = "繼續努力，觀察看看哪裡不一樣。";
+        
+        eval.innerText = comment;
+        box.style.display = 'block';
+    }
+
+    // =================基礎介面邏輯=================
+
+    function getMousePos(e) {
+        const rect = document.getElementById('canvas-stack').getBoundingClientRect();
+        return {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+    }
+
+    function updateColor() {
+        if (currentMode === 'RGB') {
+            currentColor.r = document.getElementById('r').value;
+            currentColor.g = document.getElementById('g').value;
+            currentColor.b = document.getElementById('b').value;
+        } else {
+            const c = document.getElementById('c').value/100, m = document.getElementById('m').value/100, y = document.getElementById('y').value/100, k = document.getElementById('k').value/100;
+            currentColor.r = Math.round(255 * (1-c) * (1-k));
+            currentColor.g = Math.round(255 * (1-m) * (1-k));
+            currentColor.b = Math.round(255 * (1-y) * (1-k));
+        }
+        const preview = document.getElementById('color-preview');
+        const str = document.getElementById('color-str');
+        const rgbStr = `rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`;
+        preview.style.backgroundColor = rgbStr;
+        str.innerText = rgbStr;
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.getElementById('tab-rgb').classList.toggle('active', mode === 'RGB');
+        document.getElementById('tab-cmyk').classList.toggle('active', mode === 'CMYK');
+        document.getElementById('ui-rgb').style.display = mode === 'RGB' ? 'block' : 'none';
+        document.getElementById('ui-cmyk').style.display = mode === 'CMYK' ? 'block' : 'none';
+        updateColor();
+    }
+
+    function setTool(t) {
+        currentTool = t;
+        document.getElementById('btn-paint').classList.toggle('active', t === 'paint');
+        document.getElementById('btn-brush').classList.toggle('active', t === 'brush');
+        document.getElementById('btn-eraser').classList.toggle('active', t === 'eraser');
+        
+        // 切換工具時設定不同的滑鼠樣式
+        const stack = document.getElementById('canvas-stack');
+        if (t === 'paint') stack.style.cursor = 'pointer';
+        else stack.style.cursor = 'crosshair';
+    }
+
+    function nextTask() {
+        const tasks = [
+            { n: '太平洋', f: 'color_game/太平洋.png' },
+            { n: '折衷', f: 'color_game/折衷.png' },
+            { n: '牡丹', f: 'color_game/牡丹.png' }
+        ];
+        const t = tasks[Math.floor(Math.random() * tasks.length)];
+        document.getElementById('target-name').innerText = t.n;
+        document.getElementById('target-img').src = t.f;
+        targetImgObj.src = t.f; // 載入題目圖片物件供比對用
+        document.getElementById('score-box').style.display = 'none'; // 隱藏評分
+    }
+
+    function resetAll() {
+        // 重置零件層為白色
+        partNames.forEach(name => {
+            const p = partsData[name];
+            p.ctx.clearRect(0,0,500,500);
+            p.ctx.drawImage(p.img, 0, 0, 500, 500);
+        });
+        // 清空塗鴉層
+        drawCtx.clearRect(0, 0, 500, 500);
+        document.getElementById('score-box').style.display = 'none';
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>

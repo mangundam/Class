@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>鸚鵡色彩調和挑戰 - 答案分量提示版</title>
+    <title>鸚鵡色彩實驗室 - 大畫布版</title>
     <style>
         :root {
             --primary: #2c3e50;
             --accent: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
             --bg: #1a1a1a;
             --card-bg: #ffffff;
         }
@@ -15,114 +18,125 @@
         body {
             font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
             background-color: var(--bg);
-            margin: 0; padding: 20px;
+            margin: 0; padding: 10px;
             display: flex; flex-direction: column; align-items: center;
         }
 
         .container {
-            max-width: 1200px; width: 100%;
+            max-width: 1400px; /* 增加容器寬度 */
+            width: 95%;
             background: var(--card-bg);
-            padding: 30px; border-radius: 15px;
+            padding: 20px; border-radius: 15px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
 
-        h1 { text-align: center; color: var(--primary); margin-top: 0; }
-        .desc { text-align: center; color: #666; margin-bottom: 25px; }
+        h1 { text-align: center; color: var(--primary); margin: 0 0 10px 0; }
+        .desc { text-align: center; color: #666; margin-bottom: 20px; font-size: 14px; }
 
         .mode-selector {
-            display: flex; justify-content: center; gap: 15px; margin-bottom: 25px;
+            display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;
         }
 
         button {
-            padding: 10px 20px; border: none; border-radius: 8px;
+            padding: 8px 16px; border: none; border-radius: 6px;
             cursor: pointer; font-weight: bold; transition: 0.3s;
         }
 
         .btn-mode { background: #e0e0e0; color: #666; }
         .btn-mode.active { background: var(--accent); color: white; }
 
+        /* 佈局：左側大網格，右側工具欄 */
         .game-main {
             display: grid;
-            grid-template-columns: 1fr 300px 250px;
+            grid-template-columns: 1fr 320px; /* 畫布佔據主要空間 */
             gap: 20px;
         }
 
+        /* 調整畫布格子：放大 minmax 寬度 */
         .canvas-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px; background: #f8f9fa; padding: 20px; border-radius: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); 
+            gap: 20px; background: #f0f2f5; padding: 20px; border-radius: 12px;
+            border: 1px inset #ccc;
         }
 
-        .canvas-item { display: flex; flex-direction: column; align-items: center; position: relative; }
-        .canvas-item span { margin-bottom: 8px; font-weight: bold; }
+        .canvas-item { display: flex; flex-direction: column; align-items: center; }
+        .canvas-item span { margin-bottom: 10px; font-weight: bold; color: var(--primary); font-size: 16px; }
         
+        /* 放大畫布顯示尺寸 */
         canvas {
-            border: 2px solid #ccc; background-color: #fff;
-            cursor: crosshair; width: 100%; max-width: 250px; aspect-ratio: 1/1;
-            touch-action: none; border-radius: 4px;
+            border: 3px solid #bbb; background-color: #fff;
+            cursor: crosshair; width: 100%; max-width: 450px; /* 這裡調大 */
+            aspect-ratio: 1/1;
+            touch-action: none; border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         .side-panel { display: flex; flex-direction: column; gap: 15px; }
         .preview-box {
-            border: 1px solid #eee; padding: 15px; text-align: center;
+            border: 1px solid #eee; padding: 10px; text-align: center;
             border-radius: 10px; background: #fff;
         }
 
-        #resultCanvas { width: 100%; border: 1px solid #000; }
+        #resultCanvas { width: 100%; border: 2px solid #333; }
         #questionImage { width: 100%; border-radius: 5px; border: 2px solid #e67e22; }
 
-        .score-display { font-size: 32px; font-weight: bold; color: #e67e22; }
+        .score-display { font-size: 40px; font-weight: bold; color: var(--warning); margin: 5px 0; }
 
+        /* 控制列 */
         .controls {
-            margin-top: 25px; display: flex; flex-wrap: wrap; gap: 20px;
-            align-items: center; padding: 20px; background: #f1f1f1; border-radius: 12px;
+            margin-top: 20px; display: flex; flex-wrap: wrap; gap: 20px;
+            align-items: center; padding: 15px; background: #eee; border-radius: 10px;
         }
 
-        .btn-action { background: #27ae60; color: white; width: 100%; }
-        .btn-hint { background: #f39c12; color: white; width: 100%; }
-        .btn-clear { background: #e74c3c; color: white; width: 100%; }
+        .tool-selector { display: flex; gap: 8px; border-right: 2px solid #ccc; padding-right: 15px; }
+        .btn-tool { background: #fff; border: 1px solid #999; padding: 8px 12px; }
+        .btn-tool.active { background: var(--primary); color: white; }
+
+        .btn-action { background: var(--success); color: white; width: 100%; padding: 15px; font-size: 18px; }
+        .btn-hint { background: var(--warning); color: white; width: 100%; }
+        .btn-clear { background: var(--danger); color: white; width: 100%; }
+        
+        input[type=range] { width: 150px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🦜 鸚鵡色彩實驗室</h1>
-    <p class="desc">學習如何拆解色彩！觀察提示並嘗試還原目標圖片。</p>
-
+    <h1>鸚鵡色彩組合</h1>
+    
     <div class="mode-selector">
         <button id="modeRGB" class="btn-mode active" onclick="switchMode('RGB')">RGB 螢幕模式</button>
         <button id="modeCMYK" class="btn-mode" onclick="switchMode('CMYK')">CMYK 印刷模式</button>
     </div>
-
-    <div class="game-main">
-        <div id="canvasGrid" class="canvas-grid"></div>
-
-        <div class="side-panel">
-            <div class="preview-box">
-                <b>組合結果</b>
-                <canvas id="resultCanvas" width="500" height="500"></canvas>
-            </div>
-            <div class="preview-box">
-                <b>匹配完成度</b>
-                <div id="score" class="score-display">0%</div>
-                <button class="btn-action" onclick="combineImages()">組合並對比</button>
-            </div>
+    <div class="controls">
+        <div class="tool-selector">
+            <button id="toolPencil" class="btn-tool active" onclick="setTool('pencil')">鉛筆</button>
+            <button id="toolEraser" class="btn-tool" onclick="setTool('eraser')">橡皮擦</button>
         </div>
+        <div>筆刷大小 <input type="range" id="brushSize" min="2" max="100" value="30"></div>
+        <div>不透明度 <input type="range" id="brushOpacity" min="10" max="100" value="30"></div>
+    </div>
+    <div class="game-main">
+        <div id="canvasGrid" class="canvas-grid">載入中...</div>
 
         <div class="side-panel">
             <div class="preview-box">
                 <b>目標題目</b>
                 <img id="questionImage" src="" alt="目標">
             </div>
-            <button class="btn-hint" onclick="showHints()">顯示通道提示</button>
-            <button class="btn-clear" onclick="clearAll()">清除重畫</button>
+            <div class="preview-box">
+                <b>組合結果</b>
+                <canvas id="resultCanvas" width="600" height="600"></canvas>
+                <div id="score" class="score-display">0.0%</div>
+            </div>
+            <button class="btn-action" onclick="combineImages()">組合並評分</button>
+            <button class="btn-hint" onclick="showHints()">顯示提示</button>
+            <button class="btn-clear" onclick="clearAll()">重新開始</button>
         </div>
     </div>
 
-    <div class="controls">
-        <div class="control-group">筆刷粗細 <input type="range" id="brushSize" min="5" max="80" value="25"></div>
-        <div class="control-group">顏色強度 <input type="range" id="brushOpacity" min="10" max="100" value="20"></div>
-    </div>
+
 </div>
 
 <script>
@@ -132,9 +146,11 @@
 
     let currentMode = 'RGB';
     let currentAnswer = '';
+    let currentTool = 'pencil';
     let transparentOutlineURL = ''; 
     let layers = []; 
     let isDrawing = false;
+    let lastX = 0, lastY = 0;
 
     const canvasGrid = document.getElementById('canvasGrid');
     const resultCanvas = document.getElementById('resultCanvas');
@@ -142,6 +158,13 @@
     const questionImgElement = document.getElementById('questionImage');
 
     window.onload = () => switchMode('RGB');
+
+    function setTool(tool) {
+        currentTool = tool;
+        document.querySelectorAll('.btn-tool').forEach(b => b.classList.remove('active'));
+        if (tool === 'pencil') document.getElementById('toolPencil').classList.add('active');
+        else document.getElementById('toolEraser').classList.add('active');
+    }
 
     async function getProcessedOutline() {
         if (transparentOutlineURL) return transparentOutlineURL;
@@ -154,12 +177,12 @@
                 tempCvs.width = img.width; tempCvs.height = img.height;
                 const tempCtx = tempCvs.getContext('2d');
                 tempCtx.drawImage(img, 0, 0);
-                const imgData = tempCtx.getImageData(0, 0, tempCvs.width, tempCvs.height);
-                const data = imgData.data;
+                const data = tempCtx.getImageData(0, 0, tempCvs.width, tempCvs.height).data;
+                // 去黑背景邏輯
                 for (let i = 0; i < data.length; i += 4) {
-                    if (data[i] < 50 && data[i+1] < 50 && data[i+2] < 50) data[i+3] = 0; 
+                    if (data[i] < 45 && data[i+1] < 45 && data[i+2] < 45) data[i+3] = 0; 
                 }
-                tempCtx.putImageData(imgData, 0, 0);
+                tempCtx.putImageData(new ImageData(data, tempCvs.width, tempCvs.height), 0, 0);
                 transparentOutlineURL = tempCvs.toDataURL();
                 resolve(transparentOutlineURL);
             };
@@ -173,8 +196,8 @@
         currentAnswer = answerPool[Math.floor(Math.random() * answerPool.length)];
         questionImgElement.src = folder + currentAnswer;
         await setupCanvases();
-        resultCtx.clearRect(0, 0, 500, 500);
-        document.getElementById('score').innerText = '0%';
+        resultCtx.clearRect(0, 0, 600, 600);
+        document.getElementById('score').innerText = '0.0%';
     }
 
     async function setupCanvases() {
@@ -182,61 +205,30 @@
         layers = [];
         const outlineURL = await getProcessedOutline();
         canvasGrid.innerHTML = '';
-        const config = currentMode === 'RGB' ? ['Red 通道', 'Green 通道', 'Blue 通道'] : ['Cyan 通道', 'Magenta 通道', 'Yellow 通道', 'Black 通道'];
+        const config = currentMode === 'RGB' ? ['Red (R)', 'Green (G)', 'Blue (B)'] : ['Cyan (C)', 'Magenta (M)', 'Yellow (Y)', 'Black (K)'];
 
         config.forEach((name, index) => {
             const div = document.createElement('div');
             div.className = 'canvas-item';
             div.innerHTML = `<span>${name}</span>`;
             const cvs = document.createElement('canvas');
-            cvs.width = 500; cvs.height = 500;
+            cvs.width = 600; cvs.height = 600; // 提升內部解析度，畫起來更細緻
             cvs.dataset.index = index;
             cvs.style.backgroundImage = `url(${outlineURL})`;
             cvs.style.backgroundSize = 'contain';
             div.appendChild(cvs);
             canvasGrid.appendChild(div);
-            layers.push(cvs.getContext('2d'));
+            
+            const ctx = cvs.getContext('2d');
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            layers.push(ctx);
+
             cvs.onmousedown = startDrawing;
             cvs.onmousemove = draw;
-            window.onmouseup = stopDrawing;
-        });
-    }
-
-    // --- 核心功能：顯示正確通道提示 ---
-    async function showHints() {
-        const ansImg = new Image();
-        ansImg.crossOrigin = "anonymous";
-        ansImg.src = folder + currentAnswer;
-        await new Promise(r => ansImg.onload = r);
-
-        const tempCvs = document.createElement('canvas');
-        tempCvs.width = 500; tempCvs.height = 500;
-        const tempCtx = tempCvs.getContext('2d');
-        tempCtx.drawImage(ansImg, 0, 0, 500, 500);
-        const imgData = tempCtx.getImageData(0, 0, 500, 500);
-        const data = imgData.data;
-
-        layers.forEach((ctx, layerIdx) => {
-            const layerData = ctx.createImageData(500, 500);
-            const ld = layerData.data;
-
-            for (let i = 0; i < data.length; i += 4) {
-                let r = data[i], g = data[i+1], b = data[i+2];
-                if (currentMode === 'RGB') {
-                    // RGB 提示：直接顯示對應色光強度
-                    ld[i] = (layerIdx === 0) ? r : 0;
-                    ld[i+1] = (layerIdx === 1) ? g : 0;
-                    ld[i+2] = (layerIdx === 2) ? b : 0;
-                    ld[i+3] = 80; // 淡淡的透明度
-                } else {
-                    // CMYK 提示 (簡化版轉換)：C=255-R, M=255-G, Y=255-B
-                    if (layerIdx === 0) { ld[i+1]=255; ld[i+2]=255; ld[i+3]=(255-r)*0.3; } // Cyan
-                    if (layerIdx === 1) { ld[i]=255; ld[i+2]=255; ld[i+3]=(255-g)*0.3; }   // Magenta
-                    if (layerIdx === 2) { ld[i]=255; ld[i+1]=255; ld[i+3]=(255-b)*0.3; } // Yellow
-                    if (layerIdx === 3) { ld[i]=0; ld[i+1]=0; ld[i+2]=0; ld[i+3]=(255-Math.max(r,g,b))*0.3; } // Black
-                }
-            }
-            ctx.putImageData(layerData, 0, 0);
+            window.addEventListener('mouseup', stopDrawing);
+            cvs.addEventListener('touchstart', handleTouch, {passive: false});
+            cvs.addEventListener('touchmove', handleTouch, {passive: false});
         });
     }
 
@@ -248,104 +240,108 @@
         return colors[index];
     }
 
-    function startDrawing(e) { isDrawing = true; draw(e); }
+    function startDrawing(e) {
+        isDrawing = true;
+        const rect = e.target.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        lastX = (clientX - rect.left) * (e.target.width / rect.width);
+        lastY = (clientY - rect.top) * (e.target.height / rect.height);
+        draw(e);
+    }
+
     function stopDrawing() { isDrawing = false; }
+
     function draw(e) {
         if (!isDrawing) return;
         const cvs = e.target;
+        if (cvs.tagName !== 'CANVAS') return;
         const ctx = cvs.getContext('2d');
         const rect = cvs.getBoundingClientRect();
-        const x = (e.clientX - rect.left) * (cvs.width / rect.width);
-        const y = (e.clientY - rect.top) * (cvs.height / rect.height);
-        ctx.fillStyle = getBrushColor(cvs.dataset.index);
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        const curX = (clientX - rect.left) * (cvs.width / rect.width);
+        const curY = (clientY - rect.top) * (cvs.height / rect.height);
+
         ctx.beginPath();
-        ctx.arc(x, y, document.getElementById('brushSize').value, 0, Math.PI * 2);
-        ctx.fill();
+        if (currentTool === 'eraser') {
+            ctx.globalCompositeOperation = 'destination-out';
+        } else {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = getBrushColor(cvs.dataset.index);
+        }
+        ctx.lineWidth = document.getElementById('brushSize').value;
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(curX, curY);
+        ctx.stroke();
+        [lastX, lastY] = [curX, curY];
+    }
+
+    function handleTouch(e) { if (e.type === 'touchstart') startDrawing(e); else { e.preventDefault(); draw(e); } }
+
+    async function showHints() {
+        const ansImg = new Image(); ansImg.crossOrigin = "anonymous";
+        ansImg.src = folder + currentAnswer;
+        await new Promise(r => ansImg.onload = r);
+        const tc = document.createElement('canvas'); tc.width = 600; tc.height = 600;
+        const tt = tc.getContext('2d'); tt.drawImage(ansImg, 0, 0, 600, 600);
+        const data = tt.getImageData(0, 0, 600, 600).data;
+        layers.forEach((ctx, layerIdx) => {
+            ctx.clearRect(0,0,600,600);
+            ctx.globalCompositeOperation = 'source-over';
+            const ld = ctx.createImageData(600, 600);
+            for (let i = 0; i < data.length; i += 4) {
+                let r = data[i], g = data[i+1], b = data[i+2];
+                if (currentMode === 'RGB') {
+                    ld.data[i] = (layerIdx === 0) ? r : 0;
+                    ld.data[i+1] = (layerIdx === 1) ? g : 0;
+                    ld.data[i+2] = (layerIdx === 2) ? b : 0; ld.data[i+3] = 100;
+                } else {
+                    if (layerIdx === 0) { ld.data[i+1]=255; ld.data[i+2]=255; ld.data[i+3]=(255-r)*0.4; }
+                    if (layerIdx === 1) { ld.data[i]=255; ld.data[i+2]=255; ld.data[i+3]=(255-g)*0.4; }
+                    if (layerIdx === 2) { ld.data[i]=255; ld.data[i+1]=255; ld.data[i+3]=(255-b)*0.4; }
+                    if (layerIdx === 3) { ld.data[i]=0; ld.data[i+1]=0; ld.data[i+2]=0; ld.data[i+3]=(255-Math.max(r,g,b))*0.4; }
+                }
+            }
+            ctx.putImageData(ld, 0, 0);
+        });
     }
 
     function combineImages() {
-        resultCtx.clearRect(0, 0, 500, 500);
+        resultCtx.clearRect(0, 0, 600, 600);
         if (currentMode === 'RGB') {
             resultCtx.globalCompositeOperation = 'screen';
-            resultCtx.fillStyle = 'black';
-            resultCtx.fillRect(0, 0, 500, 500);
+            resultCtx.fillStyle = 'black'; resultCtx.fillRect(0, 0, 600, 600);
         } else {
             resultCtx.globalCompositeOperation = 'multiply';
-            resultCtx.fillStyle = 'white';
-            resultCtx.fillRect(0, 0, 500, 500);
+            resultCtx.fillStyle = 'white'; resultCtx.fillRect(0, 0, 600, 600);
         }
         layers.forEach(ctx => resultCtx.drawImage(ctx.canvas, 0, 0));
         resultCtx.globalCompositeOperation = 'source-over';
         const outline = new Image(); outline.src = transparentOutlineURL;
-        outline.onload = () => {
-            resultCtx.drawImage(outline, 0, 0, 500, 500);
-            calculateScore();
-        };
+        outline.onload = () => { resultCtx.drawImage(outline, 0, 0, 600, 600); calculateScore(); };
     }
 
-   async function calculateScore() {
-		// 1. 取得玩家組合後的結果數據
-		const user = resultCtx.getImageData(0, 0, 500, 500).data;
-		
-		// 2. 取得標準答案圖數據
-		const ansImg = new Image();
-		ansImg.crossOrigin = "anonymous";
-		ansImg.src = folder + currentAnswer;
-		await new Promise(r => ansImg.onload = r);
-		
-		const tc = document.createElement('canvas');
-		tc.width = 500; tc.height = 500;
-		const tt = tc.getContext('2d');
-		tt.drawImage(ansImg, 0, 0, 500, 500);
-		const target = tt.getImageData(0, 0, 500, 500).data;
+    async function calculateScore() {
+        const user = resultCtx.getImageData(0, 0, 600, 600).data;
+        const ansImg = new Image(); ansImg.crossOrigin = "anonymous";
+        ansImg.src = folder + currentAnswer;
+        await new Promise(r => ansImg.onload = r);
+        const tc = document.createElement('canvas'); tc.width = 600; tc.height = 600;
+        const tt = tc.getContext('2d'); tt.drawImage(ansImg, 0, 0, 600, 600);
+        const target = tt.getImageData(0, 0, 600, 600).data;
+        let totalDiff = 0, validPixels = 0;
+        for (let i = 0; i < target.length; i += 4) {
+            if (target[i] > 15 || target[i+1] > 15 || target[i+2] > 15) {
+                validPixels++;
+                totalDiff += Math.abs(user[i]-target[i]) + Math.abs(user[i+1]-target[i+1]) + Math.abs(user[i+2]-target[i+2]);
+            }
+        }
+        let score = validPixels === 0 ? 0 : 100 - (totalDiff / (validPixels * 3 * 255) * 100);
+        document.getElementById('score').innerText = Math.max(0, score).toFixed(1) + '%';
+    }
 
-		let totalDiff = 0;
-		let validPixelCount = 0; // 只計算「非背景」的像素數量
-
-		for (let i = 0; i < target.length; i += 4) {
-			const tr = target[i], tg = target[i+1], tb = target[i+2];
-			
-			// 判斷是否為「有效像素」（只要 R, G, B 任一值大於 10，就視為鸚鵡身體）
-			// 如果你的背景是純黑，這個判斷會過濾掉背景
-			if (tr > 10 || tg > 10 || tb > 10) {
-				validPixelCount++;
-				
-				// 計算該像素與玩家塗色的 R, G, B 差異
-				const diffR = Math.abs(user[i] - tr);
-				const diffG = Math.abs(user[i+1] - tg);
-				const diffB = Math.abs(user[i+2] - tb);
-				
-				totalDiff += (diffR + diffG + diffB);
-			}
-		}
-
-		// 如果完全沒偵測到有效像素（圖檔錯誤），預設給 0 分
-		if (validPixelCount === 0) {
-			document.getElementById('score').innerText = '0%';
-			return;
-		}
-
-		// 計算最大可能誤差（有效像素數量 * 3個通道 * 255最大值）
-		const maxPossibleDiff = validPixelCount * 3 * 255;
-		
-		// 計算相似度百分比
-		let finalScore = 100 - (totalDiff / maxPossibleDiff * 100);
-		
-		// 稍微做一個數學曲線，讓 80 分以上更難達成，增加遊戲挑戰性
-		if (finalScore > 0) {
-			finalScore = Math.pow(finalScore / 100, 1.2) * 100;
-		}
-
-		const scoreDisplay = document.getElementById('score');
-		scoreDisplay.innerText = Math.max(0, finalScore).toFixed(1) + '%';
-
-		// 根據分數給予不同顏色反饋
-		if (finalScore > 90) scoreDisplay.style.color = "#27ae60"; // 綠色
-		else if (finalScore > 70) scoreDisplay.style.color = "#f39c12"; // 橘色
-		else scoreDisplay.style.color = "#e74c3c"; // 紅色
-	}
-
-    function clearAll() { setupCanvases(); document.getElementById('score').innerText = '0%'; }
+    function clearAll() { setupCanvases(); document.getElementById('score').innerText = '0.0%'; }
 </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>數據導向決策系統 Pro v21.0</title>
+    <title>超市的資料科學</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -36,8 +36,8 @@
         .lock-indicator { background: #000; color: #fff; padding: 6px 16px; font-weight: 900; font-size: 14px; border: 2px solid #fff; z-index: 30; }
         
         /* 物理箭頭樣式 */
-        .axis-arrow-y { position: absolute; left: -60px; top: 0; display: flex; flex-direction: column; align-items: center; font-weight: 900; font-size: 1.2rem; }
-        .axis-arrow-x { position: absolute; bottom: -50px; right: 0; display: flex; align-items: center; font-weight: 900; font-size: 1.2rem; }
+        .axis-arrow-y { position: absolute; left: 51%; top: 0; display: flex; flex-direction: column; align-items: center; font-weight: 900; font-size: 1.2rem; }
+        .axis-arrow-x { position: absolute; bottom: 40%; right: 0; display: flex; align-items: center; font-weight: 900; font-size: 1.2rem; }
 
         h1, h2, h3, p, span, button, select, option { font-style: normal !important; font-weight: 900 !important; }
     </style>
@@ -62,7 +62,7 @@
             <h2 class="text-yellow-400 text-xs mb-1 uppercase opacity-60 tracking-widest font-black tracking-widest">Directive / 任務指令</h2>
             <p v-if="currentStage === 1" class="text-2xl font-black leading-tight">資料採集：將無效單據（負數、亂碼、空白、天價）往左丟棄，正確單據往右存檔。</p>
             <p v-if="currentStage === 2" class="text-2xl font-black leading-tight">趨勢解讀：觀察數據趨勢，將右側正確的「現象 ➔ 原因 ➔ 策略」字卡拖入中間空格。</p>
-            <p v-if="currentStage === 3" class="text-2xl font-black leading-tight">決策投放：根據箭頭方向定義維度，在十字坐標軸劃分的<span class="underline text-yellow-400">「四個象限」</span>中，鎖定核心 VIP 區域。</p>
+            <p v-if="currentStage === 3" class="text-2xl font-black leading-tight">決策投放：根據箭頭方向定義維度，在十字坐標軸劃分的<span class="underline text-yellow-400">「四個象限」</span>中，鎖定高回購、高金額的區域。</p>
         </div>
     </div>
 
@@ -141,8 +141,24 @@
                 <div class="space-y-6">
                     <h3 class="border-b-2 border-black pb-2 text-sm uppercase opacity-40">Configuration</h3>
                     <div class="space-y-10">
-                        <div class="space-y-3"><label class="block text-sm uppercase">Set X-AXIS (橫軸維度)</label><select v-model="axisX" class="w-full border-2 border-black p-4 text-sm bg-slate-50 outline-noneTransition-all"><option value="">請選取...</option><option value="freq">Consumption Frequency (回購頻率)</option><option value="val">Average Ticket Value (客單金額)</option><option value="stab">Stability Index (週期穩定度)</option></select></div>
-                        <div class="space-y-3"><label class="block text-sm uppercase">Set Y-AXIS (縱軸維度)</label><select v-model="axisY" class="w-full border-2 border-black p-4 text-sm bg-slate-50 outline-none Transition-all"><option value="">請選取...</option><option value="freq">Consumption Frequency (回購頻率)</option><option value="val">Average Ticket Value (客單金額)</option><option value="margin">Contribution Margin (毛利貢獻)</option></select></div>
+                        <div class="space-y-3 text-left">
+							<label class="block text-sm text-slate-800 uppercase tracking-tighter">X-AXIS (橫軸維度)</label>
+							<select v-model="axisX" class="w-full border-2 border-black p-4 text-sm bg-slate-50 outline-none focus:bg-white transition-all">
+								<option value="">請選取...</option>
+								<option value="freq">Consumption Frequency (回購頻率)</option>
+								<option value="stab">Stability Index (週期穩定度)</option>
+								<option value="disc">Discount Sensitivity (折扣感度)</option>
+							</select>
+						</div>
+						<div class="space-y-3 text-left">
+							<label class="block text-sm text-slate-800 uppercase tracking-tighter">Y-AXIS (縱軸維度)</label>
+							<select v-model="axisY" class="w-full border-2 border-black p-4 text-sm bg-slate-50 outline-none focus:bg-white transition-all">
+								<option value="">請選取...</option>
+								<option value="val">Average Ticket Value (客單金額)</option>
+								<option value="margin">Contribution Margin (毛利貢獻)</option>
+								<option value="item">Items per Trip (單次購買件數)</option>
+							</select>
+						</div>
                     </div>
                 </div>
                 <div class="bg-black text-white p-6 text-sm font-black uppercase"><div>Remaining Budget: <span class="text-yellow-400 text-lg">{{ budget }}%</span></div></div>
@@ -150,7 +166,7 @@
             <div class="col-span-9 flex flex-col min-h-0 pl-16 pt-8 relative">
                 <div class="flex-1 border-[10px] border-black relative bg-white overflow-visible shadow-inner">
                     
-                    <div class="axis-arrow-y"><div class="text-3xl">▲</div><div>{{ axisY_label }}<br>(愈大)</div></div>
+                    <div class="axis-arrow-y"><div class="text-3xl">▲</div><div style="writing-mode: vertical-rl; text-orientation: mixed;">{{ axisY_label }}(愈大)</div></div>
                     <div class="axis-arrow-x"><div>{{ axisX_label }} (愈大)</div><div class="text-3xl">▶</div></div>
                     
                     <div class="axis-line-h shadow-md"></div>
@@ -176,15 +192,14 @@
                     <div class="space-y-4 font-black">
                         <h3 class="bg-black text-white px-3 py-1 inline-block text-sm uppercase font-black">Data Cleansing Score</h3>
                         <div class="border-2 border-black p-4 space-y-2">
-                            <p class="text-green-600">🟢 正確存檔 (Accept)：{{ stats.s1Accept }} 筆</p>
-                            <p class="text-red-600">🔴 攔截異常 (Reject)：{{ stats.s1Reject }} 筆</p>
+                            <p class="text-green-600">正確率 (Accuracy)：{{ accuracy }}%</p>
                         </div>
                     </div>
                     <div class="space-y-4 font-black">
                         <h3 class="bg-black text-white px-3 py-1 inline-block text-sm uppercase font-black">Operational Performance</h3>
                         <div class="border-2 border-black p-4 space-y-4">
-                            <div><p class="text-xs opacity-50 uppercase">Logic Validation</p><p class="text-3xl text-indigo-600">{{ stats.s2Attempts }} 次嘗試</p></div>
-                            <div><p class="text-xs opacity-50 uppercase">Market Targeting</p><p class="text-3xl text-indigo-600">{{ stats.s3Attempts }} 次嘗試</p></div>
+                            <div><p class="text-xs opacity-50 uppercase">Logic Validation</p><p class="text-3xl text-indigo-600">{{ stats.s2Attempts }} 次</p></div>
+                            <div><p class="text-xs opacity-50 uppercase">Market Targeting</p><p class="text-3xl text-indigo-600">{{ stats.s3Attempts }} 次</p></div>
                         </div>
                     </div>
                 </div>
@@ -253,14 +268,27 @@ createApp({
         };
 
         const axisX = ref(''); const axisY = ref(''); const budget = ref(100); const targetAreas = ref([]); const clusterPoints = ref([]);
-        const axisX_label = computed(() => ({ freq: '回購頻率', val: '客單金額', stab: '穩定度' }[axisX.value] || 'X維度'));
-        const axisY_label = computed(() => ({ freq: '頻率', val: '客單金額', margin: '毛利' }[axisY.value] || 'Y維度'));
+       // X 軸：行為與穩定度相關
+		const axisX_label = computed(() => ({ freq: '回購頻率', stab: '週期穩定度', disc: '折扣感度' }[axisX.value] || 'X 維度'));
+		// Y 軸：金額與獲利相關
+		const axisY_label = computed(() => ({ val: '客單金額', 	margin: '毛利貢獻', item: '購買件數' }[axisY.value] || 'Y 維度'));
 
         const initClustering = () => {
-            const pts = []; for(let i=0; i<100; i++) {
+			const pts = []; for(let i=0; i<100; i++) {
                 const type = Math.random();
-                if(type > 0.8) pts.push({ freq: Math.random()*15+80, val: Math.random()*15+5, disc: Math.random()*20, stab: Math.random()*20+75, margin: Math.random()*20+5, cross: Math.random()*20+70, freq_init: 50, val_init: 50 });
-                else pts.push({ freq: Math.random()*70+10, val: Math.random()*70+10, disc: Math.random()*70, stab: Math.random()*70, margin: Math.random()*70, cross: Math.random()*70, freq_init: 50, val_init: 50 });
+                if(type > 0.8) { // VIP 特徵群
+                    pts.push({ 
+                        freq: Math.random()*15+80, stab: Math.random()*15+78, disc: Math.random()*20, // X 維度數值
+                        val: Math.random()*20+10, margin: Math.random()*20+5, item: Math.random()*20+75,  // Y 維度數值 (Y=top，小代表高)
+                        freq_init: 50, val_init: 50 
+                    });
+                } else { // 隨機雜訊
+                    pts.push({ 
+                        freq: Math.random()*70+10, stab: Math.random()*70+10, disc: Math.random()*70,
+                        val: Math.random()*70+10, margin: Math.random()*70+10, item: Math.random()*70+10,
+                        freq_init: 50, val_init: 50 
+                    });
+                }
             }
             clusterPoints.value = pts;
         };
@@ -270,7 +298,7 @@ createApp({
             if (isAccept !== item.isCorrect) accuracy.value = Math.max(0, accuracy.value - 10);
             gsap.to('.data-card', { x: isAccept ? 1200 : -1200, opacity: 0, duration: 0.4, onComplete: () => {
                 currentCardIndex.value++; gsap.set('.data-card', { x: 0, opacity: 1 });
-                if (currentCardIndex.value >= stage1Data.value.length) { currentStage.value++; nextTick(initChart); }
+                if (currentCardIndex.value >= stage1Data.value.length) { currentStage.value = 2; nextTick(initChart); }
             }});
         };
 
@@ -292,14 +320,20 @@ createApp({
             selectDay: (idx) => { selectedDayIndex.value = idx; if(chartType.value === 'pie') { chartInstance.destroy(); initChart(); } }, 
             invest: (id) => targetAreas.value = [id], 
             finalizeAnalysis: () => {
-                stats.value.s3Attempts++;
-                const isVipArea = (axisX.value === 'freq' && axisY.value === 'val' && targetAreas.value.includes(2)) || (axisX.value === 'val' && axisY.value === 'freq' && targetAreas.value.includes(3));
-                if(isVipArea) { 
-                    score.value += (budget.value * 200); finishTime.value = new Date().toLocaleString();
-                    checkCode.value = "FIN-" + score.value + "-" + Math.random().toString(36).substr(2, 5).toUpperCase();
-                    gameStatus.value = 'finished'; 
-                } else { alert("決策偏離：資源投放效益未達標！"); budget.value = Math.max(0, budget.value - 25); }
-            }
+				stats.value.s3Attempts++;
+				// 現在只需判定 X 是否選頻率，Y 是否選客單價，且點擊右上角 (Area 2)
+				const isCorrectSetup = (axisX.value === 'freq' && axisY.value === 'val' && targetAreas.value.includes(2));
+				
+				if(isCorrectSetup) { 
+					score.value += (budget.value * 200); 
+					finishTime.value = new Date().toLocaleString();
+					checkCode.value = "VAL-" + score.value + "-" + Math.random().toString(36).substr(2, 5).toUpperCase();
+					gameStatus.value = 'finished'; 
+				} else { 
+					alert("決策失敗：座標定義或投放區域錯誤！"); 
+					budget.value = Math.max(0, budget.value - 25); 
+				}
+			}
         };
     }
 }).mount('#app');

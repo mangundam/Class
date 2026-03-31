@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>衣櫃演算法益智挑戰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .slot { width: 90px; height: 120px; position: relative; transition: all 0.3s; }
+        .slot.highlight { background: #fef08a; border: 2px solid #eab308; }
+        .cloth-img { width: 70px; height: 70px; object-fit: contain; cursor: grab; z-index: 20; position: relative; }
+        .cloth-img:active { cursor: grabbing; }
+        .hanger-bg { position: absolute; top: 10px; width: 60px; opacity: 0.2; pointer-events: none; }
+        .target-preview { opacity: 0.5; filter: grayscale(100%); width: 40px; }
+        .step-counter { font-family: 'Courier New', Courier, monospace; }
+        .ghost { opacity: 0.4; }
+    </style>
+</head>
+<body class="bg-zinc-100 min-h-screen flex flex-col items-center p-6">
+
+    <div class="w-full max-w-4xl flex justify-between items-end mb-6">
+        <div>
+            <h1 class="text-3xl font-black text-zinc-800">🧵 演算法衣櫃整理師</h1>
+            <p class="text-zinc-500 font-medium">挑戰：用最少步數完成目標排列！</p>
+        </div>
+        <div class="flex gap-4">
+            <div class="bg-white px-6 py-2 rounded-xl shadow-sm text-center border-b-4 border-blue-500">
+                <div class="text-xs text-zinc-400 font-bold uppercase">移動步數</div>
+                <div id="step-num" class="text-2xl font-black text-blue-600">0</div>
+            </div>
+            <div class="bg-white px-6 py-2 rounded-xl shadow-sm text-center border-b-4 border-emerald-500">
+                <div class="text-xs text-zinc-400 font-bold uppercase">最佳紀錄</div>
+                <div id="best-score" class="text-2xl font-black text-emerald-600">--</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-4xl bg-white rounded-2xl p-4 mb-6 shadow-sm flex items-center gap-4">
+        <span class="bg-zinc-800 text-white text-xs px-3 py-1 rounded-full font-bold">GOAL 目標</span>
+        <div id="goal-container" class="flex gap-2">
+            </div>
+    </div>
+
+    <div class="w-full max-w-4xl bg-white rounded-3xl shadow-xl p-10 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-2 h-full bg-blue-500"></div>
+        
+        <h2 class="text-sm font-bold text-zinc-400 mb-8 uppercase tracking-widest">Main Array (主要陣列空間)</h2>
+        
+        <div id="main-array" class="flex justify-between items-center bg-zinc-50 border-2 border-zinc-100 rounded-2xl p-6 mb-12">
+            </div>
+
+        <h2 class="text-sm font-bold text-zinc-400 mb-4 uppercase tracking-widest">Swap Buffer (交換暫存區 / 暫存記憶體)</h2>
+        <div id="buffer-zone" class="flex gap-6 bg-orange-50 border-2 border-dashed border-orange-200 rounded-2xl p-6 min-h-[140px]">
+            </div>
+    </div>
+
+    <button onclick="resetLevel()" class="mt-8 bg-zinc-800 text-white px-8 py-3 rounded-full font-bold hover:bg-zinc-700 transition shadow-lg">
+        🔄 重置關卡 (重新洗牌)
+    </button>
+
+    <script>
+        const CLOTH_FILES = [
+            'shirt_1_red.png', 'shirt_1_blue.png', 'shirt_1_green.png', 'shirt_1_yellow.png',
+            'pants_red.png', 'pants_blue.png', 'pants_green.png'
+        ];
+
+        let currentArray = [];
+        let goalArray = [];
+        let buffer = [null, null]; // 只有兩個暫存位
+        let steps = 0;
+
+        function initGame() {
+            // 隨機選取 5 種衣服
+            const selected = [...CLOTH_FILES].sort(() => 0.5 - Math.random()).slice(0, 5);
+            goalArray = [...selected];
+            currentArray = [...selected].sort(() => 0.5 - Math.random());
+            buffer = [null, null];
+            steps = 0;
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('step-num').innerText = steps;
+            
+            // 渲染目標
+            const goalBox = document.getElementById('goal-container');
+            goalBox.innerHTML = goalArray.map(img => `<img src="cloth/${img}" class="target-preview">`).join('');
+
+            // 渲染主要陣列
+            const mainBox = document.getElementById('main-array');
+            mainBox.innerHTML = '';
+            currentArray.forEach((img, i) => {
+                const slot = createSlot(img, 'main', i);
+                mainBox.appendChild(slot);
+            });
+
+            // 渲染緩衝區
+            const bufferBox = document.getElementById('buffer-zone');
+            bufferBox.innerHTML = '';
+            buffer.forEach((img, i) => {
+                const slot = createSlot(img, 'buffer', i);
+                bufferBox.appendChild(slot);
+            });
+
+            checkWin();
+        }
+
+        function createSlot(imgFile, type, index) {
+            const div = document.createElement('div');
+            div.className = `slot flex items-center justify-center rounded-xl border-2 ${imgFile ? 'border-transparent' : 'border-dashed border-zinc-200'}`;
+            div.dataset.type = type;
+            div.dataset.index = index;
+
+            div.innerHTML = `<img src="cloth/hanger.png" class="hanger-bg">`;
+            
+            if (imgFile) {
+                const img = document.createElement('img');
+                img.src = `cloth/${imgFile}`;
+                img.className = 'cloth-img';
+                img.draggable = true;
+                img.ondragstart = (e) => {
+                    e.dataTransfer.setData('sourceType', type);
+                    e.dataTransfer.setData('sourceIndex', index);
+                    setTimeout(() => img.classList.add('ghost'), 0);
+                };
+                img.ondragend = () => img.classList.remove('ghost');
+                div.appendChild(img);
+            }
+
+            div.ondragover = (e) => e.preventDefault();
+            div.ondrop = handleDrop;
+            return div;
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const srcType = e.dataTransfer.getData('sourceType');
+            const srcIdx = parseInt(e.dataTransfer.getData('sourceIndex'));
+            const destType = this.dataset.type;
+            const destIdx = parseInt(this.dataset.index);
+
+            // 獲取來源圖片名稱
+            let movingCloth = (srcType === 'main') ? currentArray[srcIdx] : buffer[srcIdx];
+            
+            // 獲取目標位置是否有東西
+            let targetCloth = (destType === 'main') ? currentArray[destIdx] : buffer[destIdx];
+
+            // 交換邏輯 (Swap)
+            if (srcType === 'main') currentArray[srcIdx] = targetCloth;
+            else buffer[srcIdx] = targetCloth;
+
+            if (destType === 'main') currentArray[destIdx] = movingCloth;
+            else buffer[destIdx] = movingCloth;
+
+            steps++;
+            updateUI();
+        }
+
+        function checkWin() {
+            const isWin = currentArray.every((val, i) => val === goalArray[i]);
+            if (isWin && steps > 0) {
+                setTimeout(() => {
+                    alert(`🎉 太厲害了！你用了 ${steps} 步完成整理！`);
+                    initGame();
+                }, 300);
+            }
+        }
+
+        function resetLevel() {
+            initGame();
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>

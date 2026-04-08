@@ -84,7 +84,14 @@
 			<button class="toggle-btn" onclick="toggleGroup(this, '共同-04')">共同-04</button>
 			<button class="toggle-btn" onclick="toggleGroup(this, '共同-05')">共同-05</button>
 		</div>
-
+		
+		<div class="input-group">
+			範圍限制（選填）：
+			從第 <input type="number" id="rangeStart" placeholder="全部" style="width: 60px;"> 題 
+			到第 <input type="number" id="rangeEnd" placeholder="全部" style="width: 60px;"> 題
+			<small>(依題庫編號順序)</small>
+		</div>
+		
 		<div class="input-group">
 			抽出題數：<input type="number" id="drawCount" value="20" min="1">
 			<button onclick="startQuiz()" style="padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer;">開始抽題作答</button>
@@ -12254,24 +12261,49 @@ function toggleGroup(btn, groupName) {
 
 // 抽題邏輯
 function startQuiz() {
-    // 確保有輸入基本資料
-    if (!document.getElementById('studentID').value || !document.getElementById('studentName').value) {
+    const sID = document.getElementById('studentID').value;
+    const sName = document.getElementById('studentName').value;
+    const count = parseInt(document.getElementById('drawCount').value);
+    
+    // 範圍設定變數
+    const rStart = document.getElementById('rangeStart').value;
+    const rEnd = document.getElementById('rangeEnd').value;
+
+    if (!sID || !sName) {
         alert("請先輸入學號與姓名！");
         return;
     }
 
-    const count = document.getElementById('drawCount').value;
-    let pool = allQuestions.filter(q => selectedGroups.includes(q.group));
-    
+    // 1. 篩選出符合題組的題目，並依編號排序確保「第幾題到第幾題」的準確性
+    let pool = allQuestions
+        .filter(q => selectedGroups.includes(q.group))
+        .sort((a, b) => a.code.localeCompare(b.code, undefined, {numeric: true}));
+
     if (pool.length === 0) {
         alert("請先選擇題組！");
         return;
     }
 
-    // 重置提交區域的顯示 (因為上次提交時可能被隱藏了)
-    document.getElementById('submitArea').style.display = 'none'; 
+    // 2. 處理範圍限制 (Slice 邏輯)
+    // 如果有填寫範圍，則進行切片。注意：陣列索引從 0 開始，所以要減 1
+    let finalPool = pool;
+    if (rStart !== "" || rEnd !== "") {
+        const startIdx = rStart !== "" ? parseInt(rStart) - 1 : 0;
+        const endIdx = rEnd !== "" ? parseInt(rEnd) : pool.length;
+        
+        finalPool = pool.slice(startIdx, endIdx);
+        
+        if (finalPool.length === 0) {
+            alert("設定的範圍內沒有題目，請重新檢查題號！");
+            return;
+        }
+    }
 
-    currentQuiz = pool.sort(() => 0.5 - Math.random()).slice(0, count);
+    // 3. 隨機洗牌並抽取指定數量
+    currentQuiz = finalPool.sort(() => 0.5 - Math.random()).slice(0, count);
+
+    // 重置介面並顯示
+    document.getElementById('submitArea').style.display = 'none';
     renderQuiz();
 }
 

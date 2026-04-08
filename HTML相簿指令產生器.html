@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網頁設計教學工具</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #fcfcfc; padding: 60px 20px; font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; color: #222; }
+        .tool-card { max-width: 850px; margin: auto; background: white; padding: 45px; border-radius: 0px; border: 1px solid #ddd; box-shadow: 0 15px 35px rgba(0,0,0,0.03); }
+        .main-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 35px; text-align: center; letter-spacing: 3px; color: #000; border-bottom: 2px solid #000; padding-bottom: 20px; }
+        .section-label { font-weight: 700; font-size: 1.1rem; margin-bottom: 15px; color: #000; display: block; background: #eee; padding: 8px 12px; }
+        .option-group { margin-bottom: 35px; }
+        .form-label { font-size: 0.9rem; color: #333; font-weight: 600; margin-bottom: 10px; }
+        .form-select, .form-control { border-radius: 0px; border: 1px solid #ccc; padding: 10px; }
+        .result-area { background: #111; color: #00ff00; padding: 30px; border-radius: 0px; margin-top: 30px; white-space: pre-wrap; display: none; font-family: 'Consolas', monospace; font-size: 0.9rem; line-height: 1.7; }
+        .btn-generate { background-color: #000; color: #fff; border-radius: 0px; padding: 15px; font-weight: bold; transition: 0.3s; }
+        .btn-generate:hover { background-color: #444; color: #fff; }
+        .btn-copy { display: none; margin-top: 15px; border-radius: 0px; font-weight: bold; }
+        .warning-text { color: #d9534f; font-size: 0.8rem; margin-top: 5px; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="tool-card">
+    <div class="main-title">網頁設計指令生成系統</div>
+
+    <span class="section-label">STEP 1. 基礎設定</span>
+    <div class="option-group">
+        <div class="row g-4">
+            <div class="col-md-8">
+                <label class="form-label">相簿標題名稱</label>
+                <input type="text" id="albumName" class="form-control" placeholder="請輸入標題，不可留白">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">自訂主題核心色碼</label>
+                <input type="color" id="themeColor" class="form-control form-control-color w-100" value="#000000">
+                <small class="text-muted">請點擊選擇顏色</small>
+            </div>
+        </div>
+    </div>
+
+    <span class="section-label">STEP 2. 視覺美學定義</span>
+    <div class="option-group">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <label class="form-label">氛圍風格</label>
+                <select id="style" class="form-select">
+                    <option value="" selected disabled>--- 請選擇風格 ---</option>
+                    <option value="極簡風格">極簡風格</option>
+                    <option value="清新自然">清新自然</option>
+                    <option value="莊重穩定">莊重穩定</option>
+                    <option value="現代科技">現代科技</option>
+                    <option value="優雅奢華">優雅奢華</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">字體規範</label>
+                <select id="fontStyle" class="form-select">
+                    <option value="" selected disabled>--- 請選擇字體 ---</option>
+                    <option value="無襯線體（現代感黑體）">無襯線體 (現代)</option>
+                    <option value="襯線體（古典感宋體）">襯線體 (古典)</option>
+                    <option value="圓體（活潑親切感）">圓體 (活潑)</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">版面寬鬆度</label>
+                <select id="spacing" class="form-select">
+                    <option value="" selected disabled>--- 請選擇間距 ---</option>
+                    <option value="緊湊型（節省空間）">緊湊</option>
+                    <option value="標準型（比例適中）">標準</option>
+                    <option value="寬鬆型（高品質留白）">寬鬆</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <span class="section-label">STEP 3. 網頁結構配置</span>
+    <div class="option-group">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <label class="form-label">圖片展示比例</label>
+                <select id="imgRatio" class="form-select">
+                    <option value="" selected disabled>--- 請選擇比例 ---</option>
+                    <option value="原始比例（不裁切）">原始比例</option>
+                    <option value="正方形 1:1">正方形 1:1</option>
+                    <option value="橫式 4:3">橫式 4:3</option>
+                    <option value="電影感寬螢幕 21:9">電影感 21:9</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">單行顯示張數</label>
+                <select id="gridSize" class="form-select">
+                    <option value="" selected disabled>--- 請選擇數量 ---</option>
+                    <option value="2 張（強調細節）">每行 2 張</option>
+                    <option value="3 張（經典平衡）">每行 3 張</option>
+                    <option value="4 張（高資訊量）">每行 4 張</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">導覽選單位置</label>
+                <select id="navPos" class="form-select">
+                    <option value="" selected disabled>--- 請選擇位置 ---</option>
+                    <option value="固定於網頁頂部">固定於頂部</option>
+                    <option value="隨頁面捲動消失">隨頁面捲動</option>
+                    <option value="隱藏導覽列">不顯示</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <span class="section-label">STEP 4. 互動特效勾選</span>
+    <div class="option-group">
+        <div class="row px-3">
+            <div class="col-md-6 mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="useLightbox">
+                    <label class="form-check-label" for="useLightbox">Lightbox：點擊圖片可放大觀看</label>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="useCarousel">
+                    <label class="form-check-label" for="useCarousel">Carousel：頂部大圖輪播功能</label>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="useAnimation">
+                    <label class="form-check-label" for="useAnimation">Scroll Animation：網頁向下捲動的淡入特效</label>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="useHover">
+                    <label class="form-check-label" for="useHover">Hover Effect：滑鼠移至圖片上的互動感</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button onclick="generate()" class="btn btn-generate w-100">生成網頁設計指令</button>
+
+    <div id="result" class="result-area"></div>
+    <button id="copyBtn" onclick="copy()" class="btn btn-dark w-100 btn-copy py-3">複製指令</button>
+</div>
+
+<script>
+function generate() {
+    const name = document.getElementById('albumName').value;
+    const color = document.getElementById('themeColor').value;
+    const style = document.getElementById('style').value;
+    const font = document.getElementById('fontStyle').value;
+    const space = document.getElementById('spacing').value;
+    const ratio = document.getElementById('imgRatio').value;
+    const grid = document.getElementById('gridSize').value;
+    const nav = document.getElementById('navPos').value;
+
+    // 檢查是否所有項目皆已填寫
+    if (!name || !style || !font || !space || !ratio || !grid || !nav) {
+        alert("請確認所有項目皆已填寫或選擇！");
+        return;
+    }
+
+    const features = [];
+    if(document.getElementById('useLightbox').checked) features.push("- 點擊圖片展開大圖 (Lightbox 互動效果)");
+    if(document.getElementById('useCarousel').checked) features.push("- 在網頁最上方配置 10 張照片的自動輪播區塊 (Carousel)");
+    if(document.getElementById('useAnimation').checked) features.push("- 捲動網頁時，圖片與內容需有淡入動畫 (Scroll Reveal)");
+    if(document.getElementById('useHover').checked) features.push("- 滑鼠移至圖片時需有縮放或亮度改變的互動感 (Hover FX)");
+
+    const prompt = `你現在是一位專業的 UI/UX 網頁開發工程師。請協助我製作一個高品質的單一 HTML 檔案。
+
+設計規範如下：
+1. 網頁標題：${name}
+2. 視覺風格：${style}
+3. 配色計畫：
+   - 核心主色碼為：${color}
+   - 請根據此色碼，自動搭配出合適的「背景深淺色」、「文字輔助色」與「UI 裝飾色」。
+   - 整體設計需符合色彩學美感，不應只在文字上改色，請讓按鈕、邊框、底色形成一體。
+4. 字體設定：${font}
+5. 空間佈局：${space}
+6. 結構設定：
+   - 導覽列行為：${nav}
+   - 圖片裁切比例：${ratio}（請使用 CSS object-fit 控制）
+   - 電腦版每行顯示張數：${grid}
+7. 圖片來源路徑：
+   - images/photo01.jpg 至 images/photo10.jpg
+
+互動功能：
+${features.length > 0 ? features.join('\n') : '- 無特殊互動，保持簡約靜態'}
+
+技術規格要求：
+- 使用 Bootstrap 5 框架，並額外撰寫自訂 CSS 優化質感。
+- 所有代碼（HTML/CSS/JS）需封裝於單一檔案。
+- 程式碼結束後，請以專業簡潔的條列方式，說明存檔步驟與 images 資料夾的層級關係。`;
+
+    document.getElementById('result').innerText = prompt;
+    document.getElementById('result').style.display = 'block';
+    document.getElementById('copyBtn').style.display = 'block';
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+
+function copy() {
+    const text = document.getElementById('result').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        alert("指令已成功複製到剪貼簿");
+    });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網頁開發整合編輯器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <style>
+        :root {
+            --primary-bg: #ffffff;
+            --sidebar-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --accent-color: #007bff;
+            --dark-bg: #343a40;
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+            overflow: hidden;
+        }
+
+        /* 初始遮罩層 */
+        #start-screen {
+            position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fdfdfd; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        .btn-main {
+            padding: 18px 40px; cursor: pointer; border: 1px solid #ccc;
+            background: #fff; color: #333; border-radius: 4px;
+            font-size: 18px; font-weight: bold; transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            width: 320px;
+        }
+        .btn-main:hover { background: #f0f0f0; border-color: #999; }
+
+        /* 主介面佈局 */
+        #main-container { display: flex; height: 100vh; visibility: hidden; }
+        
+        #editor-section { width: 50%; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); }
+        #preview-section { width: 50%; display: flex; flex-direction: column; background: #fff; }
+
+        /* 工具列 */
+        .toolbar {
+            height: 60px; background: var(--dark-bg); border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; padding: 0 20px; gap: 15px; justify-content: space-between;
+        }
+
+        .tab-group { display: flex; gap: 5px; }
+        .tab { 
+            padding: 10px 25px; cursor: pointer; font-size: 16px; color: #adb5bd;
+            border-radius: 4px 4px 0 0; transition: all 0.3s;
+        }
+        .tab.active { background: #495057; color: white; font-weight: bold; }
+
+        .control-btn {
+            padding: 10px 20px; cursor: pointer; border: 1px solid #555; border-radius: 4px;
+            font-size: 15px; background: #444; color: white;
+            transition: background 0.2s;
+        }
+        .control-btn:hover { background: #666; }
+        .refresh-btn { background: #007bff; border-color: #0056b3; }
+        .refresh-btn:hover { background: #0069d9; }
+
+        /* 預覽視窗 */
+        iframe { width: 100%; height: 100%; border: none; background: white; }
+
+        /* 提示側欄 */
+        #hint-panel {
+            position: fixed; right: -350px; top: 0; width: 320px; height: 100%;
+            background: #fff; border-left: 1px solid var(--border-color);
+            padding: 25px; transition: right 0.4s ease; z-index: 2000; 
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            overflow-y: scroll; /* 強制顯示滾輪 */
+        }
+        #hint-panel.open { right: 0; }
+        .hint-section-title { 
+            background: #eee; padding: 5px 10px; margin: 20px 0 10px 0; 
+            font-weight: bold; border-left: 4px solid #333;
+        }
+        .hint-item { margin-bottom: 15px; font-size: 14px; line-height: 1.6; }
+        .hint-item code { background: #f8f9fa; padding: 2px 6px; color: #e83e8c; border: 1px solid #eee; border-radius: 3px; display: inline-block; margin-top: 4px; }
+        .hint-item strong { color: #222; display: block; }
+    </style>
+</head>
+<body>
+
+<div id="start-screen">
+    <h1 style="color: #333; margin-bottom: 40px; letter-spacing: 2px;">WEB EDITOR</h1>
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <button class="btn-main" onclick="initProject('single')">開啟新專案 (單一檔案)</button>
+        <button class="btn-main" onclick="initProject('multi')">開啟新專案 (分開檔案)</button>
+        <button class="btn-main" onclick="document.getElementById('fileInput').click()">上傳電腦檔案</button>
+    </div>
+    <input type="file" id="fileInput" style="display:none" onchange="handleFileUpload(event)">
+</div>
+
+<div id="main-container">
+    <div id="editor-section">
+        <div class="toolbar">
+            <div class="tab-group" id="tabs">
+                <div class="tab active" id="tab-html" onclick="switchTab('html')">HTML</div>
+                <div class="tab" id="tab-css" onclick="switchTab('css')">CSS</div>
+                <div class="tab" id="tab-js" onclick="switchTab('js')">JS</div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="control-btn" onclick="downloadFile()">下載專案檔案</button>
+                <button class="control-btn" onclick="toggleHint()">顯示語法提示</button>
+            </div>
+        </div>
+        <div id="editor-container" style="flex-grow:1;"></div>
+    </div>
+
+    <div id="preview-section">
+        <div class="toolbar" style="background: #f1f3f5; border-bottom: 1px solid #ccc;">
+            <span style="font-weight: bold; color: #495057;">預覽畫面</span>
+            <button class="control-btn refresh-btn" onclick="updatePreview()">手動更新預覽</button>
+        </div>
+        <iframe id="preview-frame"></iframe>
+    </div>
+</div>
+
+<div id="hint-panel">
+    <div style="display:flex; justify-content: space-between; align-items: center;">
+        <h2 style="margin:0;">語法參考指南</h2>
+        <button onclick="toggleHint()" style="cursor:pointer; border:1px solid #ccc; background:#fff; padding:5px 10px;">關閉</button>
+    </div>
+
+    <div class="hint-section-title">HTML 基本標籤</div>
+    
+    <div class="hint-item">
+        <strong>標題標籤 (Headings)</strong>
+        從 h1 到 h6，數字越小字體越大。
+        <code>&lt;h1&gt;主標題&lt;/h1&gt;</code>
+    </div>
+
+    <div class="hint-item">
+        <strong>段落與換行</strong>
+        p 為段落，br 為強制換行。
+        <code>&lt;p&gt;這是段落&lt;/p&gt;</code><br>
+        <code>&lt;br&gt;</code>
+    </div>
+
+    <div class="hint-item">
+        <strong>按鈕元件 (Button)</strong>
+        用於觸發點擊事件。
+        <code>&lt;button onclick="function()"&gt;點擊&lt;/button&gt;</code>
+    </div>
+
+    <div class="hint-item">
+        <strong>表單輸入 (Input)</strong>
+        根據 type 不同有不同功能。
+        <code>&lt;input type="text"&gt; 文字輸入</code><br>
+        <code>&lt;input type="number"&gt; 數字輸入</code><br>
+        <code>&lt;input type="range"&gt; 滑桿</code><br>
+        <code>&lt;input type="checkbox"&gt; 核取方塊</code>
+    </div>
+
+    <div class="hint-item">
+        <strong>圖片標籤 (Image)</strong>
+        src 為網址，alt 為替代文字。
+        <code>&lt;img src="url" width="200"&gt;</code>
+    </div>
+
+    <div class="hint-section-title">CSS 樣式參考</div>
+
+    <div class="hint-item">
+        <strong>文字尺寸 (Font Size)</strong>
+        可以使用 px, rem 或百分比。
+        <code>font-size: 20px;</code>
+    </div>
+
+    <div class="hint-item">
+        <strong>文字顏色 (Color)</strong>
+        可以使用顏色名稱、HEX 或 RGB。
+        <code>color: red;</code><br>
+        <code>color: #ff0000;</code>
+    </div>
+
+    <div class="hint-item">
+        <strong>背景設定 (Background)</strong>
+        <code>background-color: #f0f0f0;</code><br>
+        <code>background-image: url('...');</code>
+    </div>
+
+    <div class="hint-item">
+        <strong>邊框 (Border)</strong>
+        順序為：寬度 樣式 顏色。
+        <code>border: 1px solid black;</code><br>
+        <code>border-radius: 10px; (圓角)</code>
+    </div>
+
+    <div class="hint-item">
+        <strong>間距 (Margin & Padding)</strong>
+        margin 是外距，padding 是內距。
+        <code>margin: 20px;</code><br>
+        <code>padding: 10px;</code>
+    </div>
+
+    <div class="hint-item">
+        <strong>定位與排列 (Display)</strong>
+        <code>display: block; (區塊)</code><br>
+        <code>display: flex; (彈性佈局)</code><br>
+        <code>justify-content: center; (置中)</code>
+    </div>
+
+    <div class="hint-section-title">JavaScript 常用指令</div>
+
+    <div class="hint-item">
+        <strong>視窗彈出 (Alert)</strong>
+        <code>alert('訊息內容');</code>
+    </div>
+
+    <div class="hint-item">
+        <strong>選取元素 (Selector)</strong>
+        <code>document.getElementById('id');</code>
+    </div>
+
+    <div class="hint-item">
+        <strong>修改內容</strong>
+        <code>element.innerHTML = '新內容';</code>
+    </div>
+
+    <div style="height: 100px;"></div> </div>
+
+<script>
+    let editor;
+    let mode = 'single';
+    let currentTab = 'html';
+    let files = {
+        html: '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n</head>\n<body>\n  <h1>新專案</h1>\n  <p>編輯左側內容後按更新按鈕。</p>\n</body>\n</html>',
+        css: 'body {\n  padding: 20px;\n  background: white;\n}\nh1 {\n  color: navy;\n}',
+        js: '// 在此撰寫程式碼'
+    };
+
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+    
+    function initProject(selectedMode) {
+        mode = selectedMode;
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('main-container').style.visibility = 'visible';
+        
+        if(mode === 'single') {
+            document.getElementById('tab-css').style.display = 'none';
+            document.getElementById('tab-js').style.display = 'none';
+        }
+
+        require(['vs/editor/editor.main'], function () {
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: files.html,
+                language: 'html',
+                theme: 'vs-light',
+                automaticLayout: true,
+                minimap: { enabled: false },
+                fontSize: 16,
+                wordWrap: "on"
+            });
+            updatePreview();
+        });
+    }
+
+    function switchTab(tab) {
+        files[currentTab] = editor.getValue();
+        currentTab = tab;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(`tab-${tab}`).classList.add('active');
+        const langMap = { html: 'html', css: 'css', js: 'javascript' };
+        monaco.editor.setModelLanguage(editor.getModel(), langMap[tab]);
+        editor.setValue(files[tab]);
+    }
+
+    function updatePreview() {
+        const previewFrame = document.getElementById('preview-frame');
+        let content = '';
+        if (mode === 'single') {
+            content = editor.getValue();
+        } else {
+            content = `
+                ${files.html}
+                <style>${files.css}</style>
+                <script>${files.js}<\/script>
+            `;
+        }
+        previewFrame.srcdoc = content;
+    }
+
+    function downloadFile() {
+        let content, filename;
+        if (mode === 'single') {
+            content = editor.getValue();
+            filename = 'index.html';
+        } else {
+            content = `<!DOCTYPE html>\n<html>\n<head>\n<style>${files.css}</style>\n</head>\n<body>\n${files.html}\n<script>${files.js}<\/script>\n</body>\n</html>`;
+            filename = 'project_full.html';
+        }
+        const blob = new Blob([content], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+    }
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            files.html = e.target.result;
+            initProject('single');
+        };
+        reader.readAsText(file);
+    }
+
+    function toggleHint() {
+        document.getElementById('hint-panel').classList.toggle('open');
+    }
+</script>
+
+</body>
+</html>

@@ -1,8 +1,8 @@
 from bs4 import BeautifulSoup
 import os
 
-input_file = "丙檢工作項目01.html"
-output_file = "極致省紙版_工作項目01.html"
+input_file = "丙檢工作項目03.html"
+output_file = "極致省紙版_工作項目03.html"
 
 def convert_to_compact_format():
     if not os.path.exists(input_file):

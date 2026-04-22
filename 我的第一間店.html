@@ -229,14 +229,14 @@
 	};
 
 const BUFF_POOL = [
-    { name: "🚀 網路廣告", desc: "客流 +30%", buy: 2500, dRate: 0.30 },
+    { name: "🚀 網路廣告", desc: "客流 +20%", buy: 2500, dRate: 0.20 },
     { name: "🤖 自動結帳", desc: "單位成本 -10%", buy: 3500, cRate: -0.10 },
-    { name: "💎 尊榮會員", desc: "客流 +15%, 售價 +10%", buy: 4000, dRate: 0.15, pRate: 0.10 },
-    { name: "⏰ 延長工時", desc: "客流 +25%, 人事 +20%", buy: 1500, dRate: 0.25, personnelAdd: 0.2 }, // 修改點
-    { name: "🎫 優惠禮券", desc: "客流 +40%, 售價 -15%", buy: 1200, dRate: 0.40, pRate: -0.15 },
+    { name: "💎 尊榮會員", desc: "客流 +10%, 售價 +10%", buy: 4000, dRate: 0.1, pRate: 0.10 },
+    { name: "⏰ 延長工時", desc: "客流 +25%, 人事 +20%", buy: 1500, dRate: 0.25, personnelAdd: 0.2 },
+    { name: "🎫 優惠禮券", desc: "客流 +30%, 售價 -15%", buy: 1200, dRate: 0.30, pRate: -0.15 },
     { name: "🧹 門面裝修", desc: "客流 +10%, 售價 +5%", buy: 5000, dRate: 0.10, pRate: 0.05 },
     { name: "📦 批發採購", desc: "單位成本 -20%, 客流 -5%", buy: 3000, cRate: -0.20, dRate: -0.05 },
-    { name: "👨‍🍳 專業培訓", desc: "售價 +15%, 人事 +10%", buy: 4500, pRate: 0.15, personnelAdd: 0.1 } // 修改點
+    { name: "👨‍🍳 專業培訓", desc: "售價 +15%, 人事 +10%", buy: 4500, pRate: 0.15, personnelAdd: 0.1 }
 ];
 	const BIG_EVENTS = [
 		{
@@ -244,8 +244,8 @@ const BUFF_POOL = [
 			desc: "政府宣布調高基本時薪，這將影響近期的經營成本（持續 5 天）。",
 			options: [
 				{ 
-					text: "精簡人力 (人事+15%, 客流-10%)", 
-					impact: { personnelAdd: 0.15, dRate: -0.10, log: "短期：精簡人力導致服務品質下降", duration: 5 } 
+					text: "精簡人力 (人事+15%, 客流-20%)", 
+					impact: { personnelAdd: 0.15, dRate: -0.20, log: "短期：精簡人力導致服務品質下降", duration: 5 } 
 				},
 				{ 
 					text: "全面調薪 (人事+30%, 售價+10%)", 
@@ -255,43 +255,43 @@ const BUFF_POOL = [
 		},
 		{
 			title: "🌀 強力颱風侵襲",
-			desc: "氣象局發布陸上警報，影響預計僅限今日。",
+			desc: "氣象局發布陸上警報，影響預計僅限明日。",
 			options: [
 				{ 
-					text: "防颱加固 (開銷+1000, 客流-5%)", 
-					impact: { rentAdd: 1000, dRate: -0.05, log: "短期：加固設施支出", duration: 1 } 
+					text: "防颱加固 (開銷+1000, 客流-40%)", 
+					impact: { rentAdd: 1000, dRate: -0.4, log: "短期：加固設施支出", duration: 1 } 
 				},
 				{ 
-					text: "停業一天 (當天零客流, 成本-20%)", 
-					impact: { dRate: -10.0, cRate: -0.20, log: "短期：停業避災", duration: 1 } 
+					text: "停業一天 (當天零客流, 零人事費用)", 
+					impact: { dRate: -10.0, personnelAdd: -10.0, log: "短期：停業避災", duration: 1 } 
 				}
 			]
 		},
 		{
 			title: "✈️ 國際旅遊節",
-			desc: "大量國外旅客湧入，這是一次性的觀光熱潮（持續 1 天）。",
+			desc: "大量國外旅客湧入，這是一次性的觀光熱潮（持續 3 天）。",
 			options: [
 				{ 
-					text: "外籍友善 (人事+30%, 客流+80%)", 
-					impact: { dRate: 0.80, personnelAdd: 0.3, log: "短期：增聘臨時翻譯人員", duration: 1 }
+					text: "外籍友善 (人事+40%, 客流+80%)", 
+					impact: { dRate: 0.80, personnelAdd: 0.4, log: "短期：增聘臨時翻譯人員", duration: 3 }
 				},
 				{ 
 					text: "推出套裝 (售價+15%, 客流+10%)", 
-					impact: { pRate: 0.15, dRate: 0.10, log: "短期：觀光限定套裝", duration: 1 } 
+					impact: { pRate: 0.15, dRate: 0.10, log: "短期：觀光限定套裝", duration: 3 } 
 				}
 			]
 		},
 		{
 			title: "🌍 供應鏈危機",
-			desc: "全球物料短缺，預計會造成短期的成本波動（持續 2 天）。",
+			desc: "全球物料短缺，預計會造成短期的成本波動（持續 5 天）。",
 			options: [
 				{ 
 					text: "吸收成本 (成本+8%)", 
-					impact: { cRate: 0.08, log: "短期：公司吸收物料漲幅", duration: 2 } 
+					impact: { cRate: 0.08, log: "短期：公司吸收物料漲幅", duration: 5 } 
 				},
 				{ 
-					text: "調整配方 (客流-15%)", 
-					impact: { dRate: -0.15, log: "短期：配方更換導致客流流失", duration: 2 } 
+					text: "調整配方 (客流-20%)", 
+					impact: { dRate: -0.2, log: "短期：配方更換導致客流流失", duration: 5 } 
 				}
 			]
 		},

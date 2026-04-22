@@ -180,10 +180,10 @@
     <div class="modal-content" id="setup-content">
         <h2 style="font-size: 28px;">🏬 第一步：選擇你的事業起源</h2>
         <div class="type-grid">
-            <button class="btn-type" onclick="chooseDiff('drink')"><h4>🥤 飲料店</h4><p>客流量極大，單價低。</p></button>
-            <button class="btn-type" onclick="chooseDiff('bakery')"><h4>🥐 烘焙坊</h4><p>成本與需求穩定。</p></button>
-            <button class="btn-type" onclick="chooseDiff('game')"><h4>🎮 電玩店</h4><p>高單價、高利潤。</p></button>
-            <button class="btn-type" onclick="chooseDiff('hobby')"><h4>🧱 玩具店</h4><p>專業客群穩定。</p></button>
+            <button class="btn-type" onclick="chooseDiff('drink')"><h4>🥤 飲料店</h4><p>客流量極大、低單價、低成本。</p></button>
+            <button class="btn-type" onclick="chooseDiff('bakery')"><h4>🥐 烘焙坊</h4><p>低成本、需求穩定、中等人事費。</p></button>
+            <button class="btn-type" onclick="chooseDiff('game')"><h4>🎮 電玩店</h4><p>高單價、高利潤、需求不穩定。</p></button>
+            <button class="btn-type" onclick="chooseDiff('hobby')"><h4>🧸 玩具店</h4><p>高單價、需求穩定、高人事費。</p></button>
         </div>
     </div>
 </div>
@@ -222,10 +222,10 @@
 
 <script>
 	const SHOP_DATA = {
-		drink: { name: "飲料店", icon: "🥤", price: 65, cost: 22, demandMin: 20, demandMax: 50, expense: 2400 },
-		bakery: { name: "烘焙坊", icon: "🥐", price: 165, cost: 55, demandMin: 15, demandMax: 20, expense: 2400 },
-		game: { name: "電玩店", icon: "🎮", price: 1800, cost: 1100, demandMin: 3, demandMax: 6, expense: 2400 },
-		hobby: { name: "玩具店", icon: "🧱", price: 900, cost: 500, demandMin: 8, demandMax: 12, expense: 2400 }
+		drink: { name: "飲料店", icon: "🥤", price: 65, cost: 22, demandMin: 36, demandMax: 55, personnel: 2400 },//1548~2365
+		bakery: { name: "烘焙坊", icon: "🥐", price: 180, cost: 55, demandMin: 18, demandMax: 22, personnel: 3000 },//2250~2750
+		game: { name: "電玩店", icon: "🎮", price: 1800, cost: 1100, demandMin: 1, demandMax: 5, personnel: 2800 },//700~3500
+		hobby: { name: "玩具店", icon: "🧸", price: 900, cost: 500, demandMin: 6, demandMax: 8, personnel: 3600 }//2400~3200
 	};
 
 const BUFF_POOL = [
@@ -355,50 +355,49 @@ const BUFF_POOL = [
             </div>`;
     }
 
-    function finalize(diff, m, r, cycle) {
-        state.difficulty = diff; state.money = m; state.rent = r; state.eventCycle = cycle;
-        document.getElementById('setup-modal').style.display = 'none';
-        document.getElementById('shop-node').style.display = 'flex';
-        document.getElementById('shop-sub-icon').textContent = state.shop.icon;
-        document.getElementById('ui-shop-name').textContent = state.shop.name;
-        updateUI();
-    }
+	function finalize(diff, m, r, cycle) {
+		state.difficulty = diff; 
+		state.money = m; 
+		state.rent = r;           // 難度決定的租金
+		state.eventCycle = cycle;
+		
+		// 直接抓取該店型的純人事費
+		state.personnel = state.shop.personnel; 
+		
+		document.getElementById('setup-modal').style.display = 'none';
+		document.getElementById('shop-node').style.display = 'flex';
+		document.getElementById('shop-sub-icon').textContent = state.shop.icon;
+		document.getElementById('ui-shop-name').textContent = state.shop.name;
+		updateUI();
+	}
 
 	function calculateCurrentStats() {
 		let p = state.shop.price, c = state.shop.cost;
-		let baseRent = state.rent;
-		let basePersonnel = 2400; 
+		let baseRent = state.rent;        // 來自難度設定
+		let basePersonnel = state.personnel; // 來自店型設定
 
-		// 初始化乘數 (Multiplier)
 		let pMul = 1.0, cMul = 1.0, dMul = 1.0, persMul = 1.0;
-		let rentAdd = 0, dAdd = 0; // 數值型加減保持不變
+		let rentAdd = 0, dAdd = 0;
 
-		// 第一階段：計算「一般策略 (Buffs)」的累乘
+		// 策略影響 (Buffs)
 		state.activeBuffs.forEach(item => {
 			if(item.pRate) pMul *= (1 + item.pRate);
 			if(item.cRate) cMul *= (1 + item.cRate);
 			if(item.dRate) dMul *= (1 + item.dRate);
-			if(item.personnelRate) persMul *= (1 + item.personnelRate);
-			
-			// 處理固定值加減
-			if(item.pAdd) p += item.pAdd;
-			if(item.cAdd) c += item.cAdd;
-			if(item.dAdd) dAdd += item.dAdd;
+			if(item.personnelRate) persMul *= (1 + item.personnelRate); // 影響人事
+			if(item.rentAdd) rentAdd += item.rentAdd; // 影響租金
 		});
 
-		// 第二階段：大事件最後計算 (累積在 buff 之後，造成更嚴重的擴張或萎縮)
+		// 事件影響 (Events)
 		state.historyEvents.forEach(item => {
 			if(item.pRate) pMul *= (1 + item.pRate);
 			if(item.cRate) cMul *= (1 + item.cRate);
 			if(item.dRate) dMul *= (1 + item.dRate);
 			if(item.personnelRate) persMul *= (1 + item.personnelRate);
-			
-			// 大事件的固定成本通常很有壓力，放在最後加
-			if(item.eAdd) rentAdd += item.eAdd;
 			if(item.rentAdd) rentAdd += item.rentAdd;
 		});
 
-		// 最終數值計算
+		// 最終合成計算
 		const finalPrice = Math.max(1, Math.floor(p * pMul));
 		const finalCost = Math.max(1, Math.floor(c * cMul));
 		const finalPersonnel = Math.max(0, Math.floor(basePersonnel * persMul));
@@ -407,10 +406,10 @@ const BUFF_POOL = [
 		return { 
 			price: finalPrice, 
 			cost: finalCost, 
-			expense: finalPersonnel + finalRent, 
+			expense: finalPersonnel + finalRent, // 總開銷 = 動態人事 + 動態租金
 			Statrent: finalRent,
 			StatPersonnel: finalPersonnel,
-			dRate: dMul - 1, // 轉回 UI 使用的率值
+			dRate: dMul - 1,
 			dAdd: dAdd
 		};
 	}

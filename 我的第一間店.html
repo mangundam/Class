@@ -97,13 +97,41 @@
         
         .log { background: #0f172a; color: #cbd5e1; padding: 20px; border-radius: 15px; height: 120px; overflow-y: auto; font-family: monospace; font-size: 15px; border-left: 8px solid var(--primary); }
         .status-tag { display: inline-block; background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 8px; margin: 4px; font-size: 14px; border: 1px solid #fecaca; }
+		.speed-controls { margin-top: 5px; display: flex; gap: 5px; justify-content: center; }
+		.btn-speed { 
+			background: #e2e8f0; border: none; padding: 2px 8px; border-radius: 6px; 
+			font-size: 12px; cursor: pointer; transition: 0.2s; font-weight: bold;
+		}
+		.btn-speed:hover { background: #cbd5e1; }
+		.btn-speed.active { background: var(--primary); color: white; }
+		.expanded-card {
+			max-height: none !important; 
+			height: auto !important;
+		}
+
+		.hidden-area {
+			display: none !important;
+		}
+
+		#game-log.fully-visible {
+			height: auto;
+			max-height: 800px; 
+			overflow-y: visible;
+		}
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header-stats">
-        <div class="stat-card">📅 天數 <span class="stat-val" id="ui-day">1</span></div>
+        <div class="stat-card">
+			📅 天數 <span class="stat-val" id="ui-day">1</span>
+			<div class="speed-controls">
+				<button class="btn-speed active" id="speed-1" onclick="setSpeed(1)">1x</button>
+				<button class="btn-speed" id="speed-2" onclick="setSpeed(2)">2x</button>
+				<button class="btn-speed" id="speed-10" onclick="setSpeed(10)">10x</button>
+			</div>
+		</div>
         <div class="stat-card">💰 現金 <span class="stat-val" id="ui-money">50000</span></div>
         <div class="stat-card">🏬 店型 <span id="ui-shop-name" style="font-weight:bold; color:var(--success)">-</span></div>
         <div class="stat-card">
@@ -130,7 +158,7 @@
             </div>
         </div>
 		<div class="card">
-			<h3 style="margin-top:0">📜 經營手札</h3>
+			<h3 style="margin-top:0">📜 經營筆記</h3>
 			<div class="strategy-history-area">
 				<div id="active-buffs-list" style="font-size: 14px; margin-bottom: 10px;">
 					<b style="color:var(--primary)">✅ 當前策略：</b>
@@ -181,7 +209,7 @@
 
 <div id="history-modal" class="modal">
     <div class="modal-content">
-        <h2 style="font-size: 28px;">📜 經營手札</h2>
+        <h2 style="font-size: 28px;">📜 經營筆記</h2>
         <div style="text-align:left; line-height:1.6; font-size: 15px;">
             <h4>✅ 當前投資策略：</h4>
             <div id="history-buffs">暫無</div>
@@ -204,11 +232,11 @@ const BUFF_POOL = [
     { name: "🚀 網路廣告", desc: "客流 +30%", buy: 2500, dRate: 0.30 },
     { name: "🤖 自動結帳", desc: "單位成本 -10%", buy: 3500, cRate: -0.10 },
     { name: "💎 尊榮會員", desc: "客流 +15%, 售價 +10%", buy: 4000, dRate: 0.15, pRate: 0.10 },
-    { name: "⏰ 延長工時", desc: "客流 +25%, 人事 +800", buy: 1500, dRate: 0.25, personnelAdd: 800 }, // 修改點
+    { name: "⏰ 延長工時", desc: "客流 +25%, 人事 +20%", buy: 1500, dRate: 0.25, personnelAdd: 0.2 }, // 修改點
     { name: "🎫 優惠禮券", desc: "客流 +40%, 售價 -15%", buy: 1200, dRate: 0.40, pRate: -0.15 },
     { name: "🧹 門面裝修", desc: "客流 +10%, 售價 +5%", buy: 5000, dRate: 0.10, pRate: 0.05 },
     { name: "📦 批發採購", desc: "單位成本 -20%, 客流 -5%", buy: 3000, cRate: -0.20, dRate: -0.05 },
-    { name: "👨‍🍳 專業培訓", desc: "售價 +15%, 人事 +500", buy: 4500, pRate: 0.15, personnelAdd: 500 } // 修改點
+    { name: "👨‍🍳 專業培訓", desc: "售價 +15%, 人事 +10%", buy: 4500, pRate: 0.15, personnelAdd: 0.1 } // 修改點
 ];
 	const BIG_EVENTS = [
 		{
@@ -216,12 +244,12 @@ const BUFF_POOL = [
 			desc: "政府宣布調高基本時薪，這將影響近期的經營成本（持續 5 天）。",
 			options: [
 				{ 
-					text: "精簡人力 (人事+400, 客流-10%)", 
-					impact: { personnelAdd: 400, dRate: -0.10, log: "短期：精簡人力導致服務品質下降", duration: 5 } 
+					text: "精簡人力 (人事+15%, 客流-10%)", 
+					impact: { personnelAdd: 0.15, dRate: -0.10, log: "短期：精簡人力導致服務品質下降", duration: 5 } 
 				},
 				{ 
-					text: "全面調薪 (人事+800, 售價+10%)", 
-					impact: { pRate: 0.10, personnelAdd: 800, log: "短期：調薪提升士氣與產品價值", duration: 5 }
+					text: "全面調薪 (人事+30%, 售價+10%)", 
+					impact: { pRate: 0.10, personnelAdd: 0.2, log: "短期：調薪提升士氣與產品價值", duration: 5 }
 				}
 			]
 		},
@@ -231,11 +259,11 @@ const BUFF_POOL = [
 			options: [
 				{ 
 					text: "防颱加固 (開銷+1000, 客流-5%)", 
-					impact: { eAdd: 1000, dRate: -0.05, log: "短期：加固設施支出", duration: 1 } 
+					impact: { rentAdd: 1000, dRate: -0.05, log: "短期：加固設施支出", duration: 1 } 
 				},
 				{ 
 					text: "停業一天 (當天零客流, 成本-20%)", 
-					impact: { dRate: -1.0, cRate: -0.20, log: "短期：停業避災", duration: 1 } 
+					impact: { dRate: -10.0, cRate: -0.20, log: "短期：停業避災", duration: 1 } 
 				}
 			]
 		},
@@ -244,8 +272,8 @@ const BUFF_POOL = [
 			desc: "大量國外旅客湧入，這是一次性的觀光熱潮（持續 1 天）。",
 			options: [
 				{ 
-					text: "外籍友善 (人事+800, 客流+40%)", 
-					impact: { dRate: 0.40, personnelAdd: 800, log: "短期：增聘臨時翻譯人員", duration: 1 }
+					text: "外籍友善 (人事+30%, 客流+80%)", 
+					impact: { dRate: 0.80, personnelAdd: 0.3, log: "短期：增聘臨時翻譯人員", duration: 1 }
 				},
 				{ 
 					text: "推出套裝 (售價+15%, 客流+10%)", 
@@ -258,8 +286,8 @@ const BUFF_POOL = [
 			desc: "全球物料短缺，預計會造成短期的成本波動（持續 2 天）。",
 			options: [
 				{ 
-					text: "吸收成本 (成本+8)", 
-					impact: { cAdd: 8, log: "短期：公司吸收物料漲幅", duration: 2 } 
+					text: "吸收成本 (成本+8%)", 
+					impact: { cRate: 0.08, log: "短期：公司吸收物料漲幅", duration: 2 } 
 				},
 				{ 
 					text: "調整配方 (客流-15%)", 
@@ -283,13 +311,14 @@ const BUFF_POOL = [
 		}
 	];
 	
-    let state = {
-        shop: null, money: 50000, day: 1, 
-        activeBuffs: [], historyEvents: [],
-        difficulty: 'normal', eventCycle: 5,
-        rent: 1000, personnel: 2400,
-        expenseMod: 1, dailyRev: 0, dailySold: 0
-    };
+	let state = {
+		shop: null, money: 50000, day: 1, 
+		activeBuffs: [], historyEvents: [],
+		difficulty: 'normal', eventCycle: 5,
+		rent: 1000, personnel: 2400,
+		expenseMod: 1, dailyRev: 0, dailySold: 0,
+		gameSpeed: 1 // 新增：預設速度為 1
+	};
 
     function chooseDiff(key) {
         state.shop = { ...SHOP_DATA[key] };
@@ -321,21 +350,23 @@ const BUFF_POOL = [
 
 	function calculateCurrentStats() {
 		let p = state.shop.price, c = state.shop.cost;
-		let baseE = (state.rent + state.personnel);
+		//let baseE = (state.rent + state.personnel);
+		let baseRent = state.rent;
+		let basePersonnel = state.personnel;
 		
 		let totalPRate = 1, totalCRate = 1, totalERate = 1;
 		let totalDRate = 0, totalDAdd = 0, totalEAdd = 0;
-		let tempPersonnelAdd = 0; // 用於處理事件增加的人事費
+		let tempPersonnelAdd = 1; // 用於處理事件增加的人事費
 
 		state.activeBuffs.concat(state.historyEvents).forEach(item => {
-			if(item.pRate) totalPRate += item.pRate;
-			if(item.cRate) totalCRate += item.cRate;
-			if(item.eRate) totalERate += item.eRate;
-			if(item.dRate) totalDRate += item.dRate;
+			if(item.pRate) totalPRate += item.pRate; //price價格
+			if(item.cRate) totalCRate += item.cRate; //cost成本
+			//if(item.eRate) totalERate += item.eRate; //人事
+			if(item.dRate) totalDRate += item.dRate; //demand需求
 			
 			if(item.pAdd) p += item.pAdd;
 			if(item.cAdd) c += item.cAdd;
-			if(item.eAdd) totalEAdd += item.eAdd;
+			if(item.eAdd) totalEAdd += item.eAdd; //房租上漲
 			if(item.dAdd) totalDAdd += item.dAdd;
 
 			// 如果是事件帶來的暫時性支出
@@ -346,7 +377,9 @@ const BUFF_POOL = [
 		return { 
 			price: Math.max(1, Math.floor(p * totalPRate)), 
 			cost: Math.max(1, Math.floor(c * totalCRate)), 
-			expense: Math.max(0, Math.floor((baseE + tempPersonnelAdd) * totalERate) + totalEAdd), 
+			//expense: Math.max(0, Math.floor((baseE + tempPersonnelAdd) * totalERate) + totalEAdd), 
+			expense: Math.max(0, Math.floor(basePersonnel + baseRent + totalEAdd)), 
+			Statrent: Math.max(0, baseRent + totalEAdd), 
 			dRate: totalDRate, 
 			dAdd: totalDAdd 
 		};
@@ -361,9 +394,9 @@ const BUFF_POOL = [
 			document.getElementById('ui-expense').textContent = Math.floor(stats.expense);
 			
 			// 這裡同步更新提示文字，確保店租與人事費是 state 中的最新數值
-			const currentTotal = state.rent + state.personnel;
+			//const currentTotal = state.rent + state.personnel;
 			document.getElementById('ui-expense-hint').textContent = 
-				`💡 固定成本：店租 ${state.rent.toLocaleString()}元 + 人事 ${state.personnel.toLocaleString()}元 = ${currentTotal.toLocaleString()}元/天`;
+				`💡 固定成本：店租 ${stats.Statrent.toLocaleString()}元 + 人事 ${state.personnel.toLocaleString()}元 = ${Math.floor(stats.expense).toLocaleString()}元/天`;
 			
 			const minDemand = Math.max(0, Math.floor(state.shop.demandMin * (1 + stats.dRate)) + stats.dAdd);
 			const maxDemand = Math.max(0, Math.floor(state.shop.demandMax * (1 + stats.dRate)) + stats.dAdd);
@@ -403,116 +436,123 @@ const BUFF_POOL = [
 		
 		let totalCost = (state.dailySold * stats.cost) + stats.expense;
 		state.money -= totalCost; 
+		
 		showSettlement(state.dailySold, state.dailyRev, totalCost, state.dailyRev - totalCost);
 	}
 
     async function playBusinessAnimation(total, currentPrice) {
-        return new Promise(resolve => {
-            const canvas = document.getElementById('game-canvas');
-            let spawned = 0;
-            const duration = 10000;
-            const startTime = Date.now();
+		return new Promise(resolve => {
+			const canvas = document.getElementById('game-canvas');
+			let spawned = 0;
+			const s = state.gameSpeed; // 取得目前倍率
+			
+			// 原始時間基礎值
+			const baseDuration = 10000;
+			const baseMoveTime = 3000;
+			const baseStayTime = 800;
+			const baseCoinTime = 1000;
 
-            function spawnCustomer() {
-                if (spawned >= total) return;
+			function spawnCustomer() {
+				if (spawned >= total) return;
 
-                spawned++;
-                const c = document.createElement('div');
-                c.className = 'customer';
-                c.textContent = ['🚶', '🧍', '🚶‍♀️', '🧍‍♂️', '🏃'][Math.floor(Math.random() * 5)];
-                const xOffset = (Math.random() * 80) - 40;
-                c.style.transform = `translateX(${xOffset}px)`;
-                canvas.appendChild(c);
+				spawned++;
+				const c = document.createElement('div');
+				c.className = 'customer';
+				c.textContent = ['🚶', '🧍', '🚶‍♀️', '🧍‍♂️', '🏃'][Math.floor(Math.random() * 5)];
+				const xOffset = (Math.random() * 80) - 40;
+				c.style.transform = `translateX(${xOffset}px)`;
+				canvas.appendChild(c);
 
-                // 客人走向商店
-                setTimeout(() => {
-                    c.style.transition = "left 3s linear";
-                    c.style.left = "43%";
+				// 客人走向商店 (受倍率影響)
+				setTimeout(() => {
+					c.style.transition = `left ${baseMoveTime / s}ms linear`;
+					c.style.left = "43%";
 
-                    // 到達商店後的邏輯
-                    setTimeout(() => {
-                        c.style.opacity = "0";
+					// 到達商店後的邏輯
+					setTimeout(() => {
+						c.style.opacity = "0";
 
-                        // 獨立觸發錢袋與金額動畫
-                        const coin = document.createElement('div');
-                        coin.className = 'coin-pop';
-                        coin.innerHTML = `💰 +${currentPrice}`;
-                        document.getElementById('shop-node').appendChild(coin);
+						const coin = document.createElement('div');
+						coin.className = 'coin-pop';
+						coin.style.animationDuration = `${baseCoinTime / s}ms`; // 錢袋動畫加速
+						coin.innerHTML = `💰 +${currentPrice}`;
+						document.getElementById('shop-node').appendChild(coin);
 
-                        // 更新數據
-                        state.money += currentPrice;
-                        state.dailyRev += currentPrice;
-                        state.dailySold += 1;
-                        document.getElementById('ui-money').textContent = Math.floor(state.money);
+						state.money += currentPrice;
+						state.dailyRev += currentPrice;
+						state.dailySold += 1;
+						document.getElementById('ui-money').textContent = Math.floor(state.money);
 
-                        // 離開商店
-                        setTimeout(() => {
-                            c.style.opacity = "1";
-                            c.style.transition = "left 3s linear";
-                            c.style.left = "-20%";
-                            // 清除錢袋
-                            setTimeout(() => coin.remove(), 1000);
-                        }, 800);
-                    }, 3000);
-                }, 50);
+						// 離開商店
+						setTimeout(() => {
+							c.style.opacity = "1";
+							c.style.transition = `left ${baseMoveTime / s}ms linear`;
+							c.style.left = "-20%";
+							setTimeout(() => coin.remove(), baseCoinTime / s);
+						}, baseStayTime / s);
+					}, baseMoveTime / s);
+				}, 50 / s);
 
-                // 清除客人元件
-                setTimeout(() => c.remove(), 9500);
+				// 清除客人元件
+				setTimeout(() => c.remove(), (baseMoveTime * 2 + baseStayTime + 500) / s);
 
-                // 隨機間隔產生下一個客人，維持流暢感
-                if (spawned < total) {
-                    const nextDelay = (duration / total) * (Math.random() * 0.5 + 0.75);
-                    setTimeout(spawnCustomer, nextDelay);
-                }
-            }
+				// 隨機產生下一個客人的間隔 (受倍率影響)
+				if (spawned < total) {
+					const nextDelay = (baseDuration / total) * (Math.random() * 0.5 + 0.75) / s;
+					setTimeout(spawnCustomer, nextDelay);
+				}
+			}
 
-            // 開始生成
-            spawnCustomer();
+			spawnCustomer();
 
-            // 確保所有動畫跑完才結算 (約需動畫時間+緩衝)
-            setTimeout(resolve, duration + 5000);
-        });
-    }
+			// 結算等待時間縮短
+			setTimeout(resolve, (baseDuration / s) + (5000 / s));
+		});
+	}
 
     function showSettlement(count, rev, cost, profit) {
-        const modal = document.getElementById('settle-modal');
-        document.getElementById('settle-report').innerHTML = `
-            🛍️ 銷量：<b>${count}</b> 件 | 
-            收入：<span style="color:var(--success); font-weight:800;">+$${rev.toLocaleString()}</span><br>
-            支出：<span style="color:var(--danger); font-weight:800;">-$${Math.floor(cost).toLocaleString()}</span><br>
-            💎 純利：<b style="color:${profit>=0?'green':'red'}; font-size: 26px;">$${Math.floor(profit).toLocaleString()}</b>
-        `;
-        log(`Day ${state.day}：銷量 ${count} | 營收 ${rev} | 淨利 ${Math.floor(profit)}`);
-        const optBox = document.getElementById('buff-options');
-        optBox.innerHTML = '';
-        [...BUFF_POOL].sort(() => 0.5-Math.random()).slice(0,3).forEach(b => {
-            const btn = document.createElement('div');
-            btn.className = 'btn-buff-card';
-            btn.innerHTML = `
-                <div class="buff-name-label">${b.name}</div>
-                <div class="buff-desc-label">${b.desc}</div>
-                <div class="buff-cost-label">$${b.buy.toLocaleString()}</div>
-            `;
-            btn.onclick = () => {
-				if(state.money < b.buy) return alert("資金不足");
-				state.money -= b.buy;
-				
-				// 如果投資項目有人事或店租增加，直接永久加進 state
-				if(b.personnelAdd) state.personnel += b.personnelAdd;
-				if(b.rentAdd) state.rent += b.rentAdd;
-				
-				state.activeBuffs.push(b);
-				updateUI(); // 這會觸發更新「固定開銷」下方那段文字
-				checkEventAfterSettle();
-			};
-            optBox.appendChild(btn);
-        });
-        modal.style.display = 'flex';
+		if(state.day >= 30){checkEventAfterSettle();}
+		else{
+			const modal = document.getElementById('settle-modal');
+			document.getElementById('settle-report').innerHTML = `
+				🛍️ 銷量：<b>${count}</b> 件 | 
+				收入：<span style="color:var(--success); font-weight:800;">+$${rev.toLocaleString()}</span><br>
+				支出：<span style="color:var(--danger); font-weight:800;">-$${Math.floor(cost).toLocaleString()}</span><br>
+				💎 純利：<b style="color:${profit>=0?'green':'red'}; font-size: 26px;">$${Math.floor(profit).toLocaleString()}</b>
+			`;
+			log(`Day ${state.day}：銷量 ${count} | 營收 ${rev} | 淨利 ${Math.floor(profit)}`);
+			const optBox = document.getElementById('buff-options');
+			optBox.innerHTML = '';
+			[...BUFF_POOL].sort(() => 0.5-Math.random()).slice(0,3).forEach(b => {
+				const btn = document.createElement('div');
+				btn.className = 'btn-buff-card';
+				btn.innerHTML = `
+					<div class="buff-name-label">${b.name}</div>
+					<div class="buff-desc-label">${b.desc}</div>
+					<div class="buff-cost-label">$${b.buy.toLocaleString()}</div>
+				`;
+				btn.onclick = () => {
+					if(state.money < b.buy) return alert("資金不足");
+					state.money -= b.buy;
+					
+					// 如果投資項目有人事或店租增加，直接永久加進 state
+					if(b.personnelAdd) state.personnel *=  1 + b.personnelAdd;
+					//if(b.totalERate) state.personnel *=  b.totalERate;
+					if(b.rentAdd) state.rent += b.rentAdd;
+					
+					state.activeBuffs.push(b);
+					updateUI(); // 這會觸發更新「固定開銷」下方那段文字
+					checkEventAfterSettle();
+				};
+				optBox.appendChild(btn);
+			});
+			modal.style.display = 'flex';
+		}
     }
 
     function checkEventAfterSettle() {
         document.getElementById('settle-modal').style.display = 'none';
-        if (state.day % state.eventCycle === 0) triggerBigEvent(); else nextDay();
+        if (state.day <30  && state.day % state.eventCycle === 0) triggerBigEvent(); else nextDay();
     }
 
     function triggerBigEvent() {
@@ -530,7 +570,7 @@ const BUFF_POOL = [
 				const newImpact = { ...opt.impact };
 				
 				// 如果是像你說的「5日得到3天事件」，這行 log 可以幫助除錯
-				log(`[事件] ${newImpact.log} (持續 ${newImpact.duration} 天，預計 ${state.day + newImpact.duration+1} 日恢復)`);
+				log(`<span style="color:var(--warning)">[事件] ${newImpact.log} (持續 ${newImpact.duration} 天，預計 ${state.day + newImpact.duration+1} 日恢復)</span>`);
 				
 				state.historyEvents.push(newImpact);
 				document.getElementById('event-modal').style.display = 'none';
@@ -546,28 +586,49 @@ const BUFF_POOL = [
 		// 1. 處理事件剩餘天數
 		state.historyEvents.forEach(event => {
 			if (event.duration !== undefined) {
-				event.duration--; // 天數減 1
+				event.duration--;
 			}
 		});
 
-		// 2. 自動過濾：只保留 duration 還大於 0 的事件
-		// 當 duration 變為 0，這個事件就會從陣列消失，calculateCurrentStats() 就不會再計算它的加成
+		// 2. 過濾結束的事件
 		const originalCount = state.historyEvents.length;
 		state.historyEvents = state.historyEvents.filter(event => 
 			event.duration === undefined || event.duration > -1
 		);
 
-		// 3. 如果有事件消失了，紀錄一條 log 提醒玩家
 		if (state.historyEvents.length < originalCount) {
-			log(`<span style="color:var(--success)">✨ 部分暫時性事件影響已結束，經營狀況回復原狀。</span>`);
+			log(`<span style="color:var(--success)">[事件] 部分暫時性事件影響已結束。</span>`);
 		}
 
-		// 4. 原有的天數增加與 UI 更新
+		// 3. 增加天數
 		state.day++;
 		updateUI(); 
 		document.getElementById('btn-start').disabled = false;
 
-		if(state.day > 30) alert("30天經營結束！");
+		// --- 修改點：30 天結束後的狀態切換 ---
+		if (state.day > 30) {
+			// A. 隱藏開店按鈕與動畫區
+			document.getElementById('btn-start').classList.add('hidden-area');
+			document.getElementById('game-canvas').classList.add('hidden-area');
+
+			const strategyArea = document.querySelector('.strategy-history-area');
+			if (strategyArea) strategyArea.classList.add('expanded-card');
+
+			const logArea = document.getElementById('game-log');
+			logArea.classList.add('fully-visible');
+			
+			state.day = 30;
+			updateUI(); 
+
+			log("<b style='color:var(--primary); font-size:24px;'>30 天經營結束！這裡是最終經營總結報告。</b>");
+			//alert("30天經營結束！");
+		}
+	}
+	
+	function setSpeed(speed) {
+		state.gameSpeed = speed;
+		document.querySelectorAll('.btn-speed').forEach(btn => btn.classList.remove('active'));
+		document.getElementById(`speed-${speed}`).classList.add('active');
 	}
 
     function showHistory() {

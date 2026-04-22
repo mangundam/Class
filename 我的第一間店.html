@@ -42,7 +42,8 @@
             100% { opacity: 0; transform: translate(-50%, -100px); }
         }
 
-        .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .setup-grid { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 20px; margin-bottom: 20px; }
+		.strategy-history-area {max-height: 160px;overflow-y: auto;padding-right: 5px;}
         .card { border: 1px solid #e5e7eb; padding: 20px; border-radius: 18px; background: #fafbfc; }
         
         /* Modal Content 縮小約 20% */
@@ -128,10 +129,19 @@
                 預估客流：<b id="ui-demand-range" style="color:var(--warning)">25 ~ 40</b> 人
             </div>
         </div>
-        <div class="card">
-            <button class="btn-info" onclick="showHistory()">📜 查閱經營手札 (當前效果)</button>
-            <div id="active-buffs-list" style="font-size: 14px; color: #64748b;">查看所有加成與事件影響</div>
-        </div>
+		<div class="card">
+			<h3 style="margin-top:0">📜 經營手札</h3>
+			<div class="strategy-history-area">
+				<div id="active-buffs-list" style="font-size: 14px; margin-bottom: 10px;">
+					<b style="color:var(--primary)">✅ 當前策略：</b>
+					<div id="history-buffs-inline" style="display: flex; flex-wrap: wrap; gap: 4px; margin-top:5px;">暫無</div>
+				</div>
+				<div id="event-impact-list" style="font-size: 14px;">
+					<b style="color:var(--danger)">⚠️ 事件影響：</b>
+					<div id="history-events-inline" style="margin-top:5px;">暫無</div>
+				</div>
+			</div>
+		</div>
     </div>
 
     <button class="btn-main" id="btn-start" onclick="startDay()">開店!</button>
@@ -190,81 +200,89 @@
 		hobby: { name: "玩具店", icon: "🧱", price: 900, cost: 500, demandMin: 8, demandMax: 15, expense: 2400 }
 	};
 
-	const BUFF_POOL = [
-        { name: "🚀 網路廣告", desc: "客流 +30%", buy: 2500, dRate: 0.30 },
-        { name: "🧊 節能冷氣", desc: "每日開銷 -15%", buy: 2000, eRate: -0.15 },
-        { name: "🤖 自動結帳", desc: "單位成本 -10%", buy: 3500, cRate: -0.10 },
-        { name: "💎 尊榮會員", desc: "客流 +15%, 售價 +10%", buy: 4000, dRate: 0.15, pRate: 0.10 },
-        { name: "⏰ 延長工時", desc: "客流 +25%, 開銷 +800", buy: 1500, dRate: 0.25, eAdd: 800 },
-        { name: "🎫 優惠禮券", desc: "客流 +40%, 售價 -15%", buy: 1200, dRate: 0.40, pRate: -0.15 },
-        { name: "🧹 門面裝修", desc: "客流 +10%, 售價 +5%", buy: 5000, dRate: 0.10, pRate: 0.05 },
-        { name: "📦 批發採購", desc: "單位成本 -20%, 客流 -5%", buy: 3000, cRate: -0.20, dRate: -0.05 },
-        { name: "👨‍🍳 專業培訓", desc: "售價 +15%, 每日開銷 +500", buy: 4500, pRate: 0.15, eAdd: 500 }
-    ];
-
+const BUFF_POOL = [
+    { name: "🚀 網路廣告", desc: "客流 +30%", buy: 2500, dRate: 0.30 },
+    { name: "🤖 自動結帳", desc: "單位成本 -10%", buy: 3500, cRate: -0.10 },
+    { name: "💎 尊榮會員", desc: "客流 +15%, 售價 +10%", buy: 4000, dRate: 0.15, pRate: 0.10 },
+    { name: "⏰ 延長工時", desc: "客流 +25%, 人事 +800", buy: 1500, dRate: 0.25, personnelAdd: 800 }, // 修改點
+    { name: "🎫 優惠禮券", desc: "客流 +40%, 售價 -15%", buy: 1200, dRate: 0.40, pRate: -0.15 },
+    { name: "🧹 門面裝修", desc: "客流 +10%, 售價 +5%", buy: 5000, dRate: 0.10, pRate: 0.05 },
+    { name: "📦 批發採購", desc: "單位成本 -20%, 客流 -5%", buy: 3000, cRate: -0.20, dRate: -0.05 },
+    { name: "👨‍🍳 專業培訓", desc: "售價 +15%, 人事 +500", buy: 4500, pRate: 0.15, personnelAdd: 500 } // 修改點
+];
 	const BIG_EVENTS = [
-        {
-            title: "⚖️ 法定工資調漲",
-            desc: "政府宣布調高基本時薪，營運成本面臨壓力。",
-            options: [
-                { 
-                    text: "精簡人力 (人事+400, 客流-10%)", 
-                    impact: { dRate: -0.10, log: "精簡人力導致服務變慢" },
-                    apply(s) { s.personnel += 400; } // 直接修改基礎人事費
-                },
-                { 
-                    text: "全面調薪 (人事+800, 售價+10%)", 
-                    impact: { pRate: 0.10, log: "調薪提升士氣與品質" },
-                    apply(s) { s.personnel += 800; }
-                }
-            ]
-        },
-        {
-            title: "🌀 強力颱風侵襲",
-            desc: "氣象局發布陸上警報，全台進入防災狀態。",
-            options: [
-                { 
-                    text: "防颱加固 (開銷+2000, 客流-5%)", 
-                    impact: { eAdd: 2000, dRate: -0.05, log: "加固設施減少災害損失" } 
-                },
-                { 
-                    text: "停業一天 (當天零客流, 成本-20%)", 
-                    impact: { dRate: -1.0, cRate: -0.20, log: "停業防颱避免重大災損" } 
-                }
-            ]
-        },
-        {
-            title: "⛰️ 強烈地震發生",
-            desc: "區域發生強震，店面部分設施受損導致地租補貼變動。",
-            options: [
-                { 
-                    text: "立即修繕 (店租+500)", 
-                    impact: { log: "支付修繕導致租金結構改變" },
-                    apply(s) { s.rent += 500; } // 直接修改基礎店租
-                },
-                { 
-                    text: "帶傷營運 (售價-10%, 客流-20%)", 
-                    impact: { pRate: -0.10, dRate: -0.20, log: "設施受損影響顧客觀感" } 
-                }
-            ]
-        },
-        {
-            title: "✈️ 國際旅遊節",
-            desc: "政府推廣觀光，大量國外旅客湧入本地。",
-            options: [
-                { text: "外語友善 (開銷+800, 客流+40%)", impact: { eAdd: 800, dRate: 0.40, log: "吸引大量外國觀光客" } },
-                { text: "推出套裝 (售價+15%, 客流+10%)", impact: { pRate: 0.15, dRate: 0.10, log: "觀光客套裝提升客單價" } }
-            ]
-        },
-        {
-            title: "🌍 供應鏈危機",
-            desc: "全球物料調漲，你必須做出決定以維持營運。",
-            options: [
-                { text: "吸收成本 (成本+8)", impact: { cAdd: 8, log: "吸收物料漲幅" } },
-                { text: "減量供應 (客流量 -15%)", impact: { dRate: -0.15, log: "減量導致客流下滑" } }
-            ]
-        }
-    ];
+		{
+			title: "⚖️ 法定工資調漲",
+			desc: "政府宣布調高基本時薪，這將影響近期的經營成本（持續 5 天）。",
+			options: [
+				{ 
+					text: "精簡人力 (人事+400, 客流-10%)", 
+					impact: { personnelAdd: 400, dRate: -0.10, log: "短期：精簡人力導致服務品質下降", duration: 5 } 
+				},
+				{ 
+					text: "全面調薪 (人事+800, 售價+10%)", 
+					impact: { pRate: 0.10, personnelAdd: 800, log: "短期：調薪提升士氣與產品價值", duration: 5 }
+				}
+			]
+		},
+		{
+			title: "🌀 強力颱風侵襲",
+			desc: "氣象局發布陸上警報，影響預計僅限今日。",
+			options: [
+				{ 
+					text: "防颱加固 (開銷+1000, 客流-5%)", 
+					impact: { eAdd: 1000, dRate: -0.05, log: "短期：加固設施支出", duration: 1 } 
+				},
+				{ 
+					text: "停業一天 (當天零客流, 成本-20%)", 
+					impact: { dRate: -1.0, cRate: -0.20, log: "短期：停業避災", duration: 1 } 
+				}
+			]
+		},
+		{
+			title: "✈️ 國際旅遊節",
+			desc: "大量國外旅客湧入，這是一次性的觀光熱潮（持續 1 天）。",
+			options: [
+				{ 
+					text: "外籍友善 (人事+800, 客流+40%)", 
+					impact: { dRate: 0.40, personnelAdd: 800, log: "短期：增聘臨時翻譯人員", duration: 1 }
+				},
+				{ 
+					text: "推出套裝 (售價+15%, 客流+10%)", 
+					impact: { pRate: 0.15, dRate: 0.10, log: "短期：觀光限定套裝", duration: 1 } 
+				}
+			]
+		},
+		{
+			title: "🌍 供應鏈危機",
+			desc: "全球物料短缺，預計會造成短期的成本波動（持續 2 天）。",
+			options: [
+				{ 
+					text: "吸收成本 (成本+8)", 
+					impact: { cAdd: 8, log: "短期：公司吸收物料漲幅", duration: 2 } 
+				},
+				{ 
+					text: "調整配方 (客流-15%)", 
+					impact: { dRate: -0.15, log: "短期：配方更換導致客流流失", duration: 2 } 
+				}
+			]
+		},
+		{
+			title: "🚧 門口修路",
+			desc: "店門口進行地下管線施工，預計持續 3 天，進出不便。",
+			options: [
+				{ 
+					text: "忍受不便 (客流-40%)", 
+					impact: { dRate: -0.40, log: "短期：施工阻擋了客流", duration: 3 } 
+				},
+				{
+					text: "補貼吸引 (開銷+2000, 客流-10%)",
+					impact: { eAdd: 2000, dRate: -0.10, log: "短期：投入行銷經費補貼", duration: 3 }
+				}
+			]
+		}
+	];
+	
     let state = {
         shop: null, money: 50000, day: 1, 
         activeBuffs: [], historyEvents: [],
@@ -302,58 +320,81 @@
     }
 
 	function calculateCurrentStats() {
-        let p = state.shop.price, c = state.shop.cost;
-        let e = (state.rent + state.personnel);
-        
-        let totalPRate = 1, totalCRate = 1, totalERate = 1;
-        let totalDRate = 0, totalDAdd = 0, totalEAdd = 0;
-
-        state.activeBuffs.concat(state.historyEvents).forEach(item => {
-            // 處理百分比變動 (累加率)
-            if(item.pRate) totalPRate += item.pRate;
-            if(item.cRate) totalCRate += item.cRate;
-            if(item.eRate) totalERate += item.eRate;
-            if(item.dRate) totalDRate += item.dRate;
-            
-            // 處理固定數值變動
-            if(item.pAdd) p += item.pAdd;
-            if(item.cAdd) c += item.cAdd;
-            if(item.eAdd) totalEAdd += item.eAdd;
-            if(item.dAdd) totalDAdd += item.dAdd;
-        });
-
-        return { 
-            price: Math.max(1, Math.floor(p * totalPRate)), 
-            cost: Math.max(1, Math.floor(c * totalCRate)), 
-            expense: Math.max(0, Math.floor(e * totalERate) + totalEAdd), 
-            dRate: totalDRate, 
-            dAdd: totalDAdd 
-        };
-    }
-
-	function updateUI() {
-		const stats = calculateCurrentStats();
-		document.getElementById('ui-money').textContent = Math.floor(state.money);
-		document.getElementById('ui-day').textContent = state.day;
-		document.getElementById('ui-price').textContent = stats.price;
-		document.getElementById('ui-cost').textContent = stats.cost;
-		document.getElementById('ui-expense').textContent = Math.floor(stats.expense);
+		let p = state.shop.price, c = state.shop.cost;
+		let baseE = (state.rent + state.personnel);
 		
-		const totalExp = state.rent + state.personnel;
-		document.getElementById('ui-expense-hint').textContent = `💡 固定成本：店租 ${state.rent.toLocaleString()}元 + 人事 2,400元 = ${totalExp.toLocaleString()}元/天`;
-		
-		// 修改此處：根據當前店型的 demandMin/Max 計算
-		const minDemand = Math.max(0, Math.floor(state.shop.demandMin * (1 + stats.dRate)) + stats.dAdd);
-		const maxDemand = Math.max(0, Math.floor(state.shop.demandMax * (1 + stats.dRate)) + stats.dAdd);
-		document.getElementById('ui-demand-range').textContent = `${minDemand} ~ ${maxDemand}`;
+		let totalPRate = 1, totalCRate = 1, totalERate = 1;
+		let totalDRate = 0, totalDAdd = 0, totalEAdd = 0;
+		let tempPersonnelAdd = 0; // 用於處理事件增加的人事費
+
+		state.activeBuffs.concat(state.historyEvents).forEach(item => {
+			if(item.pRate) totalPRate += item.pRate;
+			if(item.cRate) totalCRate += item.cRate;
+			if(item.eRate) totalERate += item.eRate;
+			if(item.dRate) totalDRate += item.dRate;
+			
+			if(item.pAdd) p += item.pAdd;
+			if(item.cAdd) c += item.cAdd;
+			if(item.eAdd) totalEAdd += item.eAdd;
+			if(item.dAdd) totalDAdd += item.dAdd;
+
+			// 如果是事件帶來的暫時性支出
+			if(item.personnelAdd) tempPersonnelAdd += item.personnelAdd;
+			if(item.rentAdd) totalEAdd += item.rentAdd;
+		});
+
+		return { 
+			price: Math.max(1, Math.floor(p * totalPRate)), 
+			cost: Math.max(1, Math.floor(c * totalCRate)), 
+			expense: Math.max(0, Math.floor((baseE + tempPersonnelAdd) * totalERate) + totalEAdd), 
+			dRate: totalDRate, 
+			dAdd: totalDAdd 
+		};
 	}
 
+	function updateUI() {
+			const stats = calculateCurrentStats();
+			document.getElementById('ui-money').textContent = Math.floor(state.money);
+			document.getElementById('ui-day').textContent = state.day;
+			document.getElementById('ui-price').textContent = stats.price;
+			document.getElementById('ui-cost').textContent = stats.cost;
+			document.getElementById('ui-expense').textContent = Math.floor(stats.expense);
+			
+			// 這裡同步更新提示文字，確保店租與人事費是 state 中的最新數值
+			const currentTotal = state.rent + state.personnel;
+			document.getElementById('ui-expense-hint').textContent = 
+				`💡 固定成本：店租 ${state.rent.toLocaleString()}元 + 人事 ${state.personnel.toLocaleString()}元 = ${currentTotal.toLocaleString()}元/天`;
+			
+			const minDemand = Math.max(0, Math.floor(state.shop.demandMin * (1 + stats.dRate)) + stats.dAdd);
+			const maxDemand = Math.max(0, Math.floor(state.shop.demandMax * (1 + stats.dRate)) + stats.dAdd);
+			document.getElementById('ui-demand-range').textContent = `${minDemand} ~ ${maxDemand}`;
+			const buffDiv = document.getElementById('history-buffs-inline');
+			const eventDiv = document.getElementById('history-events-inline');
+			
+			if (buffDiv) {
+				buffDiv.innerHTML = state.activeBuffs.map(b => 
+					`<span class="status-tag" style="margin:2px; font-size:11px;">${b.name}</span>`
+				).join('') || "無";
+			}
+			
+			if (eventDiv) {
+				eventDiv.innerHTML = state.historyEvents.map(e => {
+					// 如果有 duration 就顯示剩餘天數，否則顯示永久
+					const countdown = e.duration !== undefined ? ` (剩餘 ${e.duration+1} 天)` : " (永久)";
+					return `<div style="font-size:12px; color:#64748b; border-bottom:1px solid #eee; padding:2px 0;">
+						• ${e.log} <b style="color:var(--danger)">${countdown}</b>
+					</div>`;
+				}).join('') || "無";
+			}
+	}
+	
 	async function startDay() {
 		document.getElementById('btn-start').disabled = true;
 		state.dailyRev = 0; state.dailySold = 0;
+		
+		// 核心邏輯：此時 calculateCurrentStats 會包含剛剛選取的 BigEvent 效果
 		const stats = calculateCurrentStats();
 		
-		// 修改此處：從該店型的最小值到最大值之間取隨機數
 		const range = state.shop.demandMax - state.shop.demandMin + 1;
 		const baseDemand = Math.floor(Math.random() * range) + state.shop.demandMin; 
 		
@@ -369,7 +410,7 @@
         return new Promise(resolve => {
             const canvas = document.getElementById('game-canvas');
             let spawned = 0;
-            const duration = 10000;
+            const duration = 100;
             const startTime = Date.now();
 
             function spawnCustomer() {
@@ -453,12 +494,17 @@
                 <div class="buff-cost-label">$${b.buy.toLocaleString()}</div>
             `;
             btn.onclick = () => {
-                if(state.money < b.buy) return alert("資金不足");
-                state.money -= b.buy;
-                state.activeBuffs.push(b);
-                updateUI();
-                checkEventAfterSettle();
-            };
+				if(state.money < b.buy) return alert("資金不足");
+				state.money -= b.buy;
+				
+				// 如果投資項目有人事或店租增加，直接永久加進 state
+				if(b.personnelAdd) state.personnel += b.personnelAdd;
+				if(b.rentAdd) state.rent += b.rentAdd;
+				
+				state.activeBuffs.push(b);
+				updateUI(); // 這會觸發更新「固定開銷」下方那段文字
+				checkEventAfterSettle();
+			};
             optBox.appendChild(btn);
         });
         modal.style.display = 'flex';
@@ -470,42 +516,59 @@
     }
 
     function triggerBigEvent() {
-        const ev = BIG_EVENTS[Math.floor(Math.random() * BIG_EVENTS.length)];
-        document.getElementById('event-title').textContent = `🔥 第 ${state.day} 天重大決策`;
-        document.getElementById('event-desc').textContent = ev.desc;
-        const optBox = document.getElementById('event-options');
-        optBox.innerHTML = '';
-        ev.options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'btn-main';
-            btn.textContent = opt.text;
-            btn.onclick = () => {
-                // 如果選項有 apply 函數，則執行它來修改 state 的基礎數值
-                if (opt.apply) {
-                    opt.apply(state);
-                }
-                
-                // 紀錄影響到歷史清單
-                state.historyEvents.push(opt.impact);
-                log(`[事件] ${opt.impact.log}`);
-                
-                document.getElementById('event-modal').style.display = 'none';
-                
-                // 關鍵：更新 UI，這會觸發 updateUI() 並重新計算固定開銷的文字
-                updateUI(); 
-                nextDay();
-            };
-            optBox.appendChild(btn);
-        });
-        document.getElementById('event-modal').style.display = 'flex';
-    }
+		const ev = BIG_EVENTS[Math.floor(Math.random() * BIG_EVENTS.length)];
+		document.getElementById('event-title').textContent = `🔥 第 ${state.day} 天 ${ev.title}`;
+		document.getElementById('event-desc').textContent = ev.desc;
+		const optBox = document.getElementById('event-options');
+		optBox.innerHTML = '';
+		ev.options.forEach(opt => {
+			const btn = document.createElement('button');
+			btn.className = 'btn-main';
+			btn.textContent = opt.text;
+			btn.onclick = () => {
+				// 使用物件展開運算子 {...} 確保 duration 是這一次事件獨立擁有的
+				const newImpact = { ...opt.impact };
+				
+				// 如果是像你說的「5日得到3天事件」，這行 log 可以幫助除錯
+				log(`[事件] ${newImpact.log} (持續 ${newImpact.duration} 天，預計 ${state.day + newImpact.duration+1} 日恢復)`);
+				
+				state.historyEvents.push(newImpact);
+				document.getElementById('event-modal').style.display = 'none';
+				updateUI(); 
+				nextDay();
+			};
+			optBox.appendChild(btn);
+		});
+		document.getElementById('event-modal').style.display = 'flex';
+	}
 
-    function nextDay() {
-        state.day++;
-        updateUI();
-        document.getElementById('btn-start').disabled = false;
-        if(state.day > 30) alert("30天經營結束！");
-    }
+	function nextDay() {
+		// 1. 處理事件剩餘天數
+		state.historyEvents.forEach(event => {
+			if (event.duration !== undefined) {
+				event.duration--; // 天數減 1
+			}
+		});
+
+		// 2. 自動過濾：只保留 duration 還大於 0 的事件
+		// 當 duration 變為 0，這個事件就會從陣列消失，calculateCurrentStats() 就不會再計算它的加成
+		const originalCount = state.historyEvents.length;
+		state.historyEvents = state.historyEvents.filter(event => 
+			event.duration === undefined || event.duration > -1
+		);
+
+		// 3. 如果有事件消失了，紀錄一條 log 提醒玩家
+		if (state.historyEvents.length < originalCount) {
+			log(`<span style="color:var(--success)">✨ 部分暫時性事件影響已結束，經營狀況回復原狀。</span>`);
+		}
+
+		// 4. 原有的天數增加與 UI 更新
+		state.day++;
+		updateUI(); 
+		document.getElementById('btn-start').disabled = false;
+
+		if(state.day > 30) alert("30天經營結束！");
+	}
 
     function showHistory() {
         const buffDiv = document.getElementById('history-buffs');

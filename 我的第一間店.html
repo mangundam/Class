@@ -190,14 +190,72 @@
 		hobby: { name: "玩具店", icon: "🧱", price: 900, cost: 500, demandMin: 8, demandMax: 15, expense: 2400 }
 	};
 
-    const BUFF_POOL = [
+	const BUFF_POOL = [
         { name: "🚀 網路廣告", desc: "客流 +30%", buy: 2500, dRate: 0.30 },
-        { name: "🧊 節能冷氣", desc: "開銷 -800", buy: 2000, eAdd: -800 },
-        { name: "🤖 自動結帳", desc: "成本 -5", buy: 3500, cAdd: -5 },
-        { name: "💎 尊榮會員", desc: "客流+15%, 售價+10", buy: 4000, dRate: 0.15, pAdd: 10 }
+        { name: "🧊 節能冷氣", desc: "每日開銷 -15%", buy: 2000, eRate: -0.15 },
+        { name: "🤖 自動結帳", desc: "單位成本 -10%", buy: 3500, cRate: -0.10 },
+        { name: "💎 尊榮會員", desc: "客流 +15%, 售價 +10%", buy: 4000, dRate: 0.15, pRate: 0.10 },
+        { name: "⏰ 延長工時", desc: "客流 +25%, 開銷 +800", buy: 1500, dRate: 0.25, eAdd: 800 },
+        { name: "🎫 優惠禮券", desc: "客流 +40%, 售價 -15%", buy: 1200, dRate: 0.40, pRate: -0.15 },
+        { name: "🧹 門面裝修", desc: "客流 +10%, 售價 +5%", buy: 5000, dRate: 0.10, pRate: 0.05 },
+        { name: "📦 批發採購", desc: "單位成本 -20%, 客流 -5%", buy: 3000, cRate: -0.20, dRate: -0.05 },
+        { name: "👨‍🍳 專業培訓", desc: "售價 +15%, 每日開銷 +500", buy: 4500, pRate: 0.15, eAdd: 500 }
     ];
 
-    const BIG_EVENTS = [
+	const BIG_EVENTS = [
+        {
+            title: "⚖️ 法定工資調漲",
+            desc: "政府宣布調高基本時薪，營運成本面臨壓力。",
+            options: [
+                { 
+                    text: "精簡人力 (人事+400, 客流-10%)", 
+                    impact: { dRate: -0.10, log: "精簡人力導致服務變慢" },
+                    apply(s) { s.personnel += 400; } // 直接修改基礎人事費
+                },
+                { 
+                    text: "全面調薪 (人事+800, 售價+10%)", 
+                    impact: { pRate: 0.10, log: "調薪提升士氣與品質" },
+                    apply(s) { s.personnel += 800; }
+                }
+            ]
+        },
+        {
+            title: "🌀 強力颱風侵襲",
+            desc: "氣象局發布陸上警報，全台進入防災狀態。",
+            options: [
+                { 
+                    text: "防颱加固 (開銷+2000, 客流-5%)", 
+                    impact: { eAdd: 2000, dRate: -0.05, log: "加固設施減少災害損失" } 
+                },
+                { 
+                    text: "停業一天 (當天零客流, 成本-20%)", 
+                    impact: { dRate: -1.0, cRate: -0.20, log: "停業防颱避免重大災損" } 
+                }
+            ]
+        },
+        {
+            title: "⛰️ 強烈地震發生",
+            desc: "區域發生強震，店面部分設施受損導致地租補貼變動。",
+            options: [
+                { 
+                    text: "立即修繕 (店租+500)", 
+                    impact: { log: "支付修繕導致租金結構改變" },
+                    apply(s) { s.rent += 500; } // 直接修改基礎店租
+                },
+                { 
+                    text: "帶傷營運 (售價-10%, 客流-20%)", 
+                    impact: { pRate: -0.10, dRate: -0.20, log: "設施受損影響顧客觀感" } 
+                }
+            ]
+        },
+        {
+            title: "✈️ 國際旅遊節",
+            desc: "政府推廣觀光，大量國外旅客湧入本地。",
+            options: [
+                { text: "外語友善 (開銷+800, 客流+40%)", impact: { eAdd: 800, dRate: 0.40, log: "吸引大量外國觀光客" } },
+                { text: "推出套裝 (售價+15%, 客流+10%)", impact: { pRate: 0.15, dRate: 0.10, log: "觀光客套裝提升客單價" } }
+            ]
+        },
         {
             title: "🌍 供應鏈危機",
             desc: "全球物料調漲，你必須做出決定以維持營運。",
@@ -205,17 +263,8 @@
                 { text: "吸收成本 (成本+8)", impact: { cAdd: 8, log: "吸收物料漲幅" } },
                 { text: "減量供應 (客流量 -15%)", impact: { dRate: -0.15, log: "減量導致客流下滑" } }
             ]
-        },
-        {
-            title: "🏪 區域發展計劃",
-            desc: "附近建設捷運站，帶動地價。",
-            options: [
-                { text: "配合開發 (開銷+1500, 客流+20%)", impact: { eAdd: 1500, dRate: 0.20, log: "地租漲換穩定人流" } },
-                { text: "維持現狀 (客流量 -5%)", impact: { dRate: -0.05, log: "未開發導致邊緣化" } }
-            ]
         }
     ];
-
     let state = {
         shop: null, money: 50000, day: 1, 
         activeBuffs: [], historyEvents: [],
@@ -252,18 +301,34 @@
         updateUI();
     }
 
-    function calculateCurrentStats() {
+	function calculateCurrentStats() {
         let p = state.shop.price, c = state.shop.cost;
-        let e = (state.rent + state.personnel) * state.expenseMod;
-        let totalDRate = 0, totalDAdd = 0;
+        let e = (state.rent + state.personnel);
+        
+        let totalPRate = 1, totalCRate = 1, totalERate = 1;
+        let totalDRate = 0, totalDAdd = 0, totalEAdd = 0;
+
         state.activeBuffs.concat(state.historyEvents).forEach(item => {
+            // 處理百分比變動 (累加率)
+            if(item.pRate) totalPRate += item.pRate;
+            if(item.cRate) totalCRate += item.cRate;
+            if(item.eRate) totalERate += item.eRate;
+            if(item.dRate) totalDRate += item.dRate;
+            
+            // 處理固定數值變動
             if(item.pAdd) p += item.pAdd;
             if(item.cAdd) c += item.cAdd;
-            if(item.eAdd) e += item.eAdd;
+            if(item.eAdd) totalEAdd += item.eAdd;
             if(item.dAdd) totalDAdd += item.dAdd;
-            if(item.dRate) totalDRate += item.dRate;
         });
-        return { price: p, cost: Math.max(1, c), expense: Math.max(0, e), dRate: totalDRate, dAdd: totalDAdd };
+
+        return { 
+            price: Math.max(1, Math.floor(p * totalPRate)), 
+            cost: Math.max(1, Math.floor(c * totalCRate)), 
+            expense: Math.max(0, Math.floor(e * totalERate) + totalEAdd), 
+            dRate: totalDRate, 
+            dAdd: totalDAdd 
+        };
     }
 
 	function updateUI() {
@@ -415,9 +480,19 @@
             btn.className = 'btn-main';
             btn.textContent = opt.text;
             btn.onclick = () => {
+                // 如果選項有 apply 函數，則執行它來修改 state 的基礎數值
+                if (opt.apply) {
+                    opt.apply(state);
+                }
+                
+                // 紀錄影響到歷史清單
                 state.historyEvents.push(opt.impact);
                 log(`[事件] ${opt.impact.log}`);
+                
                 document.getElementById('event-modal').style.display = 'none';
+                
+                // 關鍵：更新 UI，這會觸發 updateUI() 並重新計算固定開銷的文字
+                updateUI(); 
                 nextDay();
             };
             optBox.appendChild(btn);

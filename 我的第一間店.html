@@ -229,14 +229,14 @@
 	};
 
 const BUFF_POOL = [
-    { name: "🚀 網路廣告", desc: "客流 +20%", buy: 4000, dRate: 0.20 },
+    { name: "🚀 網路廣告", desc: "客流 +10%", buy: 4000, dRate: 0.10 },
     { name: "🤖 自動結帳", desc: "單位成本 -10%", buy: 3500, cRate: -0.10 },
-    { name: "💎 尊榮會員", desc: "客流 +10%, 售價 +10%", buy: 4000, dRate: 0.1, pRate: 0.10 },
-    { name: "⏰ 延長工時", desc: "客流 +25%, 人事 +20%", buy: 1500, dRate: 0.25, personnelRate: 0.2 },
-    { name: "🎫 優惠禮券", desc: "客流 +30%, 售價 -15%", buy: 2500, dRate: 0.30, pRate: -0.15 },
+    { name: "💎 尊榮會員", desc: "客流 +5%, 售價 +10%", buy: 4000, dRate: 0.05, pRate: 0.10 },
+    { name: "⏰ 延長工時", desc: "客流 +15%, 人事 +30%", buy: 1500, dRate: 0.15, personnelRate: 0.3 },
+    { name: "🎫 優惠禮券", desc: "客流 +15%, 售價 -15%", buy: 2500, dRate: 0.15, pRate: -0.15 },
     { name: "🧹 門面裝修", desc: "客流 +10%, 售價 +5%", buy: 5000, dRate: 0.10, pRate: 0.05 },
-    { name: "📦 批發採購", desc: "單位成本 -20%, 客流 -5%", buy: 2000, cRate: -0.20, dRate: -0.05 },
-    { name: "👨‍🍳 專業培訓", desc: "售價 +15%, 人事 +10%", buy: 4000, pRate: 0.15, personnelRate: 0.1 }
+    { name: "📦 批發採購", desc: "單位成本 -20%, 客流 -10%", buy: 2000, cRate: -0.20, dRate: -0.1 },
+    { name: "👨‍🍳 專業培訓", desc: "售價 +15%, 人事 +20%", buy: 4000, pRate: 0.15, personnelRate: 0.2 }
 ];
 
 //dRate=客流, cRate=成本, pRate=售價, personnelRate=人事
@@ -260,8 +260,8 @@ const BUFF_POOL = [
 			desc: "店門口的捷運站正式完工啟用！這將帶來穩定的人潮，但地段租金也隨之暴漲。",
 			options: [
 				{ 
-					text: "原地升級 (客流+60%, 租金+2000)", 
-					impact: { dRate: 0.60, rentAdd: 2000, log: "長期：捷運站帶來龐大客流，但租金成本大幅提升"} 
+					text: "原地升級 (客流+30%, 租金+2000)", 
+					impact: { dRate: 0.30, rentAdd: 2000, log: "長期：捷運站帶來龐大客流，但租金成本大幅提升"} 
 				},
 				{ 
 					text: "搬遷避險 (客流-10%, 租金-200)", 
@@ -292,22 +292,22 @@ const BUFF_POOL = [
 					impact: { dRate: 0.80, personnelRate: 0.4, log: "短期：增聘臨時翻譯人員", duration: 3 }
 				},
 				{ 
-					text: "推出套裝 (售價+15%, 客流+10%)", 
+					text: "推出套裝 (售價+15%, 客流+20%)", 
 					impact: { pRate: 0.15, dRate: 0.10, log: "短期：觀光限定套裝", duration: 3 } 
 				}
 			]
 		},
 		{
 			title: "🌍 供應鏈危機",
-			desc: "全球物料短缺，預計會造成短期的成本波動（持續 5 天）。",
+			desc: "全球物料短缺，預計會造成短期的成本波動（持續 7 天）。",
 			options: [
 				{ 
 					text: "吸收成本 (成本+8%)", 
-					impact: { cRate: 0.08, log: "短期：公司吸收物料漲幅", duration: 5 } 
+					impact: { cRate: 0.08, log: "短期：公司吸收物料漲幅", duration: 7 } 
 				},
 				{ 
 					text: "調整配方 (客流-20%)", 
-					impact: { dRate: -0.2, log: "短期：配方更換導致客流流失", duration: 5 } 
+					impact: { dRate: -0.2, log: "短期：配方更換導致客流流失", duration: 7 } 
 				}
 			]
 		},
@@ -367,37 +367,51 @@ const BUFF_POOL = [
 	function calculateCurrentStats() {
 		let p = state.shop.price, c = state.shop.cost;
 		let baseRent = state.rent;
-		let basePersonnel = 2400; // 基礎人事費
-		
-		let totalPRate = 1, totalCRate = 1;
-		let totalDRate = 0, totalDAdd = 0, totalEAdd = 0;
-		let totalPersonnelRate = 1; // 新增人事費率追蹤
+		let basePersonnel = 2400; 
 
-		state.activeBuffs.concat(state.historyEvents).forEach(item => {
-			if(item.pRate) totalPRate += item.pRate;
-			if(item.cRate) totalCRate += item.cRate;
-			if(item.dRate) totalDRate += item.dRate;
+		// 初始化乘數 (Multiplier)
+		let pMul = 1.0, cMul = 1.0, dMul = 1.0, persMul = 1.0;
+		let rentAdd = 0, dAdd = 0; // 數值型加減保持不變
+
+		// 第一階段：計算「一般策略 (Buffs)」的累乘
+		state.activeBuffs.forEach(item => {
+			if(item.pRate) pMul *= (1 + item.pRate);
+			if(item.cRate) cMul *= (1 + item.cRate);
+			if(item.dRate) dMul *= (1 + item.dRate);
+			if(item.personnelRate) persMul *= (1 + item.personnelRate);
+			
+			// 處理固定值加減
 			if(item.pAdd) p += item.pAdd;
 			if(item.cAdd) c += item.cAdd;
-			if(item.eAdd) totalEAdd += item.eAdd;
-			if(item.dAdd) totalDAdd += item.dAdd;
-			if(item.rentAdd) totalEAdd += item.rentAdd;
-			
-			// 核心修正：正確抓取人事費率變動
-			if(item.personnelRate) totalPersonnelRate += item.personnelRate;
+			if(item.dAdd) dAdd += item.dAdd;
 		});
 
-		const finalPersonnel = Math.max(0, Math.floor(basePersonnel * totalPersonnelRate));
-		const finalRent = Math.max(0, baseRent + totalEAdd);
+		// 第二階段：大事件最後計算 (累積在 buff 之後，造成更嚴重的擴張或萎縮)
+		state.historyEvents.forEach(item => {
+			if(item.pRate) pMul *= (1 + item.pRate);
+			if(item.cRate) cMul *= (1 + item.cRate);
+			if(item.dRate) dMul *= (1 + item.dRate);
+			if(item.personnelRate) persMul *= (1 + item.personnelRate);
+			
+			// 大事件的固定成本通常很有壓力，放在最後加
+			if(item.eAdd) rentAdd += item.eAdd;
+			if(item.rentAdd) rentAdd += item.rentAdd;
+		});
+
+		// 最終數值計算
+		const finalPrice = Math.max(1, Math.floor(p * pMul));
+		const finalCost = Math.max(1, Math.floor(c * cMul));
+		const finalPersonnel = Math.max(0, Math.floor(basePersonnel * persMul));
+		const finalRent = Math.max(0, baseRent + rentAdd);
 
 		return { 
-			price: Math.max(1, Math.floor(p * totalPRate)), 
-			cost: Math.max(1, Math.floor(c * totalCRate)), 
+			price: finalPrice, 
+			cost: finalCost, 
 			expense: finalPersonnel + finalRent, 
 			Statrent: finalRent,
-			StatPersonnel: finalPersonnel, // 傳給 UI 用
-			dRate: totalDRate, 
-			dAdd: totalDAdd 
+			StatPersonnel: finalPersonnel,
+			dRate: dMul - 1, // 轉回 UI 使用的率值
+			dAdd: dAdd
 		};
 	}
 
@@ -415,6 +429,7 @@ const BUFF_POOL = [
 			const minDemand = Math.max(0, Math.floor(state.shop.demandMin * (1 + stats.dRate)) + stats.dAdd);
 			const maxDemand = Math.max(0, Math.floor(state.shop.demandMax * (1 + stats.dRate)) + stats.dAdd);
 			document.getElementById('ui-demand-range').textContent = `${minDemand} ~ ${maxDemand}`;
+						
 			const buffDiv = document.getElementById('history-buffs-inline');
 			const eventDiv = document.getElementById('history-events-inline');
 			
@@ -540,10 +555,6 @@ const BUFF_POOL = [
 				btn.onclick = () => {
 					if(state.money < b.buy) return alert("資金不足");
 					state.money -= b.buy;
-					
-					if(b.personnelRate) state.personnel *=  1 + b.personnelRate;
-					//if(b.personnelRate < 0) state.personnel = 0;
-					if(b.rentAdd) state.rent += b.rentAdd;
 					
 					state.activeBuffs.push(b);
 					updateUI();

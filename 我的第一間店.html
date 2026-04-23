@@ -118,6 +118,29 @@
 			max-height: auto; 
 			overflow-y: visible;
 		}
+		.insufficient-funds-toast {
+			position: fixed;
+			top: 40%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: rgba(239, 68, 68, 0.95); /* 使用 var(--danger) 的顏色 */
+			color: white;
+			padding: 20px 40px;
+			border-radius: 20px;
+			font-size: 32px;
+			font-weight: 900;
+			z-index: 2000;
+			box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+			pointer-events: none; /* 防止遮擋點擊 */
+			animation: fadeOutUp 1.5s ease-out forwards;
+		}
+
+		@keyframes fadeOutUp {
+			0% { opacity: 0; transform: translate(-50%, -20%); }
+			20% { opacity: 1; transform: translate(-50%, -50%); }
+			70% { opacity: 1; }
+			100% { opacity: 0; transform: translate(-50%, -80%); }
+		}
     </style>
 </head>
 <body>
@@ -161,7 +184,7 @@
 			<h3 style="margin-top:0">📜 經營筆記</h3>
 			<div class="strategy-history-area">
 				<div id="active-buffs-list" style="font-size: 14px; margin-bottom: 10px;">
-					<b style="color:var(--primary)">✅ 當前策略：</b>
+					<b style="color:var(--primary)">🎯 當前策略：</b>
 					<div id="history-buffs-inline" style="display: flex; flex-wrap: wrap; gap: 4px; margin-top:5px;">暫無</div>
 				</div>
 				<div id="event-impact-list" style="font-size: 14px;">
@@ -204,19 +227,6 @@
         <h2 id="event-title" style="color:var(--danger); font-size: 30px;">🔥 重大經營決策</h2>
         <p id="event-desc" style="font-size:17px; padding:20px; background:#fff1f2; border-radius:15px; line-height:1.5;"></p>
         <div id="event-options" class="type-grid" style="grid-template-columns: 1fr 1fr;"></div>
-    </div>
-</div>
-
-<div id="history-modal" class="modal">
-    <div class="modal-content">
-        <h2 style="font-size: 28px;">📜 經營筆記</h2>
-        <div style="text-align:left; line-height:1.6; font-size: 15px;">
-            <h4>✅ 當前投資策略：</h4>
-            <div id="history-buffs">暫無</div>
-            <h4 style="margin-top:15px;">⚠️ 歷史事件影響：</h4>
-            <div id="history-events">暫無</div>
-        </div>
-        <button class="btn-main" style="width: 40%; margin-top: 20px;" onclick="document.getElementById('history-modal').style.display='none'">關閉手札</button>
     </div>
 </div>
 
@@ -466,7 +476,7 @@ const BUFF_POOL = [
 		let totalCost = (state.dailySold * stats.cost) + stats.expense;
 		state.money -= totalCost; 
 		
-		showSettlement(state.dailySold, state.dailyRev, totalCost, state.dailyRev - totalCost);
+		showSettlement(state.dailySold, state.dailyRev, totalCost, state.dailyRev - totalCost, state.money);
 	}
 
     async function playBusinessAnimation(total, currentPrice) {
@@ -533,15 +543,16 @@ const BUFF_POOL = [
 		});
 	}
 
-    function showSettlement(count, rev, cost, profit) {
+    function showSettlement(count, rev, cost, profit,money) {
 		if(state.day >= 30){checkEventAfterSettle();}
 		else{
 			const modal = document.getElementById('settle-modal');
 			document.getElementById('settle-report').innerHTML = `
-				🛍️ 銷量：<b>${count}</b> 件 | 
-				收入：<span style="color:var(--success); font-weight:800;">+$${rev.toLocaleString()}</span><br>
-				支出：<span style="color:var(--danger); font-weight:800;">-$${Math.floor(cost).toLocaleString()}</span><br>
-				💎 純利：<b style="color:${profit>=0?'green':'red'}; font-size: 26px;">$${Math.floor(profit).toLocaleString()}</b>
+				📦 銷量：<b>${count}</b> 件 <br>
+				📥 收入：<span style="color:var(--success); font-weight:800;">+$${rev.toLocaleString()}</span><br>
+				📤 支出：<span style="color:var(--danger); font-weight:800;">-$${Math.floor(cost).toLocaleString()}</span><br>
+				✨ 純利：<b style="color:${profit>=0?'green':'red'}; font-size: 26px;">$${Math.floor(profit).toLocaleString()}</b><br>
+				💰 餘額：<b style="color:var(--success); font-size: 26px;">$${Math.floor(money).toLocaleString()}</b>
 			`;
 			log(`Day ${state.day}：銷量 ${count} | 營收 ${rev} | 淨利 ${Math.floor(profit)}`);
 			const optBox = document.getElementById('buff-options');
@@ -555,7 +566,10 @@ const BUFF_POOL = [
 					<div class="buff-cost-label">$${b.buy.toLocaleString()}</div>
 				`;
 				btn.onclick = () => {
-					if(state.money < b.buy) return alert("資金不足");
+					if(state.money < b.buy) {
+						showWarning("⚠️ 資金不足！");
+						return;
+					}
 					state.money -= b.buy;
 					
 					state.activeBuffs.push(b);
@@ -657,15 +671,25 @@ const BUFF_POOL = [
 		document.querySelectorAll('.btn-speed').forEach(btn => btn.classList.remove('active'));
 		document.getElementById(`speed-${speed}`).classList.add('active');
 	}
-
+	/*
     function showHistory() {
         const buffDiv = document.getElementById('history-buffs');
         const eventDiv = document.getElementById('history-events');
         buffDiv.innerHTML = state.activeBuffs.map(b => `<div class="status-tag">${b.name}: ${b.desc}</div>`).join('') || "目前無投資";
         eventDiv.innerHTML = state.historyEvents.map(e => `<div class="status-tag" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;">${e.log}</div>`).join('') || "目前無事件影響";
         document.getElementById('history-modal').style.display = 'flex';
-    }
-
+    }*/
+	
+	function showWarning(text) {
+		const toast = document.createElement('div');
+		toast.className = 'insufficient-funds-toast';
+		toast.textContent = text;
+		document.body.appendChild(toast);
+		
+		setTimeout(() => {
+			toast.remove();
+		}, 1500);
+	}
     function log(msg) {
         const l = document.getElementById('game-log');
         l.innerHTML = `[${state.day}日] ${msg}<br>` + l.innerHTML;

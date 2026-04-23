@@ -5,370 +5,142 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>名店大師</title>
     <style>
-        :root { --primary: #6366f1; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; }
-		body { font-family: "Noto Sans TC", sans-serif; background: #f0f2f5; margin: 0; padding: 10px; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
-		.container { width: 100%; max-width: 500px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; flex: 1; display: flex; flex-direction: column; }
+		/* --- 核心變數與基礎設定 --- */
+		:root { --primary: #6366f1; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; }
 		
-		/* 頂部數據重排 */
+		body { 
+			font-family: "Noto Sans TC", sans-serif; background: #f0f2f5; margin: 0; padding: 10px; 
+			overflow: hidden; height: 100vh; display: flex; flex-direction: column; 
+		}
+
+		.container { 
+			width: 100%; max-width: 500px; margin: 0 auto; background: #fff; padding: 15px; 
+			border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; 
+			flex: 1; display: flex; flex-direction: column; overflow: hidden; /* 合併自後續定義：防止內容溢出 */
+		}
+
+		/* --- 遊戲畫面區 (game-canvas) --- */
+		#game-canvas {
+			height: 180px; /* 取自下方縮減後的高度 */
+			background: linear-gradient(to bottom, #bae6fd 0%, #e0f2fe 100%); 
+			border-radius: 20px; position: relative; overflow: hidden; margin-bottom: 15px; 
+			border: 4px solid #f1f5f9; /* 取自下方縮減後的邊框 */
+		}
+
+		#game-canvas .customer { will-change: left; }
+
+		.road { 
+			position: absolute; bottom: 0; width: 100%; height: 40px; 
+			background: #94a3b8; border-top: 3px solid #64748b; z-index: 10; 
+		}
+
+		.customer { 
+			position: absolute; font-size: 35px; bottom: 10px; left: 110%; 
+			z-index: 20; transition: left linear; white-space: nowrap; 
+		}
+
+		.shop-building { position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); z-index: 100; }
+		.main-store-icon { font-size: 130px; line-height: 1; }
+
+		.sub-type-icon { 
+			position: absolute; top: 15px; right: -10px; font-size: 32px; background: white; 
+			border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; 
+			justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border: 3px solid var(--primary); 
+		}
+
+		/* --- 數據統計與按鈕 --- */
 		.header-stats { display: grid; grid-template-columns: 0.8fr 1.2fr 1fr; gap: 5px; margin-bottom: 10px; }
 		.stat-card { background: #f8fafc; padding: 8px 5px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: center; }
 		.stat-val { font-size: 16px; font-weight: 800; color: var(--primary); }
 		.stat-label { font-size: 11px; color: #64748b; margin-bottom: 2px; }
 		.stat-hint { font-size: 8px; color: #64748b; margin-top: 5px; display: block; line-height: 1.4; }
-
-        #game-canvas {
-			/* 高度縮減，適合手機螢幕不捲動 */
-			height: 180px; 
-			background: linear-gradient(to bottom, #bae6fd 0%, #e0f2fe 100%); 
-			border-radius: 20px; 
-			position: relative; 
-			overflow: hidden;
-			margin-bottom: 15px; 
-			border: 4px solid #f1f5f9; /* 邊框稍微縮減 */
-		}
-
-		.shop-building { 
-			position: absolute; 
-			bottom: -5px; /* 稍微下移一點點讓建築更貼地 */
-			left: 50%; 
-			transform: translateX(-50%); 
-			z-index: 100; 
-		}
-
-		.main-store-icon { 
-			/* 縮小主圖標，避免在手機上佔據過多垂直空間 */
-			font-size: 130px; 
-			line-height: 1; 
-		}
-
-		.sub-type-icon { 
-			position: absolute; 
-			/* 重新調整小圖標位置，避免超出螢幕 */
-			top: 15px; 
-			right: -10px; 
-			font-size: 32px; 
-			background: white; 
-			border-radius: 50%; 
-			width: 48px; 
-			height: 48px;
-			display: flex; 
-			align-items: center; 
-			justify-content: center;
-			box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
-			border: 3px solid var(--primary);
-		}
-
-		.coin-pop {
-			position: absolute; 
-			top: -20px; 
-			left: 50%; 
-			transform: translateX(-50%);
-			z-index: 150; 
-			font-weight: 800; 
-			/* 縮小金幣彈出的字體 */
-			font-size: 20px; 
-			color: #f59e0b;
-			display: flex; 
-			align-items: center; 
-			white-space: nowrap;
-			animation: popUp 1s ease-out forwards;
-		}
-        @keyframes popUp {
-            0% { opacity: 0; transform: translate(-50%, 0); }
-            30% { opacity: 1; }
-            100% { opacity: 0; transform: translate(-50%, -100px); }
-        }
-
-        .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+		#ui-money,#ui-shop-name { font-size:16px;}
+		.setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; flex: 0 0 auto; }
 		.card { border: 1px solid #e5e7eb; padding: 10px; border-radius: 12px; background: #fafbfc; }
 		.card h3 { font-size: 14px; margin: 0 0 5px 0; }
 		.card div { font-size: 13px !important; line-height: 1.4 !important; }
-		.strategy-history-area { max-height: 80px; overflow-y: auto; }
-        
-        /* Modal Content 縮小約 20% */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); z-index: 1000; justify-content: center; align-items: center; }
-		.modal-content { background: white; padding: 20px; border-radius: 20px; width: 85%; max-height: 85vh; overflow-y: auto; }        
-		
-		.type-grid, .diff-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-        
-        /* 選擇店型按鈕縮小 */
-		.btn-type, .btn-diff, .btn-buff-card { width: 100%; text-align: left; padding: 12px !important; border-radius: 12px !important; display: block !important; }
-		.btn-buff-card { display: flex !important; flex-direction: row !important; justify-content: space-between; align-items: center; }
-		.buff-name-label { font-size: 16px !important; }
-		.buff-desc-label { font-size: 12px !important; }
-		.buff-cost-label { font-size: 14px !important; }
 
-        /* 策略按鈕縮小 20% */
-        .btn-buff-card {
-            background: #fff;
-            border: 3px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 22px 15px;
-            cursor: pointer;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-        .btn-buff-card:hover {
-            border-color: var(--primary);
-            background: #f5f3ff;
-            transform: scale(1.03);
-            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
-        }
+		.btn-main { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; width: 100%; padding: 12px; border-radius: 12px; font-size: 18px; font-weight: bold; border: none; cursor: pointer; margin-bottom: 10px; }
+		.btn-info { background: #94a3b8; color: white; border-radius: 12px; padding: 12px; border: none; cursor: pointer; font-weight: bold; margin-bottom: 10px; width: 100%; font-size: 18px; }
 
-        .buff-name-label { font-size: 22px; font-weight: 900; color: #1f2937; }
-        .buff-desc-label { font-size: 16px; color: #4b5563; font-weight: 500; }
-        .buff-cost-label { 
-            font-size: 19px; 
-            font-weight: 800; 
-            color: var(--danger); 
-            background: #fee2e2;
-            padding: 4px 12px;
-            border-radius: 10px;
-        }
-		#settle-report { font-size: 16px !important; padding: 15px !important; }
-        /* 主按鈕縮小 */
-        .btn-main { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; width: 100%; padding: 12px; border-radius: 12px; font-size: 18px; font-weight: bold; border: none; cursor: pointer; margin-bottom: 10px; }
-        .btn-info { background: #94a3b8; color: white; border-radius: 12px; padding: 12px; border: none; cursor: pointer; font-weight: bold; margin-bottom: 10px; width: 100%; font-size: 18px; }
-        
-        .log { background: #0f172a; color: #cbd5e1; padding: 10px; border-radius: 10px; flex: 1; min-height: 60px; overflow-y: auto; font-family: monospace; font-size: 12px; border-left: 5px solid var(--primary); }
-        .status-tag { display: inline-block; background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 8px; margin: 4px; font-size: 14px; border: 1px solid #fecaca; }
 		.speed-controls { margin-top: 5px; display: flex; gap: 5px; justify-content: center; }
-		.btn-speed { 
-			background: #e2e8f0; border: none; padding: 2px 8px; border-radius: 6px; 
-			font-size: 12px; cursor: pointer; transition: 0.2s; font-weight: bold;
-		}
+		.btn-speed { background: #e2e8f0; border: none; padding: 2px 8px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: 0.2s; font-weight: bold; }
 		.btn-speed:hover { background: #cbd5e1; }
 		.btn-speed.active { background: var(--primary); color: white; }
-		.expanded-card {
-			max-height: none !important; 
-			height: auto !important;
+
+		/* --- 彈窗與結算 (保留最底部的優化設定) --- */
+		.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); z-index: 1000; justify-content: center; align-items: center; }
+		
+		/* 這裡合併了 .modal-content 與 #settle-modal .modal-content 的最終寬度 */
+		.modal-content { 
+			background: white; padding: 12px; border-radius: 20px; width: 75%; max-width: 320px; 
+			max-height: 85vh; overflow-y: auto; 
 		}
 
-		.hidden-area {
-			display: none !important;
+		.type-grid, .diff-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+		.btn-type, .btn-diff {font-size:14px;width: 100%; text-align: left; padding: 6px !important; border-radius: 12px !important; display: block !important; }
+
+		#settle-title { font-size: 20px !important; margin-bottom: 10px !important; }
+		#settle-report { 
+			font-size: 14px !important; padding: 10px !important; margin-bottom: 12px !important; 
+			background: #f1f5f9; border-radius: 15px; line-height: 1.4 !important;
+		}
+		#settle-report b, #settle-report span { font-size: 18px !important; }
+		#settle-modal h3 { font-size: 16px !important; margin-bottom: 10px !important; }
+		#settle-modal .btn-main { margin-top: 10px !important; padding: 10px !important; font-size: 15px !important; width: 100% !important; }
+		#settle-modal hr { display: none; }
+
+		/* 投資按鈕 (最終垂直排列版本) */
+		#buff-options { display: flex; flex-direction: column; align-items: center; width: 100%; }
+		.btn-buff-card {
+			display: flex !important; flex-direction: column !important; align-items: center; justify-content: center;
+			width: 90%; margin: 0 auto 8px; padding: 10px 15px !important; border: 2px solid #e5e7eb;
+			border-radius: 12px; background: #fff; cursor: pointer; box-sizing: border-box; transition: 0.3s;
+		}
+		.btn-buff-card:hover { border-color: var(--primary); background: #f5f3ff; transform: scale(1.03); }
+
+		.buff-name-label { font-size: 15px !important; font-weight: 800; color: #1f2937; margin-bottom: 2px; }
+		.buff-desc-label { font-size: 15px !important; color: #64748b; margin-bottom: 5px; }
+		.buff-cost-label { font-size: 12px !important; font-weight: 800; color: var(--danger); background: #fee2e2; padding: 2px 8px !important; border-radius: 6px; }
+
+		/* --- Log 與 其他區域 --- */
+		.log { 
+			background: #0f172a; color: #cbd5e1; padding: 10px; border-radius: 10px; 
+			height: 100px; overflow-y: auto !important; font-family: monospace; font-size: 12px; 
+			border-left: 5px solid var(--primary); margin-top: 10px; flex: none; 
+		}
+		#game-log.fully-visible { height: auto; max-height: auto; overflow-y: visible; }
+		
+		.strategy-history-area { max-height: 60px; overflow-y: auto; }
+		.status-tag { display: inline-block; background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 8px; margin: 4px; font-size: 14px; border: 1px solid #fecaca; }
+		.expanded-card { max-height: none !important; height: auto !important; }
+		.hidden-area { display: none !important; }
+
+		/* --- 動畫特效 --- */
+		.coin-pop {
+			position: absolute; top: -20px; left: 50%; transform: translateX(-50%); z-index: 150; 
+			font-weight: 800; font-size: 20px; color: #f59e0b; display: flex; align-items: center; 
+			white-space: nowrap; animation: popUp 1s ease-out forwards;
+		}
+		@keyframes popUp {
+			0% { opacity: 0; transform: translate(-50%, 0); }
+			30% { opacity: 1; }
+			100% { opacity: 0; transform: translate(-50%, -100px); }
 		}
 
-		#game-log.fully-visible {
-			height: auto;
-			max-height: auto; 
-			overflow-y: visible;
-		}
 		.insufficient-funds-toast {
-			position: fixed;
-			top: 40%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			background: rgba(239, 68, 68, 0.95); /* 使用 var(--danger) 的顏色 */
-			color: white;
-			padding: 20px 40px;
-			border-radius: 20px;
-			font-size: 32px;
-			font-weight: 900;
-			z-index: 2000;
-			box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-			pointer-events: none; /* 防止遮擋點擊 */
-			animation: fadeOutUp 1.5s ease-out forwards;
+			position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%);
+			background: rgba(239, 68, 68, 0.95); color: white; padding: 20px 40px;
+			border-radius: 20px; font-size: 32px; font-weight: 900; z-index: 2000;
+			box-shadow: 0 10px 30px rgba(0,0,0,0.3); pointer-events: none; animation: fadeOutUp 1.5s ease-out forwards;
 		}
-
 		@keyframes fadeOutUp {
 			0% { opacity: 0; transform: translate(-50%, -20%); }
 			20% { opacity: 1; transform: translate(-50%, -50%); }
 			70% { opacity: 1; }
 			100% { opacity: 0; transform: translate(-50%, -80%); }
 		}
-		/* 確保道路在底部 */
-		.road { 
-			position: absolute; 
-			bottom: 0; 
-			width: 100%; 
-			height: 40px; /* 配合手機版縮小的道路高度 */
-			background: #94a3b8; 
-			border-top: 3px solid #64748b; 
-			z-index: 10; 
-		}
-
-		/* 修正客人的初始位置與層級 */
-		.customer { 
-			position: absolute; 
-			font-size: 35px; /* 配合手機版縮小的人物 */
-			bottom: 10px; /* 讓客人的腳踩在道路中央 */
-			left: 110%; 
-			z-index: 20; 
-			transition: left linear; 
-			white-space: nowrap;
-		}
-
-		/* 強化路徑動畫的穩定性 */
-		#game-canvas .customer {
-			will-change: left;
-		}
-		
-		/* 每日結算彈窗優化 */
-		#settle-modal .modal-content {
-			padding: 15px; /* 縮減外框內距 */
-			width: 85%;
-			border-radius: 18px;
-		}
-
-		#settle-title {
-			font-size: 20px !important; /* 標題縮小 */
-			margin-bottom: 10px !important;
-		}
-
-		#settle-report {
-			font-size: 15px !important; /* 數據文字縮小 */
-			padding: 12px !important; /* 內部間距縮減 */
-			border-radius: 15px;
-			margin-bottom: 15px !important;
-			line-height: 1.4 !important;
-		}
-
-		#settle-report b, #settle-report span {
-			font-size: 18px !important; /* 強調數字稍微縮小 */
-		}
-
-		/* 投資決策區塊標題 */
-		#settle-modal h3 {
-			font-size: 16px !important;
-			margin-bottom: 10px !important;
-		}
-
-		/* 投資按鈕條列化後的文字微調 */
-		.btn-buff-card {
-			padding: 8px 12px !important; /* 讓按鈕高度變扁 */
-			gap: 5px !important;
-		}
-
-		.buff-name-label {
-			font-size: 14px !important; /* 投資名稱 */
-		}
-
-		.buff-desc-label {
-			font-size: 11px !important; /* 投資描述 */
-		}
-
-		.buff-cost-label {
-			font-size: 13px !important; /* 投資金額 */
-			padding: 2px 8px !important;
-		}
-
-		/* 跳過投資按鈕 */
-		#settle-modal .btn-main {
-			margin-top: 10px !important;
-			padding: 10px !important;
-			font-size: 15px !important;
-			width: 100% !important; /* 改為全寬更方便點擊 */
-		}
-
-		/* 移除結算中的 hr 線條節省空間 */
-		#settle-modal hr {
-			display: none;
-		}
-		/* 縮小結算彈窗的寬度與間距 */
-		#settle-modal .modal-content {
-			width: 75%; /* 從 85% 調窄到 75% */
-			max-width: 320px; /* 設定最大寬度上限 */
-			padding: 12px;
-			border-radius: 20px;
-		}
-
-		#settle-report {
-			font-size: 14px !important;
-			padding: 10px !important;
-			margin-bottom: 12px !important;
-			background: #f1f5f9; /* 稍微深一點點增加層次 */
-		}
-
-		/* 讓投資按鈕更窄更扁 */
-		.btn-buff-card {
-			padding: 6px 10px !important;
-			border-width: 2px !important; /* 邊框細一點 */
-			margin-bottom: 5px;
-		}
-
-		/* 確保 LOG 區域可以滾動 */
-		.log {
-			background: #0f172a;
-			color: #cbd5e1;
-			padding: 10px;
-			border-radius: 10px;
-			height: 100px; /* 給予固定高度 */
-			overflow-y: auto !important; /* 強制開啟滾動 */
-			font-family: monospace;
-			font-size: 12px;
-			border-left: 5px solid var(--primary);
-			margin-top: 10px;
-			flex: none; /* 取消彈性縮放，避免擠壓到上方 */
-		}
-
-		/* 為了讓 LOG 正常顯示且不捲動全身，微調 container */
-		.container {
-			height: 100vh;
-			display: flex;
-			flex-direction: column;
-			overflow: hidden; /* 防止身體捲動 */
-		}
-
-		/* 微調數據區塊高度，騰出空間給 LOG */
-		.setup-grid {
-			flex: 0 0 auto; /* 固定高度 */
-		}
-
-		.strategy-history-area {
-			max-height: 60px; /* 稍微再縮小一點點 */
-			overflow-y: auto;
-		}
-		/* 投資按鈕優化：寬度適中、上下排列 */
-		.btn-buff-card {
-			display: flex !important;
-			flex-direction: column !important; /* 改回垂直排列，文字才不會擠在一起 */
-			align-items: center;
-			justify-content: center;
-			width: 90%;          /* 限制寬度，不要貼齊邊緣 */
-			margin: 0 auto 8px;  /* 置中並增加下方間距 */
-			padding: 10px 15px !important;
-			border: 2px solid #e5e7eb;
-			border-radius: 12px;
-			background: #fff;
-			cursor: pointer;
-			box-sizing: border-box;
-		}
-
-		/* 投資項目文字縮小 */
-		.buff-name-label { 
-			font-size: 15px !important; 
-			font-weight: 800; 
-			color: #1f2937; 
-			margin-bottom: 2px;
-		}
-
-		.buff-desc-label { 
-			font-size: 11px !important; 
-			color: #64748b; 
-			margin-bottom: 5px;
-		}
-
-		.buff-cost-label { 
-			font-size: 12px !important; 
-			font-weight: 800; 
-			color: var(--danger); 
-			background: #fee2e2;
-			padding: 2px 8px !important;
-			border-radius: 6px;
-		}
-
-		/* 針對結算畫面的按鈕區域微調 */
-		#buff-options {
-			display: flex;
-			flex-direction: column; /* 強制條列 */
-			align-items: center;
-			width: 100%;
-		}
-    </style>
+	</style>
 </head>
 <body>
 <div class="container">
@@ -378,15 +150,16 @@
         <span class="stat-val" id="ui-day">1</span>
         <div class="speed-controls">
             <button class="btn-speed active" id="speed-1" onclick="setSpeed(1)">1x</button>
+			<button class="btn-speed" id="speed-2" onclick="setSpeed(2)">2x</button>
             <button class="btn-speed" id="speed-10" onclick="setSpeed(10)">10x</button>
 
         </div>
     </div>
     <div class="stat-card">
         <span class="stat-label">💰 現金</span>
-        <span class="stat-val" id="ui-money" style="font-size:14px">50000</span>
+        <span class="stat-val" id="ui-money">50000</span>
         <hr style="width:100%; border:0; border-top:1px solid #ddd; margin:4px 0">
-        <span id="ui-shop-name" style="font-size:12px; font-weight:bold; color:var(--success)">-</span>
+        <span id="ui-shop-name" style="font-weight:bold; color:var(--success)">-</span>
     </div>
     <div class="stat-card">
         <span class="stat-label">💸 開銷</span>

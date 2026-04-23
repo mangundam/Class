@@ -206,6 +206,68 @@
 		#game-canvas .customer {
 			will-change: left;
 		}
+		
+		/* 每日結算彈窗優化 */
+		#settle-modal .modal-content {
+			padding: 15px; /* 縮減外框內距 */
+			width: 85%;
+			border-radius: 18px;
+		}
+
+		#settle-title {
+			font-size: 20px !important; /* 標題縮小 */
+			margin-bottom: 10px !important;
+		}
+
+		#settle-report {
+			font-size: 15px !important; /* 數據文字縮小 */
+			padding: 12px !important; /* 內部間距縮減 */
+			border-radius: 15px;
+			margin-bottom: 15px !important;
+			line-height: 1.4 !important;
+		}
+
+		#settle-report b, #settle-report span {
+			font-size: 18px !important; /* 強調數字稍微縮小 */
+		}
+
+		/* 投資決策區塊標題 */
+		#settle-modal h3 {
+			font-size: 16px !important;
+			margin-bottom: 10px !important;
+		}
+
+		/* 投資按鈕條列化後的文字微調 */
+		.btn-buff-card {
+			padding: 8px 12px !important; /* 讓按鈕高度變扁 */
+			gap: 5px !important;
+		}
+
+		.buff-name-label {
+			font-size: 14px !important; /* 投資名稱 */
+		}
+
+		.buff-desc-label {
+			font-size: 11px !important; /* 投資描述 */
+		}
+
+		.buff-cost-label {
+			font-size: 13px !important; /* 投資金額 */
+			padding: 2px 8px !important;
+		}
+
+		/* 跳過投資按鈕 */
+		#settle-modal .btn-main {
+			margin-top: 10px !important;
+			padding: 10px !important;
+			font-size: 15px !important;
+			width: 100% !important; /* 改為全寬更方便點擊 */
+		}
+
+		/* 移除結算中的 hr 線條節省空間 */
+		#settle-modal hr {
+			display: none;
+		}
     </style>
 </head>
 <body>

@@ -6,95 +6,87 @@
     <title>名店大師</title>
     <style>
         :root { --primary: #6366f1; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; }
-        body { font-family: "Noto Sans TC", sans-serif; background: #f0f2f5; margin: 0; padding: 10px; }
-        .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
+        body { font-family: "Noto Sans TC", sans-serif; background: #f0f2f5; margin: 0; padding: 8px; overflow-x: hidden; }
+        .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         
-        /* 頂部數據：手機端改為 2x2 */
-        .header-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
-        .stat-card { background: #f8fafc; padding: 12px; border-radius: 18px; text-align: center; border: 1px solid #e2e8f0; }
-        .stat-val { font-size: 22px; font-weight: 800; color: var(--primary); display: block; }
-        .stat-hint { font-size: 11px; color: #64748b; margin-top: 5px; display: block; line-height: 1.4; }
+        /* 頂部三欄排版 */
+        .header-stats { display: grid; grid-template-columns: 0.8fr 1.2fr 1fr; gap: 6px; margin-bottom: 10px; }
+        .stat-card { background: #f8fafc; padding: 8px 4px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: center; }
+        .stat-val { font-size: 16px; font-weight: 800; color: var(--primary); display: block; }
+        .stat-hint { font-size: 9px; color: #64748b; transform: scale(0.85); line-height: 1.1; margin-top: 2px; }
 
-        /* 修復加速按鈕樣式 */
-        .speed-controls { margin-top: 5px; display: flex; gap: 5px; justify-content: center; }
+        .speed-controls { margin-top: 3px; display: flex; gap: 2px; justify-content: center; }
         .btn-speed { 
-            background: #e2e8f0; border: none; padding: 2px 8px; border-radius: 6px; 
-            font-size: 12px; cursor: pointer; transition: 0.2s; font-weight: bold;
+            background: #e2e8f0; border: none; padding: 1px 4px; border-radius: 4px; 
+            font-size: 10px; cursor: pointer; font-weight: bold;
         }
-        .btn-speed:hover { background: #cbd5e1; }
         .btn-speed.active { background: var(--primary); color: white; }
 
         #game-canvas {
-            height: 220px; background: linear-gradient(to bottom, #bae6fd 0%, #e0f2fe 100%); 
-            border-radius: 20px; position: relative; overflow: hidden;
-            margin-bottom: 15px; border: 6px solid #f1f5f9;
+            height: 160px; background: linear-gradient(to bottom, #bae6fd 0%, #e0f2fe 100%); 
+            border-radius: 15px; position: relative; overflow: hidden;
+            margin-bottom: 10px; border: 4px solid #f1f5f9;
         }
         .shop-building { position: absolute; bottom: 0px; left: 50%; transform: translateX(-50%); z-index: 100; }
-        .main-store-icon { font-size: 150px; line-height: 1; }
+        .main-store-icon { font-size: 100px; line-height: 1; }
         .sub-type-icon { 
-            position: absolute; top: 15px; right: -25px; font-size: 45px; 
-            background: white; border-radius: 50%; width: 60px; height: 60px;
+            position: absolute; top: 10px; right: -15px; font-size: 30px; 
+            background: white; border-radius: 50%; width: 40px; height: 40px;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.2); border: 4px solid var(--primary);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); border: 2px solid var(--primary);
         }
-        .road { position: absolute; bottom: 0; width: 100%; height: 60px; background: #94a3b8; border-top: 5px solid #64748b; z-index: 10; }
-        .customer { position: absolute; font-size: 45px; bottom: 5px; left: 110%; z-index: 20; transition: left linear; }
+        .road { position: absolute; bottom: 0; width: 100%; height: 40px; background: #94a3b8; border-top: 4px solid #64748b; z-index: 10; }
+        .customer { position: absolute; font-size: 35px; bottom: 5px; left: 110%; z-index: 20; transition: left linear; }
         
         .coin-pop {
-            position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
-            z-index: 150; font-weight: 800; font-size: 28px; color: #f59e0b;
-            display: flex; align-items: center; white-space: nowrap;
+            position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+            z-index: 150; font-weight: 800; font-size: 20px; color: #f59e0b;
             animation: popUp 1s ease-out forwards;
         }
         @keyframes popUp {
             0% { opacity: 0; transform: translate(-50%, 0); }
-            30% { opacity: 1; }
-            100% { opacity: 0; transform: translate(-50%, -100px); }
+            100% { opacity: 0; transform: translate(-50%, -60px); }
         }
 
-        .setup-grid { display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; }
-        .strategy-history-area { max-height: 160px; overflow-y: auto; padding-right: 5px; }
-        .card { border: 1px solid #e5e7eb; padding: 15px; border-radius: 18px; background: #fafbfc; }
+        /* 數據與筆記：左右並排 */
+        .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .card { border: 1px solid #e5e7eb; padding: 8px; border-radius: 12px; background: #fafbfc; min-height: 90px; }
+        .card h3 { margin: 0 0 5px 0; font-size: 13px; border-bottom: 1px solid #eee; }
+        .card-content { font-size: 12px; line-height: 1.5; }
+
+        .strategy-history-area { max-height: 60px; overflow-y: auto; font-size: 11px; }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 28px; width: 90%; text-align: center; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
+        .modal-content { background: white; padding: 15px; border-radius: 20px; width: 92%; text-align: center; max-height: 95vh; overflow-y: auto; box-sizing: border-box; }
         
-        .type-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 15px; }
-        .diff-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 20px; }
-        
-        /* 選擇按鈕適配手機 */
-        .btn-type, .btn-diff { background: white; border: 3px solid #e2e8f0; padding: 15px; border-radius: 16px; cursor: pointer; text-align: left; transition: 0.3s; }
-        .btn-type h4, .btn-diff h4 { margin: 0 0 8px 0; font-size: 20px; }
-        .btn-type p, .btn-diff p { margin: 0; font-size: 13px; color: #475569; line-height: 1.4; }
+        /* 縮小決策格子 */
+        .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .btn-type, .btn-diff { background: white; border: 2px solid #e2e8f0; padding: 10px; border-radius: 12px; text-align: left; }
+        .btn-type h4, .btn-diff h4 { margin: 0 0 3px 0; font-size: 15px; }
+        .btn-type p, .btn-diff p { margin: 0; font-size: 11px; color: #475569; line-height: 1.2; }
 
-        /* 策略按鈕 */
-        #buff-options { grid-template-columns: 1fr !important; }
+        #buff-options { grid-template-columns: 1fr; gap: 6px; }
         .btn-buff-card {
-            background: #fff; border: 3px solid #e5e7eb; border-radius: 16px; padding: 15px;
-            cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+            background: #fff; border: 2px solid #e5e7eb; border-radius: 10px; padding: 8px 12px;
+            display: flex; align-items: center; justify-content: space-between; gap: 5px;
         }
+        .buff-name-label { font-size: 14px; font-weight: 800; }
+        .buff-desc-label { font-size: 11px; color: #64748b; flex: 1; text-align: left; margin-left: 5px; }
+        .buff-cost-label { font-size: 12px; font-weight: 800; color: var(--danger); background: #fee2e2; padding: 2px 6px; border-radius: 6px; }
 
-        .buff-name-label { font-size: 20px; font-weight: 900; color: #1f2937; }
-        .buff-desc-label { font-size: 15px; color: #4b5563; font-weight: 500; }
-        .buff-cost-label { font-size: 17px; font-weight: 800; color: var(--danger); background: #fee2e2; padding: 4px 12px; border-radius: 10px; }
-
-        .btn-main { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; width: 100%; padding: 16px; border-radius: 12px; font-size: 19px; font-weight: bold; border: none; cursor: pointer; margin: 4px 0; }
+        .btn-main { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; width: 100%; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: bold; border: none; cursor: pointer; }
         
-        .log { background: #0f172a; color: #cbd5e1; padding: 15px; border-radius: 15px; height: 110px; overflow-y: auto; font-family: monospace; font-size: 14px; border-left: 8px solid var(--primary); }
-        .status-tag { display: inline-block; background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 8px; margin: 2px; font-size: 13px; border: 1px solid #fecaca; }
+        .log { background: #0f172a; color: #cbd5e1; padding: 10px; border-radius: 12px; height: 80px; overflow-y: auto; font-family: monospace; font-size: 12px; border-left: 5px solid var(--primary); margin-top: 10px; }
+        .status-tag { display: inline-block; background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; margin: 1px; font-size: 10px; }
 
-        .hidden-area { display: none !important; }
         .insufficient-funds-toast {
             position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(239, 68, 68, 0.95); color: white; padding: 20px 40px;
-            border-radius: 20px; font-size: 28px; font-weight: 900; z-index: 2000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: fadeOutUp 1.5s ease-out forwards;
+            background: rgba(239, 68, 68, 0.95); color: white; padding: 15px 30px;
+            border-radius: 15px; font-size: 20px; font-weight: 900; z-index: 2000;
+            animation: fadeOutUp 1.5s ease-out forwards;
         }
-
         @keyframes fadeOutUp {
             0% { opacity: 0; transform: translate(-50%, -20%); }
-            20% { opacity: 1; transform: translate(-50%, -50%); }
-            70% { opacity: 1; }
             100% { opacity: 0; transform: translate(-50%, -80%); }
         }
     </style>
@@ -111,11 +103,13 @@
                 <button class="btn-speed" id="speed-10" onclick="setSpeed(10)">10x</button>
             </div>
         </div>
-        <div class="stat-card">💰 現金 <span class="stat-val" id="ui-money">50000</span></div>
-        <div class="stat-card">🏬 店型 <span id="ui-shop-name" style="font-weight:bold; color:var(--success)">-</span></div>
         <div class="stat-card">
-            💸 固定開銷 <span id="ui-expense" style="font-weight:bold">0</span>
-            <span class="stat-hint" id="ui-expense-hint">💡 固定成本：店租 0元 + 人事 2,400元 = 2,400元/天</span>
+            💰 <span class="stat-val" id="ui-money">50000</span>
+            <span id="ui-shop-name" style="font-size:11px; font-weight:bold; color:var(--success)">-</span>
+        </div>
+        <div class="stat-card">
+            💸 開銷 <span class="stat-val" id="ui-expense">0</span>
+            <span class="stat-hint" id="ui-expense-hint">店租 0 + 人事 0</span>
         </div>
     </div>
 
@@ -130,34 +124,28 @@
     <div class="setup-grid">
         <div class="card">
             <h3>📊 營運數據</h3>
-            <div style="font-size: 18px; line-height: 1.8;">
-                單價：<b id="ui-price" style="color:var(--primary)">0</b> 元<br>
-                成本：<b id="ui-cost" style="color:var(--danger)">0</b> 元<br>
-                預估客流：<b id="ui-demand-range" style="color:var(--warning)">25 ~ 40</b> 人
+            <div class="card-content">
+                單價: <b id="ui-price" style="color:var(--primary)">0</b><br>
+                成本: <b id="ui-cost" style="color:var(--danger)">0</b><br>
+                客流: <b id="ui-demand-range" style="color:var(--warning)">0~0</b>
             </div>
         </div>
         <div class="card">
-            <h3 style="margin-top:0">📜 經營筆記</h3>
+            <h3>📜 經營筆記</h3>
             <div class="strategy-history-area">
-                <div id="active-buffs-list" style="font-size: 14px; margin-bottom: 10px;">
-                    <b style="color:var(--primary)">🎯 當前策略：</b>
-                    <div id="history-buffs-inline" style="display: flex; flex-wrap: wrap; gap: 4px; margin-top:5px;">暫無</div>
-                </div>
-                <div id="event-impact-list" style="font-size: 14px;">
-                    <b style="color:var(--danger)">⚠️ 事件影響：</b>
-                    <div id="history-events-inline" style="margin-top:5px;">暫無</div>
-                </div>
+                <div id="history-buffs-inline"></div>
+                <div id="history-events-inline"></div>
             </div>
         </div>
     </div>
 
     <button class="btn-main" id="btn-start" onclick="startDay()">開店!</button>
-    <div class="log" id="game-log" style="margin-top:15px;"></div>
+    <div class="log" id="game-log"></div>
 </div>
 
 <div id="setup-modal" class="modal" style="display:flex">
     <div class="modal-content" id="setup-content">
-        <h2 style="font-size: 28px;">🏬 第一步：選擇你的事業起源</h2>
+        <h2 style="font-size: 20px;">第一步：選擇你的事業起源</h2>
         <div class="type-grid">
             <button class="btn-type" onclick="chooseDiff('drink')"><h4>🥤 飲料店</h4><p>客流量極大、低單價、低成本。</p></button>
             <button class="btn-type" onclick="chooseDiff('bakery')"><h4>🥐 烘焙坊</h4><p>低成本、需求穩定、中等人事費。</p></button>
@@ -169,25 +157,23 @@
 
 <div id="settle-modal" class="modal">
     <div class="modal-content">
-        <h2 id="settle-title" style="font-size: 32px; margin-bottom: 15px;">📈 今日結算報表</h2>
-        <div id="settle-report" style="font-size:20px; text-align:center; background:#f8fafc; padding:25px; border-radius:20px; line-height:1.6; border: 2px solid #e2e8f0; margin-bottom: 25px;"></div>
-        <hr style="border: 1px solid #f3f4f6; margin-bottom: 25px;">
-        <h3 style="font-size: 26px; color: var(--primary); margin-bottom: 15px;">💡 每日投資決策</h3>
-        <div class="type-grid" id="buff-options" style="grid-template-columns: 1fr;"></div>
-        <button class="btn-main" style="background:#94a3b8; font-size:18px; margin-top: 30px; width: 60%;" onclick="checkEventAfterSettle()">跳過投資</button>
+        <h2 id="settle-title" style="font-size: 22px; margin-bottom: 8px;">📈 今日結算</h2>
+        <div id="settle-report" style="font-size:14px; background:#f8fafc; padding:10px; border-radius:12px; line-height:1.4; border: 1px solid #e2e8f0;"></div>
+        <h3 style="font-size: 16px; color: var(--primary); margin: 10px 0 5px 0;">💡 每日投資</h3>
+        <div id="buff-options" class="type-grid"></div>
+        <button class="btn-main" style="background:#94a3b8; font-size:14px; margin-top: 10px; width: 50%;" onclick="checkEventAfterSettle()">跳過投資</button>
     </div>
 </div>
 
 <div id="event-modal" class="modal">
     <div class="modal-content">
-        <h2 id="event-title" style="color:var(--danger); font-size: 30px;">🔥 重大經營決策</h2>
-        <p id="event-desc" style="font-size:17px; padding:20px; background:#fff1f2; border-radius:15px; line-height:1.5;"></p>
-        <div id="event-options" class="type-grid"></div>
+        <h2 id="event-title" style="color:var(--danger); font-size: 20px;">🔥 重大經營決策</h2>
+        <p id="event-desc" style="font-size:13px; padding:10px; background:#fff1f2; border-radius:10px;"></p>
+        <div id="event-options" class="type-grid" style="grid-template-columns: 1fr;"></div>
     </div>
 </div>
 
 <script>
-    // 邏輯部分保持不變
     const SHOP_DATA = {
         drink: { name: "飲料店", icon: "🥤", price: 65, cost: 22, demandMin: 36, demandMax: 55, personnel: 2400 },
         bakery: { name: "烘焙坊", icon: "🥐", price: 180, cost: 55, demandMin: 18, demandMax: 22, personnel: 3000 },
@@ -196,41 +182,27 @@
     };
 
     const BUFF_POOL = [
-        { name: "📰 網路廣告", desc: "客流 +10%", buy: 4000, dRate: 0.10 },
-        { name: "🤖 自動結帳", desc: "單位成本 -10%", buy: 3500, cRate: -0.10 },
-        { name: "💎 尊榮會員", desc: "客流 +5%, 售價 +10%", buy: 4000, dRate: 0.05, pRate: 0.10 },
-        { name: "⏰ 延長工時", desc: "客流 +15%, 人事 +30%", buy: 1500, dRate: 0.15, personnelRate: 0.3 },
-        { name: "🎫 優惠禮券", desc: "客流 +15%, 售價 -15%", buy: 2500, dRate: 0.15, pRate: -0.15 },
-        { name: "🧹 門面裝修", desc: "客流 +10%, 售價 +5%", buy: 5000, dRate: 0.10, pRate: 0.05 },
-        { name: "📦 批發採購", desc: "單位成本 -20%, 客流 -10%", buy: 2000, cRate: -0.20, dRate: -0.1 },
-        { name: "👨‍🍳 專業培訓", desc: "售價 +15%, 人事 +20%", buy: 4000, pRate: 0.15, personnelRate: 0.2 },
-        { name: "🏗️ 擴大店面", desc: "客流 +30%, 房租 +1500", buy: 8500, dRate: 0.30, rentAdd: 1500 },
-        { name: "🏢 開設分店", desc: "客流 +70%, 房租 +3000, 人事 +50%", buy: 18000, dRate: 0.70, rentAdd: 3000, personnelRate: 0.5 }
+        { name: "📰 廣告", desc: "客流+10%", buy: 4000, dRate: 0.10 },
+        { name: "🤖 自動化", desc: "成本-10%", buy: 3500, cRate: -0.10 },
+        { name: "💎 會員", desc: "客流+5%,售價+10%", buy: 4000, dRate: 0.05, pRate: 0.10 },
+        { name: "🎫 禮券", desc: "客流+15%,售價-15%", buy: 2500, dRate: 0.15, pRate: -0.15 }
     ];
 
     const BIG_EVENTS = [
         {
-            title: "⚖️ 法定工資調漲",
-            desc: "政府宣布調高基本時薪，這將影響近期的經營成本（持續 5 天）。",
+            title: "⚖️ 工資調漲",
+            desc: "政府宣布調高時薪（持續 5 天）。",
             options: [
-                { text: "精簡人力 (人事+20%, 客流-20%)", impact: { personnelRate: 0.2, dRate: -0.20, log: "短期：精簡人力導致服務品質下降", duration: 5 } },
-                { text: "全面調薪 (人事+40%, 售價+10%)", impact: { pRate: 0.10, personnelRate: 0.4, log: "短期：調薪提升士氣與產品價值", duration: 5 } }
+                { text: "精簡人力 (人事+20%, 客流-20%)", impact: { personnelRate: 0.2, dRate: -0.20, log: "精簡人力", duration: 5 } },
+                { text: "全面調薪 (人事+40%, 售價+10%)", impact: { pRate: 0.10, personnelRate: 0.4, log: "全面調薪", duration: 5 } }
             ]
         },
         {
-            title: "🏗️ 捷運完工轉型",
-            desc: "店門口的捷運站正式完工啟用！這將帶來穩定的人潮，但地段租金也隨之暴漲。",
+            title: "🌀 颱風侵襲",
+            desc: "氣象局發布警報，影響明日。",
             options: [
-                { text: "原地升級 (客流+30%, 租金+2000)", impact: { dRate: 0.30, rentAdd: 2000, log: "長期：捷運站帶來龐大客流，但租金成本大幅提升"} },
-                { text: "搬遷避險 (客流-10%, 租金-200)", impact: { dRate: -0.10, rentAdd: -200, log: "長期：搬遷至較遠地段，避開租金壓力但人氣下滑"} }
-            ]
-        },
-        {
-            title: "🌀 強力颱風侵襲",
-            desc: "氣象局發布陸上警報，影響預計僅限明日。",
-            options: [
-                { text: "防颱加固 (開銷+1000, 客流-40%)", impact: { rentAdd: 1000, dRate: -0.4, log: "短期：加固設施支出", duration: 1 } },
-                { text: "停業一天 (當天零客流, 零人事費用)", impact: { dRate: -10.0, personnelRate: -10.0, log: "短期：停業避災", duration: 1 } }
+                { text: "防颱加固 (支出1000, 客流-40%)", impact: { rentAdd: 1000, dRate: -0.4, log: "防颱加固", duration: 1 } },
+                { text: "停業一天", impact: { dRate: -10.0, personnelRate: -10.0, log: "停業避災", duration: 1 } }
             ]
         }
     ];
@@ -240,25 +212,16 @@
         activeBuffs: [], historyEvents: [],
         difficulty: 'normal', eventCycle: 5,
         rent: 1000, personnel: 2400,
-        gameSpeed: 1
+        gameSpeed: 1, dailyRev: 0, dailySold: 0
     };
 
     function chooseDiff(key) {
         state.shop = { ...SHOP_DATA[key] };
-        document.getElementById('setup-content').innerHTML = `<h2 style="font-size:28px;">⚙️ 第二步：選擇經營難度</h2>
+        document.getElementById('setup-content').innerHTML = `<h2 style="font-size:20px;">⚙️ 第二步：選擇經營難度</h2>
             <div class="diff-grid">
-                <button class="btn-diff" onclick="finalize('easy', 120000, 800, 7)">
-                    <h4>🟢 簡單</h4>
-                    <p>資金充足 ($12萬)<br>店租: $800 / 天<br><b>每 7 天</b>一事件</p>
-                </button>
-                <button class="btn-diff" onclick="finalize('normal', 60000, 1000, 5)">
-                    <h4>🟡 標準</h4>
-                    <p>創業資金 ($6萬)<br>店租: $1,000 / 天<br><b>每 5 天</b>一事件</p>
-                </button>
-                <button class="btn-diff" onclick="finalize('hard', 30000, 1200, 3)">
-                    <h4>🔴 困難</h4>
-                    <p>資金吃緊 ($3萬)<br>店租: $1,200 / 天<br><b>每 3 天</b>一事件</p>
-                </button>
+                <button class="btn-diff" onclick="finalize('easy', 120000, 800, 7)"><h4>🟢 簡單</h4><p>資金充足 ($12萬)<br>店租: $800 / 天<br><b>每 7 天</b>一事件</p></button>
+                <button class="btn-diff" onclick="finalize('normal', 60000, 1000, 5)"><h4>🟡 標準</h4><p>創業資金 ($6萬)<br>店租: $1,000 / 天<br><b>每 5 天</b>一事件</p></button>
+                <button class="btn-diff" onclick="finalize('hard', 30000, 1200, 3)"><h4>🔴 困難</h4><p>資金吃緊 ($3萬)<br>店租: $1,200 / 天<br><b>每 3 天</b>一事件</p></button>
             </div>`;
     }
 
@@ -270,6 +233,7 @@
         document.getElementById('shop-sub-icon').textContent = state.shop.icon;
         document.getElementById('ui-shop-name').textContent = state.shop.name;
         updateUI();
+        log("遊戲開始！祝您經營順利。");
     }
 
     function calculateCurrentStats() {
@@ -285,44 +249,40 @@
             if(item.rentAdd) rentAdd += item.rentAdd;
         });
 
-        const finalPrice = Math.max(1, Math.floor(p * pMul));
-        const finalCost = Math.max(1, Math.floor(c * cMul));
-        const finalPersonnel = Math.max(0, Math.floor(basePersonnel * persMul));
-        const finalRent = Math.max(0, baseRent + rentAdd);
-
         return { 
-            price: finalPrice, cost: finalCost, expense: finalPersonnel + finalRent,
-            Statrent: finalRent, StatPersonnel: finalPersonnel, dRate: dMul - 1
+            price: Math.max(1, Math.floor(p * pMul)), cost: Math.max(1, Math.floor(c * cMul)), 
+            expense: Math.max(0, Math.floor(basePersonnel * persMul) + baseRent + rentAdd),
+            Statrent: baseRent + rentAdd, StatPersonnel: Math.floor(basePersonnel * persMul), dRate: dMul - 1
         };
     }
 
     function updateUI() {
         const stats = calculateCurrentStats();
-        document.getElementById('ui-money').textContent = Math.floor(state.money);
+        document.getElementById('ui-money').textContent = Math.floor(state.money).toLocaleString();
         document.getElementById('ui-day').textContent = state.day;
         document.getElementById('ui-price').textContent = stats.price;
         document.getElementById('ui-cost').textContent = stats.cost;
         document.getElementById('ui-expense').textContent = Math.floor(stats.expense);
-        document.getElementById('ui-expense-hint').textContent = `💡 固定成本：店租 ${stats.Statrent.toLocaleString()}元 + 人事 ${stats.StatPersonnel.toLocaleString()}元 = ${Math.floor(stats.expense).toLocaleString()}元/天`;
+        document.getElementById('ui-expense-hint').textContent = `租金:${stats.Statrent} 人事:${stats.StatPersonnel}`;
         
-        const minDemand = Math.max(0, Math.floor(state.shop.demandMin * (1 + stats.dRate)));
-        const maxDemand = Math.max(0, Math.floor(state.shop.demandMax * (1 + stats.dRate)));
-        document.getElementById('ui-demand-range').textContent = `${minDemand} ~ ${maxDemand}`;
+        const minD = Math.max(0, Math.floor(state.shop.demandMin * (1 + stats.dRate)));
+        const maxD = Math.max(0, Math.floor(state.shop.demandMax * (1 + stats.dRate)));
+        document.getElementById('ui-demand-range').textContent = `${minD}~${maxD}`;
         
-        document.getElementById('history-buffs-inline').innerHTML = state.activeBuffs.map(b => `<span class="status-tag">${b.name}</span>`).join('') || "無";
-        document.getElementById('history-events-inline').innerHTML = state.historyEvents.map(e => {
-            const countdown = e.duration !== undefined ? ` (剩餘 ${e.duration+1} 天)` : " (永久)";
-            return `<div style="font-size:12px; color:#64748b;">• ${e.log} <b>${countdown}</b></div>`;
-        }).join('') || "無";
+        document.getElementById('history-buffs-inline').innerHTML = state.activeBuffs.map(b => `<span class="status-tag">${b.name}</span>`).join('');
+        document.getElementById('history-events-inline').innerHTML = state.historyEvents.map(e => `<div style="color:#ef4444; font-size:10px;">• ${e.log}</div>`).join('');
     }
 
     async function startDay() {
         document.getElementById('btn-start').disabled = true;
         const stats = calculateCurrentStats();
-        const baseDemand = Math.floor(Math.random() * (state.shop.demandMax - state.shop.demandMin + 1)) + state.shop.demandMin;
+        const range = state.shop.demandMax - state.shop.demandMin + 1;
+        const baseDemand = Math.floor(Math.random() * range) + state.shop.demandMin;
         const finalCount = Math.max(0, Math.floor(baseDemand * (1 + stats.dRate)));
+        
         state.dailyRev = 0; state.dailySold = 0;
         await playBusinessAnimation(finalCount, stats.price);
+        
         let totalCost = (state.dailySold * stats.cost) + stats.expense;
         state.money -= totalCost;
         showSettlement(state.dailySold, state.dailyRev, totalCost, state.dailyRev - totalCost, state.money);
@@ -342,35 +302,36 @@
                     c.style.transition = `left ${3000/s}ms linear`; c.style.left = "43%";
                     setTimeout(() => {
                         const coin = document.createElement('div');
-                        coin.className = 'coin-pop'; coin.innerHTML = `💰 +${currentPrice}`;
+                        coin.className = 'coin-pop'; coin.innerHTML = `+${currentPrice}`;
                         document.getElementById('shop-node').appendChild(coin);
                         state.money += currentPrice; state.dailyRev += currentPrice; state.dailySold++;
-                        document.getElementById('ui-money').textContent = Math.floor(state.money);
+                        document.getElementById('ui-money').textContent = Math.floor(state.money).toLocaleString();
                         setTimeout(() => {
                             c.style.left = "-20%"; setTimeout(() => { coin.remove(); c.remove(); }, 3000/s);
                         }, 800/s);
                     }, 3000/s);
                 }, 50);
-                if (spawned < total) setTimeout(spawn, (10000/total)/s);
+                if (spawned < total) setTimeout(spawn, (8000/total)/s);
             }
             spawn();
-            setTimeout(resolve, (15000/s));
+            setTimeout(resolve, (12000/s));
         });
     }
 
     function showSettlement(count, rev, cost, profit, money) {
         if(state.day >= 30) { checkEventAfterSettle(); return; }
         const modal = document.getElementById('settle-modal');
-        document.getElementById('settle-report').innerHTML = `📦 銷量：<b>${count}</b> 件 <br> 📥 收入：<span style="color:var(--success);">+$${rev.toLocaleString()}</span><br> 📤 支出：<span style="color:var(--danger);">-$${Math.floor(cost).toLocaleString()}</span><br> ✨ 純利：<b style="color:${profit>=0?'green':'red'};">$${Math.floor(profit).toLocaleString()}</b>`;
+        document.getElementById('settle-report').innerHTML = `銷量:${count} | 營收:+${rev} | 支出:-${Math.floor(cost)}<br><b>今日利潤: $${Math.floor(profit)}</b>`;
+        log(`第 ${state.day} 天：銷量 ${count}，利潤 ${Math.floor(profit)}`);
         
         const optBox = document.getElementById('buff-options');
         optBox.innerHTML = '';
         [...BUFF_POOL].sort(() => 0.5-Math.random()).slice(0,3).forEach(b => {
             const btn = document.createElement('div');
             btn.className = 'btn-buff-card';
-            btn.innerHTML = `<div class="buff-name-label">${b.name}</div><div class="buff-desc-label">${b.desc}</div><div class="buff-cost-label">$${b.buy.toLocaleString()}</div>`;
+            btn.innerHTML = `<div class="buff-name-label">${b.name}</div><div class="buff-desc-label">${b.desc}</div><div class="buff-cost-label">$${b.buy}</div>`;
             btn.onclick = () => {
-                if(state.money < b.buy) { showWarning("⚠️ 資金不足！"); return; }
+                if(state.money < b.buy) { showWarning("⚠️ 資金不足"); return; }
                 state.money -= b.buy; state.activeBuffs.push(b); updateUI(); checkEventAfterSettle();
             };
             optBox.appendChild(btn);
@@ -395,7 +356,7 @@
             btn.onclick = () => {
                 state.historyEvents.push({ ...opt.impact });
                 document.getElementById('event-modal').style.display = 'none';
-                updateUI(); nextDay();
+                log(`[重大事件] ${opt.impact.log}`); updateUI(); nextDay();
             };
             optBox.appendChild(btn);
         });
@@ -407,8 +368,8 @@
         state.historyEvents = state.historyEvents.filter(e => e.duration === undefined || e.duration > -1);
         state.day++; updateUI();
         if (state.day > 30 || state.money <= 0) {
+            log(state.money <= 0 ? "<b>資產耗盡，經營結束。</b>" : "<b>30天經營圓滿結束！</b>");
             document.getElementById('btn-start').style.display = 'none';
-            log(state.money <= 0 ? "破產結束" : "30天完成");
         } else {
             document.getElementById('btn-start').disabled = false;
         }
@@ -429,7 +390,9 @@
 
     function log(msg) {
         const l = document.getElementById('game-log');
-        l.innerHTML = `[${state.day}日] ${msg}<br>` + l.innerHTML;
+        const entry = document.createElement('div');
+        entry.innerHTML = `[Day ${state.day}] ${msg}`;
+        l.prepend(entry); // 最新的訊息放在最上面
     }
 </script>
 </body>

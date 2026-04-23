@@ -35,12 +35,16 @@
 </div>
 
     <div id="game-canvas">
-        <div class="shop-building" id="shop-node" style="display:none">
-            <span class="main-store-icon">🏪</span>
-            <div class="sub-type-icon" id="shop-sub-icon">🥤</div>
-        </div>
-        <div class="road"></div>
-    </div>
+		<div class="road"></div>
+		
+		<div id="sub-stores-container" class="sub-stores-container"></div>
+		
+		<div class="shop-building" id="shop-node" style="display:none">
+			<span class="main-store-icon">🏪</span>
+			<div class="sub-type-icon" id="shop-sub-icon">🥤</div>
+		</div>
+	</div>
+    <button class="btn-main" id="btn-start" onclick="startDay()">開店!</button>
 
     <div class="setup-grid">
         <div class="card">
@@ -66,7 +70,6 @@
 		</div>
     </div>
 
-    <button class="btn-main" id="btn-start" onclick="startDay()">開店!</button>
     <div class="log" id="game-log" style="margin-top:15px;"></div>
 </div>
 
@@ -110,14 +113,14 @@
 	};
 
 	const BUFF_POOL = [
-		{ name: "📰 網路廣告", desc: "客流 +10%", buy: 4000, dRate: 0.10 },
+		/*{ name: "📰 網路廣告", desc: "客流 +10%", buy: 4000, dRate: 0.10 },
 		{ name: "🤖 自動結帳", desc: "單位成本 -10%", buy: 3500, cRate: -0.10 },
 		{ name: "💎 尊榮會員", desc: "客流 +5%, 售價 +10%", buy: 4000, dRate: 0.05, pRate: 0.10 },
 		{ name: "⏰ 延長工時", desc: "客流 +15%, 人事 +30%", buy: 1500, dRate: 0.15, personnelRate: 0.3 },
 		{ name: "🎫 優惠禮券", desc: "客流 +15%, 售價 -15%", buy: 2500, dRate: 0.15, pRate: -0.15 },
 		{ name: "🧹 門面裝修", desc: "客流 +10%, 售價 +5%", buy: 5000, dRate: 0.10, pRate: 0.05 },
 		{ name: "📦 批發採購", desc: "單位成本 -20%, 客流 -10%", buy: 2000, cRate: -0.20, dRate: -0.1 },
-		{ name: "👨‍🍳 專業培訓", desc: "售價 +15%, 人事 +20%", buy: 4000, pRate: 0.15, personnelRate: 0.2 },
+		{ name: "👨‍🍳 專業培訓", desc: "售價 +15%, 人事 +20%", buy: 4000, pRate: 0.15, personnelRate: 0.2 },*/
 		{ name: "🏗️ 擴大店面", desc: "客流 +30%, 房租 +1500", buy: 8500, dRate: 0.30, rentAdd: 1500 },
 		{ name: "🏢 開設分店", desc: "客流 +70%, 房租 +3000, 人事 +50%", buy: 18000, dRate: 0.70, rentAdd: 3000, personnelRate: 0.5 }
 	];
@@ -217,7 +220,10 @@
 		difficulty: 'normal', eventCycle: 5,
 		rent: 1000, personnel: 2400,
 		expenseMod: 1, dailyRev: 0, dailySold: 0,
-		gameSpeed: 1 // 新增：預設速度為 1
+		gameSpeed: 1,
+		expansionLevel: 0,
+		branchPositions: []
+		
 	};
 
     function chooseDiff(key) {
@@ -342,6 +348,72 @@
 					</div>`;
 				}).join('') || "無";
 			}
+			const shopNode = document.getElementById('shop-node');
+			const subStoreContainer = document.getElementById('sub-stores-container');
+			if (!subStoreContainer) return;
+
+			// 處理擴大店面縮放
+			state.expansionLevel = state.activeBuffs.filter(b => b.name.includes("擴大店面")).length;
+			if (state.expansionLevel > 0) {
+				const scale = 1 + (state.expansionLevel * 0.1);
+				// 動態計算位移：每級向上提 10px 避免破底
+				const translateY = state.expansionLevel * -1;
+				
+				shopNode.style.transform = `translateX(-50%) scale(${scale}) translateY(${translateY}%)`;
+				shopNode.style.transformOrigin = "bottom center";
+			} else {
+				shopNode.style.transform = `translateX(-50%) scale(1) translateY(0px)`;
+			}
+
+			// --- 處理分店核心邏輯 (防止重疊版本) ---
+			const currentBranchBuffs = state.activeBuffs.filter(b => b.name.includes("開設分店")).length;
+			const targetGraphicCount = currentBranchBuffs; 
+
+			// 初始化 state 中的 branchPositions（如果還沒有的話）
+			if (!state.branchPositions) state.branchPositions = [];
+
+			while (state.branchPositions.length < targetGraphicCount) {
+				const storeEmojis = ['🏠', '🏘️', '🏤', '🏢', '🏬', '🏪', '🏨', '🏦'];
+				let newLeft, isOverlap, attempts = 0;
+
+				// 嘗試尋找不重疊的座標，最多嘗試 50 次避免死迴圈
+				do {
+					isOverlap = false;
+					const side = Math.random() > 0.5 ? 'left' : 'right';
+					newLeft = (side === 'left') ? (Math.random() * 32) : (68 + Math.random() * 25);
+					
+					// 檢查與「已存在分店」的距離
+					for (let existing of state.branchPositions) {
+						// 如果兩個座標水平距離小於 8%，視為重疊 (數字越大分得越開)
+						if (Math.abs(existing.left - newLeft) < 8) {
+							isOverlap = true;
+							break;
+						}
+					}
+					attempts++;
+				} while (isOverlap && attempts < 50);
+
+				state.branchPositions.push({
+					emoji: storeEmojis[Math.floor(Math.random() * storeEmojis.length)],
+					left: newLeft,
+					top: (Math.random() * 10), 
+					scale: 0.8 + (Math.random() * 0.3)
+				});
+			}
+
+			// 渲染 HTML：只有當數量增加時才重新繪製，保留原本分店的位置
+			if (subStoreContainer.childElementCount !== state.branchPositions.length) {
+				subStoreContainer.innerHTML = '';
+				state.branchPositions.forEach(pos => {
+					const span = document.createElement('span');
+					span.className = 'branch-icon';
+					span.textContent = pos.emoji;
+					span.style.left = `${pos.left}%`;
+					span.style.top = `${pos.top}%`;
+					span.style.transform = `scale(${pos.scale})`;
+					subStoreContainer.appendChild(span);
+				});
+			}
 	}
 	
 	async function startDay() {
@@ -355,10 +427,13 @@
 		const finalCount = Math.max(0, Math.floor(baseDemand * (1 + stats.dRate)) + stats.dAdd);
 		await playBusinessAnimation(finalCount, stats.price);
 		
-		let totalCost = (state.dailySold * stats.cost) + stats.expense;
-		state.money -= totalCost; 
+		const totalIncome = state.dailyRev; // 動態產生的總收入
+		const totalCost = (state.dailySold * stats.cost) + stats.expense; // 銷貨成本 + 固定開銷
+		const netProfit = totalIncome - totalCost; // 當日純利
+		state.money += netProfit;
 		
-		showSettlement(state.dailySold, state.dailyRev, totalCost, state.dailyRev - totalCost, state.money);
+		//showSettlement(state.dailySold, state.dailyRev, totalCost, state.dailyRev - totalCost, state.money);
+		showSettlement(state.dailySold, totalIncome, totalCost, netProfit, state.money);
 	}
 
     async function playBusinessAnimation(total, currentPrice) {
@@ -385,7 +460,7 @@
 
 				setTimeout(() => {
 					c.style.transition = `left ${baseMoveTime / s}ms linear`;
-					c.style.left = "43%";
+					c.style.left = "46%";
 
 					setTimeout(() => {
 						c.style.opacity = "0";
@@ -396,10 +471,10 @@
 						coin.innerHTML = `💰 +${currentPrice}`;
 						document.getElementById('shop-node').appendChild(coin);
 
-						state.money += currentPrice;
+						//state.money += currentPrice;
 						state.dailyRev += currentPrice;
 						state.dailySold += 1;
-						document.getElementById('ui-money').textContent = Math.floor(state.money);
+						document.getElementById('ui-money').textContent = Math.floor(state.money + state.dailyRev);
 
 						setTimeout(() => {
 							c.style.opacity = "1";
@@ -425,19 +500,35 @@
 		});
 	}
 
-    function showSettlement(count, rev, cost, profit,money) {
-		if(state.day >= 30){checkEventAfterSettle();}
-		else{
-			const modal = document.getElementById('settle-modal');
-			document.getElementById('settle-report').innerHTML = `
-				📦 銷量：<b>${count}</b> 件 <br>
-				📥 收入：<span style="color:var(--success); font-weight:800;">+$${rev.toLocaleString()}</span><br>
-				📤 支出：<span style="color:var(--danger); font-weight:800;">-$${Math.floor(cost).toLocaleString()}</span><br>
-				✨ 純利：<b style="color:${profit>=0?'green':'red'}; font-size: 26px;">$${Math.floor(profit).toLocaleString()}</b><br>
-				💰 餘額：<b style="color:var(--success); font-size: 26px;">$${Math.floor(money).toLocaleString()}</b>
-			`;
-			log(`Day ${state.day}：銷量 ${count} | 營收 ${rev} | 淨利 ${Math.floor(profit)}`);
-			const optBox = document.getElementById('buff-options');
+	function showSettlement(count, rev, cost, profit, money) {
+		// 如果已經達到30天或資金為負，雖然顯示報表，但點擊按鈕應指向結束畫面
+		const isGameOver = state.money < 0 || state.day >= 30;
+		
+		const modal = document.getElementById('settle-modal');
+		document.getElementById('settle-report').innerHTML = `
+			📦 銷量：<b>${count}</b> 件 <br>
+			📥 收入：<span style="color:var(--success); font-weight:800;">+$${rev.toLocaleString()}</span><br>
+			📤 支出：<span style="color:var(--danger); font-weight:800;">-$${Math.floor(cost).toLocaleString()}</span><br>
+			✨ 純利：<b style="color:${profit>=0?'green':'red'}; font-size: 26px;">$${Math.floor(profit).toLocaleString()}</b><br>
+			💰 餘額：<b style="color:var(--success); font-size: 26px;">$${Math.floor(money).toLocaleString()}</b>
+		`;
+		log(`Day ${state.day}：銷量 ${count} | 營收 ${rev} | 淨利 ${Math.floor(profit)}`);
+
+		const optBox = document.getElementById('buff-options');
+		const investTitle = modal.querySelector('h3'); // 抓取「每日投資決策」標題
+		const skipBtn = modal.querySelector('.btn-main[onclick="checkEventAfterSettle()"]');
+
+		if (state.money < 0) {
+			// 如果負債，隱藏投資選項並更改按鈕文字
+			optBox.style.display = 'none';
+			if(investTitle) investTitle.textContent = "❌ 經營失敗：公司已宣告破產";
+			skipBtn.textContent = "查看最終報表";
+		} else {
+			// 正常顯示投資選項
+			optBox.style.display = 'grid';
+			if(investTitle) investTitle.textContent = "💡 每日投資決策";
+			skipBtn.textContent = "跳過投資";
+			
 			optBox.innerHTML = '';
 			[...BUFF_POOL].sort(() => 0.5-Math.random()).slice(0,3).forEach(b => {
 				const btn = document.createElement('div');
@@ -453,16 +544,15 @@
 						return;
 					}
 					state.money -= b.buy;
-					
 					state.activeBuffs.push(b);
 					updateUI();
 					checkEventAfterSettle();
 				};
 				optBox.appendChild(btn);
 			});
-			modal.style.display = 'flex';
 		}
-    }
+		modal.style.display = 'flex';
+	}
 
     function checkEventAfterSettle() {
         document.getElementById('settle-modal').style.display = 'none';
@@ -495,6 +585,10 @@
 	}
 
 	function nextDay() {
+		if (state.money < 0) {
+			gameOver("破產！這裡是最終經營總結報告。");
+			return;
+		}
 		state.historyEvents.forEach(event => {
 			if (event.duration !== undefined) {
 				event.duration--;
@@ -511,41 +605,15 @@
 		}
 
 		state.day++;
+		if (state.day > 30) {
+			state.day = 30; // 固定在30天
+			gameOver("30 天經營結束！這裡是最終經營總結報告。");
+			return;
+		}
+
 		updateUI(); 
 		document.getElementById('btn-start').disabled = false;
-
-		if (state.day > 30) {
-			document.getElementById('btn-start').classList.add('hidden-area');
-			document.getElementById('game-canvas').classList.add('hidden-area');
-
-			const strategyArea = document.querySelector('.strategy-history-area');
-			if (strategyArea) strategyArea.classList.add('expanded-card');
-
-			const logArea = document.getElementById('game-log');
-			logArea.classList.add('fully-visible');
-			
-			state.day = 30;
-			updateUI(); 
-
-			log("<b style='color:var(--primary); font-size:24px;'>30 天經營結束！這裡是最終經營總結報告。</b>");
-			//alert("30天經營結束！");
-		}
 		
-		if (state.money <= 0) {
-			document.getElementById('btn-start').classList.add('hidden-area');
-			document.getElementById('game-canvas').classList.add('hidden-area');
-
-			const strategyArea = document.querySelector('.strategy-history-area');
-			if (strategyArea) strategyArea.classList.add('expanded-card');
-
-			const logArea = document.getElementById('game-log');
-			logArea.classList.add('fully-visible');
-			
-			state.day--;
-			updateUI(); 
-
-			log("<b style='color:var(--primary); font-size:24px;'>破產！這裡是最終經營總結報告。</b>");
-		}
 	}
 	
 	function setSpeed(speed) {
@@ -553,14 +621,20 @@
 		document.querySelectorAll('.btn-speed').forEach(btn => btn.classList.remove('active'));
 		document.getElementById(`speed-${speed}`).classList.add('active');
 	}
-	/*
-    function showHistory() {
-        const buffDiv = document.getElementById('history-buffs');
-        const eventDiv = document.getElementById('history-events');
-        buffDiv.innerHTML = state.activeBuffs.map(b => `<div class="status-tag">${b.name}: ${b.desc}</div>`).join('') || "目前無投資";
-        eventDiv.innerHTML = state.historyEvents.map(e => `<div class="status-tag" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;">${e.log}</div>`).join('') || "目前無事件影響";
-        document.getElementById('history-modal').style.display = 'flex';
-    }*/
+	
+	function gameOver(title) {
+		document.getElementById('btn-start').classList.add('hidden-area');
+		document.getElementById('game-canvas').classList.add('hidden-area');
+
+		const strategyArea = document.querySelector('.strategy-history-area');
+		if (strategyArea) strategyArea.classList.add('expanded-card');
+
+		const logArea = document.getElementById('game-log');
+		logArea.classList.add('fully-visible');
+		
+		updateUI(); 
+		log(`<b style='color:var(--primary); font-size:24px;'>${title}</b>`);
+	}
 	
 	function showWarning(text) {
 		const toast = document.createElement('div');

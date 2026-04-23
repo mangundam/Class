@@ -14,7 +14,7 @@
 		.stat-card { background: #f8fafc; padding: 8px 5px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: center; }
 		.stat-val { font-size: 16px; font-weight: 800; color: var(--primary); }
 		.stat-label { font-size: 11px; color: #64748b; margin-bottom: 2px; }
-		.stat-hint { display: none; } /* 手機版隱藏提示文字節省空間 */
+		.stat-hint { font-size: 8px; color: #64748b; margin-top: 5px; display: block; line-height: 1.4; }
 
         #game-canvas {
 			/* 高度縮減，適合手機螢幕不捲動 */
@@ -291,7 +291,7 @@
     <div class="stat-card">
         <span class="stat-label">💸 開銷</span>
         <span class="stat-val" id="ui-expense" style="color:var(--danger)">0</span>
-        <span id="ui-expense-hint" style="display:none"></span>
+        <span class="stat-hint" id="ui-expense-hint">💡 固定成本：店租 0元 + 人事 2,400元 = 2,400元/天</span>
     </div>
 </div>
 

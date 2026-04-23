@@ -107,7 +107,7 @@ body {
 
 .strategy-history-area { max-height: 60px; overflow-y: auto; }
 .status-tag { display: inline-block; background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 8px; margin: 4px; font-size: 14px; border: 1px solid #fecaca; }
-.expanded-card { max-height: none !important; height: auto !important; }
+.expanded-card { max-height: 60px !important; height: auto !important; }
 .hidden-area { display: none !important; }
 
 /* --- 動畫特效 --- */

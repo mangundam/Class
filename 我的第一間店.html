@@ -109,18 +109,18 @@
 		hobby: { name: "玩具店", icon: "🧸", price: 900, cost: 500, demandMin: 6, demandMax: 8, personnel: 3600 }//2400~3200
 	};
 
-const BUFF_POOL = [
-    { name: "📰 網路廣告", desc: "客流 +10%", buy: 4000, dRate: 0.10 },
-    { name: "🤖 自動結帳", desc: "單位成本 -10%", buy: 3500, cRate: -0.10 },
-    { name: "💎 尊榮會員", desc: "客流 +5%, 售價 +10%", buy: 4000, dRate: 0.05, pRate: 0.10 },
-    { name: "⏰ 延長工時", desc: "客流 +15%, 人事 +30%", buy: 1500, dRate: 0.15, personnelRate: 0.3 },
-    { name: "🎫 優惠禮券", desc: "客流 +15%, 售價 -15%", buy: 2500, dRate: 0.15, pRate: -0.15 },
-    { name: "🧹 門面裝修", desc: "客流 +10%, 售價 +5%", buy: 5000, dRate: 0.10, pRate: 0.05 },
-    { name: "📦 批發採購", desc: "單位成本 -20%, 客流 -10%", buy: 2000, cRate: -0.20, dRate: -0.1 },
-    { name: "👨‍🍳 專業培訓", desc: "售價 +15%, 人事 +20%", buy: 4000, pRate: 0.15, personnelRate: 0.2 },
-	{ name: "🏗️ 擴大店面", desc: "客流 +30%, 房租 +1500", buy: 8500, dRate: 0.30, rentAdd: 1500 },
-    { name: "🏢 開設分店", desc: "客流 +70%, 房租 +3000, 人事 +50%", buy: 18000, dRate: 0.70, rentAdd: 3000, personnelRate: 0.5 }
-];
+	const BUFF_POOL = [
+		{ name: "📰 網路廣告", desc: "客流 +10%", buy: 4000, dRate: 0.10 },
+		{ name: "🤖 自動結帳", desc: "單位成本 -10%", buy: 3500, cRate: -0.10 },
+		{ name: "💎 尊榮會員", desc: "客流 +5%, 售價 +10%", buy: 4000, dRate: 0.05, pRate: 0.10 },
+		{ name: "⏰ 延長工時", desc: "客流 +15%, 人事 +30%", buy: 1500, dRate: 0.15, personnelRate: 0.3 },
+		{ name: "🎫 優惠禮券", desc: "客流 +15%, 售價 -15%", buy: 2500, dRate: 0.15, pRate: -0.15 },
+		{ name: "🧹 門面裝修", desc: "客流 +10%, 售價 +5%", buy: 5000, dRate: 0.10, pRate: 0.05 },
+		{ name: "📦 批發採購", desc: "單位成本 -20%, 客流 -10%", buy: 2000, cRate: -0.20, dRate: -0.1 },
+		{ name: "👨‍🍳 專業培訓", desc: "售價 +15%, 人事 +20%", buy: 4000, pRate: 0.15, personnelRate: 0.2 },
+		{ name: "🏗️ 擴大店面", desc: "客流 +30%, 房租 +1500", buy: 8500, dRate: 0.30, rentAdd: 1500 },
+		{ name: "🏢 開設分店", desc: "客流 +70%, 房租 +3000, 人事 +50%", buy: 18000, dRate: 0.70, rentAdd: 3000, personnelRate: 0.5 }
+	];
 
 //dRate=客流, cRate=成本, pRate=售價, personnelRate=人事, rentAdd=房租
 //沒有duration等於永久活動
@@ -130,12 +130,12 @@ const BUFF_POOL = [
 			desc: "政府宣布調高基本時薪，這將影響近期的經營成本（持續 5 天）。",
 			options: [
 				{ 
-					text: "精簡人力 (人事+20%, 客流-20%)", 
-					impact: { personnelRate: 0.2, dRate: -0.20, log: "短期：精簡人力導致服務品質下降", duration: 5 } 
+					text: "精簡人力 (人事+15%, 客流-20%)", 
+					impact: { personnelRate: 0.15, dRate: -0.20, log: "短期：精簡人力導致服務品質下降", duration: 5 } 
 				},
 				{ 
-					text: "全面調薪 (人事+40%, 售價+10%)", 
-					impact: { pRate: 0.10, personnelRate: 0.4, log: "短期：調薪提升士氣與產品價值", duration: 5 }
+					text: "全面調薪 (人事+30%, 售價+10%)", 
+					impact: { pRate: 0.10, personnelRate: 0.3, log: "短期：調薪提升士氣與產品價值", duration: 5 }
 				}
 			]
 		},
@@ -148,8 +148,8 @@ const BUFF_POOL = [
 					impact: { dRate: 0.30, rentAdd: 2000, log: "長期：捷運站帶來龐大客流，但租金成本大幅提升"} 
 				},
 				{ 
-					text: "搬遷避險 (客流-10%, 租金-200)", 
-					impact: { dRate: -0.10, rentAdd: -200, log: "長期：搬遷至較遠地段，避開租金壓力但人氣下滑"}
+					text: "搬遷避險 (客流-10%, 租金-300)", 
+					impact: { dRate: -0.10, rentAdd: -300, log: "長期：搬遷至較遠地段，避開租金壓力但人氣下滑"}
 				}
 			]
 		},
@@ -163,7 +163,7 @@ const BUFF_POOL = [
 				},
 				{ 
 					text: "停業一天 (當天零客流, 零人事費用)", 
-					impact: { dRate: -10.0, personnelRate: -10.0, log: "短期：停業避災", duration: 1 } 
+					impact: { dRate: -100.0, personnelRate: -100.0, log: "短期：停業避災", duration: 1 } 
 				}
 			]
 		},
@@ -176,22 +176,22 @@ const BUFF_POOL = [
 					impact: { dRate: 0.80, personnelRate: 0.4, log: "短期：增聘臨時翻譯人員", duration: 3 }
 				},
 				{ 
-					text: "推出套裝 (售價+15%, 客流+20%)", 
-					impact: { pRate: 0.15, dRate: 0.10, log: "短期：觀光限定套裝", duration: 3 } 
+					text: "推出套裝 (售價+20%, 客流+20%)", 
+					impact: { pRate: 0.2, dRate: 0.10, log: "短期：觀光限定套裝", duration: 3 } 
 				}
 			]
 		},
 		{
 			title: "🌍 供應鏈危機",
-			desc: "全球物料短缺，預計會造成短期的成本波動（持續 7 天）。",
+			desc: "全球物料短缺，預計會造成短期的成本波動（持續 5 天）。",
 			options: [
 				{ 
 					text: "吸收成本 (成本+8%)", 
-					impact: { cRate: 0.08, log: "短期：公司吸收物料漲幅", duration: 7 } 
+					impact: { cRate: 0.08, log: "短期：公司吸收物料漲幅", duration: 5 } 
 				},
 				{ 
-					text: "調整配方 (客流-20%)", 
-					impact: { dRate: -0.2, log: "短期：配方更換導致客流流失", duration: 7 } 
+					text: "調整配方 (客流-15%)", 
+					impact: { dRate: -0.15, log: "短期：配方更換導致客流流失", duration: 5 } 
 				}
 			]
 		},
@@ -200,12 +200,12 @@ const BUFF_POOL = [
 			desc: "店門口進行地下管線施工，預計持續 3 天，進出不便。",
 			options: [
 				{ 
-					text: "忍受不便 (客流-40%)", 
-					impact: { dRate: -0.40, log: "短期：施工阻擋了客流", duration: 3 } 
+					text: "忍受不便 (客流-30%)", 
+					impact: { dRate: -0.30, log: "短期：施工阻擋了客流", duration: 3 } 
 				},
 				{
-					text: "補貼吸引 (開銷+2000, 客流-10%)",
-					impact: { eAdd: 2000, dRate: -0.10, log: "短期：投入行銷經費補貼", duration: 3 }
+					text: "補貼吸引 (開銷+1500, 客流-10%)",
+					impact: { eAdd: 1500, dRate: -0.10, log: "短期：投入行銷經費補貼", duration: 3 }
 				}
 			]
 		}

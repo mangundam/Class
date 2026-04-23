@@ -385,7 +385,7 @@
 					// 檢查與「已存在分店」的距離
 					for (let existing of state.branchPositions) {
 						// 如果兩個座標水平距離小於 8%，視為重疊 (數字越大分得越開)
-						if (Math.abs(existing.left - newLeft) < 8) {
+						if (Math.abs(existing.left - newLeft) < 15) {
 							isOverlap = true;
 							break;
 						}

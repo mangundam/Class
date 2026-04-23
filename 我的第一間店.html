@@ -446,27 +446,43 @@
 		return new Promise(resolve => {
 			const canvas = document.getElementById('game-canvas');
 			let spawned = 0;
-			let finished = 0; // 新增：追蹤完成動作的客人數量
+			let finished = 0; 
 			const s = state.gameSpeed; 
 			
-			const baseDuration = 10000;
+			const baseDuration = 10000; // 基礎總時長 (1倍速下10秒)
 			const baseMoveTime = 3000;
 			const baseStayTime = 800;
 			const baseCoinTime = 1000;
 
-			// 如果完全沒客人，直接結束
+			// --- 設定視覺上限 ---
+			const VISUAL_LIMIT = 100; // 最多畫面上出現的小人數
+			const visualTotal = Math.min(total, VISUAL_LIMIT);
+			const silentTotal = total > VISUAL_LIMIT ? total - VISUAL_LIMIT : 0;
+
 			if (total === 0) {
 				setTimeout(resolve, 500 / s);
 				return;
 			}
 
 			function spawnCustomer() {
-				if (spawned >= total) return;
+				if (spawned >= visualTotal) {
+					// 超過上限的部分：直接快速清算
+					if (silentTotal > 0) {
+						state.dailyRev += (silentTotal * currentPrice);
+						state.dailySold += silentTotal;
+						document.getElementById('ui-money').textContent = Math.floor(state.money + state.dailyRev);
+						// 如果原本就只有清算，或清算完畢且小人都走完了
+						if (finished === visualTotal) resolve();
+					}
+					return;
+				}
 
 				spawned++;
 				const c = document.createElement('div');
 				c.className = 'customer';
 				c.textContent = ['🚶', '🧍', '🚶‍♀️', '🧍‍♂️', '🏃'][Math.floor(Math.random() * 5)];
+				const yOffset = Math.random() * 15;
+				c.style.bottom = (5 + yOffset) + "px";
 				const xOffset = (Math.random() * 80) - 40;
 				c.style.transform = `translateX(${xOffset}px)`;
 				canvas.appendChild(c);
@@ -479,7 +495,6 @@
 					// 第二階段：消費
 					setTimeout(() => {
 						c.style.opacity = "0";
-
 						const coin = document.createElement('div');
 						coin.className = 'coin-pop';
 						coin.style.animationDuration = `${baseCoinTime / s}ms`; 
@@ -496,13 +511,13 @@
 							c.style.transition = `left ${baseMoveTime / s}ms linear`;
 							c.style.left = "-20%";
 							
-							// 第四階段：徹底消失並移除元素
+							// 第四階段：移除
 							setTimeout(() => {
 								c.remove();
 								coin.remove();
 								finished++;
-								// 當最後一位客人離開畫面時，觸發 resolve
-								if (finished === total) {
+								// 當視覺上的最後一位客人走完，且清算也完成時
+								if (finished === visualTotal) {
 									resolve();
 								}
 							}, baseMoveTime / s);
@@ -510,9 +525,15 @@
 					}, baseMoveTime / s);
 				}, 50 / s);
 
-				if (spawned < total) {
-					const nextDelay = (baseDuration / total) * (Math.random() * 0.5 + 0.75) / s;
+				if (spawned < visualTotal) {
+					// 這裡的間隔改由 visualTotal 來分配，確保動畫在時間內跑完
+					const nextDelay = (baseDuration / visualTotal) * (Math.random() * 0.5 + 0.75) / s;
 					setTimeout(spawnCustomer, nextDelay);
+				} else if (silentTotal > 0) {
+					// 如果有需要清算的，在最後一個動畫產生的瞬間立刻執行清算
+					state.dailyRev += (silentTotal * currentPrice);
+					state.dailySold += silentTotal;
+					document.getElementById('ui-money').textContent = Math.floor(state.money + state.dailyRev);
 				}
 			}
 

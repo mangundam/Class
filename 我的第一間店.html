@@ -236,10 +236,13 @@ const BUFF_POOL = [
     { name: "🎫 優惠禮券", desc: "客流 +15%, 售價 -15%", buy: 2500, dRate: 0.15, pRate: -0.15 },
     { name: "🧹 門面裝修", desc: "客流 +10%, 售價 +5%", buy: 5000, dRate: 0.10, pRate: 0.05 },
     { name: "📦 批發採購", desc: "單位成本 -20%, 客流 -10%", buy: 2000, cRate: -0.20, dRate: -0.1 },
-    { name: "👨‍🍳 專業培訓", desc: "售價 +15%, 人事 +20%", buy: 4000, pRate: 0.15, personnelRate: 0.2 }
+    { name: "👨‍🍳 專業培訓", desc: "售價 +15%, 人事 +20%", buy: 4000, pRate: 0.15, personnelRate: 0.2 },
+	{ name: "🏗️ 擴大店面", desc: "客流 +30%, 房租 +1500", buy: 8500, dRate: 0.30, rentAdd: 1500 },
+    { name: "🏢 開設分店", desc: "客流 +70%, 房租 +3000, 人事 +50%", buy: 18000, dRate: 0.70, rentAdd: 3000, personnelRate: 0.5 }
 ];
 
-//dRate=客流, cRate=成本, pRate=售價, personnelRate=人事
+//dRate=客流, cRate=成本, pRate=售價, personnelRate=人事, rentAdd=房租
+//沒有duration等於永久活動
 	const BIG_EVENTS = [
 		{
 			title: "⚖️ 法定工資調漲",

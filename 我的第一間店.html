@@ -417,22 +417,28 @@
 	}
 	
 	async function startDay() {
-		document.getElementById('btn-start').disabled = true;
-		state.dailyRev = 0; state.dailySold = 0;
+		const btn = document.getElementById('btn-start');
+		btn.disabled = true;
+		btn.textContent = "🏪 營業中..."; // 顯示效果
+		
+		state.dailyRev = 0; 
+		state.dailySold = 0;
 		const stats = calculateCurrentStats();
 		
 		const range = state.shop.demandMax - state.shop.demandMin + 1;
 		const baseDemand = Math.floor(Math.random() * range) + state.shop.demandMin; 
 		
 		const finalCount = Math.max(0, Math.floor(baseDemand * (1 + stats.dRate)) + stats.dAdd);
+		
+		// 等待所有客人都走完
 		await playBusinessAnimation(finalCount, stats.price);
 		
-		const totalIncome = state.dailyRev; // 動態產生的總收入
-		const totalCost = (state.dailySold * stats.cost) + stats.expense; // 銷貨成本 + 固定開銷
-		const netProfit = totalIncome - totalCost; // 當日純利
+		const totalIncome = state.dailyRev;
+		const totalCost = (state.dailySold * stats.cost) + stats.expense;
+		const netProfit = totalIncome - totalCost;
 		state.money += netProfit;
 		
-		//showSettlement(state.dailySold, state.dailyRev, totalCost, state.dailyRev - totalCost, state.money);
+		btn.textContent = "開店!"; // 結算後改回原樣
 		showSettlement(state.dailySold, totalIncome, totalCost, netProfit, state.money);
 	}
 
@@ -440,12 +446,19 @@
 		return new Promise(resolve => {
 			const canvas = document.getElementById('game-canvas');
 			let spawned = 0;
+			let finished = 0; // 新增：追蹤完成動作的客人數量
 			const s = state.gameSpeed; 
 			
 			const baseDuration = 10000;
 			const baseMoveTime = 3000;
 			const baseStayTime = 800;
 			const baseCoinTime = 1000;
+
+			// 如果完全沒客人，直接結束
+			if (total === 0) {
+				setTimeout(resolve, 500 / s);
+				return;
+			}
 
 			function spawnCustomer() {
 				if (spawned >= total) return;
@@ -458,10 +471,12 @@
 				c.style.transform = `translateX(${xOffset}px)`;
 				canvas.appendChild(c);
 
+				// 第一階段：走到店門口
 				setTimeout(() => {
 					c.style.transition = `left ${baseMoveTime / s}ms linear`;
 					c.style.left = "46%";
 
+					// 第二階段：消費
 					setTimeout(() => {
 						c.style.opacity = "0";
 
@@ -471,21 +486,29 @@
 						coin.innerHTML = `💰 +${currentPrice}`;
 						document.getElementById('shop-node').appendChild(coin);
 
-						//state.money += currentPrice;
 						state.dailyRev += currentPrice;
 						state.dailySold += 1;
 						document.getElementById('ui-money').textContent = Math.floor(state.money + state.dailyRev);
 
+						// 第三階段：離開
 						setTimeout(() => {
 							c.style.opacity = "1";
 							c.style.transition = `left ${baseMoveTime / s}ms linear`;
 							c.style.left = "-20%";
-							setTimeout(() => coin.remove(), baseCoinTime / s);
+							
+							// 第四階段：徹底消失並移除元素
+							setTimeout(() => {
+								c.remove();
+								coin.remove();
+								finished++;
+								// 當最後一位客人離開畫面時，觸發 resolve
+								if (finished === total) {
+									resolve();
+								}
+							}, baseMoveTime / s);
 						}, baseStayTime / s);
 					}, baseMoveTime / s);
 				}, 50 / s);
-
-				setTimeout(() => c.remove(), (baseMoveTime * 2 + baseStayTime + 500) / s);
 
 				if (spawned < total) {
 					const nextDelay = (baseDuration / total) * (Math.random() * 0.5 + 0.75) / s;
@@ -494,9 +517,6 @@
 			}
 
 			spawnCustomer();
-
-			// 結算等待時間縮短
-			setTimeout(resolve, (baseDuration / s) + (5000 / s));
 		});
 	}
 

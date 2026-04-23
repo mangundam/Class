@@ -5,8 +5,8 @@ body { font-family: "Noto Sans TC", sans-serif; background: #f0f2f5; margin: 0; 
 
 .header-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
 .stat-card { background: #f8fafc; padding: 15px; border-radius: 18px; text-align: center; border: 1px solid #e2e8f0; }
-.stat-val { font-size: 24px; font-weight: 800; color: var(--primary); display: block; }
-.stat-hint { font-size: 14px; color: #64748b; margin-top: 5px; display: block; line-height: 1.4; }
+.stat-val { font-size: 36px; font-weight: 800; color: var(--primary); display: block; }
+.stat-hint { font-size: 18px; color: #64748b; margin-top: 5px; display: block; line-height: 1.4; }
 #ui-shop-name {font-size:20px;}
 #game-canvas {
 	height: 280px; background: linear-gradient(to bottom, #bae6fd 0%, #e0f2fe 100%); 
@@ -116,7 +116,7 @@ body { font-family: "Noto Sans TC", sans-serif; background: #f0f2f5; margin: 0; 
 .speed-controls { margin-top: 5px; display: flex; gap: 5px; justify-content: center; }
 .btn-speed { 
 	background: #e2e8f0; border: none; padding: 2px 8px; border-radius: 6px; 
-	font-size: 18px; cursor: pointer; transition: 0.2s; font-weight: bold;
+	font-size: 24px !important; cursor: pointer; transition: 0.2s; font-weight: bold;
 }
 .btn-speed:hover { background: #cbd5e1; }
 .btn-speed.active { background: var(--primary); color: white; }

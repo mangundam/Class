@@ -4,13 +4,13 @@
 
 body { 
 	font-family: "Noto Sans TC", sans-serif; background: #f0f2f5; margin: 0; padding: 10px; 
-	overflow: hidden; height: 100vh; display: flex; flex-direction: column; 
+	overflow: auto; height: 100vh; display: flex; flex-direction: column; 
 }
 
 .container { 
 	width: 100%; max-width: 500px; margin: 0 auto; background: #fff; padding: 15px; 
 	border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; 
-	flex: 1; display: flex; flex-direction: column; overflow: hidden; /* 合併自後續定義：防止內容溢出 */
+	min-height: 100%; flex: none; overflow: visible;
 }
 
 /* --- 遊戲畫面區 (game-canvas) --- */
@@ -18,7 +18,7 @@ body {
 	height: 180px; /* 取自下方縮減後的高度 */
 	background: linear-gradient(to bottom, #bae6fd 0%, #e0f2fe 100%); 
 	border-radius: 20px; position: relative; overflow: hidden; margin-bottom: 15px; 
-	border: 4px solid #f1f5f9; /* 取自下方縮減後的邊框 */
+	border: 4px solid #f1f5f9; flex-shrink: 0;
 }
 
 #game-canvas .customer { will-change: left; }
@@ -47,7 +47,7 @@ body {
 
 .branch-icon {
     position: absolute;
-    font-size: 65px;
+    font-size: 45px;
 	filter: saturate(0.6) brightness(0.9); /* 降低飽和度，顏色較不明顯 */
     transition: all 0.5s ease;
 }
@@ -67,13 +67,18 @@ body {
 .stat-label { font-size: 11px; color: #64748b; margin-bottom: 2px; }
 .stat-hint { font-size: 8px; color: #64748b; margin-top: 5px; display: block; line-height: 1.4; }
 #ui-money,#ui-shop-name { font-size:16px;}
-.setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; flex: 0 0 auto; }
+.setup-grid { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 4px; margin-bottom: 10px; flex: 0 0 auto; }
 .card { border: 1px solid #e5e7eb; padding: 10px; border-radius: 12px; background: #fafbfc; }
 .card h3 { font-size: 12px; margin: 0 0 5px 0; }
-.card div { font-size: 10px !important; line-height: 1.2 !important; }
+.card div { font-size: 12px !important; line-height: 1.2 !important; }
+#active-buffs-list, #history-buffs-inline, #event-impact-list, #history-events-inline { font-size: 10px !important; }
+
 
 .btn-main { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; width: 100%; padding: 12px; border-radius: 12px; font-size: 18px; font-weight: bold; border: none; cursor: pointer; margin-bottom: 10px; }
-.btn-info { background: #94a3b8; color: white; border-radius: 12px; padding: 12px; border: none; cursor: pointer; font-weight: bold; margin-bottom: 10px; width: 100%; font-size: 18px; }
+.btn-main:active {transform: scale(0.98); opacity: 0.9; }
+.btn-main:disabled {background: #94a3b8 !important; cursor: not-allowed; transform: none; opacity: 0.7; }
+
+
 
 .speed-controls { margin-top: 5px; display: flex; gap: 5px; justify-content: center; }
 .btn-speed { background: #e2e8f0; border: none; padding: 2px 8px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: 0.2s; font-weight: bold; }
@@ -102,29 +107,24 @@ body {
 #settle-modal .btn-main { margin-top: 10px !important; padding: 10px !important; font-size: 15px !important; width: 100% !important; }
 #settle-modal hr { display: none; }
 
-/* 投資按鈕 (最終垂直排列版本) */
-#buff-options { display: flex; flex-direction: column; align-items: center; width: 100%; }
-.btn-buff-card {
-	display: flex !important; flex-direction: column !important; align-items: center; justify-content: center;
-	width: 90%; margin: 0 auto 8px; padding: 10px 15px !important; border: 2px solid #e5e7eb;
-	border-radius: 12px; background: #fff; cursor: pointer; box-sizing: border-box; transition: 0.3s;
-}
-.btn-buff-card:hover { border-color: var(--primary); background: #f5f3ff; transform: scale(1.03); }
+#buff-options { display: flex !important; flex-direction: column !important; gap: 10px; width: 100%; }
+.btn-buff-card {display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important; width: 100% !important; margin: 0 auto !important; padding: 10px 15px !important; border: 2px solid #e5e7eb;border-radius: 15px; background: #fff; cursor: pointer; box-sizing: border-box; text-align: left !important; }
 
-.buff-name-label { font-size: 15px !important; font-weight: 800; color: #1f2937; margin-bottom: 2px; }
-.buff-desc-label { font-size: 15px !important; color: #64748b; margin-bottom: 5px; }
-.buff-cost-label { font-size: 12px !important; font-weight: 800; color: var(--danger); background: #fee2e2; padding: 2px 8px !important; border-radius: 6px; }
+.buff-name-label { font-size: 15px !important; font-weight: 800; color: #1f2937; margin: 0 10px 0 0 !important; white-space: nowrap; }
+.buff-desc-label { font-size: 12px !important; color: #64748b; flex: 1; margin: 0 !important;line-height: 1.2;}
+.buff-cost-label { font-size: 12px !important; font-weight: 800; color: var(--danger); background: #fee2e2; padding: 4px 8px !important; border-radius: 6px; margin-left: 10px !important;white-space: nowrap; }
 
+.btn-buff-card:hover { border-color: var(--primary); background: #f5f3ff; }
 /* --- Log 與 其他區域 --- */
 .log { 
 	background: #0f172a; color: #cbd5e1; padding: 10px; border-radius: 10px; 
-	height: 100px; overflow-y: auto !important; font-family: monospace; font-size: 12px; 
+	height: 120px; overflow-y: auto !important; font-family: monospace; font-size: 12px; 
 	border-left: 5px solid var(--primary); margin-top: 10px; flex: none; 
 }
-#game-log.fully-visible { height: auto; max-height: auto; overflow-y: visible; }
+#game-log.fully-visible { height: auto; max-height: none; overflow-y: visible; }
 
 .strategy-history-area { max-height: 60px; overflow-y: auto; }
-.status-tag { display: inline-block; background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 8px; margin: 4px; font-size: 14px; border: 1px solid #fecaca; }
+.status-tag { display: inline-block; background: #fee2e2; color: #991b1b; padding: 3px 3px; border-radius: 8px; margin: 1px; font-size: 10px; border: 1px solid #fecaca; }
 .expanded-card { max-height: 60px !important; height: auto !important; }
 .hidden-area { display: none !important; }
 

@@ -49,7 +49,7 @@
     <div class="setup-grid">
         <div class="card">
             <h3>📊 營運數據</h3>
-            <div style="font-size: 20px; line-height: 1.8;">
+            <div style="line-height: 1.8;">
                 單價：<b id="ui-price" style="color:var(--primary)">0</b> 元<br>
                 成本：<b id="ui-cost" style="color:var(--danger)">0</b> 元<br>
                 預估客流：<b id="ui-demand-range" style="color:var(--warning)">25 ~ 40</b> 人
@@ -58,11 +58,11 @@
 		<div class="card">
 			<h3 style="margin-top:0">📜 經營筆記</h3>
 			<div class="strategy-history-area">
-				<div id="active-buffs-list" style="font-size: 14px; margin-bottom: 10px;">
+				<div id="active-buffs-list" style="margin-bottom: 10px;">
 					<b style="color:var(--primary)">🎯 當前策略：</b>
 					<div id="history-buffs-inline" style="display: flex; flex-wrap: wrap; gap: 4px; margin-top:5px;">暫無</div>
 				</div>
-				<div id="event-impact-list" style="font-size: 14px;">
+				<div id="event-impact-list">
 					<b style="color:var(--danger)">⚠️ 事件影響：</b>
 					<div id="history-events-inline" style="margin-top:5px;">暫無</div>
 				</div>
@@ -333,7 +333,7 @@
 				const displayTags = Object.keys(counts).map(name => {
 					const count = counts[name];
 					const countText = count > 1 ? ` *${count}` : ""; // 超過1個才顯示 *幾
-					return `<span class="status-tag" style="margin:2px; font-size:11px;">${name}${countText}</span>`;
+					return `<span class="status-tag">${name}${countText}</span>`;
 				});
 
 				buffDiv.innerHTML = displayTags.join('') || "無";
@@ -665,7 +665,7 @@
 	
 	function gameOver(title) {
 		document.getElementById('btn-start').classList.add('hidden-area');
-		document.getElementById('game-canvas').classList.add('hidden-area');
+		//document.getElementById('game-canvas').classList.add('hidden-area');
 
 		const strategyArea = document.querySelector('.strategy-history-area');
 		if (strategyArea) strategyArea.classList.add('expanded-card');

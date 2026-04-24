@@ -2,290 +2,165 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>文意選填測驗系統</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文意選填-考卷檔案產生器</title>
     <style>
-        :root { 
-            --primary: #2563eb; 
-            --success: #16a34a; 
-            --danger: #dc2626; 
-            --bg: #f1f5f9; 
-            --card-bg: #ffffff;
-        }
-
-        /* 基礎設定 */
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang TC", "Microsoft JhengHei", sans-serif;
-            background: var(--bg); 
-            line-height: 1.8; 
-            margin: 0;
-            padding: 10px;
-            color: #1e293b;
-        }
-
-        .container { 
-            max-width: 900px; 
-            margin: 10px auto; 
-            background: var(--card-bg); 
-            padding: 20px; 
-            border-radius: 16px; 
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); 
-        }
-
-        h1 { font-size: 1.5rem; color: var(--primary); text-align: center; margin-bottom: 20px; }
-        
-        .section { 
-            margin-bottom: 20px; 
-            padding-bottom: 15px;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        label { display: block; font-weight: 600; margin-bottom: 8px; color: #475569; }
-
-        /* 輸入框樣式 */
-        input, textarea { 
-            width: 100%; 
-            padding: 12px; 
-            border: 2px solid #e2e8f0; 
-            border-radius: 8px; 
-            box-sizing: border-box; 
-            font-size: 16px; 
-            transition: border-color 0.2s;
-        }
-        input:focus { border-color: var(--primary); outline: none; }
-
-        /* 文章區域排版 */
-        .passage-area { 
-            background: #fff; 
-            padding: 15px; 
-            border: 1px solid #e2e8f0;
-            border-radius: 12px; 
-            line-height: 1.5; 
-            font-size: 1.1rem;
-            word-wrap: break-word;
-            white-space: normal;
-        }
-
-        /* 下拉選單樣式優化 */
-        select.quiz-select { 
-            appearance: none; /* 去除原生箭頭 */
-            background-color: #f8fafc;
-            color: var(--primary); 
-            font-weight: bold; 
-            padding: 4px 8px; 
-            font-size: 16px; 
-            border: 2px solid #cbd5e1;
-            border-radius: 6px;
-            margin: 0 4px;
-            cursor: pointer;
-            vertical-align: middle;
-        }
-
-        .option-bank { 
-            margin-top: 15px; 
-            padding: 15px; 
-            background: #f8fafc; 
-            border-left: 4px solid var(--primary);
-            border-radius: 4px; 
-            font-size: 0.95rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .btn { 
-            background: var(--primary); 
-            color: white; 
-            padding: 15px; 
-            border: none; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            width: 100%; 
-            font-size: 1.1rem; 
-            font-weight: bold;
-            margin-top: 20px;
-            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
-        }
-
-        /* 結果顯示 */
-        .wrong-text { color: var(--danger); font-weight: bold; text-decoration: line-through; margin-right: 8px; }
-        .correct-text { color: var(--success); font-weight: bold; border-bottom: 2px solid var(--success); padding: 0 2px; }
-        
-        #analysisBox { 
-            display: none; 
-            background: #fff7ed; 
-            border: 2px solid #fed7aa; 
-            padding: 20px; 
-            border-radius: 12px; 
-            margin-top: 20px; 
-        }
-
-        /* 手機版 RWD 微調 */
-        @media (max-width: 600px) {
-            body { padding: 5px; }
-            .container { padding: 15px; border-radius: 0; margin: 0; }
-            .passage-area { font-size: 1rem; padding: 10px; line-height: 1.5; }
-            select.quiz-select { padding: 6px 10px; font-size: 16px; } /* 手機版選單大一點好點擊 */
-            h1 { font-size: 1.25rem; }
-        }
-
-        #shareLinkArea { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; margin-top: 20px; word-break: break-all; border-radius: 8px; }
+        :root { --primary: #2563eb; --bg: #f1f5f9; }
+        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: var(--bg); padding: 20px; color: #1e293b; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { color: var(--primary); text-align: center; }
+        .section { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #475569; }
+        input, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; font-size: 16px; font-family: inherit; }
+        input:focus, textarea:focus { border-color: var(--primary); outline: none; }
+        .btn { background: var(--primary); color: white; padding: 15px; border: none; border-radius: 10px; cursor: pointer; width: 100%; font-size: 1.1rem; font-weight: bold; margin-top: 10px; }
+        .btn:hover { background: #1d4ed8; }
+        .hint { font-size: 14px; color: #64748b; margin-top: 4px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="teacherMode">
-        <h1>題組產生器</h1>
-        <div class="section">
-            <label>題目篇章名稱</label>
-            <input type="text" id="t_name" placeholder="如：115學測-文意選填">
-        </div>
-        <div class="section">
-            <label>文章內容 (挖空請用 (1.) 格式)</label>
-            <textarea id="t_content" rows="8" placeholder="貼上文章..."></textarea>
-        </div>
-        <div class="section">
-            <label>選項清單 (A) 到 (J)</label>
-            <textarea id="t_options" rows="3" placeholder="(A) survivors (B) propose..."></textarea>
-        </div>
-        <div class="section">
-            <label>正確答案 (依序填 A B C...)</label>
-            <input type="text" id="t_answers" placeholder="H J A D F B E G C I">
-        </div>
-        <div class="section">
-            <label>題目解析</label>
-            <textarea id="t_analysis" rows="4" placeholder="輸入解析..."></textarea>
-        </div>
-        <button class="btn" onclick="generateLink()">生成學生作答連結</button>
-        
-        <div id="shareLinkArea">
-            <strong>生成的作答連結：</strong><br>
-            <a id="finalLink" href="#" target="_blank" style="color: var(--primary);"></a>
-        </div>
+    <h1>獨立考卷檔案產生器</h1>
+    <p style="text-align:center; color:#666;">輸入題目後，系統會自動生成並下載一個新的 HTML 檔案供學生作答。</p>
+    
+    <div class="section">
+        <label>題目篇章名稱</label>
+        <input type="text" id="t_name" placeholder="如：114學測-文意選填-生命閃爍">
     </div>
-
-    <div id="studentMode" style="display:none;">
-        <h1 id="s_title"></h1>
-        <div class="section">
-            <label>學號姓名：</label>
-            <input type="text" id="studentId" placeholder="例如：10101 王小明">
-        </div>
-        <div id="s_passage" class="passage-area"></div>
-        <div id="s_options_bank" class="option-bank"></div>
-        
-        <button class="btn" id="submitBtn" onclick="submitExam()">提交考卷</button>
-
-        <div id="analysisBox">
-            <h2 id="scoreDisplay"></h2>
-            <div style="font-weight: bold; margin-bottom: 10px; color: #9a3412;">題目解析：</div>
-            <div id="analysisText" style="white-space: pre-wrap; color: #431407;"></div>
-        </div>
+    <div class="section">
+        <label>文章內容</label>
+        <textarea id="t_content" rows="8" placeholder="直接貼上文章內容，挖空處請用 (1.) (2.) 格式..."></textarea>
+        <div class="hint">系統會自動將 (數字.)例如(21.) 轉換為下拉選單</div>
     </div>
+    <div class="section">
+        <label>選項清單 (A) 到 (J)</label>
+        <textarea id="t_options" rows="3" placeholder="(A) survivors (B) propose (C) natural..."></textarea>
+    </div>
+    <div class="section">
+        <label>正確答案</label>
+        <input type="text" id="t_answers" placeholder="H J A D F B E G C I">
+        <div class="hint">請依序輸入英文字母，用空格隔開即可</div>
+    </div>
+    <div class="section">
+        <label>題目解析</label>
+        <textarea id="t_analysis" rows="4" placeholder="提交後會顯示在最下方的解析內容..."></textarea>
+    </div>
+    
+    <button class="btn" onclick="downloadExam()">立即下載 HTML 考卷檔</button>
 </div>
 
 <script>
+function downloadExam() {
+    const name = document.getElementById('t_name').value;
+    const content = document.getElementById('t_content').value;
+    const options = document.getElementById('t_options').value;
+    const rawAnswers = document.getElementById('t_answers').value;
+    const answers = rawAnswers.toUpperCase().match(/[A-J]/g);
+    const analysis = document.getElementById('t_analysis').value;
+
+    if(!name || !content || !answers) {
+        return alert("請填寫完整資訊！題目名稱、內容與答案皆為必填。");
+    }
+
+    const examData = { name, content, options, answers, analysis };
+
+    // 構建獨立考卷的 HTML 代碼
+    const template = `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>測驗：${name}</title>
+    <style>
+        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --bg: #f8fafc; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); line-height: 1.8; padding: 10px; margin: 0; color: #1e293b; }
+        .container { max-width: 850px; margin: 10px auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: var(--primary); text-align: center; font-size: 1.4rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+        .info-sec { margin-bottom: 20px; }
+        label { font-weight: bold; color: #475569; }
+        input[type="text"] { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        .passage-area { background: #fff; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; line-height: 1.6; font-size: 1.1rem; word-wrap: break-word; }
+        select.quiz-select { color: var(--primary); font-weight: bold; padding: 4px 6px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 6px; margin: 0 4px; background: #f8fafc; cursor: pointer; }
+        .option-bank { margin-top: 15px; padding: 15px; background: #f1f5f9; border-left: 4px solid var(--primary); border-radius: 4px; font-style: italic; font-size: 0.95rem; }
+        .submit-btn { background: var(--primary); color: white; padding: 16px; border: none; border-radius: 10px; cursor: pointer; width: 100%; font-size: 1.1rem; font-weight: bold; margin-top: 25px; }
+        .wrong-text { color: var(--danger); font-weight: bold; text-decoration: line-through; margin-right: 8px; }
+        .correct-text { color: var(--success); font-weight: bold; border-bottom: 2px solid var(--success); }
+        #analysisBox { display: none; background: #fff7ed; border: 2px solid #fed7aa; padding: 20px; border-radius: 12px; margin-top: 20px; }
+        @media (max-width: 600px) { .container { padding: 15px; } .passage-area { font-size: 1rem; line-height: 1.6; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>${name}</h1>
+    <div class="info-sec"><label>學號姓名：</label><input type="text" id="studentId" placeholder="請輸入學號與姓名"></div>
+    <div id="s_passage" class="passage-area"></div>
+    <div id="s_options_bank" class="option-bank"></div>
+    <button class="submit-btn" id="submitBtn" onclick="submitExam()">提交考卷回傳後台</button>
+    <div id="analysisBox">
+        <h2 id="scoreDisplay" style="color: var(--danger);"></h2>
+        <div style="font-weight:bold; margin-bottom:5px; color:#9a3412;">題目解析：</div>
+        <div id="analysisText" style="white-space: pre-wrap; color: #431407;"></div>
+    </div>
+</div>
+<script>
 const FORM_CONFIG = {
     baseUrl: "https://docs.google.com/forms/d/e/1FAIpQLScWNOI0g2ggmmlWUDrcWyjCQ9wFNTqvm2Qi7CJ8y3x2ylTgag/formResponse",
-    entry_user: "entry.589984770",
-    entry_title: "entry.1352838166",
-    entry_ans: "entry.505437956",
-    entry_wrong: "entry.1887862863"
+    entry_user: "entry.589984770", entry_title: "entry.1352838166", entry_ans: "entry.505437956", entry_wrong: "entry.1887862863"
 };
-
-let currentData = {};
+const currentData = ${JSON.stringify(examData)};
 let optionMap = {};
 
-function generateLink() {
-    const data = {
-        name: document.getElementById('t_name').value,
-        content: document.getElementById('t_content').value,
-        options: document.getElementById('t_options').value,
-        answers: document.getElementById('t_answers').value.toUpperCase().match(/[A-J]/g),
-        analysis: document.getElementById('t_analysis').value
-    };
-    if(!data.name || !data.content || !data.answers) return alert("請填寫完整資訊！");
-    const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
-    const link = window.location.origin + window.location.pathname + "#" + encoded;
-    document.getElementById('shareLinkArea').style.display = 'block';
-    document.getElementById('finalLink').href = link;
-    document.getElementById('finalLink').innerText = link;
-}
-
 window.onload = () => {
-    if(window.location.hash) {
-        try {
-            const rawData = decodeURIComponent(atob(window.location.hash.substring(1)));
-            currentData = JSON.parse(rawData);
-            showStudentMode();
-        } catch(e) { console.error("解析失敗", e); }
-    }
-};
-
-function showStudentMode() {
-    document.getElementById('teacherMode').style.display = 'none';
-    document.getElementById('studentMode').style.display = 'block';
-    document.getElementById('s_title').innerText = currentData.name;
-    document.getElementById('s_options_bank').innerText = "選項庫：" + currentData.options;
-    
-    const optRegex = /\(([A-J])\)\s*([^\s(]+)/g;
-    let m;
-    while ((m = optRegex.exec(currentData.options)) !== null) {
-        optionMap[m[1]] = m[2];
-    }
-
+    const optRegex = /\\(([A-J])\\)\\s*([^\\s(]+)/g;
+    let m; while ((m = optRegex.exec(currentData.options)) !== null) { optionMap[m[1]] = m[2]; }
+    document.getElementById('s_options_bank').innerText = "選項預覽：" + currentData.options;
     let text = currentData.content;
-    const matches = text.match(/\(\d+\.\)/g); 
-    
+    const matches = text.match(/\\(\\d+\\.\\)/g);
     if (matches) {
-        matches.forEach((m, index) => {
-            let optionsHtml = "ABCDEFGHIJ".split('').map(letter => {
-                const word = optionMap[letter] || "";
-                return `<option value="${letter}">(${letter}) ${word}</option>`;
+        matches.forEach((m, i) => {
+            let optsHtml = "ABCDEFGHIJ".split('').map(L => {
+                const word = optionMap[L] || "";
+                return \`<option value="\${L}">(\${L}) \${word}</option>\`;
             }).join('');
-
-            let selectHtml = `<select class="quiz-select" id="q_${index}"><option value="">${m}</option>${optionsHtml}</select>`;
-            text = text.replace(m, selectHtml);
+            text = text.replace(m, \`<select class="quiz-select" id="q_\${i}"><option value="">\${m}</option>\${optsHtml}</select>\`);
         });
     }
     document.getElementById('s_passage').innerHTML = text;
-}
+};
 
 function submitExam() {
     const studentInfo = document.getElementById('studentId').value;
     if(!studentInfo) return alert("請輸入學號姓名！");
-
-    let studentAnswers = [];
-    let wrongCount = 0;
-    const selects = document.querySelectorAll('.quiz-select');
-    
-    selects.forEach((sel, i) => {
-        const userVal = sel.value;
-        const correctVal = currentData.answers[i];
-        const userWord = userVal ? `(${userVal}) ${optionMap[userVal] || ''}` : '(未填)';
-        const correctWord = `(${correctVal}) ${optionMap[correctVal] || ''}`;
-        
+    let studentAnswers = []; let wrongCount = 0;
+    document.querySelectorAll('.quiz-select').forEach((sel, i) => {
+        const userVal = sel.value; const correctVal = currentData.answers[i];
+        const userWord = userVal ? \`(\${userVal}) \${optionMap[userVal]||''}\` : '(未填)';
+        const correctWord = \`(\${correctVal}) \${optionMap[correctVal]||''}\`;
         studentAnswers.push(userVal || "?");
-        
-        const resultSpan = document.createElement('span');
-        if(userVal === correctVal) {
-            resultSpan.innerHTML = `<span class="correct-text">${correctWord}</span>`;
-        } else {
-            wrongCount++;
-            resultSpan.innerHTML = `<span class="wrong-text">${userWord}</span><span class="correct-text">${correctWord}</span>`;
-        }
-        sel.parentNode.replaceChild(resultSpan, sel);
+        const res = document.createElement('span');
+        if(userVal === correctVal) { res.innerHTML = \`<span class="correct-text">\${correctWord}</span>\`; }
+        else { wrongCount++; res.innerHTML = \`<span class="wrong-text">\${userWord}</span><span class="correct-text">\${correctWord}</span>\`; }
+        sel.parentNode.replaceChild(res, sel);
     });
-
     document.getElementById('submitBtn').style.display = 'none';
     document.getElementById('analysisBox').style.display = 'block';
-    document.getElementById('scoreDisplay').innerText = `測驗結束！錯題數：${wrongCount}`;
+    document.getElementById('scoreDisplay').innerText = "測驗完成！錯題數：" + wrongCount;
     document.getElementById('analysisText').innerText = currentData.analysis;
-
-    const finalUrl = `${FORM_CONFIG.baseUrl}?usp=pp_url&${FORM_CONFIG.entry_user}=${encodeURIComponent(studentInfo)}&${FORM_CONFIG.entry_title}=${encodeURIComponent(currentData.name)}&${FORM_CONFIG.entry_ans}=${encodeURIComponent(studentAnswers.join(','))}&${FORM_CONFIG.entry_wrong}=${encodeURIComponent(wrongCount)}`;
-
+    const finalUrl = \`\${FORM_CONFIG.baseUrl}?usp=pp_url&\${FORM_CONFIG.entry_user}=\${encodeURIComponent(studentInfo)}&\${FORM_CONFIG.entry_title}=\${encodeURIComponent(currentData.name)}&\${FORM_CONFIG.entry_ans}=\${encodeURIComponent(studentAnswers.join(','))}&\${FORM_CONFIG.entry_wrong}=\${encodeURIComponent(wrongCount)}\`;
     fetch(finalUrl, { mode: 'no-cors' });
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // 自動捲回頂部看分數
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+<\/script>
+</body>
+</html>`;
+
+    // 執行下載
+    const blob = new Blob([template], { type: "text/html" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `考卷_${name}.html`;
+    link.click();
 }
 </script>
 </body>

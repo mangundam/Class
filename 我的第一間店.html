@@ -13,7 +13,7 @@
     <div class="header-stats">
     <div class="stat-card">
         <span class="stat-label">📅 天數</span>
-        <span class="stat-val" id="ui-day">1</span>
+        <span class="stat-val" id="ui-day">-</span>
         <div class="speed-controls">
             <button class="btn-speed active" id="speed-1" onclick="setSpeed(1)">1x</button>
 			<button class="btn-speed" id="speed-2" onclick="setSpeed(2)">2x</button>
@@ -23,14 +23,14 @@
     </div>
     <div class="stat-card">
         <span class="stat-label">💰 持有現金</span>
-        <span class="stat-val" id="ui-money">50000</span>
+        <span class="stat-val" id="ui-money">-</span>
         <hr style="width:100%; border:0; border-top:1px solid #ddd; margin:4px 0">
         <span id="ui-shop-name" style="font-weight:bold; color:var(--success)">-</span>
     </div>
     <div class="stat-card">
         <span class="stat-label">💸 固定開銷</span>
-        <span class="stat-val" id="ui-expense" style="color:var(--danger)">0</span>
-        <span class="stat-hint" id="ui-expense-hint">💡 固定成本：店租 0元 + 人事 2,400元 = 2,400元/天</span>
+        <span class="stat-val" id="ui-expense" style="color:var(--danger)">-</span>
+        <span class="stat-hint" id="ui-expense-hint"></span>
     </div>
 </div>
 
@@ -50,9 +50,9 @@
         <div class="card">
             <h3>📊 營運數據</h3>
             <div style="line-height: 1.8;">
-                單價：<b id="ui-price" style="color:var(--primary)">0</b> 元<br>
-                成本：<b id="ui-cost" style="color:var(--danger)">0</b> 元<br>
-                預估客流：<b id="ui-demand-range" style="color:var(--warning)">25 ~ 40</b> 人
+                單價：<b id="ui-price" style="color:var(--primary)">-</b> 元<br>
+                成本：<b id="ui-cost" style="color:var(--danger)">-</b> 元<br>
+                預估客流：<b id="ui-demand-range" style="color:var(--warning)">-</b> 人
             </div>
         </div>
 		<div class="card">
@@ -60,11 +60,11 @@
 			<div class="strategy-history-area">
 				<div id="active-buffs-list" style="margin-bottom: 10px;">
 					<b style="color:var(--primary)">🎯 當前策略：</b>
-					<div id="history-buffs-inline" style="display: flex; flex-wrap: wrap; gap: 4px; margin-top:5px;">暫無</div>
+					<div id="history-buffs-inline" style="display: flex; flex-wrap: wrap; gap: 4px; margin-top:5px;">-</div>
 				</div>
 				<div id="event-impact-list">
 					<b style="color:var(--danger)">⚠️ 事件影響：</b>
-					<div id="history-events-inline" style="margin-top:5px;">暫無</div>
+					<div id="history-events-inline" style="margin-top:5px;">-</div>
 				</div>
 			</div>
 		</div>
@@ -106,9 +106,9 @@
 
 <script>
 	const SHOP_DATA = {
-		drink: { name: "飲料店", icon: "🥤", price: 65, cost: 22, demandMin: 36, demandMax: 55, personnel: 2400 },//1548~2365
+		drink: { name: "飲料店", icon: "🥤", price: 65, cost: 22, demandMin: 40, demandMax: 58, personnel: 2400 },//1548~2365
 		bakery: { name: "烘焙坊", icon: "🥐", price: 180, cost: 55, demandMin: 18, demandMax: 22, personnel: 3000 },//2250~2750
-		game: { name: "電玩店", icon: "🎮", price: 1800, cost: 1100, demandMin: 1, demandMax: 5, personnel: 2800 },//700~3500
+		game: { name: "電玩店", icon: "🎮", price: 1800, cost: 1100, demandMin: 1, demandMax: 5, personnel: 2400 },//700~3500
 		hobby: { name: "玩具店", icon: "🧸", price: 900, cost: 500, demandMin: 6, demandMax: 8, personnel: 3600 }//2400~3200
 	};
 
@@ -147,7 +147,7 @@
 			desc: "店門口的捷運站正式完工啟用！這將帶來穩定的人潮，但地段租金也隨之暴漲。",
 			options: [
 				{ 
-					text: "原地升級 (客流+30%, 租金+2000)", 
+					text: "原地升級 (客流+30%, 租金+2,000)", 
 					impact: { dRate: 0.30, rentAdd: 2000, log: "長期：捷運站帶來龐大客流，但租金成本大幅提升"} 
 				},
 				{ 
@@ -161,7 +161,7 @@
 			desc: "氣象局發布陸上警報，影響預計僅限明日。",
 			options: [
 				{ 
-					text: "防颱加固 (開銷+1000, 客流-40%)", 
+					text: "防颱加固 (開銷+1,000, 客流-40%)", 
 					impact: { rentAdd: 1000, dRate: -0.4, log: "短期：加固設施支出", duration: 1 } 
 				},
 				{ 
@@ -207,7 +207,7 @@
 					impact: { dRate: -0.30, log: "短期：施工阻擋了客流", duration: 3 } 
 				},
 				{
-					text: "補貼吸引 (開銷+1500, 客流-10%)",
+					text: "補貼吸引 (開銷+1,500, 客流-10%)",
 					impact: { eAdd: 1500, dRate: -0.10, log: "短期：投入行銷經費補貼", duration: 3 }
 				}
 			]
@@ -306,11 +306,11 @@
 
 	function updateUI() {
 			const stats = calculateCurrentStats();
-			document.getElementById('ui-money').textContent = Math.floor(state.money);
+			document.getElementById('ui-money').textContent = Math.floor(state.money).toLocaleString();
 			document.getElementById('ui-day').textContent = state.day;
-			document.getElementById('ui-price').textContent = stats.price;
-			document.getElementById('ui-cost').textContent = stats.cost;
-			document.getElementById('ui-expense').textContent = Math.floor(stats.expense);
+			document.getElementById('ui-price').textContent = stats.price.toLocaleString();
+			document.getElementById('ui-cost').textContent = stats.cost.toLocaleString();
+			document.getElementById('ui-expense').textContent = Math.floor(stats.expense).toLocaleString();
 			
 			document.getElementById('ui-expense-hint').textContent = 
 				`💡 固定成本：店租 ${stats.Statrent.toLocaleString()}元 + 人事 ${stats.StatPersonnel.toLocaleString()}元 = ${Math.floor(stats.expense).toLocaleString()}元/天`;
@@ -376,13 +376,11 @@
 				const storeEmojis = ['🏠', '🏘️', '🏤', '🏢', '🏬', '🏪', '🏨', '🏦'];
 				let newLeft, isOverlap, attempts = 0;
 
-				// 嘗試尋找不重疊的座標，最多嘗試 50 次避免死迴圈
 				do {
 					isOverlap = false;
 					const side = Math.random() > 0.5 ? 'left' : 'right';
-					newLeft = (side === 'left') ? (Math.random() * 32) : (68 + Math.random() * 25);
+					newLeft = (side === 'left') ? (Math.random() * 28) : (72 + Math.random() * 25);
 					
-					// 檢查與「已存在分店」的距離
 					for (let existing of state.branchPositions) {
 						// 如果兩個座標水平距離小於 8%，視為重疊 (數字越大分得越開)
 						if (Math.abs(existing.left - newLeft) < 15) {
@@ -470,7 +468,7 @@
 					if (silentTotal > 0) {
 						state.dailyRev += (silentTotal * currentPrice);
 						state.dailySold += silentTotal;
-						document.getElementById('ui-money').textContent = Math.floor(state.money + state.dailyRev);
+						document.getElementById('ui-money').textContent = Math.floor(state.money + state.dailyRev).toLocaleString();
 						// 如果原本就只有清算，或清算完畢且小人都走完了
 						if (finished === visualTotal) resolve();
 					}
@@ -503,7 +501,7 @@
 
 						state.dailyRev += currentPrice;
 						state.dailySold += 1;
-						document.getElementById('ui-money').textContent = Math.floor(state.money + state.dailyRev);
+						document.getElementById('ui-money').textContent = Math.floor(state.money + state.dailyRev).toLocaleString();
 
 						// 第三階段：離開
 						setTimeout(() => {
@@ -533,7 +531,7 @@
 					// 如果有需要清算的，在最後一個動畫產生的瞬間立刻執行清算
 					state.dailyRev += (silentTotal * currentPrice);
 					state.dailySold += silentTotal;
-					document.getElementById('ui-money').textContent = Math.floor(state.money + state.dailyRev);
+					document.getElementById('ui-money').textContent = Math.floor(state.money + state.dailyRev).toLocaleString();
 				}
 			}
 
@@ -553,7 +551,7 @@
 			✨ 純利：<b style="color:${profit>=0?'green':'red'}; font-size: 26px;">$${Math.floor(profit).toLocaleString()}</b><br>
 			💰 餘額：<b style="color:var(--success); font-size: 26px;">$${Math.floor(money).toLocaleString()}</b>
 		`;
-		log(`Day ${state.day}：銷量 ${count} | 營收 ${rev} | 淨利 ${Math.floor(profit)}`);
+		log(`Day ${state.day}：銷量 ${count} | 營收 ${rev.toLocaleString()} 元 | 淨利 ${Math.floor(profit).toLocaleString()} 元`) ;
 
 		const optBox = document.getElementById('buff-options');
 		const investTitle = modal.querySelector('h3'); // 抓取「每日投資決策」標題

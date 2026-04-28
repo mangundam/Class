@@ -160,3 +160,10 @@ body { font-family: "Noto Sans TC", sans-serif; background: #f0f2f5; margin: 0; 
 	70% { opacity: 1; }
 	100% { opacity: 0; transform: translate(-50%, -80%); }
 }
+
+#settle-detail-stats div {display: flex; flex-direction: column; justify-content: center; align-items: center; }
+#settle-detail-stats span {font-size: 18px;}
+@media (max-width: 500px) {
+    #settle-detail-stats span { font-size: 14px; }
+}
+#settle-detail-stats {margin-top:-20px;}

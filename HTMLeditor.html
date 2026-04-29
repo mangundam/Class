@@ -90,8 +90,8 @@
 <div id="start-screen">
     <h1 style="color: #333; margin-bottom: 40px; letter-spacing: 2px;">WEB EDITOR</h1>
     <div style="display: flex; flex-direction: column; gap: 20px;">
-        <button class="btn-main" onclick="initProject('single')">開啟新專案 (單一檔案)</button>
-        <button class="btn-main" onclick="initProject('multi')">開啟新專案 (分開檔案)</button>
+        <button class="btn-main" onclick="initProject('single')">開啟新專案</button>
+        <!--<button class="btn-main" onclick="initProject('multi')">開啟新專案 (分開檔案)</button>-->
         <button class="btn-main" onclick="document.getElementById('fileInput').click()">上傳電腦檔案</button>
     </div>
     <input type="file" id="fileInput" style="display:none" onchange="handleFileUpload(event)">

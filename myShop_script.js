@@ -760,3 +760,54 @@ function showEffectPanel() {
 
     document.getElementById('effect-modal').style.display = 'flex';
 }
+function resetGame() {
+    if (!confirm("確定要放棄目前的進度並重新開始嗎？")) return;
+
+    // 1. 回歸初始狀態 (與你宣告 state 時一致)
+    state = {
+        shop: null,
+        money: 50000,
+        day: 1, 
+        activeBuffs: [],
+        historyEvents: [],
+        difficulty: 'normal',
+        eventCycle: 5,
+        rent: 1000,
+        personnel: 2400,
+        expenseMod: 1,
+        dailyRev: 0,
+        dailySold: 0,
+        gameSpeed: 1,
+        expansionLevel: 0,
+        branchPositions: [] // 記得清空分店位置
+    };
+
+    // 2. 清除畫面上的動態元素
+    document.getElementById('game-log').innerHTML = ""; // 清空紀錄
+    document.getElementById('sub-stores-container').innerHTML = ""; // 移除所有分店
+    
+    // 3. 重設 UI 樣式 (例如縮放後的店面)
+    const shopNode = document.getElementById('shop-node');
+    shopNode.style.display = 'none';
+    shopNode.style.transform = `translateX(-50%) scale(1)`;
+
+    // 4. 回到初始選單
+    document.getElementById('setup-modal').style.display = 'flex';
+    document.getElementById('setup-content').innerHTML = `
+        <h2 style="font-size: 28px;">🏬 第一步：選擇你的事業起源</h2>
+        <div class="type-grid">
+            <button class="btn-type" onclick="chooseDiff('drink')"><h4>🥤 飲料店</h4><p>客流量極大、低單價、低成本。</p></button>
+            <button class="btn-type" onclick="chooseDiff('bakery')"><h4>🥐 烘焙坊</h4><p>低成本、需求穩定、中等人事費。</p></button>
+            <button class="btn-type" onclick="chooseDiff('game')"><h4>🎮 電玩店</h4><p>高單價、高利潤、需求不穩定。</p></button>
+            <button class="btn-type" onclick="chooseDiff('hobby')"><h4>🧸 玩具店</h4><p>高單價、需求穩定、高人事費。</p></button>
+        </div>
+    `;
+
+    // 5. 恢復開店按紐 (如果是 GameOver 狀態會被隱藏)
+    document.getElementById('btn-start').classList.remove('hidden-area');
+    document.getElementById('btn-start').disabled = false;
+    document.getElementById('btn-start').textContent = "開店!";
+
+    // 6. 重設速度按鈕
+    setSpeed(1);
+}

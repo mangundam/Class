@@ -4,9 +4,14 @@ body { font-family: "Noto Sans TC", sans-serif; background: #f0f2f5; margin: 0; 
 .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
 
 .header-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 5px; }
-.stat-card { background: #f8fafc; padding: 15px; border-radius: 18px; text-align: center; border: 1px solid #e2e8f0; }
+.stat-card { background: #f8fafc; padding: 15px 15px 0px 15px; border-radius: 18px; text-align: center; border: 1px solid #e2e8f0; }
 .stat-val { font-size: 36px; font-weight: 800; color: var(--primary); display: block; }
 .stat-hint { font-size: 18px; color: #64748b; margin-top: 5px; display: block; line-height: 1.4; }
+
+.btn-reset { font-size: 16px; padding: 3px 10px; cursor: pointer; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; transition: all 0.2s ease; font-weight: 500; margin:5px;}  
+.btn-reset:hover { background: #f1f5f9; border-color: #cbd5e1; color: var(--danger); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }  
+.btn-reset:active { transform: scale(0.95); } 
+
 #ui-shop-name {font-size:20px;}
 #game-canvas {
 	height: 280px; background: linear-gradient(to bottom, #bae6fd 0%, #e0f2fe 100%); 
@@ -176,10 +181,6 @@ body { font-family: "Noto Sans TC", sans-serif; background: #f0f2f5; margin: 0; 
 .settle-stat-card b { font-size: 24px;  font-weight: 800; }
 .card-ops b { color: var(--primary); }
 .card-exp b { color: var(--danger); }
-
-
-
-
 
 #settle-report { font-size:20px; text-align:center; background:#f8fafc; padding:25px; border-radius:20px; line-height:1.6; border: 2px solid #e2e8f0; margin-bottom: 5px; }
 

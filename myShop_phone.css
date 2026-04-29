@@ -68,7 +68,7 @@ body {
 .stat-hint { font-size: 8px; color: #64748b; margin-top: 5px; display: block; line-height: 1.4; }
 #ui-money,#ui-shop-name { font-size:16px;}
 .setup-grid { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 4px; margin-bottom: 5px; flex: 0 0 auto; }
-.card { border: 1px solid #e5e7eb; padding: 10px; border-radius: 12px; background: #fafbfc; }
+.card { border: 1px solid #e5e7eb; padding: 5px; border-radius: 12px; background: #fafbfc; }
 .card h3 { font-size: 12px; margin: 0 0 5px 0; }
 .card div { font-size: 12px !important; line-height: 1.2 !important; }
 #active-buffs-list, #history-buffs-inline, #event-impact-list, #history-events-inline { font-size: 10px !important; }
@@ -76,7 +76,7 @@ body {
 .Buff-detail {font-size: 12px; padding: 0px 6px; cursor: pointer; border-radius: 6px; border: 1px solid var(--primary); background: #f5f3ff; color: var(--primary);}
 .settle-Buff-detail {font-size: 14px; margin-left:10px; padding: 0px 8px; cursor: pointer; border-radius: 6px; border: 1px solid var(--primary); background: #f5f3ff; color: var(--primary);}
 
-.btn-main { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; width: 100%; padding: 12px; border-radius: 12px; font-size: 18px; font-weight: bold; border: none; cursor: pointer; margin-bottom: 10px; }
+.btn-main { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; width: 100%; padding: 12px; border-radius: 12px; font-size: 18px; font-weight: bold; border: none; cursor: pointer; margin-bottom: 5px; }
 .btn-main:active {transform: scale(0.98); opacity: 0.9; }
 .btn-main:disabled {background: #94a3b8 !important; cursor: not-allowed; transform: none; opacity: 0.7; }
 
@@ -92,7 +92,7 @@ body {
 
 /* 這裡合併了 .modal-content 與 #settle-modal .modal-content 的最終寬度 */
 .modal-content { 
-	background: white; padding: 0px 12px; border-radius: 20px; width: 75%; max-width: 320px; 
+	background: white; padding: 10px 12px; border-radius: 20px; width: 75%; max-width: 320px; 
 	max-height: 85vh; overflow-y: auto; 
 }
 
@@ -106,26 +106,25 @@ body {
 }
 
 #settle-report b, #settle-report span { font-size: 18px !important; }
-#settle-modal h3 { font-size: 16px !important; margin-bottom: 10px !important; }
+#settle-modal h3 { font-size: 16px !important; margin-bottom: 10px !important; margin:5px;}
 #settle-modal .btn-main { margin-top: 10px !important; padding: 10px !important; font-size: 15px !important; width: 100% !important; }
-#settle-modal hr { display: none; }
 
 #settle-detail-stats div {display: flex; flex-direction: column; justify-content: center; align-items: center; font-size:14px;}
 #settle-detail-stats span {font-size: 18px;}
 #settle-detail-stats {margin:-5px 0px;}
 .settle-detail-block {padding: 5px; border-radius: 12px;}
-.settle-stats-container {display: grid;grid-template-columns: 1fr 1fr;gap: 5px;margin-bottom: 5px;}
-.settle-stat-card {border-radius: 12px;display: grid;grid-template-columns: 1fr 1fr;overflow: hidden;}
-.settle-grid-left {text-align: center;padding: 12px 5px;}
-.settle-grid-right {text-align: center;padding: 12px 5px;}
-.settle-stat-card small {color: #64748b;display: block;margin-bottom: 4px;font-size: 14px;}
-.settle-stat-card b {font-size: 18px;font-weight: 800;}
-.card-ops {background: #eff6ff;border: 1px solid #dbeafe;}
-.card-ops .settle-grid-left { border-right: 1px solid #dbeafe; }
+
+.settle-stats-container { display: grid; grid-template-columns: 1.4fr 1fr;  gap: 1px; margin-bottom: 5px; } 
+.card-ops { border-radius: 12px; display: grid; grid-template-columns: 1fr 1fr 1fr; overflow: hidden; background: #eff6ff; border: 1px solid #dbeafe; }
+.card-exp { border-radius: 12px; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; background: #fff1f2; border: 1px solid #ffe4e6; }
+.settle-grid-item { text-align: center; padding: 5px 5px; }
+.card-ops .border-right { border-right: 1px solid #dbeafe; }
+.card-exp .border-right { border-right: 1px solid #ffe4e6; }
+.settle-stat-card small { color: #64748b; display: block; margin-bottom: 4px; font-size: 10px; } 
+.settle-stat-card b { font-size: 12px; }
 .card-ops b { color: var(--primary); }
-.card-exp {background: #fff1f2;border: 1px solid #ffe4e6;}
-.card-exp .settle-grid-left { border-right: 1px solid #ffe4e6; }
 .card-exp b { color: var(--danger); }
+
 
 
 #buff-options { display: flex !important; flex-direction: column !important; gap: 10px; width: 100%; }

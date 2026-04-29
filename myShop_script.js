@@ -477,9 +477,16 @@ function showSettlement(count, rev, cost, profit, money) {
 	const currentExpense = document.getElementById('ui-expense').innerText;
 	
 	document.getElementById('settle-ui-price').innerText = `$${liveStats.price.toLocaleString()}`;
-	document.getElementById('settle-ui-cost').innerText = liveStats.cost.toLocaleString();
+    document.getElementById('settle-ui-cost').innerText = `$${liveStats.cost.toLocaleString()}`;
 	document.getElementById('settle-ui-rent').innerText = `$${liveStats.Statrent.toLocaleString()}`;
 	document.getElementById('settle-ui-personnel').innerText = liveStats.StatPersonnel.toLocaleString();
+	
+	const minD = Math.max(0, Math.floor(state.shop.demandMin * (1 + liveStats.dRate)) + liveStats.dAdd);
+    const maxD = Math.max(0, Math.floor(state.shop.demandMax * (1 + liveStats.dRate)) + liveStats.dAdd);
+    document.getElementById('settle-ui-demand').innerText = `${minD}~${maxD}`;
+
+    document.getElementById('settle-ui-rent').innerText = `$${liveStats.Statrent.toLocaleString()}`;
+    document.getElementById('settle-ui-personnel').innerText = `$${liveStats.StatPersonnel.toLocaleString()}`;
 	
 	const modal = document.getElementById('settle-modal');
 	document.getElementById('settle-report').innerHTML = `

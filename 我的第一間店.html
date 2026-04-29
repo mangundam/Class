@@ -139,7 +139,8 @@
         <button class="btn-main" style="margin-top: 20px;" onclick="document.getElementById('effect-modal').style.display='none'">關閉面板</button>
     </div>
 </div>
-
+<script src="myShop_script.js"></script>
+<!--
 <script>
 	const SHOP_DATA = {
 		drink: { name: "飲料店", icon: "🥤", price: 65, cost: 22, demandMin: 40, demandMax: 58, personnel: 2400 },//1548~2365
@@ -296,7 +297,82 @@
 		document.getElementById('ui-shop-name').textContent = state.shop.name;
 		updateUI();
 	}
+	
+function calculateCurrentStats() {
+    /*
+     * p, c: 初始單價與初始單位成本 (來自店型基本資料)
+     * baseRent, basePers: 初始房租與初始人事費 (來自難度與店型)
+     * * --- 以下為各屬性的計算器 (分類：加減Sum / 乘除Mul / 絕對值Add) ---
+     * pSum, pMul: 售價的累加比率 (起始1.0) 與 連乘權重 (起始1.0)
+     * cSum, cMul: 成本的累加比率 與 連乘權重
+     * dSum, dMul: 客流的累加比率 與 連乘權重
+     * persSum, persMul: 人事費的累加比率 與 連乘權重
+     * * rAdd, dAdd: 房租與客流的「絕對數值」加減 (例如固定增加 $1500 房租)
+     */
 
+    let p = state.shop.price, c = state.shop.cost;
+    let baseRent = state.rent;
+    let basePers = state.personnel;
+
+    // 初始化計算器
+    let pSum = 1.0, pMul = 1.0;
+    let cSum = 1.0, cMul = 1.0;
+    let dSum = 1.0, dMul = 1.0;
+    let persSum = 1.0, persMul = 1.0;
+    let rAdd = 0, dAdd = 0;
+
+    // 定義統一的數據處理邏輯 (處理 Buffs 與 Events)
+    const processImpact = (item) => {
+        // --- 售價 (Price) ---
+        if (item.pRate) pSum += item.pRate;     // 例: +0.2
+        if (item.pMul)  pMul *= item.pMul;      // 例: * 1.1
+
+        // --- 成本 (Cost) ---
+        if (item.cRate) cSum += item.cRate;
+        if (item.cMul)  cMul *= item.cMul;
+
+        // --- 客流 (Demand) ---
+        if (item.dRate) dSum += item.dRate;
+        if (item.dMul)  dMul *= item.dMul;
+        if (item.dAdd)  dAdd += item.dAdd;      // 固定客流加減
+
+        // --- 人事 (Personnel) ---
+        if (item.personnelRate) persSum += item.personnelRate;
+        if (item.personnelMul)  persMul *= item.personnelMul;
+
+        // --- 房租 (Rent) ---
+        if (item.rentAdd) rAdd += item.rentAdd; // 房租通常是固定數值加減
+    };
+
+    // 1. 計算每日決策 (Buffs)
+    state.activeBuffs.forEach(processImpact);
+
+    // 2. 計算大事件 (Events)
+    state.historyEvents.forEach(processImpact);
+
+    // 最終合成計算：(初始值 * 加減總和比率 * 乘除連乘權重)
+    // 使用 Math.max 確保不會出現負數或 0 導致遊戲無法運作
+    const finalPrice = Math.max(1, Math.floor(p * pSum * pMul));
+    const finalCost  = Math.max(1, Math.floor(c * cSum * cMul));
+    const finalPers  = Math.max(0, Math.floor(basePers * persSum * persMul));
+    const finalRent  = Math.max(0, baseRent + rAdd);
+
+    // 計算最終總加成率 (回傳給 UI 顯示用，例如 +8.9%)
+    const finalDRateTotal = (dSum * dMul) - 1;
+
+    return { 
+        price: finalPrice, 
+        cost: finalCost, 
+        expense: finalPers + finalRent, 
+        Statrent: finalRent,
+        StatPersonnel: finalPers,
+        dRate: finalDRateTotal,
+        dAdd: dAdd
+    };
+}
+	
+	
+/*
 	function calculateCurrentStats() {
 		let p = state.shop.price, c = state.shop.cost;
 		let baseRent = state.rent;        // 來自難度設定
@@ -339,6 +415,7 @@
 			dAdd: dAdd
 		};
 	}
+*/
 
 	function updateUI() {
 			const stats = calculateCurrentStats();
@@ -595,7 +672,7 @@
 			📥 收入：<span style="color:var(--success); font-weight:800;">+$${rev.toLocaleString()}</span><br>
 			📤 支出：<span style="color:var(--danger); font-weight:800;">-$${Math.floor(cost).toLocaleString()}</span><br>
 			✨ 純利：<b style="color:${profit>=0?'green':'red'}; font-size: 26px;">$${Math.floor(profit).toLocaleString()}</b><br>
-			💰 餘額：<b style="color:var(--success); font-size: 26px;">$${Math.floor(money).toLocaleString()}</b>
+			💰 餘額：<b style="font-size: 26px;">$${Math.floor(money).toLocaleString()}</b>
 		`;
 		log(`Day ${state.day}：銷量 ${count} | 營收 ${rev.toLocaleString()} 元 | 淨利 ${Math.floor(profit).toLocaleString()} 元`) ;
 
@@ -817,5 +894,6 @@
 		document.getElementById('effect-modal').style.display = 'flex';
 	}
 </script>
+-->
 </body>
 </html>

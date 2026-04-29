@@ -7,12 +7,12 @@ const SHOP_DATA = {
 
 const BUFF_POOL = [
 	{ name: "📰 網路廣告", desc: "客流 +20%", buy: 4000, dSum: 0.20 },
-	{ name: "🤖 自動結帳", desc: "單位成本 *90%", buy: 3500, cMul: 0.9 },
+	{ name: "🤖 自動結帳", desc: "單位成本 90%", buy: 3500, cMul: 0.9 },
 	{ name: "💎 尊榮會員", desc: "客流 +10%, 售價 +15%", buy: 4000, dSum: 0.1, pSum: 0.15 },
 	{ name: "⏰ 延長工時", desc: "客流 +15%, 人事 +30%", buy: 1500, dSum: 0.15, persSum: 0.3 },
 	{ name: "🎫 優惠禮券", desc: "客流 +30%, 售價 -15%", buy: 2500, dSum: 0.15, pSum: -0.15 },
 	{ name: "🧹 門面裝修", desc: "客流 +15%, 售價 +10%", buy: 5000, dSum: 0.15, pSum: 0.10 },
-	{ name: "📦 批發採購", desc: "單位成本 *80%, 客流 -10%", buy: 2000, cMul: 0.8, dSum: -0.1 },
+	{ name: "📦 批發採購", desc: "單位成本 80%, 客流 -10%", buy: 2000, cMul: 0.8, dSum: -0.1 },
 	{ name: "👨‍🍳 專業培訓", desc: "售價 +30%, 人事 +20%", buy: 4000, pSum: 0.15, persSum: 0.2 },
 	{ name: "🏗️ 擴大店面", desc: "客流 +30%, 房租 +2000", buy: 8500, dSum: 0.30, rentAdd: 2000 },
 	{ name: "🏢 開設分店", desc: "客流 +100%, 房租 +3000, 人事 +100%", buy: 18000, dSum: 1.0, rentAdd: 3000, persSum: 1.0 }
@@ -31,38 +31,38 @@ const BUFF_POOL = [
 const BIG_EVENTS = [
 	{	title: "⚖️ 法定工資調漲",
 		desc: "政府宣布調高基本時薪，這將影響近期的經營成本（持續 5 天）。",
-		options: [{	text: "精簡人力 (人事 +10%, 客流 *80%)",	impact: { persSum: 0.1, dMul: 0.80, log: "短期：精簡人力導致服務品質下降", duration: 5 }},
-				  {	text: "全面調薪 (人事 +30%, 售價 *110%)", 	impact: { persSum: 0.30, pMul: 1.1, log: "短期：調薪提升士氣與產品價值", duration: 5 }}]
+		options: [{	text: "精簡人力 (人事 +10%, 客流 80%)",	impact: { persSum: 0.1, dMul: 0.80, log: "短期：精簡人力導致服務品質下降", duration: 5 }},
+				  {	text: "全面調薪 (人事 +30%, 售價 110%)", 	impact: { persSum: 0.30, pMul: 1.1, log: "短期：調薪提升士氣與產品價值", duration: 5 }}]
 	},
 				  
 	{	title: "🏗️ 捷運完工轉型",
 		desc: "店門口的捷運站正式完工啟用！這將帶來穩定的人潮，但地段租金也隨之暴漲。",
 		options: [{ text: "原地升級 (客流 +30%, 租金 +2,000)", 	impact: { dSum: 0.30, rentAdd: 2000, log: "長期：捷運站帶來龐大客流，但租金成本大幅提升"}},
-				  {	text: "搬遷避險 (客流 *90%, 租金 -300)", 	impact: { dMul: 0.9, rentAdd: -300, log: "長期：搬遷至較遠地段，避開租金壓力但人氣下滑"}}]
+				  {	text: "搬遷避險 (客流 90%, 租金 -300)", 	impact: { dMul: 0.9, rentAdd: -300, log: "長期：搬遷至較遠地段，避開租金壓力但人氣下滑"}}]
 	},
 				  
 	{	title: "🌀 強力颱風侵襲",
 		desc: "氣象局發布陸上警報，影響預計僅限明日。",
-		options: [{ text: "防颱加固 (開銷 +1,000, 客流 *60%)", 	impact: { rentAdd: 1000, dMul: 0.6, log: "短期：加固設施支出", duration: 1 }},
+		options: [{ text: "防颱加固 (開銷 +1,000, 客流 60%)", 	impact: { rentAdd: 1000, dMul: 0.6, log: "短期：加固設施支出", duration: 1 }},
 				  {	text: "停業一天 (當天零客流, 零人事費用)", 	impact: { dMul: 0.0, persMul: 0.0, log: "短期：停業避災", duration: 1 }}]
 	},
 				  
 	{	title: "✈️ 國際旅遊節",
 		desc: "大量國外旅客湧入，這是一次性的觀光熱潮（持續 3 天）。",
-		options: [{ text: "外籍友善 (人事 *200%, 客流 *180%)", 	impact: { persMul: 2.0, dMul: 1.8, log: "短期：增聘臨時翻譯人員", duration: 3 }},
-				  {	text: "推出套裝 (售價 *120%, 客流 *120%)", 	impact: { pMul: 1.2, dMul: 1.2, log: "短期：觀光限定套裝", duration: 3 }}]
+		options: [{ text: "外籍友善 (人事 200%, 客流 180%)", 	impact: { persMul: 2.0, dMul: 1.8, log: "短期：增聘臨時翻譯人員", duration: 3 }},
+				  {	text: "推出套裝 (售價 120%, 客流 120%)", 	impact: { pMul: 1.2, dMul: 1.2, log: "短期：觀光限定套裝", duration: 3 }}]
 	},
 				  
 	{	title: "🌍 供應鏈危機",
 		desc: "全球物料短缺，預計會造成短期的成本波動（持續 5 天）。",
-		options: [{ text: "吸收成本 (成本 *110%)", 				impact: { cMul: 1.1, log: "短期：公司吸收物料漲幅", duration: 5 }},
-				  {	text: "調整配方 (客流 *85%)", 				impact: { dMul: 0.85, log: "短期：配方更換導致客流流失", duration: 5 }}]
+		options: [{ text: "吸收成本 (成本 110%)", 				impact: { cMul: 1.1, log: "短期：公司吸收物料漲幅", duration: 5 }},
+				  {	text: "調整配方 (客流 85%)", 				impact: { dMul: 0.85, log: "短期：配方更換導致客流流失", duration: 5 }}]
 	},
 
 	{	title: "🚧 門口修路",
 		desc: "店門口進行地下管線施工，預計持續 3 天，進出不便。",
-		options: [{ text: "忍受不便 (客流 *70%)", 				impact: { dMul: 0.7, log: "短期：施工阻擋了客流", duration: 3 }},
-				  {	text: "補貼吸引 (開銷 +1,500, 客流 *90%)",	impact: { rentAdd: 1500, dMul: 0.9, log: "短期：投入行銷經費補貼", duration: 3 }}]
+		options: [{ text: "忍受不便 (客流 70%)", 				impact: { dMul: 0.7, log: "短期：施工阻擋了客流", duration: 3 }},
+				  {	text: "補貼吸引 (開銷 +1,500, 客流 90%)",	impact: { rentAdd: 1500, dMul: 0.9, log: "短期：投入行銷經費補貼", duration: 3 }}]
 	}
 ];
 
@@ -502,12 +502,17 @@ function showSettlement(count, rev, cost, profit, money) {
 	const investTitle = modal.querySelector('h3'); // 抓取「每日投資決策」標題
 	const skipBtn = modal.querySelector('.btn-main[onclick="checkEventAfterSettle()"]');
 
-	if (state.money < 0) {
-		// 如果負債，隱藏投資選項並更改按鈕文字
-		optBox.style.display = 'none';
-		if(investTitle) investTitle.textContent = "❌ 經營失敗：公司已宣告破產";
-		skipBtn.textContent = "查看最終報表";
-	} else {
+	if (isGameOver) {
+		optBox.style.display = 'none'; // 隱藏策略卡片
+		
+		if (state.money < 0) {
+			investTitle.textContent = "❌ 經營失敗：公司已宣告破產";
+			skipBtn.textContent = "查看最終報表";
+		} else {
+			investTitle.textContent = "🎉 經營期滿：30天創業旅程結束";
+			skipBtn.textContent = "查看結算總結";
+		}
+    } else {
 		// 正常顯示投資選項
 		optBox.style.display = 'grid';
 		if(investTitle) investTitle.innerHTML = `💡 每日投資決策<button onclick="showEffectPanel()" class="settle-Buff-detail">查看詳細加成</button>`;
@@ -540,7 +545,13 @@ function showSettlement(count, rev, cost, profit, money) {
 
 function checkEventAfterSettle() {
 	document.getElementById('settle-modal').style.display = 'none';
-	if (state.day <30  && state.day % state.eventCycle === 0) triggerBigEvent(); else nextDay();
+	const isEndOfGame = state.day >= 30 || state.money < 0;
+    
+    if (!isEndOfGame && state.day % state.eventCycle === 0) {
+        triggerBigEvent(); 
+    } else {
+        nextDay();
+    }
 }
 
 function triggerBigEvent() {
@@ -638,59 +649,36 @@ function showEffectPanel() {
     const list = document.getElementById('effect-detail-list');
     list.innerHTML = "";
 
-    // 定義要追蹤的屬性與對應的計算鍵名
+    // 定義屬性，加入 reverse: true 表示「數值上升是壞事」
     const props = [
-        { keySum: 'dSum', keyMul: 'dMul', keyAdd: 'dAdd', label: '📈 客流量', unit: '%', isRate: true },
-        { keySum: 'pSum', keyMul: 'pMul', label: '💰 售價', unit: '%', isRate: true },
-        { keySum: 'cSum', keyMul: 'cMul', label: '📦 成本', unit: '%', isRate: true },
-        { keySum: 'persSum', keyMul: 'persMul', label: '👥 人事費', unit: '%', isRate: true },
-        { keyAdd: 'rentAdd', label: '🏢 額外房租', unit: '元', isRate: false }
+        { keySum: 'dSum', keyMul: 'dMul', keyAdd: 'dAdd', label: '📈 客流量', unit: '%', isRate: true, reverse: false },
+        { keySum: 'pSum', keyMul: 'pMul', label: '💰 售價', unit: '%', isRate: true, reverse: false },
+        { keySum: 'cSum', keyMul: 'cMul', label: '📦 成本', unit: '%', isRate: true, reverse: true }, // 成本高=壞
+        { keySum: 'persSum', keyMul: 'persMul', label: '👥 人事費', unit: '%', isRate: true, reverse: true }, // 人事費高=壞
+        { keyAdd: 'rentAdd', label: '🏢 額外房租', unit: '元', isRate: false, reverse: true } // 房租高=壞
     ];
 
     let hasAnyEffect = false;
 
     props.forEach(prop => {
         let items = [];
-        let currentSum = 0;   // 加法區 (起始 0)
-        let currentMul = 1.0; // 乘法區 (起始 1.0)
-        let currentAdd = 0;   // 絕對值 (起始 0)
+        let currentSum = 0;
+        let currentMul = 1.0;
+        let currentAdd = 0;
 
-        // 定義統一的數據收集邏輯
         const collectData = (sourceArray, typeName) => {
             sourceArray.forEach(obj => {
-                let found = false;
-                // 1. 檢查加法項 (Sum)
                 if (prop.keySum && obj[prop.keySum] !== undefined) {
-                    items.push({ 
-                        name: obj.name || obj.log.split('：')[0], 
-                        val: obj[prop.keySum], 
-                        type: typeName, 
-                        method: '加法' 
-                    });
+                    items.push({ name: obj.name || obj.log.split('：')[0], val: obj[prop.keySum], type: typeName, method: '加法' });
                     currentSum += obj[prop.keySum];
-                    found = true;
                 }
-                // 2. 檢查乘法項 (Mul)
                 if (prop.keyMul && obj[prop.keyMul] !== undefined) {
-                    items.push({ 
-                        name: obj.name || obj.log.split('：')[0], 
-                        val: obj[prop.keyMul], 
-                        type: typeName, 
-                        method: '乘法' 
-                    });
+                    items.push({ name: obj.name || obj.log.split('：')[0], val: obj[prop.keyMul], type: typeName, method: '乘法' });
                     currentMul *= obj[prop.keyMul];
-                    found = true;
                 }
-                // 3. 檢查數值加減 (Add)
                 if (prop.keyAdd && obj[prop.keyAdd] !== undefined) {
-                    items.push({ 
-                        name: obj.name || obj.log.split('：')[0], 
-                        val: obj[prop.keyAdd], 
-                        type: typeName, 
-                        method: '數值' 
-                    });
+                    items.push({ name: obj.name || obj.log.split('：')[0], val: obj[prop.keyAdd], type: typeName, method: '數值' });
                     currentAdd += obj[prop.keyAdd];
-                    found = true;
                 }
             });
         };
@@ -701,17 +689,26 @@ function showEffectPanel() {
         if (items.length > 0) {
             hasAnyEffect = true;
             
-            // 計算最終總計文字
+            // --- 計算總計文字與顏色 ---
             let summaryText = "";
+            let summaryColor = "";
+            
             if (prop.isRate) {
-                // 套用新公式：(1 + Sum) * Mul - 1
                 const finalRate = ((1 + currentSum) * currentMul) - 1;
                 const pct = (finalRate * 100).toFixed(1);
                 const prefix = finalRate >= 0 ? "+" : "";
-                summaryText = `總加成：<span style="color:${finalRate >= 0 ? 'var(--success)' : 'var(--danger)'}">${prefix}${pct}%</span>`;
+                
+                // 顏色邏輯：若為 reverse 且數值增加，顯示紅色
+                const isPositiveEffect = prop.reverse ? finalRate <= 0 : finalRate >= 0;
+                summaryColor = isPositiveEffect ? 'var(--success)' : 'var(--danger)';
+                
+                summaryText = `總加成：<span style="color:${summaryColor}">${prefix}${pct}%</span>`;
             } else {
                 const prefix = currentAdd >= 0 ? "+" : "";
-                summaryText = `總計：<span style="color:${currentAdd >= 0 ? 'var(--success)' : 'var(--danger)'}">${prefix}${currentAdd.toLocaleString()}元</span>`;
+                const isPositiveEffect = prop.reverse ? currentAdd <= 0 : currentAdd >= 0;
+                summaryColor = isPositiveEffect ? 'var(--success)' : 'var(--danger)';
+                
+                summaryText = `總計：<span style="color:${summaryColor}">${prefix}${currentAdd.toLocaleString()}元</span>`;
             }
 
             let groupHTML = `
@@ -721,24 +718,27 @@ function showEffectPanel() {
                         <b style="font-size: 16px;">${summaryText}</b>
                     </div>`;
             
+            // --- 計算細項顏色 ---
             items.forEach(item => {
                 let displayVal = "";
-                let color = "";
+                let itemColor = "";
                 let prefix = "";
+                let isGood = true;
 
                 if (item.method === '加法') {
                     displayVal = `${(item.val * 100).toFixed(0)}%`;
-                    color = item.val >= 0 ? 'var(--success)' : 'var(--danger)';
                     prefix = item.val >= 0 ? "+" : "";
+                    isGood = prop.reverse ? item.val <= 0 : item.val >= 0;
                 } else if (item.method === '乘法') {
                     displayVal = `x${item.val.toFixed(2)}`;
-                    color = item.val >= 1 ? 'var(--success)' : 'var(--danger)';
-                    prefix = ""; // 乘法不需要正負號
+                    isGood = prop.reverse ? item.val <= 1 : item.val >= 1;
                 } else {
                     displayVal = `${item.val.toLocaleString()}元`;
-                    color = item.val >= 0 ? 'var(--success)' : 'var(--danger)';
                     prefix = item.val >= 0 ? "+" : "";
+                    isGood = prop.reverse ? item.val <= 0 : item.val >= 0;
                 }
+                
+                itemColor = isGood ? 'var(--success)' : 'var(--danger)';
                 
                 groupHTML += `
                     <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 4px; color: #475569;">
@@ -746,7 +746,7 @@ function showEffectPanel() {
                             <small style="background:#fff; border:1px solid #ddd; padding:0px 4px; border-radius:4px; margin-right:5px; font-size:10px;">${item.type}</small> 
                             ${item.name} 
                         </span>
-                        <span style="color:${color}">${prefix}${displayVal}</span>
+                        <span style="color:${itemColor}">${prefix}${displayVal}</span>
                     </div>`;
             });
             groupHTML += `</div>`;
@@ -760,6 +760,7 @@ function showEffectPanel() {
 
     document.getElementById('effect-modal').style.display = 'flex';
 }
+
 function resetGame() {
     if (!confirm("確定要放棄目前的進度並重新開始嗎？")) return;
 

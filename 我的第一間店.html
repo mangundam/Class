@@ -90,17 +90,30 @@
 <div id="settle-modal" class="modal">
     <div class="modal-content">
         <h2 id="settle-title" style="font-size: 32px; margin-bottom: 15px;">📈 今日結算報表</h2>
-        <div id="settle-report" style="font-size:20px; text-align:center; background:#f8fafc; padding:25px; border-radius:20px; line-height:1.6; border: 2px solid #e2e8f0; margin-bottom: 25px;"></div>
-		<div id="settle-detail-stats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; ">
-		<div class="settle-detail-block" style="background: #eff6ff; border: 1px solid #dbeafe;">
-			<small style="color: #64748b; display: block;">當前單價 / 成本</small>
-			<span id="settle-ui-price-cost" style="font-weight: bold; color: var(--primary);">$ - / -</span>
+        <div id="settle-report"></div>
+		<div class="settle-stats-container">
+			<div class="settle-stat-card card-ops">
+				<div class="settle-grid-left">
+					<small>當前單價</small>
+					<b id="settle-ui-price">-</b>
+				</div>
+				<div class="settle-grid-right">
+					<small>成本</small>
+					<b id="settle-ui-cost">-</b>
+				</div>
+			</div>
+
+			<div class="settle-stat-card card-exp">
+				<div class="settle-grid-left">
+					<small>每日租金</small>
+					<b id="settle-ui-rent">-</b>
+				</div>
+				<div class="settle-grid-right">
+					<small>人事</small>
+					<b id="settle-ui-personnel">-</b>
+				</div>
+			</div>
 		</div>
-		<div class="settle-detail-block" style="background: #fff1f2; border: 1px solid #ffe4e6;">
-			<small style="color: #64748b; display: block;">每日租金 / 人事</small>
-			<span id="settle-ui-expense" style="font-weight: bold; color: var(--danger);">$ -</span>
-		</div>
-</div>
         <hr style="border: 1px solid #f3f4f6; margin-bottom: 25px;">
         <h3 style="color: var(--primary);">💡 每日投資決策
 			<button onclick="showEffectPanel()" class="Buff-detail" style="">查看詳細加成</button>
@@ -565,14 +578,16 @@
 	function showSettlement(count, rev, cost, profit, money) {
 		// 如果已經達到30天或資金為負，雖然顯示報表，但點擊按鈕應指向結束畫面
 		const isGameOver = state.money < 0 || state.day >= 30;
-		
 		const liveStats = calculateCurrentStats();
 		
 		const currentPrice = document.getElementById('ui-price').innerText;
 		const currentCost = document.getElementById('ui-cost').innerText;
 		const currentExpense = document.getElementById('ui-expense').innerText;
-		document.getElementById('settle-ui-price-cost').innerText = `${liveStats.price.toLocaleString()} / ${liveStats.cost.toLocaleString()}`;
-		document.getElementById('settle-ui-expense').innerText = `${liveStats.Statrent.toLocaleString()} / ${liveStats.StatPersonnel.toLocaleString()}`;
+		
+		document.getElementById('settle-ui-price').innerText = `$${liveStats.price.toLocaleString()}`;
+		document.getElementById('settle-ui-cost').innerText = liveStats.cost.toLocaleString();
+		document.getElementById('settle-ui-rent').innerText = `$${liveStats.Statrent.toLocaleString()}`;
+		document.getElementById('settle-ui-personnel').innerText = liveStats.StatPersonnel.toLocaleString();
 		
 		const modal = document.getElementById('settle-modal');
 		document.getElementById('settle-report').innerHTML = `

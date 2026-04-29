@@ -101,9 +101,10 @@ body {
 
 #settle-title { font-size: 20px !important; margin-bottom: 10px !important; }
 #settle-report { 
-	font-size: 14px !important; padding: 10px !important; margin-bottom: 12px !important; 
-	background: #f1f5f9; border-radius: 15px; line-height: 1.4 !important;
+	font-size: 14px !important; padding: 10px !important; margin-bottom: 5px !important; 
+	background:#f8fafc; border-radius: 15px; line-height: 1.4 !important; border: 2px solid #e2e8f0; text-align:center;
 }
+
 #settle-report b, #settle-report span { font-size: 18px !important; }
 #settle-modal h3 { font-size: 16px !important; margin-bottom: 10px !important; }
 #settle-modal .btn-main { margin-top: 10px !important; padding: 10px !important; font-size: 15px !important; width: 100% !important; }
@@ -113,6 +114,19 @@ body {
 #settle-detail-stats span {font-size: 18px;}
 #settle-detail-stats {margin:-5px 0px;}
 .settle-detail-block {padding: 5px; border-radius: 12px;}
+.settle-stats-container {display: grid;grid-template-columns: 1fr 1fr;gap: 5px;margin-bottom: 5px;}
+.settle-stat-card {border-radius: 12px;display: grid;grid-template-columns: 1fr 1fr;overflow: hidden;}
+.settle-grid-left {text-align: center;padding: 12px 5px;}
+.settle-grid-right {text-align: center;padding: 12px 5px;}
+.settle-stat-card small {color: #64748b;display: block;margin-bottom: 4px;font-size: 14px;}
+.settle-stat-card b {font-size: 18px;font-weight: 800;}
+.card-ops {background: #eff6ff;border: 1px solid #dbeafe;}
+.card-ops .settle-grid-left { border-right: 1px solid #dbeafe; }
+.card-ops b { color: var(--primary); }
+.card-exp {background: #fff1f2;border: 1px solid #ffe4e6;}
+.card-exp .settle-grid-left { border-right: 1px solid #ffe4e6; }
+.card-exp b { color: var(--danger); }
+
 
 #buff-options { display: flex !important; flex-direction: column !important; gap: 10px; width: 100%; }
 .btn-buff-card {display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important; width: 100% !important; margin: 0 auto !important; padding: 10px 15px !important; border: 2px solid #e5e7eb;border-radius: 15px; background: #fff; cursor: pointer; box-sizing: border-box; text-align: left !important; }

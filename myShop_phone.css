@@ -92,7 +92,7 @@ body {
 
 /* 這裡合併了 .modal-content 與 #settle-modal .modal-content 的最終寬度 */
 .modal-content { 
-	background: white; padding: 12px; border-radius: 20px; width: 75%; max-width: 320px; 
+	background: white; padding: 0px 12px; border-radius: 20px; width: 75%; max-width: 320px; 
 	max-height: 85vh; overflow-y: auto; 
 }
 

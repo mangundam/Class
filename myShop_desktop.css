@@ -165,3 +165,7 @@ body { font-family: "Noto Sans TC", sans-serif; background: #f0f2f5; margin: 0; 
 #settle-detail-stats span {font-size: 24px;}
 #settle-detail-stats {margin-top:-20px;}
 .settle-detail-block {padding: 10px; border-radius: 12px;}
+#settle-modal h3 { font-size: 26px !important; margin-bottom: 15px !important; }
+
+.Buff-detail {font-size: 18px; padding: 0px 8px; cursor: pointer; border-radius: 6px; border: 1px solid var(--primary); background: #f5f3ff; color: var(--primary);}
+.settle-Buff-detail {font-size: 22px; margin-left:20px; padding: 0px 8px; cursor: pointer; border-radius: 6px; border: 1px solid var(--primary); background: #f5f3ff; color: var(--primary);}

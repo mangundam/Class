@@ -48,15 +48,17 @@
 
     <div class="setup-grid">
         <div class="card">
-            <h3>📊 營運數據</h3>
-            <div style="line-height: 1.8;">
+            <h3>📊 營運數據 </h3>
+			<div style="line-height: 1.8;">
                 單價：<b id="ui-price" style="color:var(--primary)">-</b> 元<br>
                 成本：<b id="ui-cost" style="color:var(--danger)">-</b> 元<br>
                 預估客流：<b id="ui-demand-range" style="color:var(--warning)">-</b> 人
             </div>
         </div>
 		<div class="card">
-			<h3 style="margin-top:0">📜 經營筆記</h3>
+			<h3 style="margin-top:0">📜 經營筆記
+				<button onclick="showEffectPanel()" class="Buff-detail" style="">查看詳細加成</button>
+			</h3>
 			<div class="strategy-history-area">
 				<div id="active-buffs-list" style="margin-bottom: 10px;">
 					<b style="color:var(--primary)">🎯 當前策略：</b>
@@ -100,7 +102,9 @@
 		</div>
 </div>
         <hr style="border: 1px solid #f3f4f6; margin-bottom: 25px;">
-        <h3 style="font-size: 26px; color: var(--primary); margin-bottom: 15px;">💡 每日投資決策</h3>
+        <h3 style="color: var(--primary);">💡 每日投資決策
+			<button onclick="showEffectPanel()" class="Buff-detail" style="">查看詳細加成</button>
+		</h3>
         <div class="type-grid" id="buff-options" style="grid-template-columns: repeat(3, 1fr); gap: 15px;"></div>
         <button class="btn-main" style="background:#94a3b8; font-size:18px; margin-top: 30px; width: 45%;" onclick="checkEventAfterSettle()">跳過投資</button>
     </div>
@@ -111,6 +115,15 @@
         <h2 id="event-title" style="color:var(--danger); font-size: 30px;">🔥 重大經營決策</h2>
         <p id="event-desc" style="font-size:17px; padding:20px; background:#fff1f2; border-radius:15px; line-height:1.5;"></p>
         <div id="event-options" class="type-grid" style="grid-template-columns: 1fr 1fr;"></div>
+    </div>
+</div>
+
+<div id="effect-modal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <h2 style="color:var(--primary); margin-bottom: 15px;">🔍 當前效果總計</h2>
+        <div id="effect-detail-list" style="text-align: left; max-height: 400px; overflow-y: auto;">
+            </div>
+        <button class="btn-main" style="margin-top: 20px;" onclick="document.getElementById('effect-modal').style.display='none'">關閉面板</button>
     </div>
 </div>
 
@@ -583,7 +596,7 @@
 		} else {
 			// 正常顯示投資選項
 			optBox.style.display = 'grid';
-			if(investTitle) investTitle.textContent = "💡 每日投資決策";
+			if(investTitle) investTitle.innerHTML = `💡 每日投資決策<button onclick="showEffectPanel()" class="settle-Buff-detail">查看詳細加成</button>`;
 			skipBtn.textContent = "跳過投資";
 			
 			optBox.innerHTML = '';
@@ -707,6 +720,87 @@
         const l = document.getElementById('game-log');
         l.innerHTML = `[${state.day}日] ${msg}<br>` + l.innerHTML;
     }
+	function showEffectPanel() {
+		const list = document.getElementById('effect-detail-list');
+		list.innerHTML = "";
+
+		// 定義要追蹤的屬性
+		const props = [
+			{ key: 'dRate', label: '📈 客流量', unit: '%', isRate: true },
+			{ key: 'pRate', label: '💰 售價', unit: '%', isRate: true },
+			{ key: 'cRate', label: '📦 成本', unit: '%', isRate: true },
+			{ key: 'personnelRate', label: '👥 人事費', unit: '%', isRate: true },
+			{ key: 'rentAdd', label: '🏢 額外房租', unit: '元', isRate: false }
+		];
+
+		let hasAnyEffect = false;
+
+		props.forEach(prop => {
+			let items = [];
+			let totalMultiplier = 1.0; // 用於計算百分比類型的總計 (相乘)
+			let totalAddition = 0;    // 用於計算數值類型的總計 (相加)
+
+			// 1. 檢查策略 Buff
+			state.activeBuffs.forEach(b => {
+				if (b[prop.key]) {
+					items.push({ name: b.name, val: b[prop.key], type: '策略' });
+					if (prop.isRate) totalMultiplier *= (1 + b[prop.key]);
+					else totalAddition += b[prop.key];
+				}
+			});
+
+			// 2. 檢查事件 Event
+			state.historyEvents.forEach(e => {
+				if (e[prop.key]) {
+					items.push({ name: e.log.split('：')[0], val: e[prop.key], type: '事件' });
+					if (prop.isRate) totalMultiplier *= (1 + e[prop.key]);
+					else totalAddition += e[prop.key];
+				}
+			});
+
+			if (items.length > 0) {
+				hasAnyEffect = true;
+				
+				// 計算最終總計文字
+				let summaryText = "";
+				if (prop.isRate) {
+					const finalRate = (totalMultiplier - 1) * 100;
+					const prefix = finalRate > 0 ? "+" : "";
+					summaryText = `總計：<span style="color:${finalRate >= 0 ? 'var(--success)' : 'var(--danger)'}">${prefix}${finalRate.toFixed(1)}%</span>`;
+				} else {
+					const prefix = totalAddition > 0 ? "+" : "";
+					summaryText = `總計：<span style="color:${totalAddition >= 0 ? 'var(--success)' : 'var(--danger)'}">${prefix}${totalAddition.toLocaleString()}元</span>`;
+				}
+
+				let groupHTML = `
+					<div style="margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0;">
+						<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px; margin-bottom: 8px;">
+							<b style="font-size: 18px; color: #1e293b;">${prop.label}</b>
+							<b style="font-size: 16px;">${summaryText}</b>
+						</div>`;
+				
+				items.forEach(item => {
+					const displayVal = prop.isRate ? `${(item.val * 100).toFixed(0)}` : `${item.val.toLocaleString()}`;
+					const color = item.val > 0 ? 'var(--success)' : 'var(--danger)';
+					const prefix = item.val > 0 ? "+" : "";
+					
+					groupHTML += `
+						<div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 4px; color: #475569;">
+							<span><small style="background:#fff; border:1px solid #ddd; padding:0px 4px; border-radius:4px; margin-right:5px; font-size:10px;">${item.type}</small> ${item.name}</span>
+							<span style="color:${color}">${prefix}${displayVal}${prop.unit}</span>
+						</div>`;
+				});
+				groupHTML += `</div>`;
+				list.innerHTML += groupHTML;
+			}
+		});
+
+		if (!hasAnyEffect) {
+			list.innerHTML = "<div style='text-align:center; padding:40px; color:#94a3b8;'>目前沒有任何加成效果</div>";
+		}
+
+		document.getElementById('effect-modal').style.display = 'flex';
+	}
 </script>
 </body>
 </html>

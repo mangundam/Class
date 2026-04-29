@@ -55,8 +55,8 @@ body {
 .main-store-icon { font-size: 95px; line-height: 1; }
 
 .sub-type-icon { 
-	position: absolute; top: 15px; right: -10px; font-size: 32px; background: white; 
-	border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; 
+	position: absolute; right: -10px; font-size: 22px; background: white; 
+	border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; 
 	justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border: 3px solid var(--primary); 
 }
 
@@ -73,6 +73,8 @@ body {
 .card div { font-size: 12px !important; line-height: 1.2 !important; }
 #active-buffs-list, #history-buffs-inline, #event-impact-list, #history-events-inline { font-size: 10px !important; }
 
+.Buff-detail {font-size: 12px; padding: 0px 6px; cursor: pointer; border-radius: 6px; border: 1px solid var(--primary); background: #f5f3ff; color: var(--primary);}
+.settle-Buff-detail {font-size: 14px; margin-left:10px; padding: 0px 8px; cursor: pointer; border-radius: 6px; border: 1px solid var(--primary); background: #f5f3ff; color: var(--primary);}
 
 .btn-main { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; width: 100%; padding: 12px; border-radius: 12px; font-size: 18px; font-weight: bold; border: none; cursor: pointer; margin-bottom: 10px; }
 .btn-main:active {transform: scale(0.98); opacity: 0.9; }

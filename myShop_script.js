@@ -74,8 +74,8 @@ let state = {
 	expenseMod: 1, dailyRev: 0, dailySold: 0,
 	gameSpeed: 1,
 	expansionLevel: 0,
-	branchPositions: []
-	
+	branchPositions: [],
+	historyData: []
 };
 
 function chooseDiff(key) {
@@ -364,6 +364,13 @@ async function startDay() {
 	const netProfit = totalIncome - totalCost;
 	state.money += netProfit;
 	
+	state.historyData.push({
+		day: state.day,
+		sold: state.dailySold,
+		profit: Math.floor(netProfit),
+		cash: Math.floor(state.money)
+	});
+	
 	btn.textContent = "開店!"; // 結算後改回原樣
 	showSettlement(state.dailySold, totalIncome, totalCost, netProfit, state.money);
 }
@@ -629,6 +636,7 @@ function gameOver(title) {
 	
 	updateUI(); 
 	log(`<b style='color:var(--primary); font-size:24px;'>${title}</b>`);
+	drawChart();
 }
 
 function showWarning(text) {
@@ -780,9 +788,10 @@ function resetGame() {
         dailySold: 0,
         gameSpeed: 1,
         expansionLevel: 0,
-        branchPositions: [] // 記得清空分店位置
+        branchPositions: [],
+		historyData: []
     };
-
+	
     // 2. 清除畫面上的動態元素
     document.getElementById('game-log').innerHTML = ""; // 清空紀錄
     document.getElementById('sub-stores-container').innerHTML = ""; // 移除所有分店
@@ -791,7 +800,11 @@ function resetGame() {
     const shopNode = document.getElementById('shop-node');
     shopNode.style.display = 'none';
     shopNode.style.transform = `translateX(-50%) scale(1)`;
-
+	if (window.myChartInstance instanceof Chart) {
+        window.myChartInstance.destroy();
+        window.myChartInstance = null; // 清空引用
+    }
+	document.getElementById('chart-container').style.display = 'none';
     // 4. 回到初始選單
     document.getElementById('setup-modal').style.display = 'flex';
     document.getElementById('setup-content').innerHTML = `
@@ -811,4 +824,72 @@ function resetGame() {
 
     // 6. 重設速度按鈕
     setSpeed(1);
+}
+
+function drawChart() {
+    const ctx = document.getElementById('businessChart').getContext('2d');
+    document.getElementById('chart-container').style.display = 'block';
+
+    const labels = state.historyData.map(d => `第${d.day}天`);
+    if (window.myChartInstance instanceof Chart) {
+        window.myChartInstance.destroy();
+    }
+	
+    window.myChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: '📦 銷量',
+                    data: state.historyData.map(d => d.sold),
+                    borderColor: '#f59e0b',
+                    backgroundColor: '#f59e0b',
+                    yAxisID: 'y1', // 銷量通常數字較小，用右邊座標軸
+                    tension: 0.3
+                },
+                {
+                    label: '✨ 淨利',
+                    data: state.historyData.map(d => d.profit),
+                    borderColor: '#10b981',
+                    backgroundColor: '#10b981',
+                    yAxisID: 'y',
+                    tension: 0.3
+                },
+                {
+                    label: '💰 現金',
+                    data: state.historyData.map(d => d.cash),
+                    borderColor: '#6366f1',
+                    backgroundColor: '#6366f1',
+                    yAxisID: 'y',
+                    tension: 0.3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+			maintainAspectRatio: false, // 關鍵：讓它能聽從 CSS 的高度設定
+            plugins: {
+                legend: {
+                    position: window.innerWidth > 768 ? 'top' : 'bottom', // 手機版將圖例移到下方
+                }
+            },
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                y: { // 左邊座標軸：金額
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: { display: true, text: '金額 (元)' }
+                },
+                y1: { // 右邊座標軸：數量
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    grid: { drawOnChartArea: false }, // 避免兩組網格線重疊
+                    title: { display: true, text: '銷量 (件)' }
+                }
+            }
+        }
+    });
 }

@@ -176,3 +176,18 @@ body {
 	70% { opacity: 1; }
 	100% { opacity: 0; transform: translate(-50%, -80%); }
 }
+
+#chart-container {
+    background: white;
+    padding: 5px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+#chart-container canvas {
+    min-height: 150px; /* 確保在手機上不會太扁 */
+}
+#businessChart {
+    width: 100% !important;
+    height: auto !important;
+}

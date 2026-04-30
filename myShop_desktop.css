@@ -189,3 +189,19 @@ body { font-family: "Noto Sans TC", sans-serif; background: #f0f2f5; margin: 0; 
 
 .Buff-detail {font-size: 18px; padding: 0px 8px; cursor: pointer; border-radius: 6px; border: 1px solid var(--primary); background: #f5f3ff; color: var(--primary);}
 .settle-Buff-detail {font-size: 22px; margin-left:20px; padding: 0px 8px; cursor: pointer; border-radius: 6px; border: 1px solid var(--primary); background: #f5f3ff; color: var(--primary);}
+
+#chart-container {
+    margin-top: 5px;
+    background: white;
+    padding: 10px;
+    border-radius: 18px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    max-height: 200px; 
+}
+
+/* 確保畫布在容器內正確縮放 */
+#businessChart {
+    width: 100% !important;
+    height: auto !important;
+}

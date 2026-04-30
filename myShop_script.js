@@ -841,7 +841,7 @@ function drawChart() {
             labels: labels,
             datasets: [
                 {
-                    label: '📦 銷量',
+                    label: '銷量',
                     data: state.historyData.map(d => d.sold),
                     borderColor: '#f59e0b',
                     backgroundColor: '#f59e0b',
@@ -849,13 +849,13 @@ function drawChart() {
                     tension: 0.3
                 },
                 {
-                    label: '✨ 淨利',
+                    label: '淨利',
                     data: state.historyData.map(d => d.profit),
                     borderColor: '#10b981',
                     backgroundColor: '#10b981',
                     yAxisID: 'y',
                     tension: 0.3
-                },
+                },/*
                 {
                     label: '💰 現金',
                     data: state.historyData.map(d => d.cash),
@@ -863,7 +863,7 @@ function drawChart() {
                     backgroundColor: '#6366f1',
                     yAxisID: 'y',
                     tension: 0.3
-                }
+                }*/
             ]
         },
         options: {
@@ -874,13 +874,18 @@ function drawChart() {
                     position: window.innerWidth > 768 ? 'top' : 'bottom', // 手機版將圖例移到下方
                 }
             },
+			elements: {
+				point: {
+					radius: 0 // 將數據點半徑設為 0，即隱藏
+				}
+			},
             interaction: { mode: 'index', intersect: false },
             scales: {
                 y: { // 左邊座標軸：金額
                     type: 'linear',
                     display: true,
                     position: 'left',
-                    title: { display: true, text: '金額 (元)' }
+                    title: { display: true, text: '淨利 (元)' }
                 },
                 y1: { // 右邊座標軸：數量
                     type: 'linear',

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>金甌女中 - 視覺化編輯器 (介面統一版)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { margin: 0; padding-top: 70px; background: #f8f9fa; }
+        #admin-bar {
+            position: fixed; top: 0; left: 0; right: 0; height: 70px;
+            background: #212529; color: white; display: flex;
+            align-items: center; padding: 0 20px; z-index: 10000;
+        }
+        .status-tag { padding: 4px 12px; border-radius: 20px; font-size: 13px; margin-left: 15px; font-weight: bold; }
+        .tag-locked { background: #6c757d; }
+        .tag-edit { background: #007bff; }
+        .tag-preview { background: #198754; }
+
+        #editor-container { background: white; min-height: 100vh; position: relative; }
+
+        /* 編輯模式視覺反饋 */
+        .edit-on [contenteditable="true"]:hover {
+            outline: 2px dashed #0d6efd !important;
+            background: rgba(13, 110, 253, 0.05);
+        }
+        /* 圖片在編輯模式下的提示 */
+        .edit-on img:hover {
+            outline: 3px solid #ffc107 !important;
+            cursor: pointer;
+        }
+
+        /* 統一的編輯浮窗 */
+        #edit-popover {
+            position: absolute; display: none; background: white;
+            border: 1px solid #dee2e6; padding: 15px; border-radius: 8px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2); z-index: 10001; min-width: 320px;
+        }
+    </style>
+</head>
+<body class="is-preview">
+
+<div id="admin-bar">
+    <strong class="me-3">視覺化編輯器</strong>
+    <input type="file" id="file-selector" accept=".html" class="form-control form-control-sm w-auto me-3">
+    
+    <div class="btn-group btn-group-sm me-3">
+        <button class="btn btn-outline-light" onclick="switchMode('preview')" id="btn-p" disabled>👁️ 預覽模式</button>
+        <button class="btn btn-outline-light" onclick="switchMode('edit')" id="btn-e" disabled>✏️ 編輯模式</button>
+    </div>
+
+    <span id="mode-label" class="status-tag tag-locked">請先上傳檔案</span>
+    <button class="btn btn-primary btn-sm ms-auto" id="btn-export" onclick="doExport()" disabled>💾 匯出網頁</button>
+</div>
+
+<!-- 統一編輯工具 (支援連結與圖片) -->
+<div id="edit-popover">
+    <label id="popover-title" class="form-label small fw-bold text-primary">編輯網址：</label>
+    <input type="text" id="url-input" class="form-control form-control-sm mb-3" placeholder="請輸入網址...">
+    <div class="d-flex justify-content-end gap-2">
+        <button class="btn btn-light btn-sm" onclick="hidePopover()">取消</button>
+        <button class="btn btn-primary btn-sm" onclick="handleSave()">儲存修改</button>
+    </div>
+</div>
+
+<div id="editor-container">
+    <div class="container py-5 text-center text-muted">
+        <h4>請點擊左上方「選擇檔案」上傳您的網頁</h4>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    let mode = 'preview';
+    const container = document.getElementById('editor-container');
+    const popover = document.getElementById('edit-popover');
+    const urlInput = document.getElementById('url-input');
+    const popTitle = document.getElementById('popover-title');
+    
+    let activeTarget = null; // 當前正在編輯的元素 (可能是 A 或 IMG)
+
+    // 1. 檔案載入
+    document.getElementById('file-selector').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            container.innerHTML = ev.target.result;
+            document.getElementById('btn-p').disabled = false;
+            document.getElementById('btn-e').disabled = false;
+            document.getElementById('btn-export').disabled = false;
+            switchMode('preview');
+        };
+        reader.readAsText(file);
+    });
+
+    // 2. 切換模式
+    function switchMode(newMode) {
+        mode = newMode;
+        const label = document.getElementById('mode-label');
+        
+        if (mode === 'edit') {
+            document.body.className = 'edit-on';
+            label.innerText = "目前：編輯模式";
+            label.className = "status-tag tag-edit";
+            
+            // 自動展開折疊窗
+            container.querySelectorAll('.collapse').forEach(el => el.classList.add('show'));
+            container.querySelectorAll('.accordion-button').forEach(btn => btn.classList.remove('collapsed'));
+
+            // 開啟文字編輯
+            container.querySelectorAll('p, span, h1, h2, h3, h4, h5, h6, td, th, a, button, strong, div.alert, code, li').forEach(el => {
+                el.setAttribute('contenteditable', 'true');
+            });
+
+            container.addEventListener('click', interceptClick, true);
+        } else {
+            document.body.className = 'is-preview';
+            label.innerText = "目前：預覽模式";
+            label.className = "status-tag tag-preview";
+            container.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'false'));
+            container.removeEventListener('click', interceptClick, true);
+            hidePopover();
+        }
+    }
+
+    // 3. 統一攔截器
+    function interceptClick(e) {
+        if (mode !== 'edit') return;
+        
+        const el = e.target;
+        const link = el.closest('a');
+        const img = el.tagName === 'IMG' ? el : null;
+
+        if (link || img) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            
+            activeTarget = link || img;
+            
+            // 根據類型設定標題與初始值
+            if (img) {
+                popTitle.innerText = "🖼️ 編輯圖片網址 (SRC)：";
+                urlInput.value = activeTarget.src;
+            } else {
+                popTitle.innerText = "🔗 編輯連結位址 (HREF)：";
+                urlInput.value = activeTarget.getAttribute('href') || "";
+            }
+
+            // 顯示彈窗位置
+            const rect = activeTarget.getBoundingClientRect();
+            popover.style.display = 'block';
+            popover.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+            popover.style.left = rect.left + 'px';
+        }
+    }
+
+    // 4. 統一儲存邏輯
+    function handleSave() {
+        if (!activeTarget) return;
+
+        const newValue = urlInput.value;
+        if (activeTarget.tagName === 'IMG') {
+            activeTarget.src = newValue;
+        } else {
+            activeTarget.setAttribute('href', newValue);
+        }
+        
+        hidePopover();
+    }
+
+    function hidePopover() {
+        popover.style.display = 'none';
+        activeTarget = null;
+    }
+
+    // 5. 匯出 (自動收合)
+    function doExport() {
+        const clone = container.cloneNode(true);
+        clone.querySelectorAll('.collapse').forEach(el => el.classList.remove('show'));
+        clone.querySelectorAll('.accordion-button').forEach(btn => {
+            btn.classList.add('collapsed');
+            btn.setAttribute('aria-expanded', 'false');
+        });
+        clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+
+        const blob = new Blob([clone.innerHTML], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'updated_新生專區.html';
+        a.click();
+    }
+</script>
+
+</body>
+</html>

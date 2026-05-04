@@ -840,22 +840,22 @@ function drawChart() {
         data: {
             labels: labels,
             datasets: [
-                {
+                /*{
                     label: '銷量',
                     data: state.historyData.map(d => d.sold),
                     borderColor: '#f59e0b',
                     backgroundColor: '#f59e0b',
                     yAxisID: 'y1', // 銷量通常數字較小，用右邊座標軸
                     tension: 0.3
-                },
+                },*/
                 {
                     label: '淨利',
                     data: state.historyData.map(d => d.profit),
                     borderColor: '#10b981',
                     backgroundColor: '#10b981',
-                    yAxisID: 'y',
+                    yAxisID: 'y1',
                     tension: 0.3
-                },/*
+                },
                 {
                     label: '💰 現金',
                     data: state.historyData.map(d => d.cash),
@@ -863,7 +863,7 @@ function drawChart() {
                     backgroundColor: '#6366f1',
                     yAxisID: 'y',
                     tension: 0.3
-                }*/
+                }
             ]
         },
         options: {
@@ -885,14 +885,14 @@ function drawChart() {
                     type: 'linear',
                     display: true,
                     position: 'left',
-                    title: { display: true, text: '淨利 (元)' }
+                    title: { display: true, text: '現金 (元)' }
                 },
                 y1: { // 右邊座標軸：數量
                     type: 'linear',
                     display: true,
                     position: 'right',
                     grid: { drawOnChartArea: false }, // 避免兩組網格線重疊
-                    title: { display: true, text: '銷量 (件)' }
+                    title: { display: true, text: '淨利 (元)' }
                 }
             }
         }

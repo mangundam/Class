@@ -57,7 +57,7 @@
     <label id="popover-title" class="form-label small fw-bold text-primary">編輯網址：</label>
     <input type="text" id="url-input" class="form-control form-control-sm mb-3" placeholder="請輸入網址...">
     <div class="d-flex justify-content-end gap-2">
-        <button class="btn btn-light btn-sm" onclick="hidePopover()">取消</button>
+        <button class="btn btn-light btn-sm" onclick="closeEditPanel()">取消</button>
         <button class="btn btn-primary btn-sm" onclick="handleSave()">儲存修改</button>
     </div>
 </div>
@@ -120,40 +120,63 @@
             label.className = "status-tag tag-preview";
             container.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'false'));
             container.removeEventListener('click', interceptClick, true);
-            hidePopover();
+            closeEditPanel();
         }
     }
 
     // 3. 統一攔截器
     function interceptClick(e) {
-        if (mode !== 'edit') return;
-        
-        const el = e.target;
-        const link = el.closest('a');
-        const img = el.tagName === 'IMG' ? el : null;
+		if (mode !== 'edit') return;
+		
+		const el = e.target;
+		// 優先檢查是否直接點擊圖片
+		const isImg = el.tagName === 'IMG';
+		// 檢查點擊目標或其父層是否有連結
+		const link = el.closest('a');
 
-        if (link || img) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            
-            activeTarget = link || img;
-            
-            // 根據類型設定標題與初始值
-            if (img) {
-                popTitle.innerText = "🖼️ 編輯圖片網址 (SRC)：";
-                urlInput.value = activeTarget.src;
-            } else {
-                popTitle.innerText = "🔗 編輯連結位址 (HREF)：";
-                urlInput.value = activeTarget.getAttribute('href') || "";
-            }
+		if (isImg || link) {
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			
+			// 關鍵邏輯：如果點到的是圖片，就優先編輯圖片；否則編輯連結
+			if (isImg) {
+				activeTarget = el;
+				popTitle.innerText = "🖼️ 編輯圖片網址 (SRC)：";
+				urlInput.value = activeTarget.src;
+			} else {
+				activeTarget = link;
+				popTitle.innerText = "🔗 編輯連結位址 (HREF)：";
+				urlInput.value = activeTarget.getAttribute('href') || "";
+			}
 
-            // 顯示彈窗位置
-            const rect = activeTarget.getBoundingClientRect();
-            popover.style.display = 'block';
-            popover.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-            popover.style.left = rect.left + 'px';
-        }
-    }
+			// 顯示彈窗位置
+			const rect = (isImg ? el : link).getBoundingClientRect();
+			
+			
+			const panelWidth = 320; 
+			const viewportWidth = window.innerWidth;
+			const viewportHeight = window.innerHeight;
+
+			let leftPos = rect.left + window.scrollX;
+			if (rect.left + panelWidth > viewportWidth) {
+				leftPos = viewportWidth - panelWidth - 20; 
+			}
+
+			let topPos = rect.bottom + window.scrollY + 8;
+			const panelHeight = 150; 
+			if (rect.bottom + panelHeight > viewportHeight) {
+				topPos = rect.top + window.scrollY - panelHeight - 8;
+			}
+
+			popover.style.display = 'block';
+			popover.style.top = topPos + 'px';
+			popover.style.left = Math.max(10, leftPos) + 'px'; 
+			/*
+			popover.style.display = 'block';
+			popover.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+			popover.style.left = rect.left + 'px';*/
+		}
+	}
 
     // 4. 統一儲存邏輯
     function handleSave() {
@@ -166,10 +189,10 @@
             activeTarget.setAttribute('href', newValue);
         }
         
-        hidePopover();
+        closeEditPanel();
     }
 
-    function hidePopover() {
+    function closeEditPanel() {
         popover.style.display = 'none';
         activeTarget = null;
     }

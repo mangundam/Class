@@ -77,9 +77,8 @@
     const urlInput = document.getElementById('url-input');
     const popTitle = document.getElementById('popover-title');
     
-    let activeTarget = null; // 當前正在編輯的元素 (可能是 A 或 IMG)
+    let activeTarget = null; 
 
-    // 1. 檔案載入
     document.getElementById('file-selector').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -94,7 +93,6 @@
         reader.readAsText(file);
     });
 
-    // 2. 切換模式
     function switchMode(newMode) {
         mode = newMode;
         const label = document.getElementById('mode-label');
@@ -104,11 +102,9 @@
             label.innerText = "目前：編輯模式";
             label.className = "status-tag tag-edit";
             
-            // 自動展開折疊窗
             container.querySelectorAll('.collapse').forEach(el => el.classList.add('show'));
             container.querySelectorAll('.accordion-button').forEach(btn => btn.classList.remove('collapsed'));
 
-            // 開啟文字編輯
             container.querySelectorAll('p, span, h1, h2, h3, h4, h5, h6, td, th, a, button, strong, div.alert, code, li').forEach(el => {
                 el.setAttribute('contenteditable', 'true');
             });
@@ -124,21 +120,16 @@
         }
     }
 
-    // 3. 統一攔截器
     function interceptClick(e) {
 		if (mode !== 'edit') return;
 		
 		const el = e.target;
-		// 優先檢查是否直接點擊圖片
 		const isImg = el.tagName === 'IMG';
-		// 檢查點擊目標或其父層是否有連結
 		const link = el.closest('a');
 
 		if (isImg || link) {
 			e.preventDefault();
 			e.stopImmediatePropagation();
-			
-			// 關鍵邏輯：如果點到的是圖片，就優先編輯圖片；否則編輯連結
 			if (isImg) {
 				activeTarget = el;
 				popTitle.innerText = "🖼️ 編輯圖片網址 (SRC)：";
@@ -149,7 +140,6 @@
 				urlInput.value = activeTarget.getAttribute('href') || "";
 			}
 
-			// 顯示彈窗位置
 			const rect = (isImg ? el : link).getBoundingClientRect();
 			
 			
@@ -171,14 +161,9 @@
 			popover.style.display = 'block';
 			popover.style.top = topPos + 'px';
 			popover.style.left = Math.max(10, leftPos) + 'px'; 
-			/*
-			popover.style.display = 'block';
-			popover.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-			popover.style.left = rect.left + 'px';*/
 		}
 	}
 
-    // 4. 統一儲存邏輯
     function handleSave() {
         if (!activeTarget) return;
 
@@ -197,7 +182,6 @@
         activeTarget = null;
     }
 
-    // 5. 匯出 (自動收合)
     function doExport() {
         const clone = container.cloneNode(true);
         clone.querySelectorAll('.collapse').forEach(el => el.classList.remove('show'));

@@ -27,7 +27,6 @@
         h1 { color: var(--primary-color); margin-bottom: 5px; font-size: 1.5rem; }
         .instruction { color: #666; margin-bottom: 20px; font-size: 0.9rem; }
 
-        /* 樂器候選區 */
         #instrument-pool {
             width: 95%;
             max-width: 1000px;
@@ -60,10 +59,9 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-            pointer-events: none; /* 防止圖片干擾拖動 */
+            pointer-events: none;
         }
 
-        /* 分類目標區 */
         .categories-container {
             display: flex;
             flex-wrap: wrap;
@@ -102,7 +100,6 @@
             min-height: 100px;
         }
 
-        /* 控制項 */
         .controls { margin: 30px 0; }
         button {
             padding: 12px 40px;
@@ -115,7 +112,6 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        /* 證書彈窗佈局 */
         #overlay {
             display: none;
             position: fixed;
@@ -149,7 +145,6 @@
             border-radius: 5px;
         }
 
-        /* 手機調整 */
         @media (max-width: 600px) {
             .category-box { width: 42%; }
             .instrument { width: 50px; height: 50px; }
@@ -161,6 +156,7 @@
     <h1>樂器分類大挑戰</h1>
     <p class="instruction">用滑鼠或手指將樂器拖移到正確的分類框內</p>
 
+    <!-- 樂器選擇區 -->
     <div id="instrument-pool">
         <div class="instrument" id="Violin"><img src="instruments/Violin.png" title="Violin"></div>
         <div class="instrument" id="Viola"><img src="instruments/Viola.png" title="Viola"></div>
@@ -225,58 +221,65 @@
             "Keyboards": ["Piano", "Accordion"]
         };
 
+        // --- 隨機排序功能 ---
+        function shuffleInstruments() {
+            const pool = document.getElementById('instrument-pool');
+            const items = Array.from(pool.children);
+            
+            // Fisher-Yates Shuffle 演算法
+            for (let i = items.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                pool.appendChild(items[j]); // appendChild 會自動將原有元素移動到最後
+                items.splice(j, 1);
+                items.push(pool.lastChild);
+            }
+        }
+
+        // 頁面載入後立即洗牌
+        window.onload = shuffleInstruments;
+
+        // --- 拖放邏輯 (含手機支援) ---
         let activeItem = null;
         let initialX, initialY;
 
-        // 初始化所有樂器的拖放
         document.querySelectorAll('.instrument').forEach(item => {
-            // PC 端原拖拽
             item.draggable = true;
             item.addEventListener('dragstart', e => e.dataTransfer.setData("text", item.id));
 
-            // 手機端觸控拖拽 (Touch Events)
-            item.addEventListener('touchstart', handleTouchStart, {passive: false});
-            item.addEventListener('touchmove', handleTouchMove, {passive: false});
-            item.addEventListener('touchend', handleTouchEnd, {passive: false});
+            item.addEventListener('touchstart', e => {
+                activeItem = e.target.closest('.instrument');
+                const touch = e.touches[0];
+                initialX = touch.clientX - activeItem.offsetLeft;
+                initialY = touch.clientY - activeItem.offsetTop;
+                activeItem.style.zIndex = "1000";
+            }, {passive: false});
+
+            item.addEventListener('touchmove', e => {
+                if (!activeItem) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                activeItem.style.position = 'fixed';
+                activeItem.style.left = (touch.clientX - initialX) + 'px';
+                activeItem.style.top = (touch.clientY - initialY) + 'px';
+            }, {passive: false});
+
+            item.addEventListener('touchend', e => {
+                if (!activeItem) return;
+                activeItem.style.display = 'none';
+                const dropTarget = document.elementFromPoint(
+                    e.changedTouches[0].clientX, 
+                    e.changedTouches[0].clientY
+                );
+                activeItem.style.display = 'block';
+                activeItem.style.position = 'static';
+                activeItem.style.zIndex = "10";
+
+                let zone = dropTarget ? dropTarget.closest('.drop-zone, #instrument-pool') : null;
+                if (zone) zone.appendChild(activeItem);
+                activeItem = null;
+            }, {passive: false});
         });
 
-        // 手機端邏輯
-        function handleTouchStart(e) {
-            activeItem = e.target.closest('.instrument');
-            const touch = e.touches[0];
-            initialX = touch.clientX - activeItem.offsetLeft;
-            initialY = touch.clientY - activeItem.offsetTop;
-            activeItem.style.zIndex = "1000";
-        }
-
-        function handleTouchMove(e) {
-            if (!activeItem) return;
-            e.preventDefault();
-            const touch = e.touches[0];
-            activeItem.style.position = 'fixed';
-            activeItem.style.left = (touch.clientX - initialX) + 'px';
-            activeItem.style.top = (touch.clientY - initialY) + 'px';
-        }
-
-        function handleTouchEnd(e) {
-            if (!activeItem) return;
-            activeItem.style.display = 'none'; // 暫時隱藏以獲取下方元素
-            const dropTarget = document.elementFromPoint(
-                e.changedTouches[0].clientX, 
-                e.changedTouches[0].clientY
-            );
-            activeItem.style.display = 'block';
-            activeItem.style.position = 'static';
-            activeItem.style.zIndex = "10";
-
-            let zone = dropTarget ? dropTarget.closest('.drop-zone, #instrument-pool') : null;
-            if (zone) {
-                zone.appendChild(activeItem);
-            }
-            activeItem = null;
-        }
-
-        // PC 放置邏輯
         document.querySelectorAll('.drop-zone, #instrument-pool').forEach(zone => {
             zone.addEventListener('dragover', e => e.preventDefault());
             zone.addEventListener('drop', e => {
@@ -286,6 +289,7 @@
             });
         });
 
+        // --- 結算與證書 ---
         function submitGame() {
             const studentName = prompt("請輸入學生姓名:");
             if (!studentName) return;

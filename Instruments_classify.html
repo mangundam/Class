@@ -28,122 +28,71 @@
         .instruction { color: #666; margin-bottom: 20px; font-size: 0.9rem; }
 
         #instrument-pool {
-            width: 95%;
-            max-width: 1000px;
-            min-height: 100px;
-            background: #fff;
-            border: 2px dashed #999;
-            border-radius: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-            margin-bottom: 20px;
+            width: 95%; max-width: 1000px; min-height: 100px;
+            background: #fff; border: 2px dashed #999; border-radius: 10px;
+            display: flex; flex-wrap: wrap; justify-content: center;
+            align-items: center; padding: 10px; margin-bottom: 20px;
         }
 
         .instrument {
-            width: 60px;
-            height: 60px;
-            margin: 8px;
-            cursor: grab;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            touch-action: none;
-            position: relative;
-            z-index: 10;
+            width: 60px; height: 60px; margin: 8px; cursor: grab;
+            background: #fff; border: 1px solid #ddd; border-radius: 8px;
+            touch-action: none; position: relative; z-index: 10;
         }
 
-        .instrument img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            pointer-events: none;
-        }
+        .instrument img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
 
         .categories-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-            width: 100%;
-            max-width: 1200px;
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 15px; width: 100%; max-width: 1200px;
         }
 
         .category-box {
-            width: 160px;
-            min-height: 180px;
-            background: #e9ecef;
-            border: 2px solid #ced4da;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            padding: 8px;
+            width: 160px; min-height: 180px; background: #e9ecef;
+            border: 2px solid #ced4da; border-radius: 12px;
+            display: flex; flex-direction: column; padding: 8px;
         }
 
         .category-box h3 {
-            margin: 0 0 10px 0;
-            color: #495057;
-            font-size: 0.9rem;
-            border-bottom: 2px solid #dee2e6;
-            text-align: center;
-            padding-bottom: 5px;
+            margin: 0 0 10px 0; color: #495057; font-size: 0.9rem;
+            border-bottom: 2px solid #dee2e6; text-align: center; padding-bottom: 5px;
         }
 
-        .drop-zone {
-            flex-grow: 1;
-            display: flex;
-            flex-wrap: wrap;
-            align-content: flex-start;
-            gap: 5px;
-            min-height: 100px;
-        }
+        .drop-zone { flex-grow: 1; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 5px; min-height: 100px; }
 
         .controls { margin: 30px 0; }
         button {
-            padding: 12px 40px;
-            font-size: 1.1rem;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
+            padding: 12px 40px; font-size: 1.1rem; background-color: var(--accent-color);
+            color: white; border: none; border-radius: 25px; cursor: pointer;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        #overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
+        /* 彈出視窗共同樣式 */
+        #overlay, #input-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center;
         }
 
+        .modal-content {
+            background: #fff; width: 85%; max-width: 400px; padding: 30px;
+            border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-content input {
+            width: 80%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem;
+        }
+
+        /* 證書樣式 */
         #certificate {
-            background: #fff;
-            width: 90%;
-            max-width: 500px;
-            padding: 40px;
-            border: 10px double #c9ad6a;
-            border-radius: 5px;
-            text-align: center;
-            position: relative;
+            background: #fff; width: 90%; max-width: 500px; padding: 40px;
+            border: 10px double #c9ad6a; border-radius: 5px; text-align: center; position: relative;
         }
 
         #certificate h2 { font-family: "Times New Roman", serif; color: #846733; margin-top: 0; }
-        .cert-name { font-size: 1.8rem; border-bottom: 2px solid #333; margin: 20px auto; width: fit-content; min-width: 200px; }
-        .cert-score { font-size: 1.4rem; color: var(--primary-color); margin: 15px 0; }
-        .cert-date { font-size: 0.9rem; color: #999; margin-top: 30px; }
-        
-        .close-btn {
-            margin-top: 20px;
-            background: #6c757d;
-            padding: 8px 20px;
-            border-radius: 5px;
-        }
+        .cert-name { font-size: 1.8rem; border-bottom: 2px solid #333; margin: 10px auto; width: fit-content; min-width: 150px; }
+        .cert-info { font-size: 1.1rem; color: #555; margin-bottom: 15px; }
+        .cert-score { font-size: 1.4rem; color: var(--primary-color); margin: 15px 0; font-weight: bold; }
+        .cert-date { font-size: 0.9rem; color: #999; margin-top: 20px; }
 
         @media (max-width: 600px) {
             .category-box { width: 42%; }
@@ -156,63 +105,64 @@
     <h1>樂器分類大挑戰</h1>
     <p class="instruction">用滑鼠或手指將樂器拖移到正確的分類框內</p>
 
-    <!-- 樂器選擇區 -->
     <div id="instrument-pool">
-        <div class="instrument" id="Violin"><img src="instruments/Violin.png" title="Violin"></div>
-        <div class="instrument" id="Viola"><img src="instruments/Viola.png" title="Viola"></div>
-        <div class="instrument" id="Cello"><img src="instruments/Cello.png" title="Cello"></div>
-        <div class="instrument" id="Harp"><img src="instruments/Harp.png" title="Harp"></div>
-        <div class="instrument" id="Guitar"><img src="instruments/Guitar.png" title="Guitar"></div>
-        <div class="instrument" id="Flute"><img src="instruments/Flute.png" title="Flute"></div>
-        <div class="instrument" id="Clarinet"><img src="instruments/Clarinet.png" title="Clarinet"></div>
-        <div class="instrument" id="Saxophone"><img src="instruments/Saxophone.png" title="Saxophone"></div>
-        <div class="instrument" id="Trumpet"><img src="instruments/Trumpet.png" title="Trumpet"></div>
-        <div class="instrument" id="French Horn"><img src="instruments/French Horn.png" title="French Horn"></div>
-        <div class="instrument" id="Xylophone"><img src="instruments/Xylophone.png" title="Xylophone"></div>
-        <div class="instrument" id="Piano"><img src="instruments/Piano.png" title="Piano"></div>
-        <div class="instrument" id="Accordion"><img src="instruments/Accordion.png" title="Accordion"></div>
+        <!-- 圖片連結已更新 -->
+        <div class="instrument" id="Violin"><img src="https://mangundam.github.io/Class/instruments/Violin.png"></div>
+        <div class="instrument" id="Viola"><img src="https://mangundam.github.io/Class/instruments/Viola.png"></div>
+        <div class="instrument" id="Cello"><img src="https://mangundam.github.io/Class/instruments/Cello.png"></div>
+        <div class="instrument" id="Harp"><img src="https://mangundam.github.io/Class/instruments/Harp.png"></div>
+        <div class="instrument" id="Guitar"><img src="https://mangundam.github.io/Class/instruments/Guitar.png"></div>
+        <div class="instrument" id="Flute"><img src="https://mangundam.github.io/Class/instruments/Flute.png"></div>
+        <div class="instrument" id="Clarinet"><img src="https://mangundam.github.io/Class/instruments/Clarinet.png"></div>
+        <div class="instrument" id="Saxophone"><img src="https://mangundam.github.io/Class/instruments/Saxophone.png"></div>
+        <div class="instrument" id="Trumpet"><img src="https://mangundam.github.io/Class/instruments/Trumpet.png"></div>
+        <div class="instrument" id="French Horn"><img src="https://mangundam.github.io/Class/instruments/French%20Horn.png"></div>
+        <div class="instrument" id="Xylophone"><img src="https://mangundam.github.io/Class/instruments/Xylophone.png"></div>
+        <div class="instrument" id="Piano"><img src="https://mangundam.github.io/Class/instruments/Piano.png"></div>
+        <div class="instrument" id="Accordion"><img src="https://mangundam.github.io/Class/instruments/Accordion.png"></div>
     </div>
 
     <div class="categories-container">
-        <div class="category-box">
-            <h3>Strings 弦樂器</h3>
-            <div class="drop-zone" id="Strings"></div>
-        </div>
-        <div class="category-box">
-            <h3>Woodwinds 木管樂器</h3>
-            <div class="drop-zone" id="Woodwinds"></div>
-        </div>
-        <div class="category-box">
-            <h3>Brass 銅管樂器</h3>
-            <div class="drop-zone" id="Brass"></div>
-        </div>
-        <div class="category-box">
-            <h3>Percussion 打擊樂器</h3>
-            <div class="drop-zone" id="Percussion"></div>
-        </div>
-        <div class="category-box">
-            <h3>Keyboards 鍵盤樂器</h3>
-            <div class="drop-zone" id="Keyboards"></div>
-        </div>
+        <div class="category-box"><h3>Strings 弦樂器</h3><div class="drop-zone" id="Strings"></div></div>
+        <div class="category-box"><h3>Woodwinds 木管樂器</h3><div class="drop-zone" id="Woodwinds"></div></div>
+        <div class="category-box"><h3>Brass 銅管樂器</h3><div class="drop-zone" id="Brass"></div></div>
+        <div class="category-box"><h3>Percussion 打擊樂器</h3><div class="drop-zone" id="Percussion"></div></div>
+        <div class="category-box"><h3>Keyboards 鍵盤樂器</h3><div class="drop-zone" id="Keyboards"></div></div>
     </div>
 
     <div class="controls">
-        <button onclick="submitGame()">提交答案</button>
+        <button onclick="openInputModal()">提交答案</button>
     </div>
 
+    <!-- 姓名學號輸入視窗 -->
+    <div id="input-overlay">
+        <div class="modal-content">
+            <h3>請輸入資料</h3>
+            <input type="text" id="student-id" placeholder="學號 (例如: 10101)">
+            <input type="text" id="student-name" placeholder="姓名">
+            <br><br>
+            <button onclick="confirmAndSubmit()" style="padding: 8px 25px; font-size: 1rem;">確認送出</button>
+        </div>
+    </div>
+
+    <!-- 證書視窗 -->
     <div id="overlay">
         <div id="certificate">
             <h2>CERTIFICATE OF COMPLETION</h2>
             <p>這項榮譽授予</p>
             <div class="cert-name" id="display-name"></div>
+            <div class="cert-info" id="display-id"></div>
             <p>成功完成樂器分類挑戰</p>
             <div class="cert-score" id="display-score"></div>
+            <div id="upload-status" style="font-size: 0.8rem; color: #666;">正在同步至雲端...</div>
             <div class="cert-date" id="display-date"></div>
-            <button class="close-btn" onclick="location.reload()">重新挑戰</button>
+            <button onclick="location.reload()" style="margin-top:20px; background:#6c757d; padding:8px 20px;">重新挑戰</button>
         </div>
     </div>
 
     <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbx__xGleQlRaeKWyZf-y9g-lGVaZX3wfCYlUdMoHEFGktICESMyWl3dyRqDdd9mHiVDCA/exec"; // 請更換為您的 GAS 網址
+
         const answers = {
             "Strings": ["Violin", "Viola", "Cello", "Harp", "Guitar"],
             "Woodwinds": ["Flute", "Clarinet", "Saxophone"],
@@ -221,104 +171,95 @@
             "Keyboards": ["Piano", "Accordion"]
         };
 
-        // --- 隨機排序功能 ---
-        function shuffleInstruments() {
+        // 隨機洗牌
+        window.onload = () => {
             const pool = document.getElementById('instrument-pool');
             const items = Array.from(pool.children);
-            
-            // Fisher-Yates Shuffle 演算法
             for (let i = items.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                pool.appendChild(items[j]); // appendChild 會自動將原有元素移動到最後
-                items.splice(j, 1);
-                items.push(pool.lastChild);
+                pool.appendChild(items[j]);
             }
-        }
+        };
 
-        // 頁面載入後立即洗牌
-        window.onload = shuffleInstruments;
-
-        // --- 拖放邏輯 (含手機支援) ---
-        let activeItem = null;
-        let initialX, initialY;
-
+        // 拖放與觸控邏輯 (省略重複部分以保持整潔，功能不變)
+        let activeItem = null, initialX, initialY;
         document.querySelectorAll('.instrument').forEach(item => {
             item.draggable = true;
             item.addEventListener('dragstart', e => e.dataTransfer.setData("text", item.id));
-
             item.addEventListener('touchstart', e => {
                 activeItem = e.target.closest('.instrument');
-                const touch = e.touches[0];
-                initialX = touch.clientX - activeItem.offsetLeft;
-                initialY = touch.clientY - activeItem.offsetTop;
+                const t = e.touches[0]; initialX = t.clientX - activeItem.offsetLeft; initialY = t.clientY - activeItem.offsetTop;
                 activeItem.style.zIndex = "1000";
             }, {passive: false});
-
             item.addEventListener('touchmove', e => {
-                if (!activeItem) return;
-                e.preventDefault();
-                const touch = e.touches[0];
-                activeItem.style.position = 'fixed';
-                activeItem.style.left = (touch.clientX - initialX) + 'px';
-                activeItem.style.top = (touch.clientY - initialY) + 'px';
+                if (!activeItem) return; e.preventDefault();
+                const t = e.touches[0]; activeItem.style.position = 'fixed';
+                activeItem.style.left = (t.clientX - initialX) + 'px'; activeItem.style.top = (t.clientY - initialY) + 'px';
             }, {passive: false});
-
             item.addEventListener('touchend', e => {
-                if (!activeItem) return;
-                activeItem.style.display = 'none';
-                const dropTarget = document.elementFromPoint(
-                    e.changedTouches[0].clientX, 
-                    e.changedTouches[0].clientY
-                );
-                activeItem.style.display = 'block';
-                activeItem.style.position = 'static';
-                activeItem.style.zIndex = "10";
-
-                let zone = dropTarget ? dropTarget.closest('.drop-zone, #instrument-pool') : null;
-                if (zone) zone.appendChild(activeItem);
-                activeItem = null;
+                if (!activeItem) return; activeItem.style.display = 'none';
+                const target = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+                activeItem.style.display = 'block'; activeItem.style.position = 'static';
+                const zone = target ? target.closest('.drop-zone, #instrument-pool') : null;
+                if (zone) zone.appendChild(activeItem); activeItem = null;
             }, {passive: false});
         });
-
         document.querySelectorAll('.drop-zone, #instrument-pool').forEach(zone => {
             zone.addEventListener('dragover', e => e.preventDefault());
-            zone.addEventListener('drop', e => {
-                e.preventDefault();
-                const id = e.dataTransfer.getData("text");
-                zone.appendChild(document.getElementById(id));
-            });
+            zone.addEventListener('drop', e => { e.preventDefault(); zone.appendChild(document.getElementById(e.dataTransfer.getData("text"))); });
         });
 
-        // --- 結算與證書 ---
-        function submitGame() {
-            const studentName = prompt("請輸入學生姓名:");
-            if (!studentName) return;
+        function openInputModal() { document.getElementById('input-overlay').style.display = 'flex'; }
 
-            let correctCount = 0;
+        function confirmAndSubmit() {
+            const sid = document.getElementById('student-id').value;
+            const sname = document.getElementById('student-name').value;
+            if (!sid || !sname) { alert("請完整填寫學號與姓名"); return; }
+
+            document.getElementById('input-overlay').style.display = 'none';
+            calculateAndDisplay(sid, sname);
+        }
+
+        function calculateAndDisplay(sid, sname) {
+            let correct = 0;
             const total = 13;
-
             for (const [cat, list] of Object.entries(answers)) {
-                const zone = document.getElementById(cat);
-                const items = zone.querySelectorAll('.instrument');
-                items.forEach(inst => {
-                    if (list.includes(inst.id)) {
-                        correctCount++;
-                        inst.style.border = "2px solid var(--success-color)";
-                    } else {
-                        inst.style.border = "2px solid var(--error-color)";
-                    }
+                const zoneItems = document.getElementById(cat).querySelectorAll('.instrument');
+                zoneItems.forEach(inst => {
+                    if (list.includes(inst.id)) { correct++; inst.style.border = "2px solid var(--success-color)"; }
+                    else { inst.style.border = "2px solid var(--error-color)"; }
                 });
             }
 
-            const score = Math.round((correctCount / total) * 100);
-            showCertificate(studentName, score, correctCount, total);
+            const score = Math.round((correct / total) * 100);
+            
+            // 顯示證書
+            document.getElementById('display-name').innerText = sname;
+            document.getElementById('display-id').innerText = "學號: " + sid;
+            document.getElementById('display-score').innerText = `得分: ${score}% (${correct} / ${total})`;
+            document.getElementById('display-date').innerText = "完成日期: " + new Date().toLocaleDateString();
+            document.getElementById('overlay').style.display = 'flex';
+
+            // 傳送資料到後台
+            sendToBackend(sid, sname, score, correct);
         }
 
-        function showCertificate(name, score, count, total) {
-            document.getElementById('display-name').innerText = name;
-            document.getElementById('display-score').innerText = `得分: ${score}% (正確數: ${count} / ${total})`;
-            document.getElementById('display-date').innerText = `完成日期: ${new Date().toLocaleDateString()}`;
-            document.getElementById('overlay').style.display = 'flex';
+        function sendToBackend(sid, sname, score, correct) {
+            const data = { id: sid, name: sname, score: score, count: correct, date: new Date().toLocaleString() };
+            
+            fetch(GAS_URL, {
+                method: "POST",
+                mode: "no-cors", // GAS 限制通常需使用 no-cors
+                cache: "no-cache",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            }).then(() => {
+                document.getElementById('upload-status').innerText = "雲端同步成功";
+                document.getElementById('upload-status').style.color = "green";
+            }).catch(err => {
+                document.getElementById('upload-status').innerText = "同步失敗，請截圖保存";
+                document.getElementById('upload-status').style.color = "red";
+            });
         }
     </script>
 </body>

@@ -182,28 +182,66 @@
         };
 
         // 拖放與觸控邏輯 (省略重複部分以保持整潔，功能不變)
-        let activeItem = null, initialX, initialY;
-        document.querySelectorAll('.instrument').forEach(item => {
-            item.draggable = true;
-            item.addEventListener('dragstart', e => e.dataTransfer.setData("text", item.id));
-            item.addEventListener('touchstart', e => {
-                activeItem = e.target.closest('.instrument');
-                const t = e.touches[0]; initialX = t.clientX - activeItem.offsetLeft; initialY = t.clientY - activeItem.offsetTop;
-                activeItem.style.zIndex = "1000";
-            }, {passive: false});
-            item.addEventListener('touchmove', e => {
-                if (!activeItem) return; e.preventDefault();
-                const t = e.touches[0]; activeItem.style.position = 'fixed';
-                activeItem.style.left = (t.clientX - initialX) + 'px'; activeItem.style.top = (t.clientY - initialY) + 'px';
-            }, {passive: false});
-            item.addEventListener('touchend', e => {
-                if (!activeItem) return; activeItem.style.display = 'none';
-                const target = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-                activeItem.style.display = 'block'; activeItem.style.position = 'static';
-                const zone = target ? target.closest('.drop-zone, #instrument-pool') : null;
-                if (zone) zone.appendChild(activeItem); activeItem = null;
-            }, {passive: false});
-        });
+        let activeItem = null, offsetX = 0, offsetY = 0;
+
+		document.querySelectorAll('.instrument').forEach(item => {
+			item.draggable = true;
+			
+			// PC 拖放
+			item.addEventListener('dragstart', e => e.dataTransfer.setData("text", item.id));
+
+			// 手機觸控開始
+			item.addEventListener('touchstart', e => {
+				activeItem = e.target.closest('.instrument');
+				const touch = e.touches[0];
+				const rect = activeItem.getBoundingClientRect();
+				
+				// 計算手指點擊位置與元件左上角的相對偏移
+				// 這樣拖動時元件就不會突然「跳」一下，而是會黏在手指點擊的位置
+				offsetX = touch.clientX - rect.left;
+				offsetY = touch.clientY - rect.top;
+				
+				activeItem.style.zIndex = "1000";
+			}, {passive: false});
+
+			// 手機觸控移動
+			item.addEventListener('touchmove', e => {
+				if (!activeItem) return;
+				e.preventDefault(); // 防止畫面捲動
+				
+				const touch = e.touches[0];
+				
+				// 設定為 fixed 才能在整個視窗自由移動
+				activeItem.style.position = 'fixed';
+				
+				// 修正位置：手指位置 - 相對偏移量
+				activeItem.style.left = (touch.clientX - offsetX) + 'px';
+				activeItem.style.top = (touch.clientY - offsetY) + 'px';
+			}, {passive: false});
+
+			// 手機觸控結束
+			item.addEventListener('touchend', e => {
+				if (!activeItem) return;
+				
+				activeItem.style.display = 'none'; // 隱藏自己以便 detectPoint 抓到下方的元素
+				
+				// 抓取手指放開那一刻的位置
+				const touch = e.changedTouches[0];
+				const target = document.elementFromPoint(touch.clientX, touch.clientY);
+				
+				activeItem.style.display = 'block';
+				activeItem.style.position = 'static'; // 恢復流式排版
+				activeItem.style.zIndex = "10";
+
+				const zone = target ? target.closest('.drop-zone, #instrument-pool') : null;
+				if (zone) {
+					zone.appendChild(activeItem);
+				}
+				activeItem = null;
+			}, {passive: false});
+		});
+		
+		
         document.querySelectorAll('.drop-zone, #instrument-pool').forEach(zone => {
             zone.addEventListener('dragover', e => e.preventDefault());
             zone.addEventListener('drop', e => { e.preventDefault(); zone.appendChild(document.getElementById(e.dataTransfer.getData("text"))); });

@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新生專區 - 金甌女中</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #004085;
+            --accent-color: #f39c12;
+            --bg-color: #f4f7f9;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {font-family: "Microsoft JhengHei", sans-serif;background-color: var(--bg-color);color: #333;}
+
+		.hero-banner {
+			width: 100%;
+			max-width: 1000px;
+			aspect-ratio: 1007 / 230; 
+			margin: 0 auto 20px auto;
+			border-radius: 0 0 20px 20px;
+			overflow: hidden; 
+			background-color: #ddd;
+		}
+		.hero-banner img {width: 100%;height: 100%;object-fit: contain; display: block; }
+
+        .content-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px; 
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+            border: none;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            border-left: 6px solid var(--primary-color);
+            padding-left: 12px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .nav-pills-custom {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .nav-pills-custom a {
+            background: white;
+            padding: 8px 16px;
+            border-radius: 50px;
+            box-shadow: var(--card-shadow);
+            color: var(--primary-color);
+            font-weight: bold;
+            transition: 0.3s;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+        .nav-pills-custom a:hover {background: var(--primary-color);color: white;}
+		
+        .accordion-button {padding: 12px 15px;font-size: 1rem;}
+		
+        .table-responsive {border-radius: 8px;overflow-x: auto;border: 1px solid #e0e6ed;margin-bottom: 15px;}
+        .table {margin-bottom: 0;width: 100%;border-collapse: collapse;font-size: 0.9rem;}
+        .table-warning {background: linear-gradient(135deg, #004085 0%, #002752 100%) !important;color: #ffffff !important;}
+        .table-warning th {padding: 8px 4px !important;font-weight: 600;vertical-align: middle;}
+        .table-light {
+            background-color: #f8f9fa !important;
+            font-weight: bold;
+            color: #495057;
+            width: 90px; /* 縮小首欄寬度 */
+            border-right: 1px solid #dee2e6 !important;
+            text-align: center;
+        }
+        .table td, .table th {padding: 6px 8px;border: 1px solid #edf2f7;}
+        .tab-ctl-x {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: #e7f1ff;
+            color: #004085;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .responsive-img-container img {
+            max-width: 70%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .highlight-box {background-color: #fff9e6;border: 1px solid #ffeeba;padding: 12px;border-radius: 8px;margin-bottom: 15px;}
+		
+		.badge-notice {font-size: 1.1rem;vertical-align: middle;}
+        .export-btn {border: none;transition: 0.3s;}
+        .export-btn:hover {opacity: 0.9;transform: scale(1.02);}
+		.video-thumbnail-container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+		}
+
+		.video-thumbnail-btn {
+			position: relative;
+			display: block;
+			width: 100%;
+			max-width: 400px;
+			border-radius: 12px;
+			overflow: hidden;
+			box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+			transition: transform 0.3s;
+		}
+
+		.video-thumbnail-btn:hover {transform: scale(1.02);}
+
+		.video-thumbnail-btn img {width: 100%;height: auto;display: block;}
+
+		.play-overlay {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: rgba(0, 0, 0, 0.7);
+			color: white;
+			width: 70px;
+			height: 70px;
+			border-radius: 50%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-size: 40px;
+			transition: all 0.3s;
+			border: 2px solid rgba(255,255,255,0.3);
+		}
+
+		.video-thumbnail-btn:hover .play-overlay {
+			background: rgba(255, 0, 0, 0.9);
+			transform: translate(-50%, -50%) scale(1.1);
+		}
+		.viewin_btn{
+			margin: 0px 15px;
+		}
+		
+		@media (max-width: 768px) {
+            .hero-banner { border-radius: 0; margin-bottom: 15px;}
+            .nav-pills-custom a { width: 45%; text-align: center; font-size: 0.85rem; }
+            .header-date-tag { display: inline-block; margin: 2px; font-size: 0.75rem; }
+            .section-title { font-size: 1.2rem; }
+            .table { font-size: 0.8rem; white-space: normal; } 
+            .table-light { width: 70px; min-width: 70px; }
+            .table td { min-width: 80px; }
+			.viewin_btn{margin: 15px 0px 0px 0px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero-banner" style="width:100%;"><img src="https://www.cogsh.tp.edu.tw/ischool/publish_page/110/WID_110_5_e867854a30b4de7779b8b71f9e324e9df8bd562c/header_pic.png"></div>
+
+<div class="container">
+    <div class="nav-pills-custom">
+        <a href="http://web.cogsh.tp.edu.tw/gbms/viewin.php" target="_blank">入學獎學金申請</a>
+        <a href="http://web.cogsh.tp.edu.tw/gbms/index.php" target="_blank">新生資訊系統</a>
+        <a href="https://lin.ee/2Rhw236" target="_blank">官方 LINE 諮詢</a>
+		<a href="https://www.facebook.com/yh2cogsh" target="_blank">Facebook 粉絲專頁</a>
+		<a href="https://docs.google.com/forms/d/e/1FAIpQLSejvQwDyqcB_5pSum5o29QlngBO2avo0EDd-Yn0xcG-bp3oWA/viewform" target="_blank">家長說明會報名</a>
+    </div>
+
+    <section class="content-section">
+        <h2 class="section-title">招生節目表</h2>
+        <div class="row">
+            <div class="col-12 mb-4">
+				<div class="alert alert-info shadow-sm">
+					<div class="video-thumbnail-container">
+						<div class="mb-2">
+							<h4 class="mb-1"><strong>115年簡介影片：創新的傳承</strong></h4>
+						</div>
+						<a href="https://youtu.be/humevhKrBTo" target="_blank" class="video-thumbnail-btn">
+							<img src="https://img.youtube.com/vi/humevhKrBTo/maxresdefault.jpg" alt="115年金甌女中簡介影片">
+							<div class="play-overlay">▶</div>
+						</a>
+					</div>
+				</div>
+			</div>
+            <div class="col-md-6 mb-3">
+                <h6>114年節目表</h6>
+                <table class="table table-bordered text-center align-middle">
+                    <thead class="table-dark"><tr><th>日期</th><th>主題</th><th>播放</th></tr></thead>
+                    <tbody>
+                        <tr><td>2月20日</td><td>觀光事業科</td><td><a class="btn btn-sm btn-outline-danger" href="https://youtu.be/o4TYNTHVbJA" target="_blank">播放</a></td></tr>
+                        <tr><td>3月4日</td><td>多媒體設計科</td><td><a class="btn btn-sm btn-outline-danger" href="https://youtu.be/tIuVxMAOQ9U" target="_blank">播放</a></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6 mb-3">
+                <h6>113年節目表</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered text-center align-middle">
+                        <thead class="table-dark"><tr><th>日期</th><th>主題</th><th>播放</th></tr></thead>
+                        <tbody>
+                            <tr><td>2月16日</td><td>觀光事業科</td><td><a class="btn btn-sm btn-outline-success" href="https://youtube.com/live/702fTYjWy_Y" target="_blank">播放</a></td></tr>
+                            <tr><td>2月23日</td><td>商業經營科</td><td><a class="btn btn-sm btn-outline-success" href="https://youtu.be/VMQVwRxK2cM" target="_blank">播放</a></td></tr>
+                            <tr><td>3月1日</td><td>多媒體設計科</td><td><a class="btn btn-sm btn-outline-success" href="https://youtu.be/AdS-dDSVkQg" target="_blank">播放</a></td></tr>
+                            <tr><td>3月8日</td><td>應用英語科</td><td><a class="btn btn-sm btn-outline-success" href="https://youtu.be/7OgiPJqyvz8" target="_blank">播放</a></td></tr>
+                            <tr><td>3月15日</td><td>應用日語科</td><td><a class="btn btn-sm btn-outline-success" href="https://youtu.be/350DQu7rUbo" target="_blank">播放</a></td></tr>
+                            <tr><td>3月22日</td><td>普通科</td><td><a class="btn btn-sm btn-outline-success" href="https://youtu.be/v-TamZ9RXBA" target="_blank">播放</a></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+	<section class="content-section">
+        <h2 class="section-title d-flex align-items-center flex-wrap">
+            重要訊息公告
+            <button id="export-btn" class="export-btn" style="margin-left: 15px; padding: 5px 15px; background: #e7f1ff; color: #004085; border-radius: 50px; font-size: 14px; cursor: pointer;">匯出此頁 CSV</button>
+        </h2>
+
+        <div class="row">
+            <!-- 一、服裝費轉帳資訊 -->
+            <div class="col-12 mb-4">
+                <h5 class="text-primary fw-bold mb-3">一、服裝費轉帳資訊</h5>
+                <div class="card bg-light border-0 p-3">
+                    <p class="mb-1"><strong>銀行名稱：</strong>新光銀行 中正分行 (代碼: 103-0019)</p>
+                    <p class="mb-1"><strong>銀行帳號：</strong><code class="fs-5 text-dark fw-bold">0019-50-108886-1</code></p>
+                    <p class="mb-0"><strong>戶名：</strong>財團法人臺北市私立金甌女子高級中學</p>
+                </div>
+            </div>
+
+            <!-- 二、本土語言選課 -->
+            <div class="col-md-6 mb-4">
+                <h5 class="text-primary fw-bold mb-3">二、本土語言選課</h5>
+                <p class="text-muted">
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSdt3-zhV-4mP_9Z3QqJ419EaGbbATcSbmLiRw4KduUJrWARgw/viewform" target="_blank" class="btn btn-sm btn-outline-primary">點我前往選課網頁連結</a>
+                </p>
+            </div>
+
+            <!-- 三、新生資訊系統 -->
+            <div class="col-md-6 mb-4">
+                <h5 class="text-primary fw-bold mb-3">三、新生資訊系統</h5>
+                <a class="btn btn-primary btn-sm tab-ctl-x px-3 py-2" href="http://web.cogsh.tp.edu.tw/gbms/index.php" target="_blank" style="font-size: 0.9rem;">查詢新生各項資訊(尚未開放)</a>
+            </div>
+
+            <!-- 四、國際雙聯班 -->
+            <div class="col-12 mb-4">
+                <h5 class="text-primary fw-bold mb-3">四、國際雙聯班</h5>
+                <p class="mb-2">本校與以下學校合作辦理雙聯學位班，歡迎家長與同學洽詢：</p>
+                <ul class="list-unstyled d-flex flex-wrap gap-3">
+                    <li>🇺🇸 美國 <a href="https://lwlhs.org/" target="_blank" class="text-decoration-none">箴言高中</a></li>
+                    <li>🇬🇧 英國 <a href="https://www.cityplym.ac.uk/" target="_blank" class="text-decoration-none">普利茅斯城市學院</a></li>
+                    <li>🇬🇧 英國 <a href="https://www.edinburghcollege.ac.uk/" target="_blank" class="text-decoration-none">愛丁堡學院</a></li>
+                </ul>
+            </div>
+
+            <!-- 五、關注金甌與服裝訊息 -->
+            <div class="col-md-6 mb-4">
+                <h5 class="text-primary fw-bold mb-3">五、關注金甌女中</h5>
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-outline-primary btn-sm" href="https://www.facebook.com/yh2cogsh" target="_blank">FB 粉絲專頁</a>
+                    <a class="btn btn-outline-info btn-sm" href="https://www.facebook.com/groups/254041687971629" target="_blank">FB 交流社團</a>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <h5 class="text-primary fw-bold mb-3">六、相關服裝訊息</h5>
+                <a class="btn btn-sm btn-outline-primary" href="https://www.cogsh.tp.edu.tw/ischool/resources/WID_110_9_a1cdc2d4999a5fa700c10129e43288b70cd8e59d/c7a7bc3e3020e7d8e951cf94831023ea.pdf" target="_blank">
+                    115學年度服裝清單與繡學號示範圖
+                </a>
+            </div>
+        </div>
+    </section>
+    <section class="content-section">
+        <h2 class="section-title">入學管道與重要時程</h2>
+        <div class="accordion" id="admissionAccordion">
+			<div class="accordion-item shadow-sm">
+				<h2 class="accordion-header">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c1">
+						<div>
+							<strong>一、專業群科特色招生</strong>
+							<span class="header-date-tag">報名：3/9-3/13</span>
+							<span class="header-date-tag">考試：4/12</span>
+							<span class="header-date-tag">成績公布：5/18</span>
+							<span class="header-date-tag">放榜：6/11</span>
+							<span class="header-date-tag text-danger">報到：6/12</span>
+						</div>
+					</button>
+				</h2>
+				<div id="c1" class="accordion-collapse collapse" data-bs-parent="#admissionAccordion">
+					<div class="accordion-body">
+						<div class="row mb-4">
+							<div class="col-md-6 border-end-md">
+								<h6 class="text-primary fw-bold"><i class="bi bi-people-fill"></i> 方式一（國中集報）</h6>
+								<ul class="list-unstyled ps-2 mb-3">
+									<li class="small"><strong>時間：</strong>3月11日 至 3月12日</li>
+									<li class="small text-muted">基北區考生由各國中團報。若國中無法代辦，請將報名表與費用寄至本校教務處註冊組。</li>
+								</ul>
+							</div>
+							<div class="col-md-6">
+								<h6 class="text-primary fw-bold"><i class="bi bi-person-check-fill"></i> 方式二（個別報名）</h6>
+								<ul class="list-unstyled ps-2 mb-3">
+									<li class="small"><strong>時間：</strong>3月9日 至 3月13日</li>
+									<li class="small text-danger fw-bold">非基北區或擬自行報名者，請直接遞件或郵寄至本校註冊組。</li>
+								</ul>
+							</div>
+						</div>
+						
+						<hr class="my-3"> 
+						<p class="small text-muted mb-2">報名網站：<a href="https://115special.slhs.tp.edu.tw/" target="_blank">北市特招報名系統</a></p>
+						<div class="table-responsive">
+							<table class="table table-bordered table-hover align-middle text-center small">
+								<thead class="table-warning">
+									<tr>
+										<th scope="col" style="width: 15%;">類科</th>
+										<th>商業經營科</th>
+										<th>觀光事業科</th>
+										<th>應用英語科</th>
+										<th>應用日語科</th>
+										<th>多媒體設計科</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<th class="table-light" scope="row">招生人數</th>
+										<td>10</td><td>10</td><td>20</td><td>20</td><td>20</td>
+									</tr>
+									<tr>
+										<th class="table-light" scope="row">簡章下載</th>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/84d907a628dda7790c5e79511b9b26cd.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/ef190a5c4e4a468c82306a932c2991ff.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/ea331f1faa64db0eee2de25de83fd926.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/b2c39d70554c81280d475fba86564fd1.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/5fa0ad7ff86ca00effe83457af8b7b3e.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+									</tr>
+									<tr>
+										<th class="table-light" scope="row">術科試題範例</th>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/6780a1028a4e3d4017e6f0cf438bef4a.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/082701910f17c232215d29888528efd5.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/9de4cda614fac94bc2decba1862d37d5.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/b65c7bff71ede4f5c60c740668b093d8.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/f4af4258139ef771d570582a40f78aad.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+									</tr>
+									<tr>
+										<th class="table-light" scope="row">術科測驗試題</th>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/116b38b6e79059fed906c82a284bda12.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/5714141704c3972c49709ae5a654ee6d.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/9e3371ebb1a5f99afb29144831abee26.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/ffc377c451d3168b6f1cca3aa8b8b47b.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+										<td><a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/008e7da8c96e2c1bbaeaa7c22cf5ed1b.pdf" target="_blank" class="tab-ctl-x">下載</a></td>
+									</tr>
+									<tr>
+										<th class="table-light" scope="row">備註</th>
+										<td>中文口語表達</td><td>中文口語表達</td><td>中/英口語表達</td><td>中文口語表達</td><td>繪圖實作</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+            <div class="accordion-item shadow-sm">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c2">
+                        <div>
+                            <strong>二、學習區完全免試入學</strong>
+                            <span class="header-date-tag">報名：5/5-5/6</span>
+                            <span class="header-date-tag">放榜：5/14</span>
+                            <span class="header-date-tag text-danger">報到：6/12</span>
+                        </div>
+                    </button>
+                </h2>
+                <div id="c2" class="accordion-collapse collapse" data-bs-parent="#admissionAccordion">
+                    <div class="accordion-body">
+                        <table class="table table-sm table-bordered text-center">
+                            <thead class="table-warning"><tr><th>類科</th><th>商業經營科</th><th>觀光事業科</th><th>應用英語科</th><th>應用日語科</th><th>多媒體設計科</th></tr></thead>
+                            <tbody><tr><td>招生人數</td><td>9</td><td>9</td><td>9</td><td>9</td><td>9</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item shadow-sm">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c3">
+                        <div>
+                            <strong>三、臺北市優先免試入學 (第二類)</strong>
+                            <span class="header-date-tag">報名：6/1起</span>
+                            <span class="header-date-tag text-danger">撕榜報到：6/15</span>
+                        </div>
+                    </button>
+                </h2>
+                <div id="c3" class="accordion-collapse collapse" data-bs-parent="#admissionAccordion">
+                    <div class="accordion-body">
+                        <table class="table table-sm table-bordered text-center">
+                            <thead class="table-warning"><tr><th>類科</th><th>普通科</th><th>商業經營科</th><th>觀光事業科</th><th>應用英語科</th><th>應用日語科</th><th>多媒體設計科</th></tr></thead>
+                            <tbody><tr><td>招生人數</td><td>30</td><td>10</td><td>10</td><td>20</td><td>20</td><td>20</td></tr></tbody>
+                        </table>
+                        <div class="responsive-img-container">
+                            <img src="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/114/40a4fdd723d8b32507e502472ea18026.jpg" alt="優先免試宣傳圖">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item shadow-sm">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c4">
+                        <div>
+                            <strong>四、基北區免試入學</strong>
+                            <span class="header-date-tag">志願：6/18-6/25</span>
+                            <span class="header-date-tag">放榜：7/7</span>
+                            <span class="header-date-tag text-danger">報到：7/7-7/9</span>
+                        </div>
+                    </button>
+                </h2>
+                <div id="c4" class="accordion-collapse collapse" data-bs-parent="#admissionAccordion">
+                    <div class="accordion-body">
+                        <table class="table table-sm table-bordered text-center">
+							<thead class="table-warning"><tr><th>類科</th><th>普通科</th><th>商業經營科</th><th>觀光事業科</th><th>應用英語科</th><th>應用日語科</th><th>多媒體設計科</th></tr></thead>
+                            <tbody><tr><td>預定招生人數</td><td>待優免報到後另行公布</td><td>待優免報到後另行公布</td><td>待優免報到後另行公布</td><td>待優免報到後另行公布</td><td>待優免報到後另行公布</td><td>待優免報到後另行公布</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+			<div class="accordion-item shadow-sm">
+				<h2 class="accordion-header">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c5">
+						<div>
+							<strong>五、基北區免試入學續招</strong>
+							<span class="header-date-tag">即日起至 8/29 止</span>
+							<span class="header-date-tag text-danger">未錄取考生適用</span>
+						</div>
+					</button>
+				</h2>
+				<div id="c5" class="accordion-collapse collapse" data-bs-parent="#admissionAccordion">
+					<div class="accordion-body">
+						<div class="alert alert-info shadow-sm mb-3">
+							<h6 class="fw-bold mb-2">💡 報名說明：</h6>
+							<p class="mb-1"><strong>報名資格：</strong> 未於其他入學管道錄取、或已錄取但未完成報到、或報到後已於規定時間內聲明放棄錄取資格者。</p>
+							<p class="mb-0"><strong>錄取方式：</strong> 本校尚有餘額時，依登記順序或簡章規範錄取。</p>
+						</div>
+						
+						<div class="p-3 bg-light rounded border">
+							<div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+								<div>
+									<h6 class="fw-bold mb-1">115學年度續招簡章</h6>
+									<p class="small text-muted mb-0">請詳閱簡章內容後，依規定時間親自至本校報名。</p>
+								</div>
+								<a class="btn btn-primary px-4" href="https://www.cogsh.tp.edu.tw/ischool/publish_page/110/#">下載續招簡章</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+    </section>
+
+    <section class="content-section" id="scholarship-area">
+        <h2 class="section-title">115學年度入學獎勵制度</h2>
+        <div class="highlight-box">
+            <h5 class="fw-bold text-dark">重要領取須知：</h5>
+            <ul class="small mb-0">
+                <li><strong>獎學金（項目一至六）：</strong>採「取最高金額發放」，不重複領取。</li>
+                <li><strong>獎勵金（項目七至十）：</strong>符合資格者即可重複領取。</li>
+                <li><strong>發放方式：</strong>3,000元以上獎金分六學期發放（學業平均 PR 值須達 75 以上且無大過）。</li>
+            </ul>
+        </div>
+        <div class="row">
+            <div class="col-12 mb-4">
+                <h6 class="fw-bold text-primary mb-3">【獎學金項目】(擇優領取)</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle shadow-sm">
+                        <thead class="table-dark">
+                            <tr><th>類別</th><th>條件與資格</th><th>金額</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="fw-bold bg-light">菁英獎學金</td><td>5A (60萬) / 4A (30萬) / 3A (10萬) / 2A (3萬) / 1A (1萬)</td><td class="text-danger fw-bold">最高 60萬</td></tr>
+                            <tr><td class="fw-bold bg-light">英語資優獎</td><td>國中會考英語成績達 A++</td><td class="text-danger fw-bold">2 萬元</td></tr>
+                            <tr><td class="fw-bold bg-light">技藝優秀獎</td><td>「特色招生」、「技優甄審」錄取並完成報到</td><td class="text-danger fw-bold">2 萬元</td></tr>
+                            <tr><td class="fw-bold bg-light">優先免試獎</td><td>「完全免試」或「北市優免」錄取並完成報到</td><td class="text-danger fw-bold">1 萬元</td></tr>
+                            <tr><td class="fw-bold bg-light">校友子女獎</td><td>本校校友子女或孫子女完成報到</td><td class="text-danger fw-bold">1 萬元</td></tr>
+                            <tr><td class="fw-bold bg-light">早鳥獎學金</td><td>5/18前報到：1.5萬 / 7/8前報到：2,000元</td><td class="text-danger fw-bold">最高 1.5萬</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-12">
+                <h6 class="fw-bold text-success mb-3">【加碼獎勵金】(符合資格皆可領)</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-success">
+                            <tr><th>項目</th><th>對象</th><th>金額</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="fw-bold">國際新住民</td><td>父母一方為新住民身分</td><td>3,000 元</td></tr>
+                            <tr><td class="fw-bold">姊妹同校</td><td>親姊妹同時在校，由姊姊推薦</td><td>3,000 元</td></tr>
+                            <tr><td class="fw-bold">閨蜜獎勵</td><td>兩人同時報到繳件</td><td>每人 1,000 元</td></tr>
+                            <tr><td class="fw-bold">推薦獎勵</td><td>由在校生、新生或校友推薦完成報到</td><td>推薦人 1,000 元</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="text-center ">
+            <a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/115/a474972f5a8ed86cd04314f14bd210e8.pdf" target="_blank" class="btn btn-outline-info fw-bold px-3 py-2 shadow">
+                下載詳細獎學金申請辦法說明
+            </a>
+			<a href="http://web.cogsh.tp.edu.tw/gbms/viewin.php" target="_blank" class="btn btn-outline-info fw-bold px-3 py-2 shadow viewin_btn">
+                入學獎學金申請
+            </a>
+			
+			
+        </div>
+    </section>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <section class="content-section" id="scholarship-area">
+        <h2 class="section-title">助學補助 - 安心就學沒煩惱</h2>
+        
+        <p class="small text-muted mb-3">
+            本校依據教育部規定，提供多元的學雜費補助方案。無論是家庭經濟狀況或特殊身分，皆有對應的減免額度，確保每位學生都能安心就學。
+        </p>
+
+        <div class="highlight-box">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <span class="fw-bold text-dark">115學年度助學補助須知：</span>
+                <a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/9/113/fc9c57f9b84b959633ec81c9efcd095c.pdf" target="_blank" class="tab-ctl-x">點我下載 PDF 說明</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <h6 class="fw-bold text-primary mb-2">補助金額參考：</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered text-center align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>適用科別</th>
+                                <th>補助金額 (每學期)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>普通科</td>
+                                <td class="fw-bold text-danger fs-5">26,162 元</td>
+                            </tr>
+                            <tr>
+                                <td>職業類科</td>
+                                <td class="fw-bold text-danger fs-5">26,162 元</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-muted" style="font-size: 0.8rem;">* 職業類科不分家戶所得，皆享有此補助額度。</p>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <h6 class="fw-bold text-primary mb-2">特殊身分補助對象：</h6>
+                <div class="bg-light p-3 rounded border">
+                    <p class="small fw-bold mb-2">符合下列身分者，可依規定申請對應之補助：</p>
+                    <ul class="row list-unstyled mb-0 small g-2">
+                        <li class="col-12">● 身心障礙學生及人士子女</li>
+                        <li class="col-12">● 低收入戶與中低收入戶</li>
+                        <li class="col-12">● 原住民學生</li>
+                        <li class="col-12">● 特殊境遇家庭子女</li>
+                        <li class="col-12">● 現役軍人子女</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-warning small mb-0">
+            <strong>提醒：</strong>實際收費金額將依據臺北市政府教育局函頒「臺北市115學年度第一學期學雜費及各項代收代辦費收費標準」辦理。
+        </div>
+    </section>
+        </div>
+
+        <div class="col-lg-5">
+            <section class="content-section h-100">
+                <h2 class="section-title">課程手冊 - 做好準備</h2>
+                <p class="small text-muted mb-3">就學前請務必參閱以下規範資料，規劃您的學習路徑：</p>
+                
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item bg-transparent px-0 border-0 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="fw-bold mb-1">總體課程計畫</h6>
+                                <p class="small text-muted mb-0">了解本校各學科規劃與教學重點。</p>
+                            </div>
+                            <a href="https://www.cogsh.tp.edu.tw/ischool/publish_page/57/?cid=3877" target="_blank" class="btn btn-outline-primary btn-sm">前往查詢</a>
+                        </div>
+                    </div>
+                    <div class="list-group-item bg-transparent px-0 border-0 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="fw-bold mb-1">成績評量辦法</h6>
+                                <p class="small text-muted mb-0">掌握學期評分標準及補充規定。</p>
+                            </div>
+                            <a href="https://www.cogsh.tp.edu.tw/ischool/wr/file/1/2117/48704b7c05a3e2332d827d9eec8085c6.pdf" target="_blank" class="btn btn-outline-primary btn-sm">下載 PDF</a>
+                        </div>
+                    </div>
+                    <div class="list-group-item bg-transparent px-0 border-0 mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="fw-bold mb-1">畢業條件說明</h6>
+                                <p class="small text-muted mb-0">詳細說明 108 課綱之學分要求。</p>
+                            </div>
+                            <a href="https://www.cogsh.tp.edu.tw/ischool/resources/WID_110_9_0453061c4d8f2b221f8039d2c86ce85e77c9ecf6/95c11d5b3bd6fd617ae51cd3fd0c3d23.docx" target="_blank" class="btn btn-outline-primary btn-sm">下載檔案</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <footer class="text-center  pb-5 text-muted small">
+        <p>台北市私立金甌女子高級中學 新生專區<br>網頁設計：數位果子</p>
+    </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

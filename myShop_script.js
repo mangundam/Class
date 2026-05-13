@@ -8,14 +8,21 @@ const SHOP_DATA = {
 const BUFF_POOL = [
 	{ name: "📰 網路廣告", desc: "客流 +20%", buy: 4000, dSum: 0.20 },
 	{ name: "🤖 自動結帳", desc: "單位成本 90%", buy: 3500, cMul: 0.9 },
-	{ name: "💎 尊榮會員", desc: "客流 +10%, 售價 +15%", buy: 4000, dSum: 0.1, pSum: 0.15 },
+	//{ name: "💎 尊榮會員", desc: "客流 +10%, 售價 +15%", buy: 4000, dSum: 0.1, pSum: 0.15 },
 	{ name: "⏰ 延長工時", desc: "客流 +15%, 人事 +30%", buy: 1500, dSum: 0.15, persSum: 0.3 },
 	{ name: "🎫 優惠禮券", desc: "客流 +30%, 售價 -15%", buy: 2500, dSum: 0.15, pSum: -0.15 },
-	{ name: "🧹 門面裝修", desc: "客流 +15%, 售價 +10%", buy: 5000, dSum: 0.15, pSum: 0.10 },
+	//{ name: "🧹 門面裝修", desc: "客流 +15%, 售價 +10%", buy: 5000, dSum: 0.15, pSum: 0.10 },
 	{ name: "📦 批發採購", desc: "單位成本 80%, 客流 -10%", buy: 2000, cMul: 0.8, dSum: -0.1 },
 	{ name: "👨‍🍳 專業培訓", desc: "售價 +30%, 人事 +20%", buy: 4000, pSum: 0.15, persSum: 0.2 },
 	{ name: "🏗️ 擴大店面", desc: "客流 +30%, 房租 +2000", buy: 8500, dSum: 0.30, rentAdd: 2000 },
-	{ name: "🏢 開設分店", desc: "客流 +100%, 房租 +3000, 人事 +100%", buy: 18000, dSum: 1.0, rentAdd: 3000, persSum: 1.0 }
+	{ name: "🏢 開設分店", desc: "客流 +100%, 房租 +3000, 人事 +100%", buy: 18000, dSum: 1.0, rentAdd: 3000, persSum: 1.0 },
+	
+	{ name: "🧹 門面裝修", desc: "前 3 天施工：客流 -50%；之後：客流 +20%, 售價 +15%", buy: 5000, currentStage: 0,
+		stages: [{ duration: 3, dMul: 0.5, log: "門面裝修施工中，客流減少" },
+				 { duration: Infinity, dSum: 0.2, pSum: 0.15, log: "裝修完成！店面煥然一新" }]},
+    { name: "🍱 研發新菜單",desc: "前 2 天研發：人事 +20%；之後：售價 +25%", buy: 3000, currentStage: 0,
+		stages: [{ duration: 2, persSum: 0.2, log: "廚師正在研發新菜單..." },
+				 { duration: Infinity, pSum: 0.25, log: "新菜單大獲好評！" }]},
 ];
 
 //沒有duration等於永久活動
@@ -114,121 +121,79 @@ function finalize(diff, m, r, cycle) {
 }
 
 function calculateCurrentStats() {
-/*
- * * --- 以下為各屬性的計算器 (分類：加減Sum / 乘除Mul / 絕對值Add) ---
- * pSum, pMul: 售價的累加比率 (起始1.0) 與 連乘權重 (起始1.0)
- * cSum, cMul: 成本的累加比率 與 連乘權重
- * dSum, dMul: 客流的累加比率 與 連乘權重
- * persSum, persMul: 人事費的累加比率 與 連乘權重
- * * rAdd, dAdd: 房租與客流的「絕對數值」加減 (例如固定增加 $1500 房租)
- */
+	/*
+	 * * --- 以下為各屬性的計算器 (分類：加減Sum / 乘除Mul / 絕對值Add) ---
+	 * pSum, pMul: 售價的累加比率 (起始1.0) 與 連乘權重 (起始1.0)
+	 * cSum, cMul: 成本的累加比率 與 連乘權重
+	 * dSum, dMul: 客流的累加比率 與 連乘權重
+	 * persSum, persMul: 人事費的累加比率 與 連乘權重
+	 * * rAdd, dAdd: 房租與客流的「絕對數值」加減 (例如固定增加 $1500 房租)
+	 */
 
-let p = state.shop.price, c = state.shop.cost;
-let baseRent = state.rent;
-let basePers = state.personnel;
-
-// 初始化計算器
-let pSum = 0, pMul = 1.0;
-let cSum = 0, cMul = 1.0;
-let dSum = 0, dMul = 1.0;
-let persSum = 0, persMul = 1.0;
-let rAdd = 0, dAdd = 0;
-
-// 定義統一的數據處理邏輯 (處理 Buffs 與 Events)
-const processImpact = (item) => {
-	// --- 售價 (Price) --- 修正名稱為 pSum
-	if (item.pSum !== undefined) pSum += item.pSum;
-	if (item.pMul !== undefined) pMul *= item.pMul;
-
-	// --- 成本 (Cost) --- 修正名稱為 cSum
-	if (item.cSum !== undefined) cSum += item.cSum;
-	if (item.cMul !== undefined) cMul *= item.cMul;
-
-	// --- 客流 (Demand) --- 修正名稱為 dSum
-	if (item.dSum !== undefined) dSum += item.dSum;
-	if (item.dMul !== undefined) dMul *= item.dMul;
-	if (item.dAdd !== undefined) dAdd += item.dAdd;
-
-	// --- 人事 (Personnel) --- 修正名稱為 persSum
-	if (item.persSum !== undefined) persSum += item.persSum;
-	if (item.persMul !== undefined) persMul *= item.persMul;
-
-	// --- 房租 (Rent) --- 修正名稱為 rentAdd
-	if (item.rentAdd !== undefined) rAdd += item.rentAdd;
-};
-
-// 1. 計算每日決策 (Buffs)
-state.activeBuffs.forEach(processImpact);
-
-// 2. 計算大事件 (Events)
-state.historyEvents.forEach(processImpact);
-
-// 最終合成計算：(初始值 * 加減總和比率 * 乘除連乘權重)
-// 使用 Math.max 確保不會出現負數或 0 導致遊戲無法運作
-const finalPrice = Math.max(1, Math.floor(p * (1 + pSum) * pMul));
-const finalCost  = Math.max(1, Math.floor(c * (1 + cSum) * cMul));
-const finalPers  = Math.max(0, Math.floor(basePers * (1 + persSum) * persMul));
-const finalRent  = Math.max(0, baseRent + rAdd);
-
-// 計算最終總加成率 (回傳給 UI 顯示用，例如 +8.9%)
-const finalDRateTotal = ((1 + dSum) * dMul) - 1;
-
-return { 
-        price: finalPrice, 
-        cost: finalCost, 
-        expense: finalPers + finalRent, 
-        Statrent: finalRent,
-        StatPersonnel: finalPers,
-        dRate: finalDRateTotal,
-        dAdd: dAdd
-    };
-}
-
-
-/*
-function calculateCurrentStats() {
 	let p = state.shop.price, c = state.shop.cost;
-	let baseRent = state.rent;        // 來自難度設定
-	let basePersonnel = state.personnel; // 來自店型設定
+	let baseRent = state.rent;
+	let basePers = state.personnel;
 
-	let pMul = 1.0, cMul = 1.0, dMul = 1.0, persMul = 1.0;
-	let rentAdd = 0, dAdd = 0;
+	// 初始化計算器
+	let pSum = 0, pMul = 1.0;
+	let cSum = 0, cMul = 1.0;
+	let dSum = 0, dMul = 1.0;
+	let persSum = 0, persMul = 1.0;
+	let rAdd = 0, dAdd = 0;
 
-	// 策略影響 (Buffs)
-	state.activeBuffs.forEach(item => {
-		if(item.pRate) pMul *= (1 + item.pRate);
-		if(item.cRate) cMul *= (1 + item.cRate);
-		if(item.dRate) dMul *= (1 + item.dRate);
-		if(item.personnelRate) persMul *= (1 + item.personnelRate); // 影響人事
-		if(item.rentAdd) rentAdd += item.rentAdd; // 影響租金
-	});
+	// 定義統一的數據處理邏輯 (處理 Buffs 與 Events)
+	const processImpact = (item) => {
+		const impact = item.stages ? item.stages[item.currentStage] : item;
+		
+		// --- 售價 (Price) --- 修正名稱為 pSum
+		if (impact.pSum !== undefined) pSum += impact.pSum;
+		if (impact.pMul !== undefined) pMul *= impact.pMul;
 
-	// 事件影響 (Events)
-	state.historyEvents.forEach(item => {
-		if(item.pRate) pMul *= (1 + item.pRate);
-		if(item.cRate) cMul *= (1 + item.cRate);
-		if(item.dRate) dMul *= (1 + item.dRate);
-		if(item.personnelRate) persMul *= (1 + item.personnelRate);
-		if(item.rentAdd) rentAdd += item.rentAdd;
-	});
+		// --- 成本 (Cost) --- 修正名稱為 cSum
+		if (impact.cSum !== undefined) cSum += impact.cSum;
+		if (impact.cMul !== undefined) cMul *= impact.cMul;
 
-	// 最終合成計算
-	const finalPrice = Math.max(1, Math.floor(p * pMul));
-	const finalCost = Math.max(1, Math.floor(c * cMul));
-	const finalPersonnel = Math.max(0, Math.floor(basePersonnel * persMul));
-	const finalRent = Math.max(0, baseRent + rentAdd);
+		// --- 客流 (Demand) --- 修正名稱為 dSum
+		if (impact.dSum !== undefined) dSum += impact.dSum;
+		if (impact.dMul !== undefined) dMul *= impact.dMul;
+		if (impact.dAdd !== undefined) dAdd += impact.dAdd;
+
+		// --- 人事 (Personnel) --- 修正名稱為 persSum
+		if (impact.persSum !== undefined) persSum += impact.persSum;
+		if (impact.persMul !== undefined) persMul *= impact.persMul;
+
+		// --- 房租 (Rent) --- 修正名稱為 rentAdd
+		if (impact.rentAdd !== undefined) rAdd += impact.rentAdd;
+	};
+
+	// 1. 計算每日決策 (Buffs)
+	state.activeBuffs.forEach(processImpact);
+
+	// 2. 計算大事件 (Events)
+	state.historyEvents.forEach(processImpact);
+
+	// 最終合成計算：(初始值 * 加減總和比率 * 乘除連乘權重)
+	// 使用 Math.max 確保不會出現負數或 0 導致遊戲無法運作
+	const finalPrice = Math.max(1, Math.floor(p * (1 + pSum) * pMul));
+	const finalCost  = Math.max(1, Math.floor(c * (1 + cSum) * cMul));
+	const finalPers  = Math.max(0, Math.floor(basePers * (1 + persSum) * persMul));
+	const finalRent  = Math.max(0, baseRent + rAdd);
+
+	// 計算最終總加成率 (回傳給 UI 顯示用，例如 +8.9%)
+	const finalDRateTotal = ((1 + dSum) * dMul) - 1;
 
 	return { 
 		price: finalPrice, 
 		cost: finalCost, 
-		expense: finalPersonnel + finalRent, // 總開銷 = 動態人事 + 動態租金
+		expense: finalPers + finalRent, 
 		Statrent: finalRent,
-		StatPersonnel: finalPersonnel,
-		dRate: dMul - 1,
+		StatPersonnel: finalPers,
+		dRate: finalDRateTotal,
 		dAdd: dAdd
 	};
 }
-*/
+
+
 
 function updateUI() {
 		const stats = calculateCurrentStats();
@@ -540,7 +505,8 @@ function showSettlement(count, rev, cost, profit, money) {
 					return;
 				}
 				state.money -= b.buy;
-				state.activeBuffs.push(b);
+				const newBuff = JSON.parse(JSON.stringify(b));
+				state.activeBuffs.push(newBuff);
 				updateUI();
 				checkEventAfterSettle();
 			};
@@ -591,6 +557,25 @@ function nextDay() {
 		gameOver("破產！這裡是最終經營總結報告。");
 		return;
 	}
+	
+	state.activeBuffs.forEach(buff => {
+        if (buff.stages) {
+            let current = buff.stages[buff.currentStage];
+            
+            // 如果當前階段有時間限制
+            if (current.duration !== Infinity) {
+                current.duration--;
+
+                // 如果時間到了，切換到下一階段
+                if (current.duration < 0 && buff.currentStage < buff.stages.length - 1) {
+                    buff.currentStage++;
+                    let next = buff.stages[buff.currentStage];
+                    log(`<span style="color:var(--primary)">[升級] ${buff.name}：${next.log}</span>`);
+                }
+            }
+        }
+    });
+	
 	state.historyEvents.forEach(event => {
 		if (event.duration !== undefined) {
 			event.duration--;
@@ -676,18 +661,34 @@ function showEffectPanel() {
 
         const collectData = (sourceArray, typeName) => {
             sourceArray.forEach(obj => {
-                if (prop.keySum && obj[prop.keySum] !== undefined) {
-                    items.push({ name: obj.name || obj.log.split('：')[0], val: obj[prop.keySum], type: typeName, method: '加法' });
-                    currentSum += obj[prop.keySum];
-                }
-                if (prop.keyMul && obj[prop.keyMul] !== undefined) {
-                    items.push({ name: obj.name || obj.log.split('：')[0], val: obj[prop.keyMul], type: typeName, method: '乘法' });
-                    currentMul *= obj[prop.keyMul];
-                }
-                if (prop.keyAdd && obj[prop.keyAdd] !== undefined) {
-                    items.push({ name: obj.name || obj.log.split('：')[0], val: obj[prop.keyAdd], type: typeName, method: '數值' });
-                    currentAdd += obj[prop.keyAdd];
-                }
+				const impact = obj.stages ? obj.stages[obj.currentStage] : obj;
+                if (prop.keySum && impact[prop.keySum] !== undefined) {
+					items.push({ 
+						name: obj.name || (obj.log ? obj.log.split('：')[0] : "未知事件"), 
+						val: impact[prop.keySum], 
+						type: typeName, 
+						method: '加法' 
+					});
+					currentSum += impact[prop.keySum];
+				}
+				if (prop.keyMul && impact[prop.keyMul] !== undefined) {
+					items.push({ 
+						name: obj.name || (obj.log ? obj.log.split('：')[0] : "未知事件"), 
+						val: impact[prop.keyMul], 
+						type: typeName, 
+						method: '乘法' 
+					});
+					currentMul *= impact[prop.keyMul];
+				}
+				if (prop.keyAdd && impact[prop.keyAdd] !== undefined) {
+					items.push({ 
+						name: obj.name || (obj.log ? obj.log.split('：')[0] : "未知事件"), 
+						val: impact[prop.keyAdd], 
+						type: typeName, 
+						method: '數值' 
+					});
+					currentAdd += impact[prop.keyAdd];
+				}
             });
         };
 

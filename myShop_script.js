@@ -18,7 +18,7 @@ const BUFF_POOL = [
 	{ name: "🏢 開設分店", desc: "客流 +100%, 房租 +3000, 人事 +100%", buy: 18000, dSum: 1.0, rentAdd: 3000, persSum: 1.0 },
 	
 	{ name: "🧹 門面裝修", desc: "前 3 天施工：客流 -50%；之後：客流 +20%, 售價 +15%", buy: 5000, currentStage: 0,
-		stages: [{ duration: 3, dMul: 0.5, log: "門面裝修施工中，客流減少" },
+		stages: [{ duration: 3, dSum: -0.5, log: "門面裝修施工中，客流減少" },
 				 { duration: Infinity, dSum: 0.2, pSum: 0.15, log: "裝修完成！店面煥然一新" }]},
     { name: "🍱 研發新菜單",desc: "前 2 天研發：人事 +20%；之後：售價 +25%", buy: 3000, currentStage: 0,
 		stages: [{ duration: 2, persSum: 0.2, log: "廚師正在研發新菜單..." },

@@ -1,27 +1,27 @@
 const SHOP_DATA = {
-	drink: { name: "飲料店", icon: "🥤", price: 65, cost: 22, demandMin: 40, demandMax: 58, personnel: 2400 },//1548~2365
+	drink: { name: "飲料店", icon: "🥤", price: 65, cost: 22, demandMin: 50, demandMax: 68, personnel: 2400 },//1548~2365
 	bakery: { name: "烘焙坊", icon: "🥐", price: 180, cost: 55, demandMin: 18, demandMax: 22, personnel: 3000 },//2250~2750
 	game: { name: "電玩店", icon: "🎮", price: 1800, cost: 1100, demandMin: 1, demandMax: 5, personnel: 2400 },//700~3500
 	hobby: { name: "玩具店", icon: "🧸", price: 900, cost: 500, demandMin: 6, demandMax: 8, personnel: 3600 }//2400~3200
 };
 
 const BUFF_POOL = [
-	{ name: "📰 網路廣告", desc: "客流 +15%", buy: 3000, dSum: 0.20 },
-	{ name: "🤖 自動結帳", desc: "單位成本 90%", buy: 3500, cMul: 0.9 },
-	//{ name: "💎 尊榮會員", desc: "客流 +10%, 售價 +15%", buy: 4000, dSum: 0.1, pSum: 0.15 },
-	{ name: "⏰ 延長工時", desc: "客流 +25%, 人事 +30%", buy: 1500, dSum: 0.25, persSum: 0.3 },
+	{ name: "📰 網路廣告", desc: "客流 +15%", buy: 3000, dSum: 0.15 },
+	{ name: "🤖 自動結帳", desc: "單位成本 90%", buy: 4000, cMul: 0.9 },
+	{ name: "💎 尊榮會員", desc: "單位成本 120%, 售價 +20%", buy: 4000, cMul: 1.2, pSum: 0.20 },
+	{ name: "⏰ 延長工時", desc: "客流 +25%, 人事 +20%", buy: 1500, dSum: 0.25, persSum: 0.2 },
 	{ name: "🎫 優惠禮券", desc: "客流 +25%, 售價 -20%", buy: 2500, dSum: 0.25, pSum: -0.2 },
-	{ name: "📦 批發採購", desc: "單位成本 75%, 客流 -10%", buy: 2000, cMul: 0.75, dSum: -0.1 },
+	{ name: "📦 批發採購", desc: "單位成本 80%, 客流 -10%", buy: 2000, cMul: 0.8, dSum: -0.1 },
 	{ name: "👨‍🍳 專業培訓", desc: "售價 +30%, 人事 +40%", buy: 4000, pSum: 0.30, persSum: 0.4 },
-	{ name: "🏗️ 擴大店面", desc: "客流 +30%, 房租 +2000", buy: 8500, dSum: 0.30, rentAdd: 2000 },
-	{ name: "🏢 開設分店", desc: "客流 +100%, 房租 200%, 人事 +100%", buy: 15000, dSum: 1.0, rMul: 2.0, persSum: 1.0 },
+	{ name: "🏗️ 擴大店面", desc: "客流 +30%, 店租 +2000, 售價 +5%", buy: 8500, dSum: 0.30, rentAdd: 2000, pSum: 0.05 },
+	{ name: "🏢 開設分店", desc: "客流 +100%, 店租 180%, 人事 +100%", buy: 20000, dSum: 1.0, rMul: 1.80, persSum: 1.0 },
 	
-	{ name: "🧹 門面裝修", desc: "前 3 天施工：客流 -50%；之後：客流 +20%, 售價 +15%", buy: 5000, currentStage: 0,
-		stages: [{ duration: 3, dSum: -0.5, log: "門面裝修施工中，客流減少" },
-				 { duration: Infinity, dSum: 0.2, pSum: 0.15, log: "裝修完成！店面煥然一新" }]},
-    { name: "📖 研發新產品",desc: "前 2 天研發：人事 +20%；之後：售價 +20%", buy: 3000, currentStage: 0,
-		stages: [{ duration: 2, persSum: 0.2, log: "廚師正在研發新菜單..." },
-				 { duration: Infinity, pSum: 0.20, log: "新菜單大獲好評！" }]},
+	{ name: "🧹 門面裝修", desc: "前 3 天施工：客流 -35%；之後：客流 +20%, 售價 +10%", buy: 5000, currentStage: 0,
+		stages: [{ duration: 3, dSum: -0.35, log: "門面裝修施工中，客流減少" },
+				 { duration: Infinity, dSum: 0.2, pSum: 0.10, log: "裝修完成！店面煥然一新" }]},
+    { name: "📖 研發新產品",desc: "前 2 天研發：人事 +40%；之後：售價 +20%", buy: 3000, currentStage: 0,
+		stages: [{ duration: 2, persSum: 0.4, log: "員工正在研發新產品..." },
+				 { duration: Infinity, pSum: 0.20, log: "新產品大獲好評！" }]},
 	{ name: "📢 外出宣傳", desc: "花 1 天宣傳：人事 +100%；之後：客流 +20%", buy: 2500, currentStage: 0, 
 		stages: [{ duration: 1, persSum: 1.0, log: "員工正在街頭派發傳單，人事成本增加" },
 				 { duration: Infinity, dSum: 0.2, log: "宣傳效果顯現，店面知名度提升" }]},
@@ -34,42 +34,48 @@ const BUFF_POOL = [
  * cSum, cMul: 成本的累加比率 與 連乘權重
  * dSum, dMul: 客流的累加比率 與 連乘權重
  * persSum, persMul: 人事費的累加比率 與 連乘權重
- * * rAdd, dAdd: 房租與客流的「絕對數值」加減 (例如固定增加 $1500 房租)
+ * * rAdd, dAdd: 房租與客流的「絕對數值」加減 (例如固定增加 $1500 店租)
  * rentAdd, rMul
  */
 
 const BIG_EVENTS = [
 	{	title: "⚖️ 法定工資調漲",
+		limit: 2,
 		desc: "政府宣布調高基本時薪，這將影響近期的經營成本（持續 5 天）。",
 		options: [{	text: "精簡人力 (人事 +10%, 客流 80%)",	impact: { persSum: 0.1, dMul: 0.80, log: "短期：精簡人力導致服務品質下降", duration: 5 }},
 				  {	text: "全面調薪 (人事 +30%, 售價 110%)", 	impact: { persSum: 0.30, pMul: 1.1, log: "短期：調薪提升士氣與產品價值", duration: 5 }}]
 	},
 				  
 	{	title: "🏗️ 捷運完工轉型",
+		limit: 1,
 		desc: "店門口的捷運站正式完工啟用！這將帶來穩定的人潮，但地段租金也隨之暴漲。",
-		options: [{ text: "原地升級 (客流 +30%, 租金 130%)", 	impact: { dSum: 0.30, rMul: 1.3, log: "長期：捷運站帶來龐大客流，但租金成本大幅提升"}},
-				  {	text: "搬遷避險 (客流 90%, 租金 70%)", 	impact: { dMul: 0.9, rMul: 0.7, log: "長期：搬遷至較遠地段，避開租金壓力但人氣下滑"}}]
+		options: [{ text: "原地升級 (客流 +30%, 店租 130%)", 	impact: { dSum: 0.30, rMul: 1.3, log: "長期：捷運站帶來龐大客流，但租金成本大幅提升"}},
+				  {	text: "搬遷避險 (客流 90%, 店租 70%)", 	impact: { dMul: 0.9, rMul: 0.7, log: "長期：搬遷至較遠地段，避開租金壓力但人氣下滑"}}]
 	},
 				  
 	{	title: "🌀 強力颱風侵襲",
+		limit: 3,
 		desc: "氣象局發布陸上警報，影響預計僅限明日。",
 		options: [{ text: "防颱加固 (開銷 +1,000, 客流 60%)", 	impact: { rentAdd: 1000, dMul: 0.6, log: "短期：加固設施支出", duration: 1 }},
 				  {	text: "停業一天 (當天零客流, 零人事費用)", 	impact: { dMul: 0.0, persMul: 0.0, log: "短期：停業避災", duration: 1 }}]
 	},
 				  
 	{	title: "✈️ 國際旅遊節",
+		limit: 3,
 		desc: "大量國外旅客湧入，這是一次性的觀光熱潮（持續 3 天）。",
 		options: [{ text: "外籍友善 (人事 200%, 客流 150%)", 	impact: { persMul: 2.0, dMul: 1.5, log: "短期：增聘臨時翻譯人員", duration: 3 }},
 				  {	text: "推出套裝 (售價 120%, 客流 120%)", 	impact: { pMul: 1.2, dMul: 1.2, log: "短期：觀光限定套裝", duration: 3 }}]
 	},
 				  
 	{	title: "🌍 供應鏈危機",
-		desc: "全球物料短缺，預計會造成短期的成本波動（持續 5 天）。",
-		options: [{ text: "吸收成本 (成本 110%)", 				impact: { cMul: 1.1, log: "短期：公司吸收物料漲幅", duration: 5 }},
-				  {	text: "調整配方 (客流 85%)", 				impact: { dMul: 0.85, log: "短期：配方更換導致客流流失", duration: 5 }}]
+		limit: 2,
+		desc: "全球物料短缺，預計會造成短期的成本波動（持續 3 天）。",
+		options: [{ text: "吸收成本 (成本 110%)", 				impact: { cMul: 1.1, log: "短期：公司吸收物料漲幅", duration: 3 }},
+				  {	text: "調整配方 (客流 85%)", 				impact: { dMul: 0.85, log: "短期：配方更換導致客流流失", duration: 3 }}]
 	},
 
 	{	title: "🚧 門口修路",
+		limit: 3,
 		desc: "店門口進行地下管線施工，預計持續 3 天，進出不便。",
 		options: [{ text: "忍受不便 (客流 70%)", 				impact: { dMul: 0.7, log: "短期：施工阻擋了客流", duration: 3 }},
 				  {	text: "補貼吸引 (開銷 +1,500, 客流 90%)",	impact: { rentAdd: 1500, dMul: 0.9, log: "短期：投入行銷經費補貼", duration: 3 }}]
@@ -85,7 +91,8 @@ let state = {
 	gameSpeed: 1,
 	expansionLevel: 0,
 	branchPositions: [],
-	historyData: []
+	historyData: [],
+	eventCounts: {},
 };
 
 function chooseDiff(key) {
@@ -100,9 +107,9 @@ function chooseDiff(key) {
 				<h4>🟡 標準</h4>
 				<p>創業資金 ($6萬)<br>店租: $1,000 / 天<br><b>每 5 天</b>一事件</p>
 			</button>
-			<button class="btn-diff" onclick="finalize('hard', 30000, 1200, 3)">
+			<button class="btn-diff" onclick="finalize('hard', 40000, 1200, 3)">
 				<h4>🔴 困難</h4>
-				<p>資金吃緊 ($3萬)<br>店租: $1,200 / 天<br><b>每 3 天</b>一事件</p>
+				<p>資金吃緊 ($4萬)<br>店租: $1,200 / 天<br><b>每 3 天</b>一事件</p>
 			</button>
 		</div>`;
 }
@@ -186,7 +193,7 @@ function calculateCurrentStats() {
 	const finalPrice = Math.max(1, Math.floor(p * (1 + pSum) * pMul));
 	const finalCost  = Math.max(1, Math.floor(c * (1 + cSum) * cMul));
 	const finalPers  = Math.max(0, Math.floor(basePers * (1 + persSum) * persMul));
-	const finalRent  = Math.max(0, (baseRent + rAdd) * rMul);
+	const finalRent  = Math.max(0, Math.floor((baseRent + rAdd) * rMul));
 
 	// 計算最終總加成率 (回傳給 UI 顯示用，例如 +8.9%)
 	const finalDRateTotal = ((1 + dSum) * dMul) - 1;
@@ -537,7 +544,19 @@ function checkEventAfterSettle() {
 }
 
 function triggerBigEvent() {
-	const ev = BIG_EVENTS[Math.floor(Math.random() * BIG_EVENTS.length)];
+    const availableEvents = BIG_EVENTS.filter(ev => {
+        const currentCount = state.eventCounts[ev.title] || 0;
+        const limit = ev.limit !== undefined ? ev.limit : Infinity; 
+        return currentCount < limit;
+    });
+    if (availableEvents.length === 0) {
+        log(`<span style="color:var(--success)">[平靜] 今日市場風平浪靜，沒有重大事件。</span>`);
+        nextDay();
+        return;
+    }
+	
+	const ev = availableEvents[Math.floor(Math.random() * availableEvents.length)];
+	state.eventCounts[ev.title] = (state.eventCounts[ev.title] || 0) + 1;
 	document.getElementById('event-title').textContent = `🔥 第 ${state.day} 天 ${ev.title}`;
 	document.getElementById('event-desc').textContent = ev.desc;
 	const optBox = document.getElementById('event-options');
@@ -805,7 +824,8 @@ function resetGame() {
         gameSpeed: 1,
         expansionLevel: 0,
         branchPositions: [],
-		historyData: []
+		historyData: [],
+		eventCounts: {},
     };
 	
     // 2. 清除畫面上的動態元素

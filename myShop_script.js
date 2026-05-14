@@ -11,7 +11,6 @@ const BUFF_POOL = [
 	//{ name: "💎 尊榮會員", desc: "客流 +10%, 售價 +15%", buy: 4000, dSum: 0.1, pSum: 0.15 },
 	{ name: "⏰ 延長工時", desc: "客流 +25%, 人事 +30%", buy: 1500, dSum: 0.25, persSum: 0.3 },
 	{ name: "🎫 優惠禮券", desc: "客流 +25%, 售價 -20%", buy: 2500, dSum: 0.25, pSum: -0.2 },
-	//{ name: "🧹 門面裝修", desc: "客流 +15%, 售價 +10%", buy: 5000, dSum: 0.15, pSum: 0.10 },
 	{ name: "📦 批發採購", desc: "單位成本 75%, 客流 -10%", buy: 2000, cMul: 0.75, dSum: -0.1 },
 	{ name: "👨‍🍳 專業培訓", desc: "售價 +30%, 人事 +40%", buy: 4000, pSum: 0.30, persSum: 0.4 },
 	{ name: "🏗️ 擴大店面", desc: "客流 +30%, 房租 +2000", buy: 8500, dSum: 0.30, rentAdd: 2000 },

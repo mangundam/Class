@@ -6,26 +6,26 @@ const SHOP_DATA = {
 };
 
 const BUFF_POOL = [
-	{ name: "📰 網路廣告", desc: "客流 +20%", buy: 3000, dSum: 0.20 },
+	{ name: "📰 網路廣告", desc: "客流 +15%", buy: 3000, dSum: 0.20 },
 	{ name: "🤖 自動結帳", desc: "單位成本 90%", buy: 3500, cMul: 0.9 },
 	//{ name: "💎 尊榮會員", desc: "客流 +10%, 售價 +15%", buy: 4000, dSum: 0.1, pSum: 0.15 },
 	{ name: "⏰ 延長工時", desc: "客流 +25%, 人事 +30%", buy: 1500, dSum: 0.25, persSum: 0.3 },
 	{ name: "🎫 優惠禮券", desc: "客流 +25%, 售價 -20%", buy: 2500, dSum: 0.25, pSum: -0.2 },
 	//{ name: "🧹 門面裝修", desc: "客流 +15%, 售價 +10%", buy: 5000, dSum: 0.15, pSum: 0.10 },
 	{ name: "📦 批發採購", desc: "單位成本 75%, 客流 -10%", buy: 2000, cMul: 0.75, dSum: -0.1 },
-	{ name: "👨‍🍳 專業培訓", desc: "售價 +35%, 人事 +30%", buy: 4000, pSum: 0.35, persSum: 0.3 },
+	{ name: "👨‍🍳 專業培訓", desc: "售價 +30%, 人事 +40%", buy: 4000, pSum: 0.30, persSum: 0.4 },
 	{ name: "🏗️ 擴大店面", desc: "客流 +30%, 房租 +2000", buy: 8500, dSum: 0.30, rentAdd: 2000 },
 	{ name: "🏢 開設分店", desc: "客流 +100%, 房租 200%, 人事 +100%", buy: 15000, dSum: 1.0, rMul: 2.0, persSum: 1.0 },
 	
 	{ name: "🧹 門面裝修", desc: "前 3 天施工：客流 -50%；之後：客流 +20%, 售價 +15%", buy: 5000, currentStage: 0,
 		stages: [{ duration: 3, dSum: -0.5, log: "門面裝修施工中，客流減少" },
 				 { duration: Infinity, dSum: 0.2, pSum: 0.15, log: "裝修完成！店面煥然一新" }]},
-    { name: "📖 研發新產品",desc: "前 2 天研發：人事 +20%；之後：售價 +25%", buy: 3000, currentStage: 0,
+    { name: "📖 研發新產品",desc: "前 2 天研發：人事 +20%；之後：售價 +20%", buy: 3000, currentStage: 0,
 		stages: [{ duration: 2, persSum: 0.2, log: "廚師正在研發新菜單..." },
-				 { duration: Infinity, pSum: 0.25, log: "新菜單大獲好評！" }]},
-	{ name: "📢 外出宣傳", desc: "花 1 天宣傳：人事 +100%；之後：客流 +30%", buy: 2500, currentStage: 0, 
+				 { duration: Infinity, pSum: 0.20, log: "新菜單大獲好評！" }]},
+	{ name: "📢 外出宣傳", desc: "花 1 天宣傳：人事 +100%；之後：客流 +20%", buy: 2500, currentStage: 0, 
 		stages: [{ duration: 1, persSum: 1.0, log: "員工正在街頭派發傳單，人事成本增加" },
-				 { duration: Infinity, dSum: 0.3, log: "宣傳效果顯現，店面知名度提升" }]},
+				 { duration: Infinity, dSum: 0.2, log: "宣傳效果顯現，店面知名度提升" }]},
 ];
 
 //沒有duration等於永久活動

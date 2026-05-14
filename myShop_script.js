@@ -6,23 +6,23 @@ const SHOP_DATA = {
 };
 
 const BUFF_POOL = [
-	{ name: "📰 網路廣告", desc: "客流 +15%", buy: 3000, dSum: 0.15 },
-	{ name: "🤖 自動結帳", desc: "單位成本 90%", buy: 4000, cMul: 0.9 },
-	{ name: "💎 尊榮會員", desc: "單位成本 120%, 售價 +20%", buy: 4000, cMul: 1.2, pSum: 0.20 },
-	{ name: "⏰ 延長工時", desc: "客流 +25%, 人事 +20%", buy: 1500, dSum: 0.25, persSum: 0.2 },
-	{ name: "🎫 優惠禮券", desc: "客流 +25%, 售價 -20%", buy: 2500, dSum: 0.25, pSum: -0.2 },
-	{ name: "📦 批發採購", desc: "單位成本 80%, 客流 -10%", buy: 2000, cMul: 0.8, dSum: -0.1 },
-	{ name: "👨‍🍳 專業培訓", desc: "售價 +30%, 人事 +40%", buy: 4000, pSum: 0.30, persSum: 0.4 },
-	{ name: "🏗️ 擴大店面", desc: "客流 +30%, 店租 +2000, 售價 +5%", buy: 8500, dSum: 0.30, rentAdd: 2000, pSum: 0.05 },
-	{ name: "🏢 開設分店", desc: "客流 +100%, 店租 180%, 人事 +100%", buy: 20000, dSum: 1.0, rMul: 1.80, persSum: 1.0 },
+	{ name: "📰 網路廣告", goodDesc: ["客流 +15%"], badDesc: [], buy: 3000, dSum: 0.15 },
+	{ name: "🤖 自動結帳", goodDesc: ["成本 90%"], badDesc: [], buy: 4000, cMul: 0.9 },
+	{ name: "💎 尊榮會員", goodDesc: ["售價 +20%"], badDesc: ["成本 120%"], buy: 4000, cMul: 1.2, pSum: 0.20 },
+	{ name: "⏰ 延長工時", goodDesc: ["客流 +25%"], badDesc: ["人事 +20%"], buy: 1500, dSum: 0.25, persSum: 0.2 },
+	{ name: "🎫 優惠禮券", goodDesc: ["客流 +25%"], badDesc: ["售價 -20%"], buy: 2500, dSum: 0.25, pSum: -0.2 },
+	{ name: "📦 批發採購", goodDesc: ["成本 80%"], badDesc: ["客流 -10%"], buy: 2000, cMul: 0.8, dSum: -0.1 },
+	{ name: "👨‍🍳 專業培訓", goodDesc: ["售價 +30%"], badDesc: ["人事 +40%"], buy: 4000, pSum: 0.30, persSum: 0.4 },
+	{ name: "🏗️ 擴大店面", goodDesc: ["客流 +30%", "售價 +5%"], badDesc: ["房租 +2000元"], buy: 8500, dSum: 0.30, rentAdd: 2000, pSum: 0.05 },
+	{ name: "🏢 開設分店", goodDesc: ["客流 +100%"], badDesc: ["店租 180%", "人事 +100%"], buy: 20000, dSum: 1.0, rMul: 1.80, persSum: 1.0 },
 	
-	{ name: "🧹 門面裝修", desc: "前 3 天施工：客流 -35%；之後：客流 +20%, 售價 +10%", buy: 5000, currentStage: 0,
-		stages: [{ duration: 3, dSum: -0.35, log: "門面裝修施工中，客流減少" },
+	{ name: "🧹 門面裝修", goodDesc: ["之後：客流 +20%", "售價 +10%"], badDesc: ["前 3 天：客流 -40%"], buy: 5000, currentStage: 0,
+		stages: [{ duration: 3, dSum: -0.4, log: "門面裝修施工中，客流減少" },
 				 { duration: Infinity, dSum: 0.2, pSum: 0.10, log: "裝修完成！店面煥然一新" }]},
-    { name: "📖 研發新產品",desc: "前 2 天研發：人事 +40%；之後：售價 +20%", buy: 3000, currentStage: 0,
+    { name: "📖 研發新產品",goodDesc: ["之後：售價 +20%"], badDesc: ["前 2 天：人事 +40%"], buy: 3000, currentStage: 0,
 		stages: [{ duration: 2, persSum: 0.4, log: "員工正在研發新產品..." },
 				 { duration: Infinity, pSum: 0.20, log: "新產品大獲好評！" }]},
-	{ name: "📢 外出宣傳", desc: "花 1 天宣傳：人事 +100%；之後：客流 +20%", buy: 2500, currentStage: 0, 
+	{ name: "📢 外出宣傳", goodDesc: ["之後：客流 +20%"], badDesc: ["當天：人事 +100%"], buy: 2500, currentStage: 0, 
 		stages: [{ duration: 1, persSum: 1.0, log: "員工正在街頭派發傳單，人事成本增加" },
 				 { duration: Infinity, dSum: 0.2, log: "宣傳效果顯現，店面知名度提升" }]},
 ];
@@ -510,9 +510,14 @@ function showSettlement(count, rev, cost, profit, money) {
 		[...BUFF_POOL].sort(() => 0.5-Math.random()).slice(0,3).forEach(b => {
 			const btn = document.createElement('div');
 			btn.className = 'btn-buff-card';
+			
+			const goodHTML = b.goodDesc.map(text => `<span class="text-good">${text}</span>`).join('，');
+			const badHTML = b.badDesc.map(text => `<span class="text-bad">${text}</span>`).join('，');
+			const fullDesc = [badHTML, goodHTML].filter(html => html !== "").join('，');
+			
 			btn.innerHTML = `
 				<div class="buff-name-label">${b.name}</div>
-				<div class="buff-desc-label">${b.desc}</div>
+				<div class="buff-desc-label">${fullDesc}</div>
 				<div class="buff-cost-label">$${b.buy.toLocaleString()}</div>
 			`;
 			btn.onclick = () => {

@@ -60,7 +60,7 @@ const BIG_EVENTS = [
 				  
 	{	title: "✈️ 國際旅遊節",
 		desc: "大量國外旅客湧入，這是一次性的觀光熱潮（持續 3 天）。",
-		options: [{ text: "外籍友善 (人事 200%, 客流 180%)", 	impact: { persMul: 2.0, dMul: 1.8, log: "短期：增聘臨時翻譯人員", duration: 3 }},
+		options: [{ text: "外籍友善 (人事 200%, 客流 150%)", 	impact: { persMul: 2.0, dMul: 1.5, log: "短期：增聘臨時翻譯人員", duration: 3 }},
 				  {	text: "推出套裝 (售價 120%, 客流 120%)", 	impact: { pMul: 1.2, dMul: 1.2, log: "短期：觀光限定套裝", duration: 3 }}]
 	},
 				  

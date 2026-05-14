@@ -6,26 +6,26 @@ const SHOP_DATA = {
 };
 
 const BUFF_POOL = [
-	{ name: "📰 網路廣告", desc: "客流 +20%", buy: 4000, dSum: 0.20 },
+	{ name: "📰 網路廣告", desc: "客流 +20%", buy: 3000, dSum: 0.20 },
 	{ name: "🤖 自動結帳", desc: "單位成本 90%", buy: 3500, cMul: 0.9 },
 	//{ name: "💎 尊榮會員", desc: "客流 +10%, 售價 +15%", buy: 4000, dSum: 0.1, pSum: 0.15 },
-	{ name: "⏰ 延長工時", desc: "客流 +15%, 人事 +30%", buy: 1500, dSum: 0.15, persSum: 0.3 },
-	{ name: "🎫 優惠禮券", desc: "客流 +15%, 售價 -15%", buy: 2500, dSum: 0.15, pSum: -0.15 },
+	{ name: "⏰ 延長工時", desc: "客流 +25%, 人事 +30%", buy: 1500, dSum: 0.25, persSum: 0.3 },
+	{ name: "🎫 優惠禮券", desc: "客流 +25%, 售價 -2%", buy: 2500, dSum: 0.25, pSum: -0.2 },
 	//{ name: "🧹 門面裝修", desc: "客流 +15%, 售價 +10%", buy: 5000, dSum: 0.15, pSum: 0.10 },
-	{ name: "📦 批發採購", desc: "單位成本 80%, 客流 -10%", buy: 2000, cMul: 0.8, dSum: -0.1 },
-	{ name: "👨‍🍳 專業培訓", desc: "售價 +30%, 人事 +20%", buy: 4000, pSum: 0.15, persSum: 0.2 },
+	{ name: "📦 批發採購", desc: "單位成本 75%, 客流 -10%", buy: 2000, cMul: 0.75, dSum: -0.1 },
+	{ name: "👨‍🍳 專業培訓", desc: "售價 +35%, 人事 +20%", buy: 4000, pSum: 0.35, persSum: 0.2 },
 	{ name: "🏗️ 擴大店面", desc: "客流 +30%, 房租 +2000", buy: 8500, dSum: 0.30, rentAdd: 2000 },
-	{ name: "🏢 開設分店", desc: "客流 +100%, 房租 +4000, 人事 +100%", buy: 18000, dSum: 1.0, rentAdd: 4000, persSum: 1.0 },
+	{ name: "🏢 開設分店", desc: "客流 +100%, 房租 200%, 人事 +100%", buy: 15000, dSum: 1.0, rMul: 2.0, persSum: 1.0 },
 	
-	{ name: "🧹 門面裝修", desc: "前 3 天施工：客流 -50%；之後：客流 +20%, 售價 +15%", buy: 5000, currentStage: 0,
+	{ name: "🧹 門面裝修", desc: "前 3 天施工：客流 -35%；之後：客流 +20%, 售價 +15%", buy: 5000, currentStage: 0,
 		stages: [{ duration: 3, dSum: -0.5, log: "門面裝修施工中，客流減少" },
 				 { duration: Infinity, dSum: 0.2, pSum: 0.15, log: "裝修完成！店面煥然一新" }]},
-    { name: "🍱 研發新菜單",desc: "前 2 天研發：人事 +20%；之後：售價 +25%", buy: 3000, currentStage: 0,
+    { name: "📖 研發新產品",desc: "前 2 天研發：人事 +20%；之後：售價 +25%", buy: 3000, currentStage: 0,
 		stages: [{ duration: 2, persSum: 0.2, log: "廚師正在研發新菜單..." },
 				 { duration: Infinity, pSum: 0.25, log: "新菜單大獲好評！" }]},
-	{ name: "📢 外出宣傳", desc: "前 3 天宣傳：人事 +20%；之後：客流 +20%", buy: 2500, currentStage: 0, 
-		stages: [{ duration: 3, persSum: 0.2, log: "員工正在街頭派發傳單，人事成本增加" },
-				 { duration: Infinity, dSum: 0.2, log: "宣傳效果顯現，店面知名度提升" }]},
+	{ name: "📢 外出宣傳", desc: "花 1 天宣傳：人事 +100%；之後：客流 +30%", buy: 2500, currentStage: 0, 
+		stages: [{ duration: 1, persSum: 1.0, log: "員工正在街頭派發傳單，人事成本增加" },
+				 { duration: Infinity, dSum: 0.3, log: "宣傳效果顯現，店面知名度提升" }]},
 ];
 
 //沒有duration等於永久活動
@@ -36,6 +36,7 @@ const BUFF_POOL = [
  * dSum, dMul: 客流的累加比率 與 連乘權重
  * persSum, persMul: 人事費的累加比率 與 連乘權重
  * * rAdd, dAdd: 房租與客流的「絕對數值」加減 (例如固定增加 $1500 房租)
+ * rentAdd, rMul
  */
 
 const BIG_EVENTS = [
@@ -47,8 +48,8 @@ const BIG_EVENTS = [
 				  
 	{	title: "🏗️ 捷運完工轉型",
 		desc: "店門口的捷運站正式完工啟用！這將帶來穩定的人潮，但地段租金也隨之暴漲。",
-		options: [{ text: "原地升級 (客流 +30%, 租金 +2,000)", 	impact: { dSum: 0.30, rentAdd: 2000, log: "長期：捷運站帶來龐大客流，但租金成本大幅提升"}},
-				  {	text: "搬遷避險 (客流 90%, 租金 -300)", 	impact: { dMul: 0.9, rentAdd: -300, log: "長期：搬遷至較遠地段，避開租金壓力但人氣下滑"}}]
+		options: [{ text: "原地升級 (客流 +30%, 租金 130%)", 	impact: { dSum: 0.30, rMul: 1.3, log: "長期：捷運站帶來龐大客流，但租金成本大幅提升"}},
+				  {	text: "搬遷避險 (客流 90%, 租金 70%)", 	impact: { dMul: 0.9, rMul: 0.7, log: "長期：搬遷至較遠地段，避開租金壓力但人氣下滑"}}]
 	},
 				  
 	{	title: "🌀 強力颱風侵襲",
@@ -120,6 +121,9 @@ function finalize(diff, m, r, cycle) {
 	document.getElementById('shop-node').style.display = 'flex';
 	document.getElementById('shop-sub-icon').textContent = state.shop.icon;
 	document.getElementById('ui-shop-name').textContent = state.shop.name;
+	if(diff=="easy"){document.getElementById('ui-day').style.color = "green";}
+	else if(diff=="normal"){document.getElementById('ui-day').style.color = "#6366f1";}
+	else if(diff=="hard"){document.getElementById('ui-day').style.color = "red";}
 	updateUI();
 }
 
@@ -143,6 +147,7 @@ function calculateCurrentStats() {
 	let dSum = 0, dMul = 1.0;
 	let persSum = 0, persMul = 1.0;
 	let rAdd = 0, dAdd = 0;
+	let rMul = 1.0;
 
 	// 定義統一的數據處理邏輯 (處理 Buffs 與 Events)
 	const processImpact = (item) => {
@@ -167,6 +172,8 @@ function calculateCurrentStats() {
 
 		// --- 房租 (Rent) --- 修正名稱為 rentAdd
 		if (impact.rentAdd !== undefined) rAdd += impact.rentAdd;
+		if (impact.rMul !== undefined) rMul *= impact.rMul;
+		
 	};
 
 	// 1. 計算每日決策 (Buffs)
@@ -180,7 +187,7 @@ function calculateCurrentStats() {
 	const finalPrice = Math.max(1, Math.floor(p * (1 + pSum) * pMul));
 	const finalCost  = Math.max(1, Math.floor(c * (1 + cSum) * cMul));
 	const finalPers  = Math.max(0, Math.floor(basePers * (1 + persSum) * persMul));
-	const finalRent  = Math.max(0, baseRent + rAdd);
+	const finalRent  = Math.max(0, (baseRent + rAdd) * rMul);
 
 	// 計算最終總加成率 (回傳給 UI 顯示用，例如 +8.9%)
 	const finalDRateTotal = ((1 + dSum) * dMul) - 1;
@@ -651,7 +658,7 @@ function showEffectPanel() {
         { keySum: 'pSum', keyMul: 'pMul', label: '💰 售價', unit: '%', isRate: true, reverse: false },
         { keySum: 'cSum', keyMul: 'cMul', label: '📦 成本', unit: '%', isRate: true, reverse: true }, // 成本高=壞
         { keySum: 'persSum', keyMul: 'persMul', label: '👥 人事費', unit: '%', isRate: true, reverse: true }, // 人事費高=壞
-        { keyAdd: 'rentAdd', label: '🏢 額外房租', unit: '元', isRate: false, reverse: true } // 房租高=壞
+        { keyAdd: 'rentAdd', keyMul: 'rMul', label: '🏢 房租變動', unit: '元', isRate: false, reverse: true }// 房租高=壞
     ];
 
     let hasAnyEffect = false;
@@ -720,7 +727,13 @@ function showEffectPanel() {
                 const isPositiveEffect = prop.reverse ? currentAdd <= 0 : currentAdd >= 0;
                 summaryColor = isPositiveEffect ? 'var(--success)' : 'var(--danger)';
                 
-                summaryText = `總計：<span style="color:${summaryColor}">${prefix}${currentAdd.toLocaleString()}元</span>`;
+				if (currentMul !== 1) {
+					summaryText = `幅度：<span style="color:${summaryColor}">x${currentMul.toFixed(2)}</span>`;
+				} else {
+					summaryText = `總計：<span style="color:${summaryColor}">${prefix}${currentAdd.toLocaleString()}元</span>`;
+				}
+				
+                //summaryText = `總計：<span style="color:${summaryColor}">${prefix}${currentAdd.toLocaleString()}元</span>`;
             }
 
             let groupHTML = `

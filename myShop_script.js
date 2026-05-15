@@ -7,7 +7,7 @@ const SHOP_DATA = {
 
 const BUFF_POOL = [
 	{ name: "📰 網路廣告", goodDesc: ["客流 +15%"], badDesc: [], buy: 3000, dSum: 0.15 },
-	{ name: "🤖 自動結帳", goodDesc: ["成本 90%"], badDesc: [], buy: 4000, cMul: 0.9 },
+	{ name: "🤝 協議採購", goodDesc: ["成本 90%"], badDesc: [], buy: 4000, cMul: 0.9 },
 	{ name: "💎 尊榮會員", goodDesc: ["售價 +20%"], badDesc: ["成本 120%"], buy: 4000, cMul: 1.2, pSum: 0.20 },
 	{ name: "⏰ 延長工時", goodDesc: ["客流 +25%"], badDesc: ["人事 +20%"], buy: 1500, dSum: 0.25, persSum: 0.2 },
 	{ name: "🎫 優惠禮券", goodDesc: ["客流 +25%"], badDesc: ["售價 -20%"], buy: 2500, dSum: 0.25, pSum: -0.2 },
@@ -15,6 +15,7 @@ const BUFF_POOL = [
 	{ name: "👨‍🍳 專業培訓", goodDesc: ["售價 +30%"], badDesc: ["人事 +40%"], buy: 4000, pSum: 0.30, persSum: 0.4 },
 	{ name: "🏗️ 擴大店面", goodDesc: ["客流 +30%", "售價 +5%"], badDesc: ["房租 +2000元"], buy: 8500, dSum: 0.30, rentAdd: 2000, pSum: 0.05 },
 	{ name: "🏢 開設分店", goodDesc: ["客流 +100%"], badDesc: ["店租 180%", "人事 +100%"], buy: 20000, dSum: 1.0, rMul: 1.80, persSum: 1.0 },
+	
 	
 	{ name: "🧹 門面裝修", goodDesc: ["之後：客流 +20%", "售價 +10%"], badDesc: ["前 3 天：客流 -50%"], buy: 5000, currentStage: 0,
 		stages: [{ duration: 3, dSum: -0.5, log: "門面裝修施工中，客流減少" },
@@ -25,6 +26,9 @@ const BUFF_POOL = [
 	{ name: "📢 外出宣傳", goodDesc: ["之後：客流 +20%"], badDesc: ["當天：人事 +100%"], buy: 2500, currentStage: 0, 
 		stages: [{ duration: 1, persSum: 1.0, log: "員工正在街頭派發傳單，人事成本增加" },
 				 { duration: Infinity, dSum: 0.2, log: "宣傳效果顯現，店面知名度提升" }]},
+	{ name: "🏖 員工旅遊", goodDesc: ["之後：客流 +20%", "人事 -20%"], badDesc: ["前 3 天：人事 -100%", "客流-50%"], buy: 2000, currentStage: 0, 
+		stages: [{ duration: 3, persSum: -1.0, dSum: -0.5, log: "老闆出錢讓員工休假旅遊，老闆獨自撐店，服務效率減半" },
+				 { duration: Infinity, persSum: -0.2, dSum: 0.2, log: "員工旅遊歸來，士氣大振！效率提升使人事成本優化" }]},
 ];
 
 //沒有duration等於永久活動
@@ -79,7 +83,13 @@ const BIG_EVENTS = [
 		desc: "店門口進行地下管線施工，預計持續 3 天，進出不便。",
 		options: [{ text: "忍受不便 (客流 70%)", 				impact: { dMul: 0.7, log: "短期：施工阻擋了客流", duration: 3 }},
 				  {	text: "補貼吸引 (開銷 +1,500, 客流 90%)",	impact: { rentAdd: 1500, dMul: 0.9, log: "短期：投入行銷經費補貼", duration: 3 }}]
-	}
+	},
+	{	title: "🤖 全球自動化浪潮",
+		limit: 1,
+		desc: "智慧零售科技成熟，你可以選擇裁撤所有店員轉型為「無人商店」，或是僅導入自助設備。",
+		options: [{ text: "全面轉型 (人事費 0, 店租 150%, 額外月租 +3,000)", impact: { persMul: 0.0, rMul: 1.5, rentAdd: 3000, log: "轉型為無人商店：雖然人事成本消失，但維護開銷驚人" }},
+				  {	text: "自助結帳 (人事 70%, 店租 120%)",					 impact: { persMul: 0.7, rMul: 1.2, log: "導入自助結帳系統：稍微減輕人事壓力，租金微幅上升" }}]
+	},
 ];
 
 let state = {
@@ -511,9 +521,9 @@ function showSettlement(count, rev, cost, profit, money) {
 			const btn = document.createElement('div');
 			btn.className = 'btn-buff-card';
 			
-			const goodHTML = b.goodDesc.map(text => `<span class="text-good">${text}</span>`).join('');
-			const badHTML = b.badDesc.map(text => `<span class="text-bad">${text}</span><br>`).join('');
-			const fullDesc = [badHTML, goodHTML].filter(html => html !== "").join('');
+			const goodHTML = b.goodDesc.map(text => `<span class="text-good">${text}</span>`).join(' ');
+			const badHTML = b.badDesc.map(text => `<span class="text-bad">${text}</span><br>`).join(' ');
+			const fullDesc = [badHTML, goodHTML].filter(html => html !== "").join(' ');
 			
 			btn.innerHTML = `
 				<div class="buff-name-label">${b.name}</div>

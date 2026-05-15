@@ -46,49 +46,49 @@ const BIG_EVENTS = [
 	{	title: "⚖️ 法定工資調漲",
 		limit: 2,
 		desc: "政府宣布調高基本時薪，這將影響近期的經營成本（持續 5 天）。",
-		options: [{	text: "精簡人力 (人事 +10%, 客流 80%)",	impact: { persSum: 0.1, dMul: 0.80, log: "短期：精簡人力導致服務品質下降", duration: 5 }},
-				  {	text: "全面調薪 (人事 +30%, 售價 110%)", 	impact: { persSum: 0.30, pMul: 1.1, log: "短期：調薪提升士氣與產品價值", duration: 5 }}]
+		options: [{	text: "精簡人力 (人事 +10%, 客流 80%)",	impact: { persSum: 0.1, dMul: 0.80, log: "短期：精簡人力導致服務品質下降 (人事 +10%, 客流 80%)", duration: 5 }},
+				  {	text: "全面調薪 (人事 +30%, 售價 110%)", 	impact: { persSum: 0.30, pMul: 1.1, log: "短期：調薪提升士氣與產品價值 (人事 +30%, 售價 110%)", duration: 5 }}]
 	},
 				  
 	{	title: "🏗️ 捷運完工轉型",
 		limit: 1,
 		desc: "店門口的捷運站正式完工啟用！這將帶來穩定的人潮，但地段租金也隨之暴漲。",
-		options: [{ text: "原地升級 (客流 +30%, 店租 130%)", 	impact: { dSum: 0.30, rMul: 1.3, log: "長期：捷運站帶來龐大客流，但租金成本大幅提升"}},
-				  {	text: "搬遷避險 (客流 90%, 店租 70%)", 	impact: { dMul: 0.9, rMul: 0.7, log: "長期：搬遷至較遠地段，避開租金壓力但人氣下滑"}}]
+		options: [{ text: "原地升級 (客流 +30%, 店租 130%)", 	impact: { dSum: 0.30, rMul: 1.3, log: "長期：捷運站帶來龐大客流，但租金成本大幅提升 (客流 +30%, 店租 130%)"}},
+				  {	text: "搬遷避險 (客流 90%, 店租 70%)", 	impact: { dMul: 0.9, rMul: 0.7, log: "長期：搬遷至較遠地段，避開租金壓力但人氣下滑 (客流 90%, 店租 70%)"}}]
 	},
 				  
 	{	title: "🌀 強力颱風侵襲",
 		limit: 3,
 		desc: "氣象局發布陸上警報，影響預計僅限明日。",
-		options: [{ text: "防颱加固 (開銷 +1,000, 客流 60%)", 	impact: { rentAdd: 1000, dMul: 0.6, log: "短期：加固設施支出", duration: 1 }},
-				  {	text: "停業一天 (當天零客流, 零人事費用)", 	impact: { dMul: 0.0, persMul: 0.0, log: "短期：停業避災", duration: 1 }}]
+		options: [{ text: "防颱加固 (開銷 +1,000, 客流 60%)", 	impact: { rentAdd: 1000, dMul: 0.6, log: "短期：加固設施支出 (開銷 +1,000, 客流 60%)", duration: 1 }},
+				  {	text: "停業一天 (當天零客流, 零人事費用)", 	impact: { dMul: 0.0, persMul: 0.0, log: "短期：停業避災 (當天零客流, 零人事費用)", duration: 1 }}]
 	},
 				  
 	{	title: "✈️ 國際旅遊節",
 		limit: 3,
 		desc: "大量國外旅客湧入，這是一次性的觀光熱潮（持續 3 天）。",
-		options: [{ text: "外籍友善 (人事 200%, 客流 150%)", 	impact: { persMul: 2.0, dMul: 1.5, log: "短期：增聘臨時翻譯人員", duration: 3 }},
-				  {	text: "推出套裝 (售價 120%, 客流 120%)", 	impact: { pMul: 1.2, dMul: 1.2, log: "短期：觀光限定套裝", duration: 3 }}]
+		options: [{ text: "外籍友善 (人事 200%, 客流 150%)", 	impact: { persMul: 2.0, dMul: 1.5, log: "短期：增聘臨時翻譯人員 (人事 200%, 客流 150%)", duration: 3 }},
+				  {	text: "推出套裝 (售價 120%, 客流 120%)", 	impact: { pMul: 1.2, dMul: 1.2, log: "短期：觀光限定套裝 (售價 120%, 客流 120%)", duration: 3 }}]
 	},
 				  
 	{	title: "🌍 供應鏈危機",
 		limit: 2,
 		desc: "全球物料短缺，預計會造成短期的成本波動（持續 3 天）。",
-		options: [{ text: "吸收成本 (成本 110%)", 				impact: { cMul: 1.1, log: "短期：公司吸收物料漲幅", duration: 3 }},
-				  {	text: "調整配方 (客流 85%)", 				impact: { dMul: 0.85, log: "短期：配方更換導致客流流失", duration: 3 }}]
+		options: [{ text: "吸收成本 (成本 110%)", 				impact: { cMul: 1.1, log: "短期：公司吸收物料漲幅 (成本 110%)", duration: 3 }},
+				  {	text: "調整配方 (客流 85%)", 				impact: { dMul: 0.85, log: "短期：配方更換導致客流流失 (客流 85%)", duration: 3 }}]
 	},
 
 	{	title: "🚧 門口修路",
 		limit: 3,
 		desc: "店門口進行地下管線施工，預計持續 3 天，進出不便。",
-		options: [{ text: "忍受不便 (客流 70%)", 				impact: { dMul: 0.7, log: "短期：施工阻擋了客流", duration: 3 }},
-				  {	text: "補貼吸引 (開銷 +1,500, 客流 90%)",	impact: { rentAdd: 1500, dMul: 0.9, log: "短期：投入行銷經費補貼", duration: 3 }}]
+		options: [{ text: "忍受不便 (客流 70%)", 				impact: { dMul: 0.7, log: "短期：施工阻擋了客流 (客流 70%)", duration: 3 }},
+				  {	text: "補貼吸引 (開銷 +1,500, 客流 90%)",	impact: { rentAdd: 1500, dMul: 0.9, log: "短期：投入行銷經費補貼 (開銷 +1,500, 客流 90%)", duration: 3 }}]
 	},
 	{	title: "🤖 全球自動化浪潮",
 		limit: 1,
 		desc: "智慧零售科技成熟，你可以選擇裁撤所有店員轉型為「無人商店」，或是僅導入自助設備。",
-		options: [{ text: "全面轉型 (人事費 0, 店租 150%, 額外月租 +3,000)", impact: { persMul: 0.0, rMul: 1.5, rentAdd: 3000, log: "轉型為無人商店：雖然人事成本消失，但維護開銷驚人" }},
-				  {	text: "自助結帳 (人事 70%, 店租 120%)",					 impact: { persMul: 0.7, rMul: 1.2, log: "導入自助結帳系統：稍微減輕人事壓力，租金微幅上升" }}]
+		options: [{ text: "全面轉型 (人事費 0, 店租 150%, 額外月租 +3,000)", impact: { persMul: 0.0, rMul: 1.5, rentAdd: 3000, log: "轉型為無人商店：雖然人事成本消失，但維護開銷驚人 (人事費 0, 店租 150%, 額外月租 +3,000)" }},
+				  {	text: "自助結帳 (人事 70%, 店租 120%)",					 impact: { persMul: 0.7, rMul: 1.2, log: "導入自助結帳系統：稍微減輕人事壓力，租金微幅上升 (人事 70%, 店租 120%)" }}]
 	},
 ];
 

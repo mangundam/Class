@@ -16,11 +16,11 @@ const BUFF_POOL = [
 	{ name: "🏗️ 擴大店面", goodDesc: ["客流 +30%", "售價 +5%"], badDesc: ["房租 +2000元"], buy: 8500, dSum: 0.30, rentAdd: 2000, pSum: 0.05 },
 	{ name: "🏢 開設分店", goodDesc: ["客流 +100%"], badDesc: ["店租 180%", "人事 +100%"], buy: 20000, dSum: 1.0, rMul: 1.80, persSum: 1.0 },
 	
-	{ name: "🧹 門面裝修", goodDesc: ["之後：客流 +20%", "售價 +10%"], badDesc: ["前 3 天：客流 -40%"], buy: 5000, currentStage: 0,
-		stages: [{ duration: 3, dSum: -0.4, log: "門面裝修施工中，客流減少" },
+	{ name: "🧹 門面裝修", goodDesc: ["之後：客流 +20%", "售價 +10%"], badDesc: ["前 3 天：客流 -50%"], buy: 5000, currentStage: 0,
+		stages: [{ duration: 3, dSum: -0.5, log: "門面裝修施工中，客流減少" },
 				 { duration: Infinity, dSum: 0.2, pSum: 0.10, log: "裝修完成！店面煥然一新" }]},
-    { name: "📖 研發新產品",goodDesc: ["之後：售價 +20%"], badDesc: ["前 2 天：人事 +40%"], buy: 3000, currentStage: 0,
-		stages: [{ duration: 2, persSum: 0.4, log: "員工正在研發新產品..." },
+    { name: "📖 研發新產品",goodDesc: ["之後：售價 +20%"], badDesc: ["前 2 天：人事 +50%"], buy: 3000, currentStage: 0,
+		stages: [{ duration: 2, persSum: 0.5, log: "員工正在研發新產品..." },
 				 { duration: Infinity, pSum: 0.20, log: "新產品大獲好評！" }]},
 	{ name: "📢 外出宣傳", goodDesc: ["之後：客流 +20%"], badDesc: ["當天：人事 +100%"], buy: 2500, currentStage: 0, 
 		stages: [{ duration: 1, persSum: 1.0, log: "員工正在街頭派發傳單，人事成本增加" },
@@ -511,9 +511,9 @@ function showSettlement(count, rev, cost, profit, money) {
 			const btn = document.createElement('div');
 			btn.className = 'btn-buff-card';
 			
-			const goodHTML = b.goodDesc.map(text => `<span class="text-good">${text}</span>`).join('，');
-			const badHTML = b.badDesc.map(text => `<span class="text-bad">${text}</span>`).join('，');
-			const fullDesc = [badHTML, goodHTML].filter(html => html !== "").join('，');
+			const goodHTML = b.goodDesc.map(text => `<span class="text-good">${text}</span>`).join('');
+			const badHTML = b.badDesc.map(text => `<span class="text-bad">${text}</span><br>`).join('');
+			const fullDesc = [badHTML, goodHTML].filter(html => html !== "").join('');
 			
 			btn.innerHTML = `
 				<div class="buff-name-label">${b.name}</div>

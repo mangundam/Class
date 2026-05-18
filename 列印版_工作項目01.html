@@ -43,6 +43,15 @@
             
             /* 選項與解析緊貼題目 */
             .options { margin-left: 10px; color: #333; }
+            
+            /* 針對選項中的圖片進行縮放，避免破壞排版 */
+            .options img {
+                max-height: 16px;    /* 限制圖片高度，使其與文字差不多高 */
+                width: auto;         /* 依比例自動調整寬度 */
+                vertical-align: middle; /* 讓圖片與文字對齊 */
+                margin: 0 2px;       /* 圖片左右留一點點空隙 */
+            }
+            
             .note { 
                 font-size: 11px; 
                 color: #777; 
@@ -52,7 +61,7 @@
         </style>
     </head>
     <body>
-        <h2>電腦軟體應用 丙級 項目01 (1~334題)</h2>
+        <h2>電腦軟體應用 丙級 項目04</h2>
         <div style="text-align:center;"><button onclick="window.print()">直接列印</button></div>
         <div class="container">
     
@@ -1090,13 +1099,13 @@
         
             <div class="q-block">
                 <span class="q-header">173.【D】</span>下列何者數值與其他不同？
-                <div class="options">(A)(B)(C)(D)</div>
+                <div class="options">(A) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/1-173-4.jpg"/> (B) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/1-173-2.jpg"/> (C) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/1-173-1.jpg"/> (D) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/1-173-3.jpg"/></div>
                 <span class="note">解：18、18、18、16</span>
             </div>
         
             <div class="q-block">
                 <span class="q-header">174.【C】</span>對TB（Tera Byte）之敘述，下列何者正確？
-                <div class="options">(A) 1TB=1024 X 1024GB (B) 1TB=1024 X 1024Byte (C)(D) 1TB=10億位元組</div>
+                <div class="options">(A) 1TB=1024 X 1024GB (B) 1TB=1024 X 1024Byte (C) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/1-174-2.jpg"/> (D) 1TB=10億位元組</div>
                 <span class="note">解：2的10次方Byte = 1KB、2的20次方Byte = 1MB、2的30次方Byte = 1GB、2的40次方Byte = 1TB。(2的10次方 = 1024)</span>
             </div>
         
@@ -1125,7 +1134,7 @@
             </div>
         
             <div class="q-block">
-                <span class="q-header">179.【B】</span>有一個程式需要執行
+                <span class="q-header">179.【B】</span>有一個程式需要執行個指令，每個指令平均需要20ps來執行，請問這個程式執行的時間約為多少？
                 <div class="options">(A) 20毫秒 (B) 20秒 (C) 200毫秒 (D) 2秒</div>
                 <span class="note">解：10 的 12 次方乘以 20ps（20 乘以 10 的負 12 次方秒）等於 20 秒。</span>
             </div>
@@ -1481,43 +1490,43 @@
             <div class="q-block">
                 <span class="q-header">238.【B】</span>大數據（Big Data）分析技術中，常使用NoSQL資料庫，下列哪一個是屬於NoSQL資料庫軟體？
                 <div class="options">(A) MariaDB (B) MongoDB (C) Sybase (D) PostgreSQL</div>
-                <span class="note">解：MongoDB 是一種以文件（Document）為導向的 NoSQL 資料庫軟體，常用於處理大數據中的非結構化資料。Spark MLlib 是 Apache Spark 專案中專門提供分散式機器學習演算法與工具的核心組件。</span>
+                <span class="note">解：MongoDB 是一種以文件（Document）為導向的 NoSQL 資料庫軟體，常用於處理大數據中的非結構化資料。</span>
             </div>
         
             <div class="q-block">
                 <span class="q-header">239.【C】</span>對於適用大數據分析的叢集運算框架Apache Spark專案中，下列哪項組件是專做分散式機器學習的？
                 <div class="options">(A) Spark SQL (B) GraphX (C) Spark MLlib (D) Spark Streaming</div>
-                <span class="note">解：Apache Spark 支援多種程式語言開發，其中 Python（PySpark）是進行數據科學與機器學習最常用的語言。</span>
+                <span class="note">解：Spark MLlib 是 Apache Spark 專案中專門提供分散式機器學習演算法與工具的核心組件。</span>
             </div>
         
             <div class="q-block">
                 <span class="q-header">240.【C】</span>下列何者程式語言支援Apache Spark叢集運算框架？
                 <div class="options">(A) FORTRAN (B) Auto ISP (C) Python (D) prolog</div>
-                <span class="note">解：iOS 是由蘋果公司（Apple）開發，專門供 iPhone、iPad 等行動裝置使用的封閉式作業系統。</span>
+                <span class="note">解：Apache Spark 支援多種程式語言開發，其中 Python（PySpark）是進行數據科學與機器學習最常用的語言。</span>
             </div>
         
             <div class="q-block">
                 <span class="q-header">241.【D】</span>下列何者是iPhone所使用的作業系統？
                 <div class="options">(A) Windows (B) Android (C) Unix (D) iOS</div>
-                <span class="note">解：Android 是由開放手機聯盟（OHA）領導開發，基於 Linux 核心的開放原始碼行動裝置作業系統。全球定位系統（GPS）晶片能接收多顆人造衛星發射的訊號，經由計算後得出智慧裝置所在的經緯度座標。</span>
+                <span class="note">解：iOS 是由蘋果公司（Apple）開發，專門供 iPhone、iPad 等行動裝置使用的封閉式作業系統。</span>
             </div>
         
             <div class="q-block">
                 <span class="q-header">242.【A】</span>下列何者是開放手機聯盟（Open Handset Alliance）所領導與開發的智慧裝置作業系統？
                 <div class="options">(A) Android (B) Linux (C) Windows (D) Unix</div>
-                <span class="note">解：全球定位系統（GPS）晶片能接收多顆人造衛星發射的訊號，經由計算後得出智慧裝置所在的經緯度座標。</span>
+                <span class="note">解：Android 是由開放手機聯盟（OHA）領導開發，基於 Linux 核心的開放原始碼行動裝置作業系統。全球定位系統（GPS）晶片能接收多顆人造衛星發射的訊號，經由計算後得出智慧裝置所在的經緯度座標。</span>
             </div>
         
             <div class="q-block">
                 <span class="q-header">243.【C】</span>下列何者可以讓智慧裝置透過人造衛星來完成持有者位置的定位？
                 <div class="options">(A) 加速計 (B) 氣壓計 (C) GPS晶片 (D) 陀螺儀</div>
-                <span class="note">解：地理編碼（Geocoding）是指將人類可讀的地址（如路名、門牌）轉換為電腦可識別的地理座標（經緯度）。</span>
+                <span class="note">解：全球定位系統（GPS）晶片能接收多顆人造衛星發射的訊號，經由計算後得出智慧裝置所在的經緯度座標。</span>
             </div>
         
             <div class="q-block">
                 <span class="q-header">244.【B】</span>智慧裝置透過Google Maps之類的電子地圖服務，將地址轉換成為經度與緯度的過程稱之為何？
                 <div class="options">(A) Reverse geocoding (B) Geocoding (C) Searching (D) Finding</div>
-                <span class="note">解：逆向地理編碼（Reverse Geocoding）是指將地理座標（經緯度）轉換回對應的實體地址或地標名稱的過程。</span>
+                <span class="note">解：地理編碼（Geocoding）是指將人類可讀的地址（如路名、門牌）轉換為電腦可識別的地理座標（經緯度）。</span>
             </div>
         
             <div class="q-block">

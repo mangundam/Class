@@ -43,6 +43,15 @@
             
             /* 選項與解析緊貼題目 */
             .options { margin-left: 10px; color: #333; }
+            
+            /* 針對選項中的圖片進行縮放，避免破壞排版 */
+            .options img {
+                max-height: 16px;    /* 限制圖片高度，使其與文字差不多高 */
+                width: auto;         /* 依比例自動調整寬度 */
+                vertical-align: middle; /* 讓圖片與文字對齊 */
+                margin: 0 2px;       /* 圖片左右留一點點空隙 */
+            }
+            
             .note { 
                 font-size: 11px; 
                 color: #777; 
@@ -52,334 +61,11 @@
         </style>
     </head>
     <body>
-        <h2>電腦軟體應用 丙級 項目02、03 (335~631題)</h2>
+        <h2>電腦軟體應用 丙級 項目04</h2>
         <div style="text-align:center;"><button onclick="window.print()">直接列印</button></div>
         <div class="container">
     
             <div class="q-block">
-                <span class="q-header">335.【A】</span>下列何者可以增加電腦文書檔案管理的效率？
-                <div class="options">(A) 有系統的檔名命名規則 (B) 頁首設定 (C) 頁碼設定 (D) 粗體字</div>
-                <span class="note">解：統一且有系統的命名規則（如包含日期、專案名）能讓使用者快速檢索並有效管理大量檔案。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">336.【A】</span>在進行文章編修時，下列何項設定不會直接影響文章編修的操作？
-                <div class="options">(A) 螢幕色彩檔的設定 (B) 插入（Insert）/覆蓋（Replace）的設定 (C) 左右邊界設定 (D) 定位鍵（Tab）設定</div>
-                <span class="note">解：螢幕色彩檔僅影響顯示出的顏色準確度，與文章內容的文字編修、排版操作無直接關聯。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">337.【A】</span>在Open Office套裝軟體內，下列何種軟體屬於文書處理軟體？
-                <div class="options">(A) Writer (B) Draw (C) Impress (D) Calc</div>
-                <span class="note">解：在 OpenOffice 套件中，Writer 是對應 Microsoft Word 的文書處理軟體。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">338.【D】</span>在Open Office套裝軟體內，下列何種軟體屬於簡報軟體？
-                <div class="options">(A) Writer (B) Draw (C) Calc (D) Impress</div>
-                <span class="note">解：在 OpenOffice 套件中，Impress 是對應 Microsoft PowerPoint 的簡報製作軟體。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">339.【A】</span>下列何者不是作業系統？
-                <div class="options">(A) Oracle (B) Linux (C) Unix (D) Windows</div>
-                <span class="note">解：Oracle 是一套關聯式資料庫管理系統軟體，並非用來管理硬體與提供使用者介面的作業系統。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">340.【B】</span>下列何套電子郵件系統還能兼具有「管理行事曆」的功能？
-                <div class="options">(A) Netscape (B) Outlook (C) cc:Mail (D) Outlook Express</div>
-                <span class="note">解：Outlook 具備強大的個人資訊管理功能，除了收發信件，還整合了行事曆、聯絡人與工作管理。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">341.【C】</span>下列何種軟體不可以直接把檔案轉換為網頁？
-                <div class="options">(A) PowerPoint (B) Word (C) Acrobat Reader (D) PhotoImpact</div>
-                <span class="note">解：Acrobat Reader 是專門用來閱讀 PDF 文件的軟體，不具備編輯或將檔案轉存為網頁的功能。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">342.【D】</span>下列何種行為在Internet環境中是違法的？
-                <div class="options">(A) 下載自由軟體 (B) 聊天 (C) 交友 (D) 販賣非法軟體</div>
-                <span class="note">解：在網路環境中，販賣盜版軟體或非法序號觸犯著作權法與相關刑法，屬於違法行為。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">343.【A】</span>下列何套軟體為電子郵件軟體？
-                <div class="options">(A) Outlook (B) Word (C) Visio (D) Excel</div>
-                <span class="note">解：Outlook 是微軟推出的專業電子郵件用戶端軟體，屬於 Office 辦公室套件的一部分。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">344.【B】</span>如果想把電子郵件寄送給許多人，卻又不想讓收件者彼此之間知道您寄給哪些人，可以利用下列何項功能做到？
-                <div class="options">(A) 副本 (B) 密件副本 (C) 加密 (D) 做不到</div>
-                <span class="note">解：密件副本（Bcc）功能可以將信件寄給多位收件者，且收件者彼此看不到名單中其他人的郵件地址。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">345.【A】</span>為了讓郵件在傳送過程中不被駭客破壞，內容不輕易被檢視，可以藉由電子郵件系統內何項功能來達成？
-                <div class="options">(A) 加密 (B) 反駭客 (C) 壓縮 (D) 密件副本</div>
-                <span class="note">解：加密功能會將郵件內容轉換為亂碼，只有持有正確金鑰的人能解讀，可防止內容被駭客竊看。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">346.【A】</span>如果想防止青少年進入一些像是色情或是暴力等網站，可以在瀏覽器上設定下列何項功能？
-                <div class="options">(A) 分級 (B) 加密 (C) 分類 (D) 沒有這項功能</div>
-                <span class="note">解：瀏覽器的內容分級（或家長控制）功能可根據分級標籤，自動阻擋色情或暴力等不當網站。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">347.【A】</span>在Microsoft Word 環境中，若同時按下[Ctrl]+[O]鍵，則會執行下列何種動作？
-                <div class="options">(A) 開啟舊檔 (B) 關閉檔案 (C) 儲存檔案 (D) 開新檔案</div>
-                <span class="note">解：在 Word 中，按下 Ctrl 與 O 鍵的組合捷徑代表執行「開啟舊檔（Open）」的動作。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">348.【B】</span>在Microsoft Word 環境中，若希望將一份文件重複列印3份，並自動按份數依序印出，則可在「檔案/列印」選項下選取下列何項功能來達成目的？
-                <div class="options">(A) 反序列印 (B) 自動分頁 (C) 雙面列印 (D) 幕後列印</div>
-                <span class="note">解：自動分頁功能會讓印表機按第一份、第二份、第三份的次序逐份印出，方便使用者直接裝訂。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">349.【C】</span>在Microsoft Word 環境中，若要以一個預先建置完成的通訊錄檔案來大量製作信封上的郵寄標籤，下列何種製作方法最簡便？
-                <div class="options">(A) 表格 (B) 範本 (C) 合併列印 (D) 版面設定</div>
-                <span class="note">解：合併列印功能可將通訊錄資料庫與主文件結合，一次產生大量包含不同收件人資訊的標籤或信封。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">350.【D】</span>若在Microsoft Word 環境中執行合併列印的動作時，由「插入合併欄位」功能所插入的欄位變數名稱「地址」會被下列何種符號框起來？
-                <div class="options">(A) {地址} (B) ?地址? (C) [地址] (D) <<�地址>></div>
-                <span class="note">解：Word 的合併列印功能會以雙箭頭符號（<< >>）標示出從資料來源插入的變數欄位名稱。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">351.【A】</span>有關Microsoft Word 之「欄」的敘述，下列何者錯誤？
-                <div class="options">(A) 欄格式的設定只在直書情況下進行，橫書則不可 (B) 可對不同的節設定不同的欄格式 (C) 段落文字以欄寬做為換行的基準 (D) 先選定部分文字，再進行欄格式設定，Word會在選定範圍前後位置插入分節符號</div>
-                <span class="note">解：欄格式設定在橫書模式下最為常見（如報紙編排），並非只能在直書情況下進行。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">352.【A】</span>在Microsoft Word 之「檔案/列印」功能選項中，若只要列印第2頁至第8頁時，應在對話盒中之「頁面」方框中輸入？
-                <div class="options">(A) 2-8 (B) 2:8 (C) 2,8 (D) 2~8</div>
-                <span class="note">解：在列印範圍的頁面方框中，使用連字號「-」代表一個連續的範圍，如輸入 2-8 代表印第 2 頁至第 8 頁。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">353.【D】</span>若在Microsoft Word 環境中要使用二種不同格式的頁碼時，必須在不同頁碼之文件中插入下列何種符號？
-                <div class="options">(A) 文字換行分隔 (B) 分欄 (C) 分頁 (D) 分節</div>
-                <span class="note">解：若要在同一份文件中使用不同的頁碼格式，必須插入分節符號將文件分為不同節。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">354.【B】</span>下列應用軟體中，何者不具有文書處理功能？
-                <div class="options">(A) WordPad (B) Microsoft Access (C) Microsoft Word (D) OpenOffice Writer</div>
-                <span class="note">解：Microsoft Access 是一套資料庫管理軟體，主要功能是處理資料表與查詢，非文書處理。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">355.【C】</span>在Microsoft Word 之「檔案/另存新檔」功能選項中，無法將檔案儲存為下列何種副檔名？
-                <div class="options">(A) .pdf (B) .rtf (C) .pptx (D) .dotx</div>
-                <span class="note">解：Word 是文書處理軟體，無法將檔案另存為 PowerPoint 的簡報格式（.pptx）。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">356.【C】</span>有關Microsoft Word 之「表格」的敘述，下列何者錯誤？
-                <div class="options">(A) 表格內之數字資料可以被排序 (B) 表格內之儲存格可以被分割或合併 (C) 表格內不可以有圖形 (D) 表格內之數字資料可以被運算</div>
-                <span class="note">解：Word 表格功能強大，每個儲存格都能插入圖片、圖形或美工圖案，並非只能放入文字。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">357.【B】</span>在Microsoft Word 之「版面配置」索引標籤內的「直書/橫書」功能選項中，下列何種類型的資料無法達到「直書/橫書」的功能？
-                <div class="options">(A) 繁體中文字 (B) 半形英文字 (C) 全形英文字 (D) 簡體中文字</div>
-                <span class="note">解：半形英文字在轉為直向排列時通常會橫向倒臥，無法像中文字或全形文字一樣維持正立呈現。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">358.【C】</span>在Microsoft Word 的操作環境中，若要同時選取某一段文章的第二行第3至第6個字與第三行第3至第6個字，可先按下哪一個鍵，再將滑鼠移至第二行第3個字按住滑鼠，並拉動滑鼠至第三行第6個字即可完成選取的動作？
-                <div class="options">(A) Ctrl鍵 (B) Tab鍵 (C) Alt鍵 (D) Shift鍵</div>
-                <span class="note">解：在 Word 中按住 Alt 鍵後拖曳滑鼠，可以進行「垂直塊狀選取」，選取不連續行的特定區塊文字。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">359.【C】</span>有關Microsoft Word 之敘述，下列何者錯誤？
-                <div class="options">(A) 具有「Web版面配置」模式，可檢視文件的網頁外觀 (B) 若某一段落被設定為「固定行高」且「行高12點」，而此段落的中文字卻被設定為「大小24點」，則文字的上半部不會顯示出來 (C) 建立表格時最多只能設定48個欄位 (D) 可以將圖片插入在文件的頁首區域內</div>
-                <span class="note">解：Word 表格的欄位限制非常寬鬆，預設最大欄位數為 63 欄，並非限制在 48 個欄位。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">360.【B】</span>有關Microsoft Word 之敘述，下列何者錯誤？
-                <div class="options">(A) 可以製作具有多欄的檔案內容 (B) 無法為文字設定註解 (C) 可以使用書籤快速跳至所定義的位置處 (D) 可以改變檔案內容的顯示比例</div>
-                <span class="note">解：Word 提供完整的註解功能，使用者可以針對特定文字或段落新增註解以進行審閱與溝通。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">361.【D】</span>在Microsoft Word 中，有關「索引標籤、群組」之敘述，下列何者錯誤？
-                <div class="options">(A) 不能隱藏預設的群組 (B) 可隱藏預設的索引標籤 (C) 可新增索引標籤 (D) 可調整「檔案」索引標籤的位置</div>
-                <span class="note">解：Word 2010 之後的版本中，「檔案」標籤是固定位於最左側的功能區起點，無法自由調整其位置。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">362.【C】</span>在Microsoft Word 中，下列何者不是「文字效果」所提供的效果？
-                <div class="options">(A) 反射 (B) 光暈 (C) 立體旋轉 (D) 陰影</div>
-                <span class="note">解：立體旋轉是針對圖片或圖形的格式設定，並非 Word「文字效果」中直接提供給文字的效果。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">363.【D】</span>在Microsoft Word 中，若要從重疊的浮動圖片中，選取整張被其他圖片所覆蓋的圖片，在不移動圖片的情形下，運用下列何項功能最為便捷？
-                <div class="options">(A) 尋找 (B) 選取物件 (C) 進階尋找 (D) 選取窗格</div>
-                <span class="note">解：選取窗格會列出頁面上所有的物件清單，即使物件完全被重疊遮蓋，也能透過清單輕鬆點選。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">364.【A】</span>在Microsoft Word 中，「螢幕擷取畫面」功能可以擷取下列何種視窗畫面？
-                <div class="options">(A) 除Word檔案本視窗外，其餘所有未最小化的開啟視窗 (B) 所有最大化的視窗 (C) 除Word檔案本視窗外，其餘所有最大化的視窗 (D) 所有未最小化的開啟視窗</div>
-                <span class="note">解：螢幕擷取畫面功能可以捕捉所有目前開啟且未最小化的其他視窗畫面，方便插入文件中。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">365.【C】</span>在Microsoft Word 中，下列何項合併列印可使用「更新標籤」功能？
-                <div class="options">(A) 目錄 (B) 信封 (C) 標籤 (D) 信件</div>
-                <span class="note">解：標籤合併列印中，點選「更新標籤」能將第一格的設計格式快速複製到整張所有標籤格內。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">366.【C】</span>在Microsoft Word 中，下列何項合併列印功能，不能使用目前文件作為主文件？
-                <div class="options">(A) 電子郵件訊息 (B) 信件 (C) 網頁 (D) 目錄</div>
-                <span class="note">解：網頁模式主要用於檢視網頁外觀，在合併列印中無法將網頁當作合併列印的主文件類型。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">367.【B】</span>在Microsoft Word 中，要將文件中的英文字母快速改為全形的字母，可使用下列何項功能？
-                <div class="options">(A) 放大字型 (B) 大小寫轉換 (C) 字型 (D) 亞洲方式配置</div>
-                <span class="note">解：Word「大小寫轉換」功能中的「全形」選項，能將選取的半形英文字母與數字快速轉換為全形。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">368.【C】</span>在Microsoft Word 中，若要翻譯特定的英文字，可按住下列何種按鍵，再以滑鼠左鍵在單字上按一下，結果就會出現在「參考資料」窗格內？
-                <div class="options">(A) Ctrl (B) Shift (C) Alt (D) Tab</div>
-                <span class="note">解：按住 Alt 鍵並點擊單字是 Word 的智慧查詢捷徑，會自動開啟參考資料窗格進行翻譯或搜尋。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">369.【C】</span>在Microsoft Word 中，根據Word預設值，圖片會在儲存檔案時，以下列何種解析度來壓縮影像？
-                <div class="options">(A) 150ppi (B) 96ppi (C) 220ppi (D) 300ppi</div>
-                <span class="note">解：Word 為平衡品質與檔案大小，預設會以 220 ppi 的解析度來壓縮文件中插入的圖片。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">370.【D】</span>在Microsoft Word 中，合併列印的「電子郵件訊息」，透過下列何種軟體來寄送電子郵件？
-                <div class="options">(A) LINE (B) Gmail (C) Facebook (D) Outlook</div>
-                <span class="note">解：Outlook 是微軟提供的電子郵件處理軟體，Word 的合併郵件功能會透過它自動發送大量信件。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">371.【A】</span>在Microsoft Word 中，佈景主題為一組格式設定選項，下列何者不是「佈景主題」所組成的項目？
-                <div class="options">(A) 圖片 (B) 效果 (C) 色彩 (D) 字型</div>
-                <span class="note">解：佈景主題整合了色彩、字型與效果，但不包含圖片，圖片必須由使用者自行插入。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">372.【D】</span>在Microsoft Word 中，下列何種功能不會改變文字間的間距？
-                <div class="options">(A) 最適文字大小 (B) 字元間距 (C) 分散對齊 (D) 字元比例</div>
-                <span class="note">解：字元比例僅會改變字體的寬度（拉長或壓扁），不會改變文字之間原有的間隔距離。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">373.【C】</span>在Microsoft Word 中，若選取文件中的部分文字將其分為二欄，則Word會自動在文件中加入下列何種符號？
-                <div class="options">(A) 分行符號 (B) 分欄符號 (C) 分節符號 (D) 定位符號</div>
-                <span class="note">解：將部分文字改為多欄排版時，Word 為了區隔不同的版面配置，會自動在前後插入分節符號。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">374.【D】</span>在Microsoft Word 中，在整頁模式時若要將頁首頁尾區域展開，可在紙張上、下邊緣如何操作？
-                <div class="options">(A) 按滑鼠左鍵一下 (B) 以滑鼠左鍵往下拖曳 (C) 以滑鼠左鍵往上拖曳 (D) 按滑鼠左鍵兩下</div>
-                <span class="note">解：在 Word 的整頁模式下，對紙張上下的留白邊緣快速按滑鼠左鍵兩下，可快速展開或隱藏頁首頁尾。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">375.【A】</span>在Microsoft Word 中，「圖片效果」不具有下列何項效果？
-                <div class="options">(A) 填滿 (B) 光暈 (C) 浮凸 (D) 立體旋轉</div>
-                <span class="note">解：圖片效果包含陰影、反射、光暈等，但填滿是針對圖形內部的顏色填充，不屬於圖片效果。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">376.【D】</span>在Microsoft Word 中，下列何者不是「設定圖片格式」的「反射」效果可調整之項目？
-                <div class="options">(A) 大小 (B) 距離 (C) 模糊 (D) 對比</div>
-                <span class="note">解：圖片的反射效果可以調整透明度、大小、模糊度與距離，對比則是屬於圖片修正的項目。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">377.【C】</span>在Microsoft Word 中，製作「目錄」時，下列何者可作為「項目資料來源」？
-                <div class="options">(A) 書籤 (B) 標號 (C) 樣式 (D) 項目標記</div>
-                <span class="note">解：製作目錄時，Word 預設會搜尋文中的標題「樣式」（如標題1、標題2）來自動產生大綱。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">378.【A】</span>在Microsoft Word 中，製作紙張方向為直向及橫向同時存在的文件時，需在文件中插入下列何種符號？
-                <div class="options">(A) 分節符號（下一頁） (B) 文字換行分隔符號 (C) 分欄符號 (D) 分頁符號（接續本頁）</div>
-                <span class="note">解：分節符號中的「下一頁」能讓新節從新的一頁開始，並允許設定與前一節不同的紙張方向。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">379.【C】</span>Mac OS使用幾個點的多指觸控左右滑動來切換全螢幕操作視窗？
-                <div class="options">(A) 1 (B) 3 (C) 4 (D) 2</div>
-                <span class="note">解：在 Mac OS 中，使用四指在觸控板上左右滑動是切換全螢幕應用程式或桌面空間的預設手勢。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">380.【B】</span>Mac OS中的iWork不包含以下何種應用軟體？
-                <div class="options">(A) Pages (B) Words (C) Keynote (D) Numbers</div>
-                <span class="note">解：iWork 是蘋果的辦公室套件，包含 Pages (文件)、Numbers (表格) 與 Keynote (簡報)。Words 非其成員。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">381.【B】</span>Mac OS研發程式最常使用Xcode IDE，其所使用的語言是？
-                <div class="options">(A) C# (B) Objective-C (C) Java (D) C++</div>
-                <span class="note">解：Xcode 是開發蘋果產品軟體的核心工具，傳統上主要使用 Objective-C 以及後來的 Swift 語言。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">382.【D】</span>下列何種程式語言依然還保存pointer的概念？
-                <div class="options">(A) C# (B) Basic (C) Java (D) Objective-C</div>
-                <span class="note">解：Objective-C 繼承自 C 語言，因此保留了指標（pointer）的概念，能直接操作記憶體位址。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">383.【B】</span>下列何者是開放文檔格式（OpenDocument Format）所規範的簡報檔案副檔名？
-                <div class="options">(A) .ppt (B) .odp (C) .pptx (D) .odt</div>
-                <span class="note">解：ODF（開放文件格式）中，試算表為 .ods，文件為 .odt，而簡報檔案的副檔名為 .odp。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">384.【C】</span>下列何者是開放文檔格式（OpenDocument Format）所規範的文件檔案副檔名？
-                <div class="options">(A) .odp (B) .docx (C) .odt (D) .doc</div>
-                <span class="note">解：ODF 規範中，.odt (OpenDocument Text) 是專門用於文書處理文件的標準副檔名。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">385.【C】</span>下列何者是開放文檔格式（OpenDocument Format）所規範的試算表檔案副檔名？
-                <div class="options">(A) .xls (B) .xlsx (C) .ods (D) .odt</div>
-                <span class="note">解：ODF 規範中，.ods (OpenDocument Spreadsheet) 是專門用於試算表資料的標準副檔名。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">386.【C】</span>下列何者是開放文檔格式（OpenDocument Format）所規範的資料庫檔案副檔名？
-                <div class="options">(A) .mdb (B) .dbf (C) .odb (D) .accdb</div>
-                <span class="note">解：ODF 規範中，.odb (OpenDocument Database) 是專門用於資料庫檔案的標準副檔名。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">387.【C】</span>在文書處理軟體Microsoft Word 2019中，選取文字後，要在文字加上圓圈符號，可使用下列哪一項功能？
-                <div class="options">(A) 頁面框線 (B) 表格 (C) 圍繞文字 (D) 字元框線</div>
-                <span class="note">解：圍繞文字功能可以在選取的文字（如數字或單一字母）外加上圓圈、方框或三角等幾何符號。</span>
-            </div>
-        
-            <div class="q-block">
-                <span class="q-header">388.【D】</span>在Word中，若要切換到預覽列印，則預設值為按下列哪一種組合按鍵？
-                <div class="options">(A) Ctrl＋Alt＋R (B) Ctrl＋Alt＋K (C) Ctrl＋Alt＋M (D) Ctrl＋Alt＋I</div>
-                <span class="note">解：在 Windows 版 Word 中，Ctrl 加 Alt 加 I 是切換至「預覽列印（Print Preview）」的快速鍵。</span>
-            </div>
-			<div class="q-block">
                 <span class="q-header">389.【D】</span>下列何者是指電腦中所使用的中文字型，是依每一筆劃的起點、方向以及終點等資料儲存？
                 <div class="options">(A) 點字法 (B) 字根法 (C) 矩陣法 (D) 線段法</div>
                 <span class="note">解：線段法（向量法）是紀錄文字筆劃的起點與終點座標，縮放時不會產生鋸齒，字型較美觀。</span>
@@ -682,7 +368,7 @@
             <div class="q-block">
                 <span class="q-header">439.【A】</span>在 Windows 作業系統中，內建防火牆（Firewall）之功能敘述，下列何者錯誤？
                 <div class="options">(A) 可阻擋DDoS網際網路之攻擊 (B) 可阻擋未設定為例外的應用程式與網際網路連接 (C) 可偵測或停用電腦上的病毒及蠕蟲 (D) 可記錄連線至電腦的所有成功、失敗相關資訊</div>
-                <span class="note">解：軟體防火牆擋不住大規模頻寬攻擊。</span>
+                <span class="note">解：防火牆主要過濾進出封包與連線規則，而偵測並清除病毒與蠕蟲則是「防毒軟體」的核心功能。</span>
             </div>
         
             <div class="q-block">
@@ -699,7 +385,7 @@
         
             <div class="q-block">
                 <span class="q-header">442.【B】</span>在 Windows 作業系統中，要切換不同「虛擬桌面」，可以按下何種組合鍵？
-                <div class="options">(A)(B)(C)(D)</div>
+                <div class="options">(A) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-54-3.jpg"/> (B) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-54-1.jpg"/> (C) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-54-2.jpg"/> (D) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-54-4.jpg"/></div>
                 <span class="note">解：在 Windows 10/11 中，Win 鍵加 Ctrl 加左右方向鍵可以用來在已建立的多個「虛擬桌面」間切換。</span>
             </div>
         
@@ -711,7 +397,7 @@
         
             <div class="q-block">
                 <span class="q-header">444.【D】</span>在 Windows 作業系統預設狀態，要新增「虛擬桌面」可以按下哪個組合鍵？
-                <div class="options">(A)(B)(C)(D)</div>
+                <div class="options">(A) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-56-3.jpg"/> (B) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-56-4.jpg"/> (C) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-56-2.jpg"/> (D) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-56-1.jpg"/></div>
                 <span class="note">解：在 Windows 中，按下 Win 鍵加 Ctrl 加 D 可以快速建立並切換到一個全新的虛擬桌面。</span>
             </div>
         
@@ -788,7 +474,7 @@
             </div>
         
             <div class="q-block">
-                <span class="q-header">457.【B】</span>在 Windows 作業系統中，若工作列的通知區域顯示OneDrive的圖示為圓形箭頭
+                <span class="q-header">457.【B】</span>在 Windows 作業系統中，若工作列的通知區域顯示OneDrive的圖示為圓形箭頭，表示OneDrive處於何種狀態？
                 <div class="options">(A) 帳號被封鎖 (B) 正在進行同步處理 (C) 同步處理完畢 (D) 暫停同步處理</div>
                 <span class="note">解：OneDrive 的圓形雙箭頭圖示代表系統正在掃描檔案變更，並與雲端伺服器進行資料同步。</span>
             </div>
@@ -801,7 +487,7 @@
         
             <div class="q-block">
                 <span class="q-header">459.【A】</span>在 Windows 作業系統中，要關閉「虛擬桌面」可以按下列何種組合鍵？
-                <div class="options">(A)(B)(C)(D)</div>
+                <div class="options">(A) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-71-2.jpg"/> (B) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-71-1.jpg"/> (C) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-71-3.jpg"/> (D) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-71-4.jpg"/></div>
                 <span class="note">解：在 Windows 10/11 中，按下 Win 鍵加 Ctrl 加 F4 可以關閉目前正在使用的虛擬桌面。</span>
             </div>
         
@@ -843,7 +529,7 @@
         
             <div class="q-block">
                 <span class="q-header">466.【A】</span>在 Windows 作業系統中，要利用「工作檢視」來管理視窗及桌面，可以按下何種組合鍵來開啟？
-                <div class="options">(A)(B)(C)(D)</div>
+                <div class="options">(A) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-78-1.jpg"/> (B) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-78-4.jpg"/> (C) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-78-2.jpg"/> (D) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-78-3.jpg"/></div>
                 <span class="note">解：在 Windows 中，按下 Win 鍵加 Tab 可以開啟「工作檢視」，管理所有視窗與虛擬桌面。</span>
             </div>
         
@@ -1155,7 +841,7 @@
         
             <div class="q-block">
                 <span class="q-header">518.【A】</span>IPv6位址是使用128bit的長度來標示電腦所在位址，所可以容許的位址個數是IPv4位址（位址長度為32bit）的幾倍？
-                <div class="options">(A)(B) 96 (C) 4 (D)</div>
+                <div class="options">(A) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-130-4.jpg"/> (B) 96 (C) 4 (D) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-130-3.jpg"/></div>
                 <span class="note">解：IPv6 位址為 128 位元，其位址空間總數為 2 的 128 次方；IPv4 為 2 的 32 次方。兩者倍數關係為 2 的 96 次方。</span>
             </div>
         

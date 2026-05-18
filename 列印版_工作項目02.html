@@ -43,6 +43,15 @@
             
             /* 選項與解析緊貼題目 */
             .options { margin-left: 10px; color: #333; }
+            
+            /* 針對選項中的圖片進行縮放，避免破壞排版 */
+            .options img {
+                max-height: 16px;    /* 限制圖片高度，使其與文字差不多高 */
+                width: auto;         /* 依比例自動調整寬度 */
+                vertical-align: middle; /* 讓圖片與文字對齊 */
+                margin: 0 2px;       /* 圖片左右留一點點空隙 */
+            }
+            
             .note { 
                 font-size: 11px; 
                 color: #777; 
@@ -52,7 +61,7 @@
         </style>
     </head>
     <body>
-        <h2>電腦軟體應用 丙級 項目02 (335~388題)</h2>
+        <h2>電腦軟體應用 丙級 項目04</h2>
         <div style="text-align:center;"><button onclick="window.print()">直接列印</button></div>
         <div class="container">
     
@@ -148,7 +157,7 @@
         
             <div class="q-block">
                 <span class="q-header">350.【D】</span>若在Microsoft Word 環境中執行合併列印的動作時，由「插入合併欄位」功能所插入的欄位變數名稱「地址」會被下列何種符號框起來？
-                <div class="options">(A) {地址} (B) ?地址? (C) [地址] (D) <<�地址>></div>
+                <div class="options">(A) {地址} (B) ?地址? (C) [地址] (D) &lt;&lt;�地址&gt;&gt;</div>
                 <span class="note">解：Word 的合併列印功能會以雙箭頭符號（<< >>）標示出從資料來源插入的變數欄位名稱。</span>
             </div>
         

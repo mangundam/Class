@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+    <html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+        <title>互動式心智圖</title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <style>
+            /* 🚩 補上不選取文字 CSS：防止手機單指拖曳畫面時，誤選取變藍色字塊 */
+            body { margin: 0; background-color: #f8f9fa; font-family: sans-serif; overflow: hidden; user-select: none; -webkit-user-select: none; }
+            #controls { position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; gap: 8px; }
+            button { padding: 6px 12px; background-color: #4a5568; color: white; border: none; border-radius: 4px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+            button:hover { background-color: #2d3748; }
+            svg { width: 100vw; height: 100vh; }
+            /* 🚩 清除手機點擊節點時產生的預設藍色高亮外框 */
+            .node { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+            .node rect { fill: #fff; stroke-width: 2px; rx: 4px; ry: 4px; }
+            
+            .depth-0 rect { fill: #ebf4ff; stroke: #3182ce; }
+            .depth-1 rect { fill: #faf5ff; stroke: #805ad5; }
+            .depth-2 rect { fill: #f0fff4; stroke: #38a169; }
+            .depth-3 rect { fill: #ffffff; stroke: #718096; }
+            .depth-4 rect { fill: #ffffff; stroke: #a0aec0; }
+
+            .node text { font-size: 14px; fill: #2d3748; dominant-baseline: middle; text-anchor: middle; }
+            .depth-0 text { font-weight: bold; font-size: 16px; }
+            .link { fill: none; stroke: #cbd5e0; stroke-width: 2px; }
+            .collapsed rect { fill: #edf2f7 !important; }
+
+            .toggle-button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+            .toggle-button circle { stroke-width: 2px; transition: fill 0.25s, stroke 0.25s; }
+            .collapsed-btn circle { fill: #48bb78; stroke: #38a169; }
+            .expanded-btn circle { fill: #ffffff; stroke: #cbd5e0; }
+        </style>
+    </head>
+    <body>
+        <div id="controls">
+            <button onclick="zoomIn()">＋ 放大</button>
+            <button onclick="zoomOut()">－ 縮小</button>
+            <button onclick="resetView()">↺ 回復預設</button>
+            <button onclick="expandAll()">展開 全部展開</button>
+        </div>
+        <svg id="mindmap"></svg>
+    <script>
+    const myData = {"name":"商業基本概念與應用","children":[{"name":"商業概述 (CH1)","children":[{"name":"意義","children":[{"name":"狹義: 固有商業(買賣業)"},{"name":"廣義: 固有+輔助商業(金融/倉儲)"}]},{"name":"成立條件","children":[{"name":"營利目的"},{"name":"發生交易行為"}]},{"name":"組織型態","children":[{"name":"獨資(Individual owenrshio)"},{"name":"合夥(Partnership)"},{"name":"公司(Corporation)"},{"name":"社會企業(Social enterprise)"}]}]},{"name":"企業經營與保險(CH2)","children":[{"name":"基本概念","children":[{"name":"風險轉移(事前轉嫁)"},{"name":"風險融資(事後彌補)"}]},{"name":"保險種類","children":[{"name":"財產保險","children":[{"name":"產品責任險"},{"name":"公共意外責任險"}]},{"name":"人身保險","children":[{"name":"職業災害保險"},{"name":"人壽保險(死亡/生存)"}]}]}]},{"name":"商業現代化機能(CH3)","children":[{"name":"五流:商流、物流、金流、資訊流、服務流"},{"name":"資訊工具","children":[{"name":"POS"},{"name":"EOS"},{"name":"RFID/NFC"},{"name":"EDI"}]},{"name":"顧客關係管理","children":[{"name":"步驟"},{"name":"目的"}]}]}]};
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const svg = d3.select("#mindmap");
+    const gMain = svg.append("g");
+
+    // 🚩 縮放傾聽器：D3 預設即完整支援手機雙指觸控與單指拖曳
+    const zoomBehavior = d3.zoom()
+        .scaleExtent([0.1, 3])
+        .on("zoom", (e) => gMain.attr("transform", e.transform));
+    svg.call(zoomBehavior);
+
+    // 調整垂直間距與水平層級間距
+    const treeLayout = d3.tree().nodeSize([45, 260]);
+    let root;
+
+    function collapseAllChildren(d) {
+        if (d.children) {
+            d._children = d.children;
+            d._children.forEach(collapseAllChildren);
+            d.children = null;
+        }
+    }
+
+    function toggleNode(event, d) {
+        if (d.children) {
+            collapseAllChildren(d);
+        } else if (d._children) {
+            d.children = d._children;
+            d._children = null;
+        }
+        update(d);
+    }
+
+    function init() {
+        root = d3.hierarchy(myData);
+        
+        // 先建立一次完整的佈局計算，讓所有節點（包含深層節點）取得初始的 x 與 y 坐標
+        treeLayout(root);
+        
+        root.x0 = height / 2;
+        root.y0 = 0;
+
+        // 紀錄完空間位置後，再把 depth >= 1 的節點摺疊起來
+        root.descendants().forEach(d => {
+            d.x0 = d.x; // 保留 D3 計算好的正確位置
+            d.y0 = d.y;
+            if (d.depth >= 1) {
+                collapseAllChildren(d);
+            }
+        });
+
+        update(root);
+        resetView();
+    }
+
+    function update(source) {
+        // 每次更新時，根據「目前展開的結構」重新計算佈局
+        const treeData = treeLayout(root);
+        const nodes = treeData.descendants();
+        const links = treeData.links();
+
+        // 重新校正水平方向間距
+        nodes.forEach(d => d.y = d.depth * 260);
+
+        const node = gMain.selectAll("g.node")
+            .data(nodes, d => d.id || (d.id = Math.random().toString()));
+
+        const nodeEnter = node.enter().append("g")
+            .attr("class", d => `node depth-${d.depth}`)
+            .attr("transform", d => `translate(${source.y0},${source.x0})`);
+
+        nodeEnter.on("click", toggleNode);
+
+        const padding = 12;
+        nodeEnter.append("rect")
+            .attr("height", 28)
+            .attr("y", -14)
+            .attr("x", d => -((d.data.name.length * 14) / 2 + padding))
+            .attr("width", d => d.data.name.length * 14 + padding * 2);
+
+        nodeEnter.append("text").text(d => d.data.name);
+
+        const toggleBtnGroup = nodeEnter.append("g")
+            .attr("class", "toggle-button")
+            .attr("transform", d => {
+                const rectWidth = d.data.name.length * 14 + padding * 2;
+                return `translate(${rectWidth / 2 + 12}, 0)`;
+            })
+            .on("click", (event, d) => {
+                event.stopPropagation();
+                toggleNode(event, d);
+            });
+
+        toggleBtnGroup.filter(d => !d.children && !d._children).remove();
+        toggleBtnGroup.append("circle").attr("r", 6);
+
+        const nodeUpdate = nodeEnter.merge(node);
+        nodeUpdate.classed("collapsed", d => !d.children && d._children);
+
+        const updateToggleBtn = nodeUpdate.select(".toggle-button");
+        updateToggleBtn.classed("collapsed-btn", d => !d.children && d._children);
+        updateToggleBtn.classed("expanded-btn", d => d.children);
+
+        // 🚩 修正處：回復正確的模板字串變數對齊，不再重疊
+        nodeUpdate.transition().duration(350)
+            .attr("transform", d => `translate(${d.y},${d.x})`);
+
+        node.exit().transition().duration(350)
+            .attr("transform", d => `translate(${source.y},${source.x})`).remove();
+
+        const link = gMain.selectAll("path.link").data(links, d => d.target.id);
+        const linkPath = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+
+        const linkEnter = link.enter().insert("path", "g")
+            .attr("class", "link")
+            .attr("d", d => {
+                const o = { x: source.x0, y: source.y0 };
+                return linkPath({ source: o, target: o });
+            });
+
+        link.merge(linkEnter).transition().duration(350).attr("d", linkPath);
+
+        link.exit().transition().duration(350)
+            .attr("d", d => {
+                const o = { x: source.y, y: source.x };
+                return linkPath({ source: o, target: o });
+            }).remove();
+
+        nodes.forEach(d => { d.x0 = d.x; d.y0 = d.y; });
+    }
+
+    function zoomIn() { svg.transition().duration(200).call(zoomBehavior.scaleBy, 1.2); }
+    function zoomOut() { svg.transition().duration(200).call(zoomBehavior.scaleBy, 0.8); }
+
+    function resetView() {
+        root.descendants().forEach(d => {
+            if (d.depth >= 1) collapseAllChildren(d);
+        });
+        update(root);
+        
+        // 🚩 手機版初始視角優化：偵測到手機寬度時，預設往左推一點（留 60 空間），在大螢幕則維持 120
+        const isMobile = window.innerWidth < 600;
+        const initialLeft = isMobile ? 60 : 120;
+
+        svg.transition().duration(500).call(
+            zoomBehavior.transform,
+            d3.zoomIdentity.translate(initialLeft, height / 2).scale(0.85)
+        );
+    }
+
+    function expandAll() {
+        function expand(d) {
+            if (d._children) { d.children = d._children; d._children = null; }
+            if (d.children) d.children.forEach(expand);
+        }
+        root.descendants().forEach(expand);
+        update(root);
+    }
+
+    window.addEventListener("resize", () => {
+        svg.attr("width", window.innerWidth).attr("height", window.innerHeight);
+    });
+
+    init();
+    </script>
+    </body>
+    </html>

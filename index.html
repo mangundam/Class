@@ -107,10 +107,25 @@
 
 <script>
     const CONFIG = {
-        username: 'mangundam',
-        repo: 'Class',
-        folder: ''
+        username: 'mangundam', // 本地測試時的預設值
+        repo: 'Jolin',         // 本地測試時的預設值
+        folder: ''            // HTML 存放的資料夾名稱 (若在根目錄則設為 '')
     };
+
+    // 自動偵測是否在 GitHub Pages 環境
+    const host = window.location.hostname;
+    const path = window.location.pathname;
+
+    if (host.endsWith('.github.io')) {
+        // 從 'username.github.io' 擷取 username
+        CONFIG.username = host.split('.')[0];
+        
+        // 從 '/repo/index.html' 擷取第一個路徑名稱作為 repo
+        const pathSegments = path.split('/').filter(segment => segment !== '');
+        if (pathSegments.length > 0) {
+            CONFIG.repo = pathSegments[0];
+        }
+    }
 
     const grid = document.getElementById('main-grid');
     const loader = document.getElementById('loader');

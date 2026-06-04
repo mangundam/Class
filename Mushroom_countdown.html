@@ -70,6 +70,14 @@
         button:hover {
             background-color: #0062cc;
         }
+        .record-box {
+            background-color: #e8f4fd;
+            border-left: 4px solid #007aff;
+            padding: 12px;
+            margin-top: 20px;
+            border-radius: 0 4px 4px 0;
+            font-size: 16px;
+        }
         .results {
             margin-top: 24px;
             border-top: 1px solid #e9ecef;
@@ -86,7 +94,7 @@
             margin-top: 10px;
         }
         th, td {
-            padding: 10px;
+            padding: 12px 10px;
             text-align: left;
             border-bottom: 1px solid #eee;
             font-variant-numeric: tabular-nums;
@@ -97,7 +105,8 @@
         }
         .highlight {
             color: #d9383a;
-            font-weight: 600;
+            font-weight: bold;
+            font-size: 18px;
         }
     </style>
 </head>
@@ -117,17 +126,19 @@
 
     <button id="eliminateBtn">蘑菇消滅確認</button>
 
+    <div id="recordBox" class="record-box" style="display: none;"></div>
+
     <div class="results" id="resultArea" style="display: none;">
-        <h2>建議開啟遊戲時間點</h2>
-        <p style="font-size: 14px; color: #666;">
-            已為您自動計算：<strong>蘑菇消滅時間 + 5分鐘（復活） + 8秒刷新公倍數 - 開啟花費時間</strong>
+        <h2>您應該「點開遊戲」的精確時間點</h2>
+        <p style="font-size: 14px; color: #666; line-height: 1.5;">
+            計算公式：<strong>(消滅秒數 - 8秒的倍數) - 開啟遊戲秒數</strong>。以下時間已加上 5 分鐘復活區間。
         </p>
         <table>
             <thead>
                 <tr>
-                    <th>序號</th>
-                    <th>預計重新整理週期</th>
-                    <th class="highlight">您應該啟動遊戲的時間</th>
+                    <th>往前推算週期</th>
+                    <th>進遊戲時的預期秒數</th>
+                    <th class="highlight">動作：此時點開遊戲</th>
                 </tr>
             </thead>
             <tbody id="resultTableBody">
@@ -137,10 +148,8 @@
 </div>
 
 <script>
-    let timeOffset = 0; // 與標準時間的毫秒誤差值
+    let timeOffset = 0; 
 
-    // 1. 同步網路標準時間（解決本機時間不準的問題）
-    // 使用 worldtimeapi.org 獲取台北標準時間
     async function syncTime() {
         try {
             const start = performance.now();
@@ -148,32 +157,26 @@
             const data = await response.json();
             const end = performance.now();
             
-            // 扣除網路傳輸延遲（估算值）
             const latency = (end - start) / 2;
             const serverTime = new Date(data.datetime).getTime() + latency;
             const localTime = Date.now();
             
-            // 計算本地時間與標準時間的差值
             timeOffset = serverTime - localTime;
-            console.log("時間同步成功，誤差校正值 (ms):", timeOffset);
         } catch (error) {
             console.error("無法同步標準時間，將採用系統本地時間:", error);
         }
     }
 
-    // 獲取目前絕對精確的台灣時間物件
     function getExactTime() {
         return new Date(Date.now() + timeOffset);
     }
 
-    // 更新時鐘顯示
     function updateClock() {
         const now = getExactTime();
         const timeString = now.toLocaleTimeString('zh-TW', { hour12: false }) + '.' + String(now.getMilliseconds()).padStart(3, '0');
         document.getElementById('currentTimeDisplay').innerText = `目前台灣標準時間：${timeString}`;
     }
 
-    // 格式化時間輸出 (HH:mm:ss.SSS)
     function formatExactTime(date) {
         const h = String(date.getHours()).padStart(2, '0');
         const m = String(date.getMinutes()).padStart(2, '0');
@@ -181,45 +184,53 @@
         return `${h}:${m}:${s}`;
     }
 
-    // 2. 按鈕點擊事件：計算時間
     document.getElementById('eliminateBtn').addEventListener('click', () => {
-        const eliminateTime = getExactTime(); // 記下按下按鈕這一刻的精確標準時間
+        const eliminateTime = getExactTime(); 
         const launchTimeCost = parseInt(document.getElementById('launchTime').value, 10) || 0;
         
-        // 蘑菇基本復活時間為 5 分鐘後 (5 * 60 * 1000 = 300,000 毫秒)
+        // 1. 顯示消滅時的時間紀錄
+        const recordBox = document.getElementById('recordBox');
+        recordBox.style.display = 'block';
+        recordBox.innerHTML = `<strong>蘑菇消滅記錄時間：</strong> ${formatExactTime(eliminateTime)}`;
+
+        // 2. 計算 5 分鐘後的復活基準時間點
         const baseRespawnTime = new Date(eliminateTime.getTime() + 5 * 60 * 1000);
         
         const tableBody = document.getElementById('resultTableBody');
-        tableBody.innerHTML = ''; // 清空舊資料
+        tableBody.innerHTML = ''; 
 
-        // 列出接下來 5 個符合 8 秒週期的時間點
-        // 為了確保一定能碰到復活，我們從 0 倍、8秒、16秒、24秒、32秒等公倍數往後推算
-        for (let i = 0; i < 5; i++) {
-            const additionalSeconds = i * 8;
+        // 3. 依照使用者邏輯：從復活點的秒數往前扣除 8 的倍數與開啟時間
+        // 列出往前扣 1組 8秒、2組 8秒、3組 8秒 的時間點
+        for (let i = 1; i <= 4; i++) {
+            const backwardSeconds = i * 8;
             
-            // 理論上遊戲伺服器刷新數據的時間點（復活時間 + 8秒公倍數）
-            const serverRefreshTime = new Date(baseRespawnTime.getTime() + additionalSeconds * 1000);
+            // 預期進遊戲時的伺服器重新整理點 (基準時間 - 8秒倍數)
+            const expectedGameTime = new Date(baseRespawnTime.getTime() - backwardSeconds * 1000);
             
-            // 您實際需要開啟遊戲的時間（必須扣除開啟遊戲花費的秒數）
-            const idealLaunchTime = new Date(serverRefreshTime.getTime() - launchTimeCost * 1000);
+            // 真正要動手點開遊戲的時間 (預期進遊戲時間 - 開啟花費時間)
+            const actualActionTime = new Date(expectedGameTime.getTime() - launchTimeCost * 1000);
+            
+            // 計算進入遊戲時的畫面秒數 (消滅秒數 - 8秒倍數)
+            let displaySeconds = eliminateTime.getSeconds() - backwardSeconds;
+            while (displaySeconds < 0) {
+                displaySeconds += 60; // 確保秒數維持正數顯示
+            }
             
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>第 ${i + 1} 組</td>
-                <td>復活後 + ${additionalSeconds} 秒</td>
-                <td class="highlight">${formatExactTime(idealLaunchTime)}</td>
+                <td>提前 ${backwardSeconds} 秒 (扣 ${i} 次週期)</td>
+                <td>xx 分 ${String(displaySeconds).padStart(2, '0')} 秒</td>
+                <td class="highlight">${formatExactTime(actualActionTime)}</td>
             `;
             tableBody.appendChild(row);
         }
 
-        // 顯示結果區域
         document.getElementById('resultArea').style.display = 'block';
     });
 
-    // 初始化
     syncTime();
-    setInterval(updateClock, 50); // 每50毫秒更新一次時鐘維持高精確度
-    setInterval(syncTime, 60000); // 每分鐘自動重新校正一次標準時間
+    setInterval(updateClock, 50); 
+    setInterval(syncTime, 60000);
 </script>
 
 </body>

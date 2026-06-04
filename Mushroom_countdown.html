@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蘑菇復活精確時間計算器</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #111;
+            text-align: center;
+        }
+        .time-display {
+            font-size: 18px;
+            background: #f1f3f5;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #007aff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0062cc;
+        }
+        .results {
+            margin-top: 24px;
+            border-top: 1px solid #e9ecef;
+            padding-top: 20px;
+        }
+        .results h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #222;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-variant-numeric: tabular-nums;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        .highlight {
+            color: #d9383a;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>蘑菇復活精確時間計算器</h1>
+    
+    <div class="time-display" id="currentTimeDisplay">
+        網路標準時間載入中...
+    </div>
+
+    <div class="form-group">
+        <label for="launchTime">開啟遊戲花費時間 (秒)</label>
+        <input type="number" id="launchTime" value="6" min="0" step="1">
+    </div>
+
+    <button id="eliminateBtn">蘑菇消滅確認</button>
+
+    <div class="results" id="resultArea" style="display: none;">
+        <h2>建議開啟遊戲時間點</h2>
+        <p style="font-size: 14px; color: #666;">
+            已為您自動計算：<strong>蘑菇消滅時間 + 5分鐘（復活） + 8秒刷新公倍數 - 開啟花費時間</strong>
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>序號</th>
+                    <th>預計重新整理週期</th>
+                    <th class="highlight">您應該啟動遊戲的時間</th>
+                </tr>
+            </thead>
+            <tbody id="resultTableBody">
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let timeOffset = 0; // 與標準時間的毫秒誤差值
+
+    // 1. 同步網路標準時間（解決本機時間不準的問題）
+    // 使用 worldtimeapi.org 獲取台北標準時間
+    async function syncTime() {
+        try {
+            const start = performance.now();
+            const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Taipei');
+            const data = await response.json();
+            const end = performance.now();
+            
+            // 扣除網路傳輸延遲（估算值）
+            const latency = (end - start) / 2;
+            const serverTime = new Date(data.datetime).getTime() + latency;
+            const localTime = Date.now();
+            
+            // 計算本地時間與標準時間的差值
+            timeOffset = serverTime - localTime;
+            console.log("時間同步成功，誤差校正值 (ms):", timeOffset);
+        } catch (error) {
+            console.error("無法同步標準時間，將採用系統本地時間:", error);
+        }
+    }
+
+    // 獲取目前絕對精確的台灣時間物件
+    function getExactTime() {
+        return new Date(Date.now() + timeOffset);
+    }
+
+    // 更新時鐘顯示
+    function updateClock() {
+        const now = getExactTime();
+        const timeString = now.toLocaleTimeString('zh-TW', { hour12: false }) + '.' + String(now.getMilliseconds()).padStart(3, '0');
+        document.getElementById('currentTimeDisplay').innerText = `目前台灣標準時間：${timeString}`;
+    }
+
+    // 格式化時間輸出 (HH:mm:ss.SSS)
+    function formatExactTime(date) {
+        const h = String(date.getHours()).padStart(2, '0');
+        const m = String(date.getMinutes()).padStart(2, '0');
+        const s = String(date.getSeconds()).padStart(2, '0');
+        return `${h}:${m}:${s}`;
+    }
+
+    // 2. 按鈕點擊事件：計算時間
+    document.getElementById('eliminateBtn').addEventListener('click', () => {
+        const eliminateTime = getExactTime(); // 記下按下按鈕這一刻的精確標準時間
+        const launchTimeCost = parseInt(document.getElementById('launchTime').value, 10) || 0;
+        
+        // 蘑菇基本復活時間為 5 分鐘後 (5 * 60 * 1000 = 300,000 毫秒)
+        const baseRespawnTime = new Date(eliminateTime.getTime() + 5 * 60 * 1000);
+        
+        const tableBody = document.getElementById('resultTableBody');
+        tableBody.innerHTML = ''; // 清空舊資料
+
+        // 列出接下來 5 個符合 8 秒週期的時間點
+        // 為了確保一定能碰到復活，我們從 0 倍、8秒、16秒、24秒、32秒等公倍數往後推算
+        for (let i = 0; i < 5; i++) {
+            const additionalSeconds = i * 8;
+            
+            // 理論上遊戲伺服器刷新數據的時間點（復活時間 + 8秒公倍數）
+            const serverRefreshTime = new Date(baseRespawnTime.getTime() + additionalSeconds * 1000);
+            
+            // 您實際需要開啟遊戲的時間（必須扣除開啟遊戲花費的秒數）
+            const idealLaunchTime = new Date(serverRefreshTime.getTime() - launchTimeCost * 1000);
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>第 ${i + 1} 組</td>
+                <td>復活後 + ${additionalSeconds} 秒</td>
+                <td class="highlight">${formatExactTime(idealLaunchTime)}</td>
+            `;
+            tableBody.appendChild(row);
+        }
+
+        // 顯示結果區域
+        document.getElementById('resultArea').style.display = 'block';
+    });
+
+    // 初始化
+    syncTime();
+    setInterval(updateClock, 50); // 每50毫秒更新一次時鐘維持高精確度
+    setInterval(syncTime, 60000); // 每分鐘自動重新校正一次標準時間
+</script>
+
+</body>
+</html>

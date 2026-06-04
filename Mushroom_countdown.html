@@ -10,13 +10,12 @@
             background-color: #f8f9fa;
             color: #333;
             margin: 0;
-            padding: 0 0 40px 0; /* 移除上方 padding，改由置頂區塊填滿 */
+            padding: 0 0 40px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
         
-        /* 關鍵修改：讓時間顯示區塊絕對置頂 */
         .sticky-header {
             position: sticky;
             top: 0;
@@ -32,7 +31,7 @@
         .time-display {
             max-width: 650px;
             width: 100%;
-            font-size: 20px; /* 手機版稍微放大時間，看得更清楚 */
+            font-size: 20px;
             font-weight: bold;
             background: #f1f3f5;
             padding: 12px;
@@ -61,7 +60,6 @@
             text-align: center;
         }
         
-        /* 雙欄並排配置 */
         .flex-row {
             display: flex;
             gap: 12px;
@@ -97,7 +95,6 @@
             font-size: 16px;
         }
         
-        /* 小型預約按鈕 */
         .small-btn {
             padding: 10px 12px;
             background-color: #28a745;
@@ -130,7 +127,6 @@
             background-color: #0062cc;
         }
         
-        /* 消滅與復活區塊 */
         .record-container {
             display: flex;
             gap: 12px;
@@ -162,7 +158,7 @@
         .results {
             border-top: 1px solid #e9ecef;
             margin-top: 20px;
-            overflow-x: auto; /* 防止手機版表格過寬破版 */
+            overflow-x: auto;
         }
         table {
             width: 100%;
@@ -170,7 +166,7 @@
             margin-top: 10px;
         }
         th, td {
-            padding: 10px 8px;
+            padding: 12px 8px;
             text-align: left;
             border-bottom: 1px solid #eee;
             font-variant-numeric: tabular-nums;
@@ -186,7 +182,6 @@
             font-size: 16px;
         }
         
-        /* 目標最接近時間點的醒目提示底色 */
         .nearest-row {
             background-color: #fffbeb !important;
             border-left: 4px solid #f59e0b;
@@ -200,6 +195,12 @@
             margin-left: 4px;
             display: inline-block;
             vertical-align: middle;
+        }
+        
+        /* 倒數計時器專用粗體紅字 */
+        .countdown-text {
+            color: #d9383a;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -243,7 +244,7 @@
             <thead>
                 <tr>
                     <th>推算</th>
-                    <th>進遊戲秒數</th>
+                    <th>倒數計時</th>
                     <th class="highlight">開遊戲</th>
                 </tr>
             </thead>
@@ -284,7 +285,7 @@
         document.getElementById('currentTimeDisplay').innerText = `目前台灣標準時間：${timeString}`;
         
         if (calculatedTimes.length > 0) {
-            highlightNearestRow(now.getTime());
+            updateCountdownAndHighlight(now.getTime());
         }
     }
 
@@ -317,17 +318,11 @@
             const expectedGameTime = new Date(baseRespawnTime.getTime() - backwardSeconds * 1000);
             const actualActionTime = new Date(expectedGameTime.getTime() - launchTimeCost * 1000);
             
-            let displaySeconds = eliminateTime.getSeconds() - backwardSeconds;
-            while (displaySeconds < 0) {
-                displaySeconds += 60; 
-            }
-            
             calculatedTimes.push({
                 index: i - 1,
                 timestamp: actualActionTime.getTime(),
                 backwardSeconds: backwardSeconds,
                 cycleCount: i,
-                displaySeconds: displaySeconds,
                 timeStr: formatExactTime(actualActionTime)
             });
 
@@ -335,20 +330,22 @@
             row.id = `time-row-${i - 1}`;
             row.innerHTML = `
                 <td class="row-meta">提前 ${backwardSeconds}s (扣${i}次)</td>
-                <td>xx分 ${String(displaySeconds).padStart(2, '0')}秒</td>
+                <td class="countdown-cell">-</td>
                 <td class="highlight">${formatExactTime(actualActionTime)}</td>
             `;
             tableBody.appendChild(row);
         }
 
         document.getElementById('resultArea').style.display = 'block';
-        highlightNearestRow(getExactTime().getTime()); 
+        updateCountdownAndHighlight(getExactTime().getTime()); 
     }
 
-    function highlightNearestRow(currentTimestamp) {
+    // 核心處理：更新倒數並動態高亮
+    function updateCountdownAndHighlight(currentTimestamp) {
         let nearestIndex = -1;
         let minDiff = Infinity;
 
+        // 1. 找出最接近且尚未過去的時間點
         for (let i = 0; i < calculatedTimes.length; i++) {
             const diff = calculatedTimes[i].timestamp - currentTimestamp;
             if (diff >= 0 && diff < minDiff) {
@@ -357,25 +354,40 @@
             }
         }
 
+        // 2. 更新表格列的樣式與倒數計時內容
         for (let i = 0; i < calculatedTimes.length; i++) {
             const row = document.getElementById(`time-row-${i}`);
             if (!row) continue;
             
             const metaTd = row.querySelector('.row-meta');
+            const countdownTd = row.querySelector('.countdown-cell');
             
             if (i === nearestIndex) {
+                // 醒目標示該列
                 if (!row.classList.contains('nearest-row')) {
                     row.classList.add('nearest-row');
                     if (!row.querySelector('.nearest-badge')) {
                         metaTd.innerHTML = `提前 ${calculatedTimes[i].backwardSeconds}s (扣${calculatedTimes[i].cycleCount}次) <span class="nearest-badge">推薦</span>`;
                     }
                 }
+                
+                // 計算並渲染該列的即時倒數計時
+                const totalSecondsLeft = Math.ceil((calculatedTimes[i].timestamp - currentTimestamp) / 1000);
+                if (totalSecondsLeft >= 0) {
+                    const m = String(Math.floor(totalSecondsLeft / 60)).padStart(2, '0');
+                    const s = String(totalSecondsLeft % 60).padStart(2, '0');
+                    countdownTd.innerHTML = `<span class="countdown-text">剩餘 ${m}分${s}秒</span>`;
+                } else {
+                    countdownTd.innerText = '-';
+                }
             } else {
+                // 非最接近列：清除底色、標籤與倒數文字
                 row.classList.remove('nearest-row');
                 const badge = row.querySelector('.nearest-badge');
                 if (badge) {
                     metaTd.innerHTML = `提前 ${calculatedTimes[i].backwardSeconds}s (扣${calculatedTimes[i].cycleCount}次)`;
                 }
+                countdownTd.innerText = '-';
             }
         }
     }

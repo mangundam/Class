@@ -15,7 +15,7 @@
             justify-content: center;
         }
         .container {
-            max-width: 600px;
+            max-width: 650px;
             width: 100%;
             background: #ffffff;
             padding: 30px;
@@ -188,20 +188,17 @@
         const eliminateTime = getExactTime(); 
         const launchTimeCost = parseInt(document.getElementById('launchTime').value, 10) || 0;
         
-        // 1. 顯示消滅時的時間紀錄
         const recordBox = document.getElementById('recordBox');
         recordBox.style.display = 'block';
         recordBox.innerHTML = `<strong>蘑菇消滅記錄時間：</strong> ${formatExactTime(eliminateTime)}`;
 
-        // 2. 計算 5 分鐘後的復活基準時間點
         const baseRespawnTime = new Date(eliminateTime.getTime() + 5 * 60 * 1000);
         
         const tableBody = document.getElementById('resultTableBody');
         tableBody.innerHTML = ''; 
 
-        // 3. 依照使用者邏輯：從復活點的秒數往前扣除 8 的倍數與開啟時間
-        // 列出往前扣 1組 8秒、2組 8秒、3組 8秒 的時間點
-        for (let i = 1; i <= 4; i++) {
+        // 循環生成 8 個不同的提前時間點
+        for (let i = 1; i <= 8; i++) {
             const backwardSeconds = i * 8;
             
             // 預期進遊戲時的伺服器重新整理點 (基準時間 - 8秒倍數)
@@ -213,7 +210,7 @@
             // 計算進入遊戲時的畫面秒數 (消滅秒數 - 8秒倍數)
             let displaySeconds = eliminateTime.getSeconds() - backwardSeconds;
             while (displaySeconds < 0) {
-                displaySeconds += 60; // 確保秒數維持正數顯示
+                displaySeconds += 60; 
             }
             
             const row = document.createElement('tr');

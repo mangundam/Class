@@ -10,42 +10,83 @@
             background-color: #f8f9fa;
             color: #333;
             margin: 0;
-            padding: 40px 20px;
+            padding: 0 0 40px 0; /* 移除上方 padding，改由置頂區塊填滿 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        /* 關鍵修改：讓時間顯示區塊絕對置頂 */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 12px 20px;
+            box-sizing: border-box;
             display: flex;
             justify-content: center;
         }
+        .time-display {
+            max-width: 650px;
+            width: 100%;
+            font-size: 20px; /* 手機版稍微放大時間，看得更清楚 */
+            font-weight: bold;
+            background: #f1f3f5;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            color: #111;
+            box-sizing: border-box;
+        }
+
         .container {
             max-width: 650px;
             width: 100%;
             background: #ffffff;
-            padding: 30px;
+            padding: 24px;
+            margin-top: 16px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
         }
         h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 600;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             color: #111;
             text-align: center;
         }
-        .time-display {
-            font-size: 18px;
-            background: #f1f3f5;
-            padding: 12px;
-            border-radius: 6px;
-			margin-top:20px;
-            text-align: center;
-            font-variant-numeric: tabular-nums;
+        
+        /* 雙欄並排配置 */
+        .flex-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
         }
+        .flex-col-50 {
+            flex: 1;
+            width: 50%;
+        }
+        
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 0px;
+        }
+        .inline-input-group {
+            display: flex;
+            gap: 4px;
+            align-items: center;
         }
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 500;
             color: #555;
+            font-size: 13px;
+            white-space: nowrap;
         }
         input[type="number"] {
             width: 100%;
@@ -55,7 +96,25 @@
             box-sizing: border-box;
             font-size: 16px;
         }
-        button {
+        
+        /* 小型預約按鈕 */
+        .small-btn {
+            padding: 10px 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background-color 0.2s;
+        }
+        .small-btn:hover {
+            background-color: #218838;
+        }
+
+        button#eliminateBtn {
             width: 100%;
             padding: 14px;
             background-color: #007aff;
@@ -67,25 +126,43 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        button:hover {
+        button#eliminateBtn:hover {
             background-color: #0062cc;
         }
+        
+        /* 消滅與復活區塊 */
+        .record-container {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
         .record-box {
+            flex: 1;
+            width: 50%;
             background-color: #e8f4fd;
             border-left: 4px solid #007aff;
-            padding: 12px;
-            margin-top: 20px;
+            padding: 10px;
             border-radius: 0 4px 4px 0;
-            font-size: 16px;
-			text-align: center;
+            font-size: 14px;
+            text-align: center;
+            box-sizing: border-box;
         }
+        .respawn-box {
+            flex: 1;
+            width: 50%;
+            background-color: #fef3c7;
+            border-left: 4px solid #d97706;
+            padding: 10px;
+            border-radius: 0 4px 4px 0;
+            font-size: 14px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        
         .results {
             border-top: 1px solid #e9ecef;
-        }
-        .results h2 {
-            font-size: 18px;
-            margin-bottom: 12px;
-            color: #222;
+            margin-top: 20px;
+            overflow-x: auto; /* 防止手機版表格過寬破版 */
         }
         table {
             width: 100%;
@@ -93,10 +170,11 @@
             margin-top: 10px;
         }
         th, td {
-            padding: 12px 10px;
+            padding: 10px 8px;
             text-align: left;
             border-bottom: 1px solid #eee;
             font-variant-numeric: tabular-nums;
+            font-size: 14px;
         }
         th {
             background-color: #f8f9fa;
@@ -105,26 +183,61 @@
         .highlight {
             color: #d9383a;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 16px;
+        }
+        
+        /* 目標最接近時間點的醒目提示底色 */
+        .nearest-row {
+            background-color: #fffbeb !important;
+            border-left: 4px solid #f59e0b;
+        }
+        .nearest-badge {
+            background-color: #f59e0b;
+            color: white;
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 10px;
+            margin-left: 4px;
+            display: inline-block;
+            vertical-align: middle;
         }
     </style>
 </head>
 <body>
 
+<div class="sticky-header">
+    <div class="time-display" id="currentTimeDisplay">
+        網路標準時間載入中...
+    </div>
+</div>
+
 <div class="container">    
+    <h1>蘑菇復活精確時間計算器</h1>
 
-
-    <div class="form-group">
-        <label for="launchTime">開啟遊戲花費時間 (秒)</label>
-        <input type="number" id="launchTime" value="6" min="0" step="1">
+    <div class="flex-row">
+        <div class="flex-col-50 form-group">
+            <label for="launchTime">開啟遊戲花費時間 (秒)</label>
+            <input type="number" id="launchTime" value="6" min="0" step="1">
+        </div>
+        <div class="flex-col-50 form-group">
+            <label>預約消滅（分 / 秒後）</label>
+            <div class="inline-input-group">
+                <input type="number" id="reserveMin" value="0" min="0" placeholder="分" style="flex:1;">
+                <span style="color:#666; font-size:12px;">分</span>
+                <input type="number" id="reserveSec" value="0" min="0" placeholder="秒" style="flex:1;">
+                <span style="color:#666; font-size:12px;">秒</span>
+                <button class="small-btn" id="reserveBtn">排程</button>
+            </div>
+        </div>
     </div>
 
     <button id="eliminateBtn">蘑菇消滅確認</button>
 
-    <div id="recordBox" class="record-box" style="display: none;"></div>
-	<div class="time-display" id="currentTimeDisplay">
-        網路標準時間載入中...
+    <div class="record-container">
+        <div id="recordBox" class="record-box" style="display: none;"></div>
+        <div id="respawnBox" class="respawn-box" style="display: none;"></div>
     </div>
+    
     <div class="results" id="resultArea" style="display: none;">
         <table>
             <thead>
@@ -135,13 +248,14 @@
                 </tr>
             </thead>
             <tbody id="resultTableBody">
-                </tbody>
+            </tbody>
         </table>
     </div>
 </div>
 
 <script>
     let timeOffset = 0; 
+    let calculatedTimes = []; 
 
     async function syncTime() {
         try {
@@ -168,6 +282,10 @@
         const now = getExactTime();
         const timeString = now.toLocaleTimeString('zh-TW', { hour12: false }) + '.' + String(now.getMilliseconds()).padStart(3, '0');
         document.getElementById('currentTimeDisplay').innerText = `目前台灣標準時間：${timeString}`;
+        
+        if (calculatedTimes.length > 0) {
+            highlightNearestRow(now.getTime());
+        }
     }
 
     function formatExactTime(date) {
@@ -177,45 +295,107 @@
         return `${h}:${m}:${s}`;
     }
 
-    document.getElementById('eliminateBtn').addEventListener('click', () => {
-        const eliminateTime = getExactTime(); 
+    function calculateMushroomTimings(eliminateTime) {
         const launchTimeCost = parseInt(document.getElementById('launchTime').value, 10) || 0;
         
         const recordBox = document.getElementById('recordBox');
         recordBox.style.display = 'block';
-        recordBox.innerHTML = `<strong>蘑菇消滅記錄時間：</strong> ${formatExactTime(eliminateTime)}`;
+        recordBox.innerHTML = `<strong>消滅記錄時間</strong><br>${formatExactTime(eliminateTime)}`;
 
         const baseRespawnTime = new Date(eliminateTime.getTime() + 5 * 60 * 1000);
-        
+        const respawnBox = document.getElementById('respawnBox');
+        respawnBox.style.display = 'block';
+        respawnBox.innerHTML = `<strong>預計復活時間</strong><br>${formatExactTime(baseRespawnTime)}`;
+
         const tableBody = document.getElementById('resultTableBody');
         tableBody.innerHTML = ''; 
+        calculatedTimes = []; 
 
-        // 循環生成 8 個不同的提前時間點
         for (let i = 1; i <= 8; i++) {
             const backwardSeconds = i * 8;
             
-            // 預期進遊戲時的伺服器重新整理點 (基準時間 - 8秒倍數)
             const expectedGameTime = new Date(baseRespawnTime.getTime() - backwardSeconds * 1000);
-            
-            // 真正要動手點開遊戲的時間 (預期進遊戲時間 - 開啟花費時間)
             const actualActionTime = new Date(expectedGameTime.getTime() - launchTimeCost * 1000);
             
-            // 計算進入遊戲時的畫面秒數 (消滅秒數 - 8秒倍數)
             let displaySeconds = eliminateTime.getSeconds() - backwardSeconds;
             while (displaySeconds < 0) {
                 displaySeconds += 60; 
             }
             
+            calculatedTimes.push({
+                index: i - 1,
+                timestamp: actualActionTime.getTime(),
+                backwardSeconds: backwardSeconds,
+                cycleCount: i,
+                displaySeconds: displaySeconds,
+                timeStr: formatExactTime(actualActionTime)
+            });
+
             const row = document.createElement('tr');
+            row.id = `time-row-${i - 1}`;
             row.innerHTML = `
-                <td>提前 ${backwardSeconds} 秒 (扣 ${i} 次週期)</td>
-                <td>xx 分 ${String(displaySeconds).padStart(2, '0')} 秒</td>
+                <td class="row-meta">提前 ${backwardSeconds}s (扣${i}次)</td>
+                <td>xx分 ${String(displaySeconds).padStart(2, '0')}秒</td>
                 <td class="highlight">${formatExactTime(actualActionTime)}</td>
             `;
             tableBody.appendChild(row);
         }
 
         document.getElementById('resultArea').style.display = 'block';
+        highlightNearestRow(getExactTime().getTime()); 
+    }
+
+    function highlightNearestRow(currentTimestamp) {
+        let nearestIndex = -1;
+        let minDiff = Infinity;
+
+        for (let i = 0; i < calculatedTimes.length; i++) {
+            const diff = calculatedTimes[i].timestamp - currentTimestamp;
+            if (diff >= 0 && diff < minDiff) {
+                minDiff = diff;
+                nearestIndex = i;
+            }
+        }
+
+        for (let i = 0; i < calculatedTimes.length; i++) {
+            const row = document.getElementById(`time-row-${i}`);
+            if (!row) continue;
+            
+            const metaTd = row.querySelector('.row-meta');
+            
+            if (i === nearestIndex) {
+                if (!row.classList.contains('nearest-row')) {
+                    row.classList.add('nearest-row');
+                    if (!row.querySelector('.nearest-badge')) {
+                        metaTd.innerHTML = `提前 ${calculatedTimes[i].backwardSeconds}s (扣${calculatedTimes[i].cycleCount}次) <span class="nearest-badge">推薦</span>`;
+                    }
+                }
+            } else {
+                row.classList.remove('nearest-row');
+                const badge = row.querySelector('.nearest-badge');
+                if (badge) {
+                    metaTd.innerHTML = `提前 ${calculatedTimes[i].backwardSeconds}s (扣${calculatedTimes[i].cycleCount}次)`;
+                }
+            }
+        }
+    }
+
+    document.getElementById('eliminateBtn').addEventListener('click', () => {
+        calculateMushroomTimings(getExactTime());
+    });
+
+    document.getElementById('reserveBtn').addEventListener('click', () => {
+        const minOffset = parseInt(document.getElementById('reserveMin').value, 10) || 0;
+        const secOffset = parseInt(document.getElementById('reserveSec').value, 10) || 0;
+        const totalMsOffset = ((minOffset * 60) + secOffset) * 1000;
+        
+        if (totalMsOffset <= 0) {
+            alert("請輸入大於 0 的預約分或秒數！");
+            return;
+        }
+
+        const targetEliminateTime = new Date(getExactTime().getTime() + totalMsOffset);
+        calculateMushroomTimings(targetEliminateTime);
     });
 
     syncTime();

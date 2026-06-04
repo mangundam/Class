@@ -329,7 +329,7 @@
             const row = document.createElement('tr');
             row.id = `time-row-${i - 1}`;
             row.innerHTML = `
-                <td class="row-meta">提前 ${backwardSeconds}s (扣${i}次)</td>
+                <td class="row-meta">提前 ${backwardSeconds}s </td>
                 <td class="countdown-cell">-</td>
                 <td class="highlight">${formatExactTime(actualActionTime)}</td>
             `;
@@ -367,7 +367,7 @@
                 if (!row.classList.contains('nearest-row')) {
                     row.classList.add('nearest-row');
                     if (!row.querySelector('.nearest-badge')) {
-                        metaTd.innerHTML = `提前 ${calculatedTimes[i].backwardSeconds}s (扣${calculatedTimes[i].cycleCount}次) <span class="nearest-badge">推薦</span>`;
+                        metaTd.innerHTML = `提前 ${calculatedTimes[i].backwardSeconds}s <span class="nearest-badge">推薦</span>`;
                     }
                 }
                 

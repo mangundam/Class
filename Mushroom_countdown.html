@@ -60,14 +60,15 @@
             text-align: center;
         }
         
+        /* 調整為三欄並排配置 */
         .flex-row {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 16px;
         }
-        .flex-col-50 {
+        .flex-col-33 {
             flex: 1;
-            width: 50%;
+            width: 33.33%;
         }
         
         .form-group {
@@ -75,7 +76,7 @@
         }
         .inline-input-group {
             display: flex;
-            gap: 4px;
+            gap: 2px;
             align-items: center;
         }
         label {
@@ -86,17 +87,17 @@
             font-size: 13px;
             white-space: nowrap;
         }
-        input[type="number"] {
+        input[type="number"], input[type="text"] {
             width: 100%;
             padding: 10px;
             border: 1px solid #cccccc;
             border-radius: 4px;
             box-sizing: border-box;
-            font-size: 16px;
+            font-size: 15px;
         }
         
         .small-btn {
-            padding: 10px 12px;
+            padding: 10px 10px;
             background-color: #28a745;
             color: white;
             border: none;
@@ -160,10 +161,16 @@
             margin-top: 20px;
             overflow-x: auto;
         }
+        .results h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 16px 0 4px 0;
+            color: #444;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 5px;
         }
         th, td {
             padding: 12px 8px;
@@ -215,17 +222,21 @@
     <h1>蘑菇復活精確時間計算器</h1>
 
     <div class="flex-row">
-        <div class="flex-col-50 form-group">
-            <label for="launchTime">開啟遊戲花費時間 (秒)</label>
+        <div class="flex-col-33 form-group">
+            <label for="launchTime">遊戲開啟時間 (秒)</label>
             <input type="number" id="launchTime" value="6" min="0" step="1">
         </div>
-        <div class="flex-col-50 form-group">
-            <label>預約消滅（分 / 秒後）</label>
+        <div class="flex-col-33 form-group">
+            <label for="mushroomName">蘑菇名稱 (註記)</label>
+            <input type="text" id="mushroomName" value="">
+        </div>
+        <div class="flex-col-33 form-group">
+            <label>預約消滅（分/秒後）</label>
             <div class="inline-input-group">
-                <input type="number" id="reserveMin" value="0" min="0" placeholder="分" style="flex:1;">
-                <span style="color:#666; font-size:12px;">分</span>
-                <input type="number" id="reserveSec" value="0" min="0" placeholder="秒" style="flex:1;">
-                <span style="color:#666; font-size:12px;">秒</span>
+                <input type="number" id="reserveMin" value="0" min="0" placeholder="分" style="flex:1; padding: 10px 4px;">
+                <span style="color:#666; font-size:11px;">分</span>
+                <input type="number" id="reserveSec" value="0" min="0" placeholder="秒" style="flex:1; padding: 10px 4px;">
+                <span style="color:#666; font-size:11px;">秒</span>
                 <button class="small-btn" id="reserveBtn">排程</button>
             </div>
         </div>
@@ -239,6 +250,7 @@
     </div>
     
     <div class="results" id="resultArea" style="display: none;">
+        <h2 id="resultTitle">推算時程表</h2>
         <table>
             <thead>
                 <tr>
@@ -297,38 +309,43 @@
 
     function calculateMushroomTimings(eliminateTime) {
         const launchTimeCost = parseInt(document.getElementById('launchTime').value, 10) || 0;
+        const nameInput = document.getElementById('mushroomName').value.trim();
+        const mName = nameInput ? `[${nameInput}] ` : ''; // 若有輸入名稱，加入中括號註記
         
+        // 更新結果區的大標題
+        document.getElementById('resultTitle').innerText = `${mName}推算時程表`;
+
         const recordBox = document.getElementById('recordBox');
         recordBox.style.display = 'block';
-        recordBox.innerHTML = `<strong>消滅記錄時間</strong><br>${formatExactTime(eliminateTime)}`;
+        recordBox.innerHTML = `<strong>${mName}消滅時間</strong><br>${formatExactTime(eliminateTime)}`;
 
         const baseRespawnTime = new Date(eliminateTime.getTime() + 5 * 60 * 1000);
         const respawnBox = document.getElementById('respawnBox');
         respawnBox.style.display = 'block';
-        respawnBox.innerHTML = `<strong>預計復活時間</strong><br>${formatExactTime(baseRespawnTime)}`;
+        respawnBox.innerHTML = `<strong>${mName}預計復活</strong><br>${formatExactTime(baseRespawnTime)}`;
 
         const tableBody = document.getElementById('resultTableBody');
         tableBody.innerHTML = ''; 
         calculatedTimes = []; 
 
-        // 修正：最上方插入純粹的「基準復活時間點」（不扣除開啟時間）
+        // 1. 最上方插入純粹的「基準復活時間點」
         calculatedTimes.push({
             id: 'row-base',
             timestamp: baseRespawnTime.getTime(),
-            labelText: '復活時間',
+            labelText: '基準復活時間點',
             timeStr: formatExactTime(baseRespawnTime)
         });
 
         const baseRow = document.createElement('tr');
         baseRow.id = 'time-row-base';
         baseRow.innerHTML = `
-            <td class="row-meta" style="font-weight: 600;">復活時間</td>
+            <td class="row-meta" style="font-weight: 600;">基準復活時間點</td>
             <td class="countdown-cell">-</td>
             <td class="highlight">${formatExactTime(baseRespawnTime)}</td>
         `;
         tableBody.appendChild(baseRow);
 
-        // 依序放入往前推算的 8 個週期時間點（保留原本扣除開啟時間的邏輯）
+        // 2. 依序放入往前推算的 8 個週期時間點
         for (let i = 1; i <= 8; i++) {
             const backwardSeconds = i * 8;
             const expectedGameTime = new Date(baseRespawnTime.getTime() - backwardSeconds * 1000);
@@ -337,14 +354,14 @@
             calculatedTimes.push({
                 id: `row-${i}`,
                 timestamp: actualActionTime.getTime(),
-                labelText: `提前 ${backwardSeconds}s `,
+                labelText: `提前 ${backwardSeconds}s (扣${i}次)`,
                 timeStr: formatExactTime(actualActionTime)
             });
 
             const row = document.createElement('tr');
             row.id = `time-row-${i}`;
             row.innerHTML = `
-                <td class="row-meta">提前 ${backwardSeconds}s </td>
+                <td class="row-meta">提前 ${backwardSeconds}s (扣${i}次)</td>
                 <td class="countdown-cell">-</td>
                 <td class="highlight">${formatExactTime(actualActionTime)}</td>
             `;

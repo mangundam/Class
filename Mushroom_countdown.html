@@ -591,22 +591,34 @@
     }
 
     // 觸發通知與播放音效的調度函數
-    function triggerMushroomAlert(mushroomName) {
-        // 系統橫幅通知 (可在畫面縮小、鎖定時跳出)
-        if (isNotificationEnabled && Notification.permission === "granted") {
-            new Notification("蘑菇計時提醒", {
-                body: `您的蘑菇 [${mushroomName}] 已到提前 64 秒開遊戲時機！`,
-                requireInteraction: true // 保持橫幅不自動消失，直到使用者點擊
-            });
-        }
-        
-        // 播放自訂音效檔案
-        if (isSoundEnabled) {
-            const audio = new Audio('mushroom_sound.mp3');
-            audio.play().catch(err => console.error("音效播放失敗，可能需要使用者主動與網頁互動:", err));
-        }
-    }
+    // 修改後的通知與背景音效觸發函式
+	function triggerMushroomAlert(mushroomName) {
+		// 1. 如果有開啟通知，優先發送系統通知
+		if (isNotificationEnabled && Notification.permission === "granted") {
+			const notification = new Notification("蘑菇計時提醒", {
+				body: `您的蘑菇 [${mushroomName}] 已到提前 64 秒開遊戲時機！`,
+				requireInteraction: true, // 保持橫幅不自動消失
+				silent: false // 關鍵：指示 Windows/手機 系統使用作業系統預設的提示音效
+			});
 
+			// 2. 關鍵破解：當系統通知「成功跳出 (show)」的瞬間，借用它的權限在背景播放網頁自訂音效
+			notification.onshow = function() {
+				if (isSoundEnabled) {
+					const audio = new Audio('mushroom_sound.mp3');
+					// 提高音效在背景播放的優先權
+					audio.play().catch(err => {
+						console.log("網頁背景音效遭阻擋，已改由作業系統預設通知音效提示。");
+					});
+				}
+			};
+		} else {
+			// 如果使用者只開音效、沒開通知，且網頁是在前台活躍狀態，才單獨播放音效
+			if (isSoundEnabled && document.visibilityState === "visible") {
+				const audio = new Audio('mushroom_sound.mp3');
+				audio.play().catch(err => console.error(err));
+			}
+		}
+	}
     function toggleCardCollapse(groupId) {
         const group = activeMushroomGroups.find(g => g.id === groupId);
         if (!group) return;

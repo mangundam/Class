@@ -312,11 +312,11 @@
 
 <div class="sticky-header">
     <div class="header-layout">
-        <button id="notiToggleBtn" class="toggle-btn">通知關閉</button>
+        <button id="notiToggleBtn" class="toggle-btn">無通知</button>
         <div class="time-display" id="currentTimeDisplay">
             網路標準時間載入中...
         </div>
-        <button id="soundToggleBtn" class="toggle-btn">音效關閉</button>
+        <button id="soundToggleBtn" class="toggle-btn">無音效</button>
     </div>
 </div>
 
@@ -647,7 +647,7 @@
                 if (permission === "granted") {
                     isNotificationEnabled = true;
                     this.classList.add('active');
-                    this.innerText = "通知開啟";
+                    this.innerText = "有通知";
                 } else {
                     alert("權限已被拒絕，請至瀏覽器設定允許此網頁發送通知。");
                 }
@@ -655,7 +655,7 @@
         } else {
             isNotificationEnabled = false;
             this.classList.remove('active');
-            this.innerText = "通知關閉";
+            this.innerText = "無通知";
         }
     });
 
@@ -664,10 +664,10 @@
         isSoundEnabled = !isSoundEnabled;
         if (isSoundEnabled) {
             this.classList.add('active');
-            this.innerText = "音效開啟";
+            this.innerText = "有音效";
         } else {
             this.classList.remove('active');
-            this.innerText = "音效關閉";
+            this.innerText = "無音效";
         }
     });
 

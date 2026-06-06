@@ -358,7 +358,7 @@
             calculatedTimes.push({
                 id: String(i),
                 timestamp: actualActionTime.getTime(),
-                labelText: `提前 ${backwardSeconds}s (扣${i}次)`
+                labelText: `提前 ${backwardSeconds}s`
             });
         }
 
@@ -399,7 +399,7 @@
                                 const tObj = calculatedTimes[i];
                                 return `
                                 <tr id="${groupId}-row-${i}">
-                                    <td class="row-meta">提前 ${i*8}s (扣${i}次)</td>
+                                    <td class="row-meta">提前 ${i*8}s </td>
                                     <td class="countdown-cell">-</td>
                                     <td class="highlight">${formatExactTime(new Date(tObj.timestamp))}</td>
                                 </tr>`;

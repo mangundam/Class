@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蘑菇復活精確時間計算器</title>
+    <title>多組蘑菇復活精確時間計算器</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -45,22 +45,20 @@
         .container {
             max-width: 650px;
             width: 100%;
-            background: #ffffff;
-            padding: 24px;
+            padding: 0 20px;
+            box-sizing: border-box;
             margin-top: 16px;
+        }
+
+        /* 控制台樣式 */
+        .control-panel {
+            background: #ffffff;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            box-sizing: border-box;
-        }
-        h1 {
-            font-size: 22px;
-            font-weight: 600;
             margin-bottom: 20px;
-            color: #111;
-            text-align: center;
         }
         
-        /* 調整為三欄並排配置 */
         .flex-row {
             display: flex;
             gap: 10px;
@@ -127,11 +125,50 @@
         button#eliminateBtn:hover {
             background-color: #0062cc;
         }
+
+        /* 獨立多組卡片與折疊樣式 */
+        .mushroom-card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-top: 16px;
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+        }
+        
+        .card-header {
+            background-color: #f1f3f5;
+            padding: 14px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .card-header:hover {
+            background-color: #e9ecef;
+        }
+        .card-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: #111;
+        }
+        .card-summary-countdown {
+            font-size: 14px;
+            font-weight: bold;
+            color: #d9383a;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .card-body {
+            padding: 16px;
+        }
         
         .record-container {
             display: flex;
             gap: 12px;
-            margin-top: 16px;
+            margin-bottom: 16px;
         }
         .record-box {
             flex: 1;
@@ -140,7 +177,7 @@
             border-left: 4px solid #007aff;
             padding: 10px;
             border-radius: 0 4px 4px 0;
-            font-size: 14px;
+            font-size: 13px;
             text-align: center;
             box-sizing: border-box;
         }
@@ -151,21 +188,14 @@
             border-left: 4px solid #d97706;
             padding: 10px;
             border-radius: 0 4px 4px 0;
-            font-size: 14px;
+            font-size: 13px;
             text-align: center;
             box-sizing: border-box;
         }
         
         .results {
             border-top: 1px solid #e9ecef;
-            margin-top: 20px;
             overflow-x: auto;
-        }
-        .results h2 {
-            font-size: 16px;
-            font-weight: 600;
-            margin: 16px 0 4px 0;
-            color: #444;
         }
         table {
             width: 100%;
@@ -173,11 +203,11 @@
             margin-top: 5px;
         }
         th, td {
-            padding: 12px 8px;
+            padding: 10px 8px;
             text-align: left;
             border-bottom: 1px solid #eee;
             font-variant-numeric: tabular-nums;
-            font-size: 14px;
+            font-size: 13px;
         }
         th {
             background-color: #f8f9fa;
@@ -186,7 +216,7 @@
         .highlight {
             color: #d9383a;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 15px;
         }
         
         .nearest-row {
@@ -196,8 +226,8 @@
         .nearest-badge {
             background-color: #f59e0b;
             color: white;
-            font-size: 10px;
-            padding: 1px 5px;
+            font-size: 9px;
+            padding: 1px 4px;
             border-radius: 10px;
             margin-left: 4px;
             display: inline-block;
@@ -207,6 +237,20 @@
         .countdown-text {
             color: #d9383a;
             font-weight: bold;
+        }
+        
+        /* 刪除按鈕 */
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 5px;
+            margin-left: 10px;
+        }
+        .delete-btn:hover {
+            color: #d9383a;
         }
     </style>
 </head>
@@ -219,55 +263,36 @@
 </div>
 
 <div class="container">    
-    <h1>蘑菇復活精確時間計算器</h1>
-
-    <div class="flex-row">
-        <div class="flex-col-33 form-group">
-            <label for="launchTime">遊戲開啟時間 (秒)</label>
-            <input type="number" id="launchTime" value="6" min="0" step="1">
-        </div>
-        <div class="flex-col-33 form-group">
-            <label for="mushroomName">蘑菇名稱 (註記)</label>
-            <input type="text" id="mushroomName" value="">
-        </div>
-        <div class="flex-col-33 form-group">
-            <label>預約消滅（分/秒後）</label>
-            <div class="inline-input-group">
-                <input type="number" id="reserveMin" value="0" min="0" placeholder="分" style="flex:1; padding: 10px 4px;">
-                <span style="color:#666; font-size:11px;">分</span>
-                <input type="number" id="reserveSec" value="0" min="0" placeholder="秒" style="flex:1; padding: 10px 4px;">
-                <span style="color:#666; font-size:11px;">秒</span>
-                <button class="small-btn" id="reserveBtn">排程</button>
+    <div class="control-panel">
+        <div class="flex-row">
+            <div class="flex-col-33 form-group">
+                <label for="launchTime">遊戲開啟時間 (秒)</label>
+                <input type="number" id="launchTime" value="6" min="0" step="1">
+            </div>
+            <div class="flex-col-33 form-group">
+                <label for="mushroomName">蘑菇名稱 (註記)</label>
+                <input type="text" id="mushroomName" placeholder="例如：1號大菇" value="">
+            </div>
+            <div class="flex-col-33 form-group">
+                <label>預約消滅（分/秒後）</label>
+                <div class="inline-input-group">
+                    <input type="number" id="reserveMin" value="0" min="0" placeholder="分" style="flex:1; padding: 10px 4px;">
+                    <span style="color:#666; font-size:11px;">分</span>
+                    <input type="number" id="reserveSec" value="0" min="0" placeholder="秒" style="flex:1; padding: 10px 4px;">
+                    <span style="color:#666; font-size:11px;">秒</span>
+                    <button class="small-btn" id="reserveBtn">排程</button>
+                </div>
             </div>
         </div>
+        <button id="eliminateBtn">確認消滅並新增一組</button>
     </div>
 
-    <button id="eliminateBtn">蘑菇消滅確認</button>
-
-    <div class="record-container">
-        <div id="recordBox" class="record-box" style="display: none;"></div>
-        <div id="respawnBox" class="respawn-box" style="display: none;"></div>
-    </div>
-    
-    <div class="results" id="resultArea" style="display: none;">
-        <h2 id="resultTitle">推算時程表</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>推算</th>
-                    <th>倒數計時</th>
-                    <th class="highlight">開遊戲</th>
-                </tr>
-            </thead>
-            <tbody id="resultTableBody">
-            </tbody>
-        </table>
-    </div>
+    <div id="mushroomCardsContainer"></div>
 </div>
 
 <script>
     let timeOffset = 0; 
-    let calculatedTimes = []; 
+    let activeMushroomGroups = []; // 儲存所有進行中蘑菇組別的實體資料
 
     async function syncTime() {
         try {
@@ -279,10 +304,9 @@
             const latency = (end - start) / 2;
             const serverTime = new Date(data.datetime).getTime() + latency;
             const localTime = Date.now();
-            
             timeOffset = serverTime - localTime;
         } catch (error) {
-            console.error("無法同步標準時間，將採用系統本地時間:", error);
+            console.error("無法同步標準時間:", error);
         }
     }
 
@@ -290,151 +314,230 @@
         return new Date(Date.now() + timeOffset);
     }
 
+    // 主時鐘監聽常駐程式
     function updateClock() {
         const now = getExactTime();
-        const timeString = now.toLocaleTimeString('zh-TW', { hour12: false }) + '.' + String(now.getMilliseconds()).padStart(3, '0');
-        document.getElementById('currentTimeDisplay').innerText = `目前台灣標準時間：${timeString}`;
+        const currentTimestamp = now.getTime();
         
-        if (calculatedTimes.length > 0) {
-            updateCountdownAndHighlight(now.getTime());
-        }
+        document.getElementById('currentTimeDisplay').innerText = `目前台灣標準時間：${now.toLocaleTimeString('zh-TW', { hour12: false })}.${String(now.getMilliseconds()).padStart(3, '0')}`;
+        
+        // 即時驅動渲染所有多組卡片內的計時資訊
+        activeMushroomGroups.forEach(group => {
+            updateCardTimingsAndSummary(group, currentTimestamp);
+        });
     }
 
     function formatExactTime(date) {
-        const h = String(date.getHours()).padStart(2, '0');
-        const m = String(date.getMinutes()).padStart(2, '0');
-        const s = String(date.getSeconds()).padStart(2, '0');
-        return `${h}:${m}:${s}`;
+        return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
     }
 
-    function calculateMushroomTimings(eliminateTime) {
+    // 核心處理：創建全新一組獨立的計時 DOM 節點
+    function createNewMushroomGroup(eliminateTime) {
         const launchTimeCost = parseInt(document.getElementById('launchTime').value, 10) || 0;
         const nameInput = document.getElementById('mushroomName').value.trim();
-        const mName = nameInput ? `[${nameInput}] ` : ''; // 若有輸入名稱，加入中括號註記
-        
-        // 更新結果區的大標題
-        document.getElementById('resultTitle').innerText = `${mName}推算時程表`;
-
-        const recordBox = document.getElementById('recordBox');
-        recordBox.style.display = 'block';
-        recordBox.innerHTML = `<strong>${mName}消滅時間</strong><br>${formatExactTime(eliminateTime)}`;
+        const finalName = nameInput || `未命名蘑菇 #${activeMushroomGroups.length + 1}`;
+        const groupId = 'group-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
 
         const baseRespawnTime = new Date(eliminateTime.getTime() + 5 * 60 * 1000);
-        const respawnBox = document.getElementById('respawnBox');
-        respawnBox.style.display = 'block';
-        respawnBox.innerHTML = `<strong>${mName}預計復活</strong><br>${formatExactTime(baseRespawnTime)}`;
-
-        const tableBody = document.getElementById('resultTableBody');
-        tableBody.innerHTML = ''; 
-        calculatedTimes = []; 
-
-        // 1. 最上方插入純粹的「基準復活時間點」
+        
+        // 封裝該組別獨立的結構陣列
+        let calculatedTimes = [];
+        
+        // 基準復活點
         calculatedTimes.push({
-            id: 'row-base',
+            id: 'base',
             timestamp: baseRespawnTime.getTime(),
-            labelText: '基準復活時間點',
-            timeStr: formatExactTime(baseRespawnTime)
+            labelText: '基準復活時間點'
         });
 
-        const baseRow = document.createElement('tr');
-        baseRow.id = 'time-row-base';
-        baseRow.innerHTML = `
-            <td class="row-meta" style="font-weight: 600;">基準復活時間點</td>
-            <td class="countdown-cell">-</td>
-            <td class="highlight">${formatExactTime(baseRespawnTime)}</td>
-        `;
-        tableBody.appendChild(baseRow);
-
-        // 2. 依序放入往前推算的 8 個週期時間點
+        // 8組推算點
         for (let i = 1; i <= 8; i++) {
             const backwardSeconds = i * 8;
             const expectedGameTime = new Date(baseRespawnTime.getTime() - backwardSeconds * 1000);
             const actualActionTime = new Date(expectedGameTime.getTime() - launchTimeCost * 1000);
-            
             calculatedTimes.push({
-                id: `row-${i}`,
+                id: String(i),
                 timestamp: actualActionTime.getTime(),
-                labelText: `提前 ${backwardSeconds}s (扣${i}次)`,
-                timeStr: formatExactTime(actualActionTime)
+                labelText: `提前 ${backwardSeconds}s (扣${i}次)`
             });
-
-            const row = document.createElement('tr');
-            row.id = `time-row-${i}`;
-            row.innerHTML = `
-                <td class="row-meta">提前 ${backwardSeconds}s (扣${i}次)</td>
-                <td class="countdown-cell">-</td>
-                <td class="highlight">${formatExactTime(actualActionTime)}</td>
-            `;
-            tableBody.appendChild(row);
         }
 
-        document.getElementById('resultArea').style.display = 'block';
-        updateCountdownAndHighlight(getExactTime().getTime()); 
+        // 建立 DOM 卡片
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'mushroom-card';
+        cardDiv.id = groupId;
+        
+        cardDiv.innerHTML = `
+            <div class="card-header" onclick="toggleCardCollapse('${groupId}')">
+                <span class="card-title">🍄 ${finalName}</span>
+                <div style="display: flex; align-items: center;">
+                    <span class="card-summary-countdown" id="summary-${groupId}">載入中...</span>
+                    <button class="delete-btn" onclick="deleteMushroomGroup(event, '${groupId}')">×</button>
+                </div>
+            </div>
+            <div class="card-body" id="body-${groupId}">
+                <div class="record-container">
+                    <div class="record-box"><strong>消滅時間</strong><br>${formatExactTime(eliminateTime)}</div>
+                    <div class="respawn-box"><strong>預計復活</strong><br>${formatExactTime(baseRespawnTime)}</div>
+                </div>
+                <div class="results">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>推算</th>
+                                <th>倒數計時</th>
+                                <th class="highlight">開遊戲</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="${groupId}-row-base">
+                                <td class="row-meta" style="font-weight:600;">基準復活時間點</td>
+                                <td class="countdown-cell">-</td>
+                                <td class="highlight">${formatExactTime(baseRespawnTime)}</td>
+                            </tr>
+                            ${[1,2,3,4,5,6,7,8].map(i => {
+                                const tObj = calculatedTimes[i];
+                                return `
+                                <tr id="${groupId}-row-${i}">
+                                    <td class="row-meta">提前 ${i*8}s (扣${i}次)</td>
+                                    <td class="countdown-cell">-</td>
+                                    <td class="highlight">${formatExactTime(new Date(tObj.timestamp))}</td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        // 塞入底部容器中
+        document.getElementById('mushroomCardsContainer').appendChild(cardDiv);
+
+        // 登記資料至全域追蹤陣列
+        activeMushroomGroups.push({
+            id: groupId,
+            name: finalName,
+            isCollapsed: false, // 預設新生成的展開
+            timings: calculatedTimes
+        });
+
+        // 清空欄位方便下一組點擊
+        document.getElementById('mushroomName').value = '';
+        document.getElementById('reserveMin').value = '0';
+        document.getElementById('reserveSec').value = '0';
     }
 
-    function updateCountdownAndHighlight(currentTimestamp) {
-        let nearestId = '';
+    // 每 50ms 動態刷卡片內的表格高亮與折疊後的總標題倒數
+    function updateCardTimingsAndSummary(group, currentTimestamp) {
+        let nearestItem = null;
         let minDiff = Infinity;
 
-        for (let i = 0; i < calculatedTimes.length; i++) {
-            const diff = calculatedTimes[i].timestamp - currentTimestamp;
+        // 遍歷找出這組內未來最接近的時間項目
+        for (let i = 0; i < group.timings.length; i++) {
+            const diff = group.timings[i].timestamp - currentTimestamp;
             if (diff >= 0 && diff < minDiff) {
                 minDiff = diff;
-                nearestId = calculatedTimes[i].id;
+                nearestItem = group.timings[i];
             }
         }
 
-        for (let i = 0; i < calculatedTimes.length; i++) {
-            const item = calculatedTimes[i];
-            const row = document.getElementById(`time-row-${item.id.replace('row-', '')}`);
-            if (!row) continue;
+        // 更新折疊區的摘要文字
+        const summarySpan = document.getElementById(`summary-${group.id}`);
+        if (!summarySpan) return;
+
+        if (nearestItem) {
+            const totalSecLeft = Math.ceil((nearestItem.timestamp - currentTimestamp) / 1000);
+            const m = String(Math.floor(totalSecLeft / 60)).padStart(2, '0');
+            const s = String(totalSecLeft % 60).padStart(2, '0');
             
-            const metaTd = row.querySelector('.row-meta');
-            const countdownTd = row.querySelector('.countdown-cell');
-            
-            if (item.id === nearestId) {
-                if (!row.classList.contains('nearest-row')) {
-                    row.classList.add('nearest-row');
-                    if (!row.querySelector('.nearest-badge')) {
-                        metaTd.innerHTML = `${item.labelText} <span class="nearest-badge">推薦</span>`;
+            if (group.isCollapsed) {
+                summarySpan.innerHTML = `⏱️ 最接近開遊戲剩: <span style="color:#d9383a;">${m}分${s}秒</span> [點擊展開]`;
+            } else {
+                summarySpan.innerHTML = `<span style="color:#666; font-weight:normal; font-size:12px;">[點擊折疊]</span>`;
+            }
+
+            // 如果沒有折疊，則更新卡片內部詳細的 Table 高亮與倒數
+            if (!group.isCollapsed) {
+                for (let i = 0; i < group.timings.length; i++) {
+                    const item = group.timings[i];
+                    const row = document.getElementById(`${group.id}-row-${item.id}`);
+                    if (!row) continue;
+
+                    const metaTd = row.querySelector('.row-meta');
+                    const countdownTd = row.querySelector('.countdown-cell');
+
+                    if (item.id === nearestItem.id) {
+                        if (!row.classList.contains('nearest-row')) {
+                            row.classList.add('nearest-row');
+                            if (!row.querySelector('.nearest-badge')) {
+                                metaTd.innerHTML = `${item.id === 'base' ? '基準復活時間點' : item.labelText} <span class="nearest-badge">推薦</span>`;
+                            }
+                        }
+                        countdownTd.innerHTML = `<span class="countdown-text">剩餘 ${m}分${s}秒</span>`;
+                    } else {
+                        row.classList.remove('nearest-row');
+                        const badge = row.querySelector('.nearest-badge');
+                        if (badge) {
+                            metaTd.innerHTML = item.id === 'base' ? '基準復活時間點' : item.labelText;
+                        }
+                        countdownTd.innerText = '-';
                     }
                 }
-                
-                const totalSecondsLeft = Math.ceil((item.timestamp - currentTimestamp) / 1000);
-                if (totalSecondsLeft >= 0) {
-                    const m = String(Math.floor(totalSecondsLeft / 60)).padStart(2, '0');
-                    const s = String(totalSecondsLeft % 60).padStart(2, '0');
-                    countdownTd.innerHTML = `<span class="countdown-text">剩餘 ${m}分${s}秒</span>`;
-                } else {
-                    countdownTd.innerText = '-';
+            }
+        } else {
+            summarySpan.innerText = '已全部結束';
+            if (!group.isCollapsed) {
+                for (let i = 0; i < group.timings.length; i++) {
+                    const row = document.getElementById(`${group.id}-row-${group.timings[i].id}`);
+                    if (row) {
+                        row.classList.remove('nearest-row');
+                        row.querySelector('.countdown-cell').innerText = '-';
+                    }
                 }
-            } else {
-                row.classList.remove('nearest-row');
-                const badge = row.querySelector('.nearest-badge');
-                if (badge) {
-                    metaTd.innerHTML = item.labelText;
-                }
-                countdownTd.innerText = '-';
             }
         }
     }
 
+    // 控制折疊開關
+    function toggleCardCollapse(groupId) {
+        const group = activeMushroomGroups.find(g => g.id === groupId);
+        if (!group) return;
+
+        group.isCollapsed = !group.isCollapsed;
+        const bodyDiv = document.getElementById(`body-${groupId}`);
+        if (bodyDiv) {
+            bodyDiv.style.display = group.isCollapsed ? 'none' : 'block';
+        }
+    }
+
+    // 刪除指定的群組卡片
+    function deleteMushroomGroup(event, groupId) {
+        event.stopPropagation(); // 防止觸發折疊
+        if (confirm("確定要刪除這組蘑菇記錄嗎？")) {
+            const cardElement = document.getElementById(groupId);
+            if (cardElement) cardElement.remove();
+            activeMushroomGroups = activeMushroomGroups.filter(g => g.id !== groupId);
+        }
+    }
+
+    // 事件監聽：直接消滅確認
     document.getElementById('eliminateBtn').addEventListener('click', () => {
-        calculateMushroomTimings(getExactTime());
+        createNewMushroomGroup(getExactTime());
     });
 
+    // 事件監聽：預約排程消滅
     document.getElementById('reserveBtn').addEventListener('click', () => {
         const minOffset = parseInt(document.getElementById('reserveMin').value, 10) || 0;
         const secOffset = parseInt(document.getElementById('reserveSec').value, 10) || 0;
         const totalMsOffset = ((minOffset * 60) + secOffset) * 1000;
         
         if (totalMsOffset <= 0) {
-            alert("請輸入大於 0 的預約分或秒數！");
+            alert("請輸入大於 0 的預約時間！");
             return;
         }
 
         const targetEliminateTime = new Date(getExactTime().getTime() + totalMsOffset);
-        calculateMushroomTimings(targetEliminateTime);
+        createNewMushroomGroup(targetEliminateTime);
     });
 
     syncTime();

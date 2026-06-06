@@ -155,10 +155,11 @@
             color: #111;
         }
         .card-summary-countdown {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
-            color: #d9383a;
+            color: #555;
             font-variant-numeric: tabular-nums;
+            text-align: right;
         }
         
         .card-body {
@@ -239,7 +240,7 @@
             font-weight: bold;
         }
 
-        /* 新增：消滅倒數狀態區塊 */
+        /* 消滅倒數狀態區塊 */
         .elimination-monitor {
             margin-top: 14px;
             padding: 10px;
@@ -387,7 +388,7 @@
                 <span class="card-title">${finalName}</span>
                 <div style="display: flex; align-items: center;">
                     <span class="card-summary-countdown" id="summary-${groupId}">載入中...</span>
-                    <button class="delete-btn" onclick="deleteMushroomGroup(event, '${groupId}')">×</button>
+                    <button class="delete-btn" onclick="deleteMushroomGroup(event, '${groupId}')">x</button>
                 </div>
             </div>
             <div class="card-body" id="body-${groupId}">
@@ -432,7 +433,7 @@
             id: groupId,
             name: finalName,
             isCollapsed: false, 
-            eliminateTimestamp: eliminateTime.getTime(), // 儲存消滅時間戳記
+            eliminateTimestamp: eliminateTime.getTime(), 
             eliminateStr: formatExactTime(eliminateTime),
             timings: calculatedTimes
         });
@@ -443,25 +444,31 @@
     }
 
     function updateCardTimingsAndSummary(group, currentTimestamp) {
+        let eliminateText = "";
+        
         // 1. 處理最下方的「距離蘑菇消滅還有多久」監控邏輯
         const monitorDiv = document.getElementById(`${group.id}-elimination-monitor`);
-        if (monitorDiv) {
-            const msToEliminate = group.eliminateTimestamp - currentTimestamp;
-            if (msToEliminate > 0) {
-                // 尚未消滅（預約狀態中）
-                const totalSecLeft = Math.ceil(msToEliminate / 1000);
-                const m = String(Math.floor(totalSecLeft / 60)).padStart(2, '0');
-                const s = String(totalSecLeft % 60).padStart(2, '0');
+        const msToEliminate = group.eliminateTimestamp - currentTimestamp;
+        
+        if (msToEliminate > 0) {
+            const totalSecLeft = Math.ceil(msToEliminate / 1000);
+            const m = String(Math.floor(totalSecLeft / 60)).padStart(2, '0');
+            const s = String(totalSecLeft % 60).padStart(2, '0');
+            eliminateText = `消滅剩: ${m}分${s}秒`;
+            
+            if (monitorDiv) {
                 monitorDiv.className = "elimination-monitor monitor-active";
                 monitorDiv.innerHTML = `距離蘑菇消滅還有：<span style="color:#0284c7; font-weight:bold;">${m}分${s}秒</span>`;
-            } else {
-                // 已經消滅
+            }
+        } else {
+            eliminateText = `已消滅`;
+            if (monitorDiv) {
                 monitorDiv.className = "elimination-monitor monitor-done";
                 monitorDiv.innerHTML = `蘑菇已於 ${group.eliminateStr} 消滅`;
             }
         }
 
-        // 2. 處理原本的推算表格高亮與標題摘要
+        // 2. 處理推算表格高亮與標題摘要
         let nearestItem = null;
         let minDiff = Infinity;
 
@@ -482,7 +489,8 @@
             const s = String(totalSecLeft % 60).padStart(2, '0');
             
             if (group.isCollapsed) {
-                summarySpan.innerHTML = `最接近開遊戲剩: <span style="color:#d9383a;">${m}分${s}秒</span> [展開]`;
+                // 折疊時：同時顯示消滅時間剩餘與開遊戲剩餘時間
+                summarySpan.innerHTML = `<span style="color:#0284c7;">${eliminateText}</span> | 開遊戲剩: <span style="color:#d9383a;">${m}分${s}秒</span> [展開]`;
             } else {
                 summarySpan.innerHTML = `<span style="color:#666; font-weight:normal; font-size:12px;">[折疊]</span>`;
             }
@@ -515,7 +523,12 @@
                 }
             }
         } else {
-            summarySpan.innerText = '已全部結束';
+            if (group.isCollapsed) {
+                summarySpan.innerText = `${eliminateText} | 已全部結束`;
+            } else {
+                summarySpan.innerText = '已全部結束';
+            }
+            
             if (!group.isCollapsed) {
                 for (let i = 0; i < group.timings.length; i++) {
                     const row = document.getElementById(`${group.id}-row-${group.timings[i].id}`);

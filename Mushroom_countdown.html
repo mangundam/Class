@@ -578,7 +578,15 @@
         const targetEliminateTime = new Date(getExactTime().getTime() + totalMsOffset);
         createNewMushroomGroup(targetEliminateTime);
     });
-
+	
+	[document.getElementById('reserveMin'), document.getElementById('reserveSec'), document.getElementById('mushroomName')].forEach(input => {
+		input.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter') {
+				event.preventDefault(); // 防止表單預設提交行為
+				document.getElementById('reserveBtn').click(); // 觸發排程按鈕點擊
+			}
+		});
+	});
     syncTime();
     setInterval(updateClock, 50); 
     setInterval(syncTime, 60000);

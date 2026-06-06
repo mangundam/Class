@@ -369,7 +369,7 @@
         
         cardDiv.innerHTML = `
             <div class="card-header" onclick="toggleCardCollapse('${groupId}')">
-                <span class="card-title">🍄 ${finalName}</span>
+                <span class="card-title">${finalName}</span>
                 <div style="display: flex; align-items: center;">
                     <span class="card-summary-countdown" id="summary-${groupId}">載入中...</span>
                     <button class="delete-btn" onclick="deleteMushroomGroup(event, '${groupId}')">×</button>
@@ -451,9 +451,9 @@
             const s = String(totalSecLeft % 60).padStart(2, '0');
             
             if (group.isCollapsed) {
-                summarySpan.innerHTML = `⏱️ 最接近開遊戲剩: <span style="color:#d9383a;">${m}分${s}秒</span> [點擊展開]`;
+                summarySpan.innerHTML = `最接近開遊戲剩: <span style="color:#d9383a;">${m}分${s}秒</span> [展開]`;
             } else {
-                summarySpan.innerHTML = `<span style="color:#666; font-weight:normal; font-size:12px;">[點擊折疊]</span>`;
+                summarySpan.innerHTML = `<span style="color:#666; font-weight:normal; font-size:12px;">[折疊]</span>`;
             }
 
             // 如果沒有折疊，則更新卡片內部詳細的 Table 高亮與倒數

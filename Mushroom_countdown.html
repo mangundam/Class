@@ -16,6 +16,7 @@
             align-items: center;
         }
         
+        /* 置頂控制列 */
         .sticky-header {
             position: sticky;
             top: 0;
@@ -23,23 +24,53 @@
             background: #ffffff;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             z-index: 1000;
-            padding: 12px 20px;
+            padding: 10px 16px;
             box-sizing: border-box;
             display: flex;
             justify-content: center;
+            align-items: center;
         }
-        .time-display {
+
+        .header-layout {
             max-width: 650px;
             width: 100%;
-            font-size: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* 縮短後的時間顯示 */
+        .time-display {
+            flex: 1;
+            font-size: 18px;
             font-weight: bold;
             background: #f1f3f5;
-            padding: 12px;
+            padding: 10px;
             border-radius: 6px;
             text-align: center;
             font-variant-numeric: tabular-nums;
             color: #111;
             box-sizing: border-box;
+        }
+
+        /* 通知與音效按鈕通用樣式 */
+        .toggle-btn {
+            padding: 10px 14px;
+            background-color: #ffffff;
+            color: #555;
+            border: 1px solid #cccccc;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        /* 開啟狀態的樣式 */
+        .toggle-btn.active {
+            background-color: #007aff;
+            color: #ffffff;
+            border-color: #007aff;
         }
 
         .container {
@@ -280,8 +311,12 @@
 <body>
 
 <div class="sticky-header">
-    <div class="time-display" id="currentTimeDisplay">
-        網路標準時間載入中...
+    <div class="header-layout">
+        <button id="notiToggleBtn" class="toggle-btn">通知關閉</button>
+        <div class="time-display" id="currentTimeDisplay">
+            網路標準時間載入中...
+        </div>
+        <button id="soundToggleBtn" class="toggle-btn">音效關閉</button>
     </div>
 </div>
 
@@ -316,6 +351,10 @@
 <script>
     let timeOffset = 0; 
     let activeMushroomGroups = []; 
+    
+    // 全域開關狀態
+    let isNotificationEnabled = false;
+    let isSoundEnabled = false;
 
     async function syncTime() {
         try {
@@ -341,7 +380,7 @@
         const now = getExactTime();
         const currentTimestamp = now.getTime();
         
-        document.getElementById('currentTimeDisplay').innerText = `目前台灣標準時間：${now.toLocaleTimeString('zh-TW', { hour12: false })}.${String(now.getMilliseconds()).padStart(3, '0')}`;
+        document.getElementById('currentTimeDisplay').innerText = `${now.toLocaleTimeString('zh-TW', { hour12: false })}.${String(now.getMilliseconds()).padStart(3, '0')}`;
         
         activeMushroomGroups.forEach(group => {
             updateCardTimingsAndSummary(group, currentTimestamp);
@@ -435,7 +474,8 @@
             isCollapsed: false, 
             eliminateTimestamp: eliminateTime.getTime(), 
             eliminateStr: formatExactTime(eliminateTime),
-            timings: calculatedTimes
+            timings: calculatedTimes,
+            alertTriggered: false // 標記是否已觸發過提前64秒的通知與音效
         });
 
         document.getElementById('mushroomName').value = '';
@@ -480,6 +520,16 @@
             }
         }
 
+        // 3. 核心檢查功能：第一次提前 64 秒時發送系統通知與音效 (對應 id: '8'，即 8*8=64s)
+        const target64sItem = group.timings.find(t => t.id === '8');
+        if (target64sItem && !group.alertTriggered) {
+            // 計算當前時間距离開遊戲時間是否小於或等於 0 秒 (即時間已到)
+            if (currentTimestamp >= target64sItem.timestamp) {
+                group.alertTriggered = true; // 鎖定狀態防止重複執行
+                triggerMushroomAlert(group.name);
+            }
+        }
+
         const summarySpan = document.getElementById(`summary-${group.id}`);
         if (!summarySpan) return;
 
@@ -489,7 +539,6 @@
             const s = String(totalSecLeft % 60).padStart(2, '0');
             
             if (group.isCollapsed) {
-                // 折疊時：同時顯示消滅時間剩餘與開遊戲剩餘時間
                 summarySpan.innerHTML = `<span style="color:#0284c7;">${eliminateText}</span> | 開遊戲剩: <span style="color:#d9383a;">${m}分${s}秒</span> [展開]`;
             } else {
                 summarySpan.innerHTML = `<span style="color:#666; font-weight:normal; font-size:12px;">[折疊]</span>`;
@@ -541,6 +590,23 @@
         }
     }
 
+    // 觸發通知與播放音效的調度函數
+    function triggerMushroomAlert(mushroomName) {
+        // 系統橫幅通知 (可在畫面縮小、鎖定時跳出)
+        if (isNotificationEnabled && Notification.permission === "granted") {
+            new Notification("蘑菇計時提醒", {
+                body: `您的蘑菇 [${mushroomName}] 已到提前 64 秒開遊戲時機！`,
+                requireInteraction: true // 保持橫幅不自動消失，直到使用者點擊
+            });
+        }
+        
+        // 播放自訂音效檔案
+        if (isSoundEnabled) {
+            const audio = new Audio('mushroom_sound.mp3');
+            audio.play().catch(err => console.error("音效播放失敗，可能需要使用者主動與網頁互動:", err));
+        }
+    }
+
     function toggleCardCollapse(groupId) {
         const group = activeMushroomGroups.find(g => g.id === groupId);
         if (!group) return;
@@ -561,6 +627,38 @@
         }
     }
 
+    // 通知權限開關控制
+    document.getElementById('notiToggleBtn').addEventListener('click', function() {
+        if (!isNotificationEnabled) {
+            // 向瀏覽器要求發送桌面系統通知的權限
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    isNotificationEnabled = true;
+                    this.classList.add('active');
+                    this.innerText = "通知開啟";
+                } else {
+                    alert("權限已被拒絕，請至瀏覽器設定允許此網頁發送通知。");
+                }
+            });
+        } else {
+            isNotificationEnabled = false;
+            this.classList.remove('active');
+            this.innerText = "通知關閉";
+        }
+    });
+
+    // 音效開關控制
+    document.getElementById('soundToggleBtn').addEventListener('click', function() {
+        isSoundEnabled = !isSoundEnabled;
+        if (isSoundEnabled) {
+            this.classList.add('active');
+            this.innerText = "音效開啟";
+        } else {
+            this.classList.remove('active');
+            this.innerText = "音效關閉";
+        }
+    });
+
     document.getElementById('eliminateBtn').addEventListener('click', () => {
         createNewMushroomGroup(getExactTime());
     });
@@ -578,15 +676,16 @@
         const targetEliminateTime = new Date(getExactTime().getTime() + totalMsOffset);
         createNewMushroomGroup(targetEliminateTime);
     });
-	
-	[document.getElementById('reserveMin'), document.getElementById('reserveSec'), document.getElementById('mushroomName')].forEach(input => {
-		input.addEventListener('keydown', (event) => {
-			if (event.key === 'Enter') {
-				event.preventDefault(); // 防止表單預設提交行為
-				document.getElementById('reserveBtn').click(); // 觸發排程按鈕點擊
-			}
-		});
-	});
+    
+    [document.getElementById('reserveMin'), document.getElementById('reserveSec'), document.getElementById('mushroomName')].forEach(input => {
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault(); 
+                document.getElementById('reserveBtn').click(); 
+            }
+        });
+    });
+
     syncTime();
     setInterval(updateClock, 50); 
     setInterval(syncTime, 60000);

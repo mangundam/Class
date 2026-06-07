@@ -95,9 +95,14 @@
             gap: 10px;
             margin-bottom: 16px;
         }
-        .flex-col-33 {
-            flex: 1;
-            width: 33.33%;
+        .flex-col-40 {
+            flex: 27;
+        }
+		.flex-col-45 {
+            flex: 55;
+        }
+		.flex-col-15 {
+            flex: 12;
         }
         
         .form-group {
@@ -323,15 +328,15 @@
 <div class="container">    
     <div class="control-panel">
         <div class="flex-row">
-            <div class="flex-col-33 form-group">
-                <label for="launchTime">遊戲開啟時間 (秒)</label>
+            <div class="flex-col-15 form-group">
+                <label for="launchTime">開啟時間(秒)</label>
                 <input type="number" id="launchTime" value="6" min="0" step="1">
             </div>
-            <div class="flex-col-33 form-group">
-                <label for="mushroomName">蘑菇名稱 (註記)</label>
+            <div class="flex-col-40 form-group">
+                <label for="mushroomName">蘑菇名稱</label>
                 <input type="text" id="mushroomName" value="">
             </div>
-            <div class="flex-col-33 form-group">
+            <div class="flex-col-45 form-group">
                 <label>預約消滅（分/秒後）</label>
                 <div class="inline-input-group">
                     <input type="number" id="reserveMin" value="0" min="0" placeholder="分" style="flex:1; padding: 10px 4px;">

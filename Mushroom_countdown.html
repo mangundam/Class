@@ -92,17 +92,17 @@
         
         .flex-row {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 16px;
+        }
+        .flex-col-launch {
+            flex: 18;
         }
         .flex-col-name {
             flex: 27;
         }
-		.flex-col-time {
+        .flex-col-time {
             flex: 55;
-        }
-		.flex-col-launch {
-            flex: 12;
         }
         
         .form-group {
@@ -120,18 +120,24 @@
             color: #555;
             font-size: 13px;
             white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
         }
         input[type="number"], input[type="text"] {
             width: 100%;
-            padding: 10px;
+            padding: 10px 6px;
             border: 1px solid #cccccc;
             border-radius: 4px;
             box-sizing: border-box;
             font-size: 15px;
+            text-align: center;
+        }
+        input[type="text"] {
+            text-align: left;
         }
         
         .small-btn {
-            padding: 10px 10px;
+            padding: 10px 8px;
             background-color: #28a745;
             color: white;
             border: none;
@@ -321,7 +327,7 @@
         <div class="time-display" id="currentTimeDisplay">
             網路標準時間載入中...
         </div>
-        <button id="soundToggleBtn" class="toggle-btn">無音效</button>
+        <button id="soundToggleBtn" class="toggle-btn active">有音效</button>
     </div>
 </div>
 
@@ -357,9 +363,9 @@
     let timeOffset = 0; 
     let activeMushroomGroups = []; 
     
-    // 全域開關狀態
+    // 全域開關狀態（通知預設先設為 false，等一開網頁驗證通過才轉 true）
     let isNotificationEnabled = false;
-    let isSoundEnabled = false;
+    let isSoundEnabled = true;
 
     async function syncTime() {
         try {
@@ -399,7 +405,7 @@
     function createNewMushroomGroup(eliminateTime) {
         const launchTimeCost = parseInt(document.getElementById('launchTime').value, 10) || 0;
         const nameInput = document.getElementById('mushroomName').value.trim();
-        const finalName = nameInput || `未命名蘑菇 #${activeMushroomGroups.length + 1}`;
+        const finalName = nameInput || `蘑菇 #${activeMushroomGroups.length + 1}`;
         const groupId = 'group-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
 
         const baseRespawnTime = new Date(eliminateTime.getTime() + 5 * 60 * 1000);
@@ -480,7 +486,7 @@
             eliminateTimestamp: eliminateTime.getTime(), 
             eliminateStr: formatExactTime(eliminateTime),
             timings: calculatedTimes,
-            alertTriggered: false // 標記是否已觸發過提前64秒的通知與音效
+            alertTriggered: false 
         });
 
         document.getElementById('mushroomName').value = '';
@@ -491,7 +497,6 @@
     function updateCardTimingsAndSummary(group, currentTimestamp) {
         let eliminateText = "";
         
-        // 1. 處理最下方的「距離蘑菇消滅還有多久」監控邏輯
         const monitorDiv = document.getElementById(`${group.id}-elimination-monitor`);
         const msToEliminate = group.eliminateTimestamp - currentTimestamp;
         
@@ -513,7 +518,6 @@
             }
         }
 
-        // 2. 處理推算表格高亮與標題摘要
         let nearestItem = null;
         let minDiff = Infinity;
 
@@ -525,12 +529,10 @@
             }
         }
 
-        // 3. 核心檢查功能：第一次提前 64 秒時發送系統通知與音效 (對應 id: '8'，即 8*8=64s)
         const target64sItem = group.timings.find(t => t.id === '8');
         if (target64sItem && !group.alertTriggered) {
-            // 計算當前時間距离開遊戲時間是否小於或等於 0 秒 (即時間已到)
             if (currentTimestamp >= target64sItem.timestamp) {
-                group.alertTriggered = true; // 鎖定狀態防止重複執行
+                group.alertTriggered = true; 
                 triggerMushroomAlert(group.name);
             }
         }
@@ -595,35 +597,30 @@
         }
     }
 
-    // 觸發通知與播放音效的調度函數
-    // 修改後的通知與背景音效觸發函式
-	function triggerMushroomAlert(mushroomName) {
-		// 1. 如果有開啟通知，優先發送系統通知
-		if (isNotificationEnabled && Notification.permission === "granted") {
-			const notification = new Notification("蘑菇計時提醒", {
-				body: `您的蘑菇 [${mushroomName}] 已到提前 64 秒開遊戲時機！`,
-				requireInteraction: true, // 保持橫幅不自動消失
-				silent: false // 關鍵：指示 Windows/手機 系統使用作業系統預設的提示音效
-			});
+    function triggerMushroomAlert(mushroomName) {
+        if (isNotificationEnabled && Notification.permission === "granted") {
+            const notification = new Notification("蘑菇計時提醒", {
+                body: `您的蘑菇 [${mushroomName}] 已到提前 64 秒開遊戲時機！`,
+                requireInteraction: true, 
+                silent: false 
+            });
 
-			// 2. 關鍵破解：當系統通知「成功跳出 (show)」的瞬間，借用它的權限在背景播放網頁自訂音效
-			notification.onshow = function() {
-				if (isSoundEnabled) {
-					const audio = new Audio('mushroom_sound.mp3');
-					// 提高音效在背景播放的優先權
-					audio.play().catch(err => {
-						console.log("網頁背景音效遭阻擋，已改由作業系統預設通知音效提示。");
-					});
-				}
-			};
-		} else {
-			// 如果使用者只開音效、沒開通知，且網頁是在前台活躍狀態，才單獨播放音效
-			if (isSoundEnabled && document.visibilityState === "visible") {
-				const audio = new Audio('mushroom_sound.mp3');
-				audio.play().catch(err => console.error(err));
-			}
-		}
-	}
+            notification.onshow = function() {
+                if (isSoundEnabled) {
+                    const audio = new Audio('mushroom_sound.mp3');
+                    audio.play().catch(err => {
+                        console.log("網頁背景音效遭阻擋，已改由作業系統預設通知音效提示。");
+                    });
+                }
+            };
+        } else {
+            if (isSoundEnabled && document.visibilityState === "visible") {
+                const audio = new Audio('mushroom_sound.mp3');
+                audio.play().catch(err => console.error(err));
+            }
+        }
+    }
+
     function toggleCardCollapse(groupId) {
         const group = activeMushroomGroups.find(g => g.id === groupId);
         if (!group) return;
@@ -644,17 +641,56 @@
         }
     }
 
-    // 通知權限開關控制
+    /* 關鍵優化：一進入網頁即自動強制執行權限驗證與請求彈窗 */
+    function initNotificationSecurity() {
+        const btn = document.getElementById('notiToggleBtn');
+        
+        // 檢查瀏覽器是否支援系統通知
+        if (!("Notification" in window)) {
+            btn.classList.remove('active');
+            btn.innerText = "無通知";
+            isNotificationEnabled = false;
+            return;
+        }
+
+        // 如果目前權限是「預設 (尚未決定)」，立刻主動跳出瀏覽器請求視窗
+        if (Notification.permission === "default") {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    isNotificationEnabled = true;
+                    btn.classList.add('active');
+                    btn.innerText = "有通知";
+                } else {
+                    isNotificationEnabled = false;
+                    btn.classList.remove('active');
+                    btn.innerText = "無通知";
+                }
+            });
+        } 
+        // 如果先前早就已經允許過，直接無縫啟用通知功能
+        else if (Notification.permission === "granted") {
+            isNotificationEnabled = true;
+            btn.classList.add('active');
+            btn.innerText = "有通知";
+        } 
+        // 權限已被拒絕 (denied)
+        else {
+            isNotificationEnabled = false;
+            btn.classList.remove('active');
+            btn.innerText = "無通知";
+        }
+    }
+
+    // 手動點選通知按鈕切換
     document.getElementById('notiToggleBtn').addEventListener('click', function() {
         if (!isNotificationEnabled) {
-            // 向瀏覽器要求發送桌面系統通知的權限
             Notification.requestPermission().then(permission => {
                 if (permission === "granted") {
                     isNotificationEnabled = true;
                     this.classList.add('active');
                     this.innerText = "有通知";
                 } else {
-                    alert("權限已被拒絕，請至瀏覽器設定允許此網頁發送通知。");
+                    alert("權限已被拒絕，請至瀏覽器網址列左側調整允許此網頁發送通知。");
                 }
             });
         } else {
@@ -664,7 +700,6 @@
         }
     });
 
-    // 音效開關控制
     document.getElementById('soundToggleBtn').addEventListener('click', function() {
         isSoundEnabled = !isSoundEnabled;
         if (isSoundEnabled) {
@@ -703,7 +738,9 @@
         });
     });
 
+    // 啟動初始化
     syncTime();
+    initNotificationSecurity(); // 執行即時驗證請求
     setInterval(updateClock, 50); 
     setInterval(syncTime, 60000);
 </script>

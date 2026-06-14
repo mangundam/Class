@@ -433,6 +433,7 @@
         cardDiv.className = 'mushroom-card';
         cardDiv.id = groupId;
         
+        /* 核心修改 1：將 style 設為 display: none，使新卡片預設隱藏收合 */
         cardDiv.innerHTML = `
             <div class="card-header" onclick="toggleCardCollapse('${groupId}')">
                 <span class="card-title">${finalName}</span>
@@ -441,7 +442,7 @@
                     <button class="delete-btn" onclick="deleteMushroomGroup(event, '${groupId}')">x</button>
                 </div>
             </div>
-            <div class="card-body" id="body-${groupId}">
+            <div class="card-body" id="body-${groupId}" style="display: none;">
                 <div class="record-container">
                     <div class="record-box"><strong>消滅時間</strong><br>${formatExactTime(eliminateTime)}</div>
                     <div class="respawn-box"><strong>預計復活</strong><br>${formatExactTime(baseRespawnTime)}</div>
@@ -482,7 +483,7 @@
         activeMushroomGroups.push({
             id: groupId,
             name: finalName,
-            isCollapsed: false, 
+            isCollapsed: true, /* 核心修改 1：改為 true，預設折疊狀態資料 */
             eliminateTimestamp: eliminateTime.getTime(), 
             eliminateStr: formatExactTime(eliminateTime),
             timings: calculatedTimes,
@@ -641,11 +642,10 @@
         }
     }
 
-    /* 關鍵優化：一進入網頁即自動強制執行權限驗證與請求彈窗 */
+    /* 一進入網頁即自動強制執行權限驗證與請求彈窗 */
     function initNotificationSecurity() {
         const btn = document.getElementById('notiToggleBtn');
         
-        // 檢查瀏覽器是否支援系統通知
         if (!("Notification" in window)) {
             btn.classList.remove('active');
             btn.innerText = "無通知";
@@ -653,7 +653,6 @@
             return;
         }
 
-        // 如果目前權限是「預設 (尚未決定)」，立刻主動跳出瀏覽器請求視窗
         if (Notification.permission === "default") {
             Notification.requestPermission().then(permission => {
                 if (permission === "granted") {
@@ -667,13 +666,11 @@
                 }
             });
         } 
-        // 如果先前早就已經允許過，直接無縫啟用通知功能
         else if (Notification.permission === "granted") {
             isNotificationEnabled = true;
             btn.classList.add('active');
             btn.innerText = "有通知";
         } 
-        // 權限已被拒絕 (denied)
         else {
             isNotificationEnabled = false;
             btn.classList.remove('active');
@@ -681,7 +678,6 @@
         }
     }
 
-    // 手動點選通知按鈕切換
     document.getElementById('notiToggleBtn').addEventListener('click', function() {
         if (!isNotificationEnabled) {
             Notification.requestPermission().then(permission => {
@@ -738,9 +734,25 @@
         });
     });
 
+    /* 核心修改 2：為時間相關數字欄位加上自動清空與防空值處理 */
+    [document.getElementById('launchTime'), document.getElementById('reserveMin'), document.getElementById('reserveSec')].forEach(input => {
+        // 當游標點入欄位時
+        input.addEventListener('focus', function() {
+            if (this.value === '0' || this.value === '') {
+                this.value = ''; // 點擊時自己清空，不用退格刪除0
+            }
+        });
+        // 當游標離開欄位時
+        input.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                this.value = '0'; // 若沒有輸入或為空白則自動恢復為0
+            }
+        });
+    });
+
     // 啟動初始化
     syncTime();
-    initNotificationSecurity(); // 執行即時驗證請求
+    initNotificationSecurity(); 
     setInterval(updateClock, 50); 
     setInterval(syncTime, 60000);
 </script>

@@ -21,7 +21,7 @@
 
         <div class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-slate-100">
             <label for="rawInput" class="block text-sm font-semibold text-slate-600 mb-2">請輸入活動文字資訊（支援多筆，可以分號或換行區隔）：</label>
-            <textarea id="rawInput" rows="5" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition" ></textarea>
+            <textarea id="rawInput" rows="5" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition" placeholder="請輸入活動內容..."></textarea>
             
             <div class="mt-4 flex justify-end">
                 <button id="submitBtn" class="bg-slate-700 hover:bg-slate-800 text-white font-medium px-6 py-2.5 rounded-lg text-sm transition shadow-sm flex items-center">
@@ -36,8 +36,12 @@
     </div>
 
     <script>
-        // 請替換成您從 Google Apps Script 部署得到的 Web App URL
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxOgWFzXxgC07bb9HeFLBkiR9CFTT7pCgE79YqxQk4RomR3X_p2hHxNYUEbpw3sgY25/exec";
+        
+        // 請將下方的「您的試算表ID」替換為實際的 Google 試算表 ID
+        const SPREADSHEET_ID = "19E0tC63FWjXkrOzDJi9O_evk8EpcYEzJihl5eloHiZc"; 
+        const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/pub?output=csv`;
+
         let calendar;
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -50,58 +54,135 @@
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek'
                 },
-                events: [], // 初始事件留空，或可延伸讀取 Google Sheet 資料
+                events: [], 
                 eventClick: function(info) {
                     alert(`活動：${info.event.title}\n地點：${info.event.extendedProps.location || '無'}\n期間：${info.event.startStr} ~ ${info.event.endStr || info.event.startStr}`);
                 }
             });
             calendar.render();
 
-            // 綁定送出按鈕事件
+            // 網頁載入時，自動從雲端試算表讀取歷史活動
+            loadSavedEvents();
+
             document.getElementById('submitBtn').addEventListener('click', handleDataSubmit);
         });
 
+        // 從公開的 CSV 讀取試算表資料並渲染至日曆
+        async function loadSavedEvents() {
+            try {
+                const response = await fetch(SHEET_CSV_URL);
+                if (!response.ok) return;
+                
+                const data = await response.text();
+                const rows = csvToArray(data);
+                
+                // 移除現有事件，避免重複渲染
+                calendar.removeAllEvents();
+
+                // 檢查標題列並走訪資料（跳過第一行標題）
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (row.length < 3) continue;
+
+                    const startDate = row[0] ? row[0].trim() : "";
+                    const endDate = row[1] ? row[1].trim() : "";
+                    const title = row[2] ? row[2].trim() : "";
+                    const location = row[3] ? row[3].trim() : "";
+
+                    // 略過測試用或非正常日期的列
+                    if (!startDate || startDate.includes("連線測試") || startDate.includes("錯誤捕捉")) continue;
+
+                    // 格式化日期格式 YYYY/MM/DD -> YYYY-MM-DD
+                    const startFormatted = startDate.replace(/\//g, '-');
+                    let endFormatted = endDate ? endDate.replace(/\//g, '-') : startFormatted;
+
+                    // FullCalendar 的結束日期不包含當天，若是跨天活動需將結束日加 1 天
+                    if (endFormatted) {
+                        let endD = new Date(endFormatted);
+                        if (!isNaN(endD.getTime())) {
+                            endD.setDate(endD.getDate() + 1);
+                            endFormatted = endD.toISOString().split('T')[0];
+                        }
+                    }
+
+                    calendar.addEvent({
+                        title: title,
+                        start: startFormatted,
+                        end: endFormatted,
+                        extendedProps: { location: location },
+                        backgroundColor: '#475569',
+                        borderColor: '#334155'
+                    });
+                }
+            } catch (error) {
+                console.error("載入雲端資料時發生錯誤:", error);
+            }
+        }
+
         async function handleDataSubmit() {
-			const textInput = document.getElementById('rawInput').value.trim();
-			if (!textInput) {
-				alert('請輸入活動文字內容');
-				return;
-			}
+            const textInput = document.getElementById('rawInput').value.trim();
+            if (!textInput) {
+                alert('請輸入活動文字內容');
+                return;
+            }
 
-			const btnText = document.getElementById('btnText');
-			const submitBtn = document.getElementById('submitBtn');
-			
-			submitBtn.disabled = true;
-			btnText.textContent = '處理解析中...';
+            const btnText = document.getElementById('btnText');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            submitBtn.disabled = true;
+            btnText.textContent = '處理解析中...';
 
-			try {
-				// 使用 URLSearchParams 建立標準的網址參數字串
-				const params = new URLSearchParams();
-				params.append('text', textInput);
+            try {
+                const params = new URLSearchParams();
+                params.append('text', textInput);
 
-				// 使用 no-cors 模式發送
-				await fetch(GAS_WEB_APP_URL, {
-					method: 'POST',
-					mode: 'no-cors', 
-					headers: {
-						// 務必指定為傳統表單的編碼格式
-						'Content-Type': 'application/x-www-form-urlencoded'
-					},
-					body: params.toString() // 轉為 text=xxx&... 的字串格式
-				});
+                await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params.toString()
+                });
 
-				// 在 no-cors 模式下，只要順利執行完畢就代表請求已成功送達 Google 伺服器
-				alert('活動資料已成功送出！請稍候 3-5 秒開啟 Google Sheet 檢查確認。');
-				document.getElementById('rawInput').value = ''; 
-				
-			} catch (error) {
-				console.error('詳細錯誤資訊:', error);
-				alert('連線至伺服器時發生錯誤，請檢查主控台訊息。');
-			} finally {
-				submitBtn.disabled = false;
-				btnText.textContent = '解析並同步至雲端';
-			}
-		}
+                alert('活動資料已成功送出！');
+                document.getElementById('rawInput').value = ''; 
+                
+                // 雲端同步完成後，延遲 1.5 秒自動重新整理日曆
+                // 留給 Google 伺服器一小段時間將資料寫入快取中
+                setTimeout(loadSavedEvents, 1500);
+                
+            } catch (error) {
+                console.error('詳細錯誤資訊:', error);
+                alert('連線至伺服器時發生錯誤，請檢查主控台訊息。');
+            } finally {
+                submitBtn.disabled = false;
+                btnText.textContent = '解析並同步至雲端';
+            }
+        }
+
+        // 簡易 CSV 轉成陣列的解析器
+        function csvToArray(text) {
+            const p = new RegExp((
+                "(\\,|\\r?\\n|\\r|^)" +
+                "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+                "([^\\,\\r\\n]*))"
+            ), "gi");
+            const d = [[]];
+            let m = null;
+            while (m = p.exec(text)) {
+                const c = m[1];
+                if (c.length && c !== ",") d.push([]);
+                let v;
+                if (m[2] !== undefined) {
+                    v = m[2].replace(new RegExp("\"\"", "g"), "\"");
+                } else {
+                    v = m[3];
+                }
+                d[d.length - 1].push(v);
+            }
+            return d;
+        }
     </script>
 </body>
 </html>

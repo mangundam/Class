@@ -75,18 +75,22 @@
 			btnText.textContent = '處理解析中...';
 
 			try {
-				// 使用標準 FormData 封裝資料
-				const formData = new FormData();
-				formData.append('text', textInput);
+				// 使用 URLSearchParams 建立標準的網址參數字串
+				const params = new URLSearchParams();
+				params.append('text', textInput);
 
-				// 強制使用 no-cors 模式發送
+				// 使用 no-cors 模式發送
 				await fetch(GAS_WEB_APP_URL, {
 					method: 'POST',
 					mode: 'no-cors', 
-					body: formData
+					headers: {
+						// 務必指定為傳統表單的編碼格式
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
+					body: params.toString() // 轉為 text=xxx&... 的字串格式
 				});
 
-				// 在 no-cors 模式下，只要沒噴 catch 就代表發送成功
+				// 在 no-cors 模式下，只要順利執行完畢就代表請求已成功送達 Google 伺服器
 				alert('活動資料已成功送出！請稍候 3-5 秒開啟 Google Sheet 檢查確認。');
 				document.getElementById('rawInput').value = ''; 
 				

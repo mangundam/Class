@@ -75,23 +75,20 @@
 			btnText.textContent = '處理解析中...';
 
 			try {
-				// 使用 URLSearchParams 模擬傳統表單發送，配合 no-cors 模式
-				// 這是繞過 Google Apps Script CORS 阻擋最穩定、最標準的作法
-				const searchParams = new URLSearchParams();
-				searchParams.append('text', textInput);
+				// 使用標準 FormData 封裝資料
+				const formData = new FormData();
+				formData.append('text', textInput);
 
+				// 強制使用 no-cors 模式發送
 				await fetch(GAS_WEB_APP_URL, {
 					method: 'POST',
-					mode: 'no-cors', // 告訴瀏覽器：發送就好，不用檢查跨網域回應
-					headers: {
-						'Content-Type': 'application/x-www-form-urlencoded'
-					},
-					body: searchParams.toString()
+					mode: 'no-cors', 
+					body: formData
 				});
 
-				// 在 no-cors 模式下，只要沒有噴進 catch，就代表 200 (OK) 發送成功了
+				// 在 no-cors 模式下，只要沒噴 catch 就代表發送成功
 				alert('活動資料已成功送出！請稍候 3-5 秒開啟 Google Sheet 檢查確認。');
-				document.getElementById('rawInput').value = ''; // 清空輸入框
+				document.getElementById('rawInput').value = ''; 
 				
 			} catch (error) {
 				console.error('詳細錯誤資訊:', error);

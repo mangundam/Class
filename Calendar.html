@@ -37,11 +37,6 @@
 
     <script>
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxOgWFzXxgC07bb9HeFLBkiR9CFTT7pCgE79YqxQk4RomR3X_p2hHxNYUEbpw3sgY25/exec";
-        
-        // 請將下方的「您的試算表ID」替換為實際的 Google 試算表 ID
-        const SPREADSHEET_ID = "19E0tC63FWjXkrOzDJi9O_evk8EpcYEzJihl5eloHiZc"; 
-        const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/pub?output=csv`;
-
         let calendar;
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -61,42 +56,28 @@
             });
             calendar.render();
 
-            // 網頁載入時，自動從雲端試算表讀取歷史活動
+            // 網頁開啟或整理時自動讀取雲端資料
             loadSavedEvents();
 
             document.getElementById('submitBtn').addEventListener('click', handleDataSubmit);
         });
 
-        // 從公開的 CSV 讀取試算表資料並渲染至日曆
+        // 透過向 GAS 發送 GET 請求獲取歷史資料
         async function loadSavedEvents() {
             try {
-                const response = await fetch(SHEET_CSV_URL);
+                const response = await fetch(GAS_WEB_APP_URL);
                 if (!response.ok) return;
                 
-                const data = await response.text();
-                const rows = csvToArray(data);
+                const eventsData = await response.json();
+                if (!Array.isArray(eventsData)) return;
                 
-                // 移除現有事件，避免重複渲染
                 calendar.removeAllEvents();
 
-                // 檢查標題列並走訪資料（跳過第一行標題）
-                for (let i = 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    if (row.length < 3) continue;
+                eventsData.forEach(event => {
+                    const startFormatted = event.startDate.replace(/\//g, '-');
+                    let endFormatted = event.endDate ? event.endDate.replace(/\//g, '-') : startFormatted;
 
-                    const startDate = row[0] ? row[0].trim() : "";
-                    const endDate = row[1] ? row[1].trim() : "";
-                    const title = row[2] ? row[2].trim() : "";
-                    const location = row[3] ? row[3].trim() : "";
-
-                    // 略過測試用或非正常日期的列
-                    if (!startDate || startDate.includes("連線測試") || startDate.includes("錯誤捕捉")) continue;
-
-                    // 格式化日期格式 YYYY/MM/DD -> YYYY-MM-DD
-                    const startFormatted = startDate.replace(/\//g, '-');
-                    let endFormatted = endDate ? endDate.replace(/\//g, '-') : startFormatted;
-
-                    // FullCalendar 的結束日期不包含當天，若是跨天活動需將結束日加 1 天
+                    // 處理 FullCalendar 跨天活動少一天的計算問題
                     if (endFormatted) {
                         let endD = new Date(endFormatted);
                         if (!isNaN(endD.getTime())) {
@@ -106,14 +87,14 @@
                     }
 
                     calendar.addEvent({
-                        title: title,
+                        title: event.title,
                         start: startFormatted,
                         end: endFormatted,
-                        extendedProps: { location: location },
+                        extendedProps: { location: event.location },
                         backgroundColor: '#475569',
                         borderColor: '#334155'
                     });
-                }
+                });
             } catch (error) {
                 console.error("載入雲端資料時發生錯誤:", error);
             }
@@ -148,9 +129,8 @@
                 alert('活動資料已成功送出！');
                 document.getElementById('rawInput').value = ''; 
                 
-                // 雲端同步完成後，延遲 1.5 秒自動重新整理日曆
-                // 留給 Google 伺服器一小段時間將資料寫入快取中
-                setTimeout(loadSavedEvents, 1500);
+                // 雲端存檔後，延遲 1.8 秒自動呼叫讀取機制重新刷新日曆畫面
+                setTimeout(loadSavedEvents, 1800);
                 
             } catch (error) {
                 console.error('詳細錯誤資訊:', error);
@@ -159,29 +139,6 @@
                 submitBtn.disabled = false;
                 btnText.textContent = '解析並同步至雲端';
             }
-        }
-
-        // 簡易 CSV 轉成陣列的解析器
-        function csvToArray(text) {
-            const p = new RegExp((
-                "(\\,|\\r?\\n|\\r|^)" +
-                "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-                "([^\\,\\r\\n]*))"
-            ), "gi");
-            const d = [[]];
-            let m = null;
-            while (m = p.exec(text)) {
-                const c = m[1];
-                if (c.length && c !== ",") d.push([]);
-                let v;
-                if (m[2] !== undefined) {
-                    v = m[2].replace(new RegExp("\"\"", "g"), "\"");
-                } else {
-                    v = m[3];
-                }
-                d[d.length - 1].push(v);
-            }
-            return d;
         }
     </script>
 </body>

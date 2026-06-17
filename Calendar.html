@@ -62,59 +62,61 @@
         });
 
         async function handleDataSubmit() {
-            const textInput = document.getElementById('rawInput').value.trim();
-            if (!textInput) {
-                alert('請輸入活動文字內容');
-                return;
-            }
+			const textInput = document.getElementById('rawInput').value.trim();
+			if (!textInput) {
+				alert('請輸入活動文字內容');
+				return;
+			}
 
-            const btnText = document.getElementById('btnText');
-            const submitBtn = document.getElementById('submitBtn');
-            
-            // 進入讀取狀態
-            submitBtn.disabled = true;
-            btnText.textContent = '處理解析中...';
+			const btnText = document.getElementById('btnText');
+			const submitBtn = document.getElementById('submitBtn');
+			
+			submitBtn.disabled = true;
+			btnText.textContent = '處理解析中...';
 
-            try {
-                const response = await fetch(GAS_WEB_APP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ text: textInput })
-                });
+			try {
+				// 使用 text/plain 傳送 JSON 字串，可以完美繞過嚴格的 CORS 預檢阻擋
+				const response = await fetch(GAS_WEB_APP_URL, {
+					method: 'POST',
+					mode: 'cors', 
+					headers: {
+						'Content-Type': 'text/plain;charset=utf-8'
+					},
+					body: JSON.stringify({ text: textInput })
+				});
 
-                const result = await response.json();
+				const result = await response.json();
 
-                if (result.status === 'success') {
-                    alert('資料成功寫入 Google Sheet！');
-                    document.getElementById('rawInput').value = ''; // 清空輸入框
-                    
-                    // 將新解析成功的活動渲染到下方的日曆畫面上
-                    result.data.forEach(item => {
-                        // FullCalendar 結束日期不包含當天，故若有結束日期需加 1 天以便完整顯示跨度
-                        let endDate = new Date(item.endDate);
-                        endDate.setDate(endDate.getDate() + 1);
+				if (result.status === 'success') {
+					alert('資料成功寫入 Google Sheet！');
+					document.getElementById('rawInput').value = '';
+					
+					result.data.forEach(item => {
+						let endDate = new Date(item.endDate);
+						endDate.setDate(endDate.getDate() + 1);
 
-                        calendar.addEvent({
-                            title: item.title,
-                            start: item.startDate.replace(/\//g, '-'),
-                            end: endDate.toISOString().split('T')[0],
-                            extendedProps: {
-                                location: item.location
-                            },
-                            backgroundColor: '#475569',
-                            borderColor: '#334155'
-                        });
-                    });
-                } else {
-                    alert('解析失敗：' + result.message);
-                }
-            } catch (error) {
-                console.error(error);
-                alert('連線至伺服器時發生錯誤');
-            } finally {
-                submitBtn.disabled = false;
-                btnText.textContent = '解析並同步至雲端';
-            }
-        }
+						calendar.addEvent({
+							title: item.title,
+							start: item.startDate.replace(/\//g, '-'),
+							end: endDate.toISOString().split('T')[0],
+							extendedProps: {
+								location: item.location
+							},
+							backgroundColor: '#475569',
+							borderColor: '#334155'
+						});
+					});
+				} else {
+					alert('解析失敗：' + result.message);
+				}
+			} catch (error) {
+				console.error('詳細錯誤資訊:', error);
+				alert('連線至伺服器時發生錯誤，請檢查主控台 (F12) 的詳細訊息。');
+			} finally {
+				submitBtn.disabled = false;
+				btnText.textContent = '解析並同步至雲端';
+			}
+		}
     </script>
 </body>
 </html>

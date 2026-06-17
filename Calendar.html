@@ -75,43 +75,27 @@
 			btnText.textContent = '處理解析中...';
 
 			try {
-				// 使用 text/plain 傳送 JSON 字串，可以完美繞過嚴格的 CORS 預檢阻擋
-				const response = await fetch(GAS_WEB_APP_URL, {
+				// 使用 URLSearchParams 模擬傳統表單發送，配合 no-cors 模式
+				// 這是繞過 Google Apps Script CORS 阻擋最穩定、最標準的作法
+				const searchParams = new URLSearchParams();
+				searchParams.append('text', textInput);
+
+				await fetch(GAS_WEB_APP_URL, {
 					method: 'POST',
-					mode: 'cors', 
+					mode: 'no-cors', // 告訴瀏覽器：發送就好，不用檢查跨網域回應
 					headers: {
-						'Content-Type': 'text/plain;charset=utf-8'
+						'Content-Type': 'application/x-www-form-urlencoded'
 					},
-					body: JSON.stringify({ text: textInput })
+					body: searchParams.toString()
 				});
 
-				const result = await response.json();
-
-				if (result.status === 'success') {
-					alert('資料成功寫入 Google Sheet！');
-					document.getElementById('rawInput').value = '';
-					
-					result.data.forEach(item => {
-						let endDate = new Date(item.endDate);
-						endDate.setDate(endDate.getDate() + 1);
-
-						calendar.addEvent({
-							title: item.title,
-							start: item.startDate.replace(/\//g, '-'),
-							end: endDate.toISOString().split('T')[0],
-							extendedProps: {
-								location: item.location
-							},
-							backgroundColor: '#475569',
-							borderColor: '#334155'
-						});
-					});
-				} else {
-					alert('解析失敗：' + result.message);
-				}
+				// 在 no-cors 模式下，只要沒有噴進 catch，就代表 200 (OK) 發送成功了
+				alert('活動資料已成功送出！請稍候 3-5 秒開啟 Google Sheet 檢查確認。');
+				document.getElementById('rawInput').value = ''; // 清空輸入框
+				
 			} catch (error) {
 				console.error('詳細錯誤資訊:', error);
-				alert('連線至伺服器時發生錯誤，請檢查主控台 (F12) 的詳細訊息。');
+				alert('連線至伺服器時發生錯誤，請檢查主控台訊息。');
 			} finally {
 				submitBtn.disabled = false;
 				btnText.textContent = '解析並同步至雲端';

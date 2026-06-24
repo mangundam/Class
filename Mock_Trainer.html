@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數概模考題庫</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+            --success-color: #20c997;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .filter-section {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .filter-title {
+            font-size: 1.1em;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tag-btn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.2s ease;
+        }
+
+        .tag-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .tag-btn.active {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: #ffffff;
+        }
+
+        .question-card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .question-title {
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+        }
+
+        .option-item {
+            padding: 8px 0;
+        }
+
+        .toggle-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: background-color 0.2s;
+        }
+
+        .toggle-btn:hover {
+            background-color: #1aa179;
+        }
+
+        .answer-section {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f1f8f6;
+            border-radius: 4px;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .answer-section.visible {
+            display: block;
+        }
+
+        .answer-text {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .explanation-text {
+            color: var(--text-main);
+            white-space: pre-wrap;
+        }
+
+        .empty-explanation {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        
+        .status-message {
+            text-align: center;
+            color: var(--text-muted);
+            margin-top: 50px;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>數概模考題庫</h1>
+
+    <div class="filter-section">
+        <div class="filter-title">請選擇測驗單元 (可複選)：</div>
+        <div class="tags-container" id="tagsContainer">
+            </div>
+    </div>
+
+    <div id="questionsContainer">
+        <div class="status-message">載入題庫中，請稍候...</div>
+    </div>
+</div>
+
+<script>
+    let allQuestions = [];
+    let uniqueTags = new Set();
+    let selectedTags = new Set();
+
+    // 讀取 JSON 題庫資料
+    fetch('mock_questions_database.json')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('無法讀取題庫檔案');
+            }
+            return response.json();
+        })
+        .then(data => {
+            allQuestions = data;
+            extractTags();
+            renderTags();
+            renderQuestions(); // 初始化顯示，若無選擇標籤可預設提示
+        })
+        .catch(error => {
+            document.getElementById('questionsContainer').innerHTML = 
+                `<div class="status-message" style="color: red;">讀取失敗。請確認是否透過本機伺服器 (Local Server) 執行，或已將檔案上傳至伺服器。</div>`;
+            console.error('Error fetching questions:', error);
+        });
+
+    // 從所有題目中萃取出不重複的標籤
+    function extractTags() {
+        allQuestions.forEach(q => {
+            if (q.標籤) {
+                // 處理可能有多個標籤的情況（以逗號分隔）
+                let tagsArray = q.標籤.split(',');
+                tagsArray.forEach(tag => {
+                    let trimmedTag = tag.trim();
+                    if (trimmedTag !== "") {
+                        uniqueTags.add(trimmedTag);
+                    }
+                });
+            }
+        });
+    }
+
+    // 渲染標籤按鈕
+    function renderTags() {
+        const container = document.getElementById('tagsContainer');
+        container.innerHTML = '';
+
+        // 將 Set 轉換為 Array 並排序，讓標籤依序排列
+        let sortedTags = Array.from(uniqueTags).sort();
+
+        sortedTags.forEach(tag => {
+            const btn = document.createElement('button');
+            btn.className = 'tag-btn';
+            btn.textContent = tag;
+            btn.onclick = () => toggleTag(tag, btn);
+            container.appendChild(btn);
+        });
+    }
+
+    // 切換標籤選取狀態
+    function toggleTag(tag, btnElement) {
+        if (selectedTags.has(tag)) {
+            selectedTags.delete(tag);
+            btnElement.classList.remove('active');
+        } else {
+            selectedTags.add(tag);
+            btnElement.classList.add('active');
+        }
+        renderQuestions();
+    }
+
+    // 渲染題目列表
+    function renderQuestions() {
+        const container = document.getElementById('questionsContainer');
+        container.innerHTML = '';
+
+        if (selectedTags.size === 0) {
+            container.innerHTML = '<div class="status-message">請從上方選擇一或多個單元標籤以顯示題目。</div>';
+            return;
+        }
+
+        // 篩選出符合任一選中標籤的題目 (OR 邏輯)
+        const filteredQuestions = allQuestions.filter(q => {
+            if (!q.標籤) return false;
+            let qTags = q.標籤.split(',').map(t => t.trim());
+            return qTags.some(t => selectedTags.has(t));
+        });
+
+        if (filteredQuestions.length === 0) {
+            container.innerHTML = '<div class="status-message">所選標籤目前沒有對應的題目。</div>';
+            return;
+        }
+
+        // 生成題目卡片
+        filteredQuestions.forEach((q, index) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+
+            const explanationContent = q.解析 && q.解析.trim() !== "" 
+                ? `<div class="explanation-text">解析：\n${q.解析}</div>` 
+                : `<div class="explanation-text empty-explanation">解析：目前尚無解析。</div>`;
+
+            card.innerHTML = `
+                <div class="question-header">
+                    <span>題號：${q.題號 || '無'}</span>
+                    <span>來源：${q.來源 || '無'}</span>
+                </div>
+                <div class="question-title">${q.題目}</div>
+                <ul class="options-list">
+                    ${q.選項A ? `<li class="option-item">${q.選項A}</li>` : ''}
+                    ${q.選項B ? `<li class="option-item">${q.選項B}</li>` : ''}
+                    ${q.選項C ? `<li class="option-item">${q.選項C}</li>` : ''}
+                    ${q.選項D ? `<li class="option-item">${q.選項D}</li>` : ''}
+                </ul>
+                <button class="toggle-btn" onclick="toggleAnswer('ans-${index}')">顯示答案與解析</button>
+                <div class="answer-section" id="ans-${index}">
+                    <div class="answer-text">標準答案：${q.答案}</div>
+                    ${explanationContent}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // 切換顯示答案與解析區域
+    function toggleAnswer(elementId) {
+        const section = document.getElementById(elementId);
+        if (section.classList.contains('visible')) {
+            section.classList.remove('visible');
+            section.previousElementSibling.textContent = '顯示答案與解析';
+        } else {
+            section.classList.add('visible');
+            section.previousElementSibling.textContent = '隱藏答案與解析';
+        }
+    }
+</script>
+
+</body>
+</html>

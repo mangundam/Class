@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>數概模考題庫</title>
+    <title>數概模考題目</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -170,12 +170,13 @@
 <body>
 
 <div class="container">
-    <h1>數概模考題庫</h1>
+    <h1>數概模考題目</h1>
 
     <div class="filter-section">
         <div class="filter-title">請選擇測驗單元 (可複選)：</div>
         <div class="tags-container" id="tagsContainer">
-            </div>
+            <div class="status-message" style="margin-top: 0;">載入標籤中...</div>
+        </div>
     </div>
 
     <div id="questionsContainer">
@@ -185,10 +186,9 @@
 
 <script>
     let allQuestions = [];
-    let uniqueTags = new Set();
+    let tagCounts = {}; // 改用物件來紀錄每個標籤出現的次數
     let selectedTags = new Set();
 
-    // 讀取 JSON 題庫資料
     fetch('mock_questions_database.json')
         .then(response => {
             if (!response.ok) {
@@ -198,50 +198,52 @@
         })
         .then(data => {
             allQuestions = data;
-            extractTags();
+            extractTagsAndCount();
             renderTags();
-            renderQuestions(); // 初始化顯示，若無選擇標籤可預設提示
+            renderQuestions();
         })
         .catch(error => {
             document.getElementById('questionsContainer').innerHTML = 
-                `<div class="status-message" style="color: red;">讀取失敗。請確認是否透過本機伺服器 (Local Server) 執行，或已將檔案上傳至伺服器。</div>`;
+                `<div class="status-message" style="color: red;">讀取失敗。請確認是否透過本機伺服器執行，或已將檔案上傳至 GitHub Pages。</div>`;
             console.error('Error fetching questions:', error);
         });
 
-    // 從所有題目中萃取出不重複的標籤
-    function extractTags() {
+    function extractTagsAndCount() {
         allQuestions.forEach(q => {
             if (q.標籤) {
-                // 處理可能有多個標籤的情況（以逗號分隔）
                 let tagsArray = q.標籤.split(',');
                 tagsArray.forEach(tag => {
                     let trimmedTag = tag.trim();
                     if (trimmedTag !== "") {
-                        uniqueTags.add(trimmedTag);
+                        // 如果該標籤已經存在，次數加 1；否則初始化為 1
+                        if (tagCounts[trimmedTag]) {
+                            tagCounts[trimmedTag]++;
+                        } else {
+                            tagCounts[trimmedTag] = 1;
+                        }
                     }
                 });
             }
         });
     }
 
-    // 渲染標籤按鈕
     function renderTags() {
         const container = document.getElementById('tagsContainer');
         container.innerHTML = '';
 
-        // 將 Set 轉換為 Array 並排序，讓標籤依序排列
-        let sortedTags = Array.from(uniqueTags).sort();
+        // 取得所有標籤名稱並進行排序
+        let sortedTags = Object.keys(tagCounts).sort();
 
         sortedTags.forEach(tag => {
             const btn = document.createElement('button');
             btn.className = 'tag-btn';
-            btn.textContent = tag;
+            // 將按鈕文字加上該標籤的題數統計
+            btn.textContent = `${tag} (${tagCounts[tag]})`;
             btn.onclick = () => toggleTag(tag, btn);
             container.appendChild(btn);
         });
     }
 
-    // 切換標籤選取狀態
     function toggleTag(tag, btnElement) {
         if (selectedTags.has(tag)) {
             selectedTags.delete(tag);
@@ -253,7 +255,6 @@
         renderQuestions();
     }
 
-    // 渲染題目列表
     function renderQuestions() {
         const container = document.getElementById('questionsContainer');
         container.innerHTML = '';
@@ -263,7 +264,6 @@
             return;
         }
 
-        // 篩選出符合任一選中標籤的題目 (OR 邏輯)
         const filteredQuestions = allQuestions.filter(q => {
             if (!q.標籤) return false;
             let qTags = q.標籤.split(',').map(t => t.trim());
@@ -275,7 +275,6 @@
             return;
         }
 
-        // 生成題目卡片
         filteredQuestions.forEach((q, index) => {
             const card = document.createElement('div');
             card.className = 'question-card';
@@ -306,7 +305,6 @@
         });
     }
 
-    // 切換顯示答案與解析區域
     function toggleAnswer(elementId) {
         const section = document.getElementById(elementId);
         if (section.classList.contains('visible')) {

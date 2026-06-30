@@ -213,7 +213,7 @@
         })
         .catch(error => {
             document.getElementById('questionsContainer').innerHTML = 
-                `<div class="status-message" style="color: red;">讀取失敗。請確認是否透過本機伺服器執行，或已將檔案上傳至伺服器。</div>`;
+                '<div class="status-message" style="color: red;">讀取失敗。請確認是否透過本機伺服器執行，或已將檔案上傳至伺服器。</div>';
             console.error('Error fetching questions:', error);
         });
 
@@ -261,6 +261,17 @@
         renderQuestions();
     }
 
+    // 新增：將危險的 HTML 字元替換為安全的網頁實體符號
+    function escapeHTML(text) {
+        if (!text) return '';
+        return text.toString()
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
     // 將文字中的 {{圖檔名}} 轉換為 <img> 標籤的函數
     function parseImages(text) {
         if (!text) return '';
@@ -292,17 +303,17 @@
             const card = document.createElement('div');
             card.className = 'question-card';
 
-            // 處理所有文字欄位的圖片轉換
-            const parsedTitle = parseImages(q.題目);
-            const parsedOptA = parseImages(q.選項A);
-            const parsedOptB = parseImages(q.選項B);
-            const parsedOptC = parseImages(q.選項C);
-            const parsedOptD = parseImages(q.選項D);
-            const parsedExplanation = parseImages(q.解析);
+            // 處理順序：先執行 escapeHTML 把 <div> 變成純文字，再執行 parseImages 把 {{}} 變成真實圖片標籤
+            const parsedTitle = parseImages(escapeHTML(q.題目));
+            const parsedOptA = parseImages(escapeHTML(q.選項A));
+            const parsedOptB = parseImages(escapeHTML(q.選項B));
+            const parsedOptC = parseImages(escapeHTML(q.選項C));
+            const parsedOptD = parseImages(escapeHTML(q.選項D));
+            const parsedExplanation = parseImages(escapeHTML(q.解析));
 
             const explanationContent = parsedExplanation && parsedExplanation.trim() !== "" 
                 ? `<div class="explanation-text">解析：\n${parsedExplanation}</div>` 
-                : `<div class="explanation-text empty-explanation">解析：目前尚無解析。</div>`;
+                : '<div class="explanation-text empty-explanation">解析：目前尚無解析。</div>';
 
             card.innerHTML = `
                 <div class="question-header">
@@ -318,7 +329,7 @@
                 </ul>
                 <button class="toggle-btn" onclick="toggleAnswer('ans-${index}')">顯示答案與解析</button>
                 <div class="answer-section" id="ans-${index}">
-                    <div class="answer-text">標準答案：${q.答案}</div>
+                    <div class="answer-text">標準答案：${escapeHTML(q.答案)}</div>
                     ${explanationContent}
                 </div>
             `;

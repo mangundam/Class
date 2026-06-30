@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>數概模考題目</title>
+    <title>數位科技模考題目</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -165,12 +165,21 @@
             margin-top: 50px;
             font-size: 1.1em;
         }
+
+        /* 針對題目與選項中的圖片進行樣式設定 */
+        .question-image {
+            max-width: 100%;
+            height: auto; /* 保持原圖長寬比例 */
+            display: block;
+            margin: 10px 0; /* 與上下文字保持距離 */
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>數概模考題目</h1>
+    <h1>數位科技模考題目</h1>
 
     <div class="filter-section">
         <div class="filter-title">請選擇測驗單元 (可複選)：</div>
@@ -186,7 +195,7 @@
 
 <script>
     let allQuestions = [];
-    let tagCounts = {}; // 改用物件來紀錄每個標籤出現的次數
+    let tagCounts = {};
     let selectedTags = new Set();
 
     fetch('mock_questions_database.json')
@@ -204,7 +213,7 @@
         })
         .catch(error => {
             document.getElementById('questionsContainer').innerHTML = 
-                `<div class="status-message" style="color: red;">讀取失敗。請確認是否透過本機伺服器執行，或已將檔案上傳至 GitHub Pages。</div>`;
+                `<div class="status-message" style="color: red;">讀取失敗。請確認是否透過本機伺服器執行，或已將檔案上傳至伺服器。</div>`;
             console.error('Error fetching questions:', error);
         });
 
@@ -215,7 +224,6 @@
                 tagsArray.forEach(tag => {
                     let trimmedTag = tag.trim();
                     if (trimmedTag !== "") {
-                        // 如果該標籤已經存在，次數加 1；否則初始化為 1
                         if (tagCounts[trimmedTag]) {
                             tagCounts[trimmedTag]++;
                         } else {
@@ -231,13 +239,11 @@
         const container = document.getElementById('tagsContainer');
         container.innerHTML = '';
 
-        // 取得所有標籤名稱並進行排序
         let sortedTags = Object.keys(tagCounts).sort();
 
         sortedTags.forEach(tag => {
             const btn = document.createElement('button');
             btn.className = 'tag-btn';
-            // 將按鈕文字加上該標籤的題數統計
             btn.textContent = `${tag} (${tagCounts[tag]})`;
             btn.onclick = () => toggleTag(tag, btn);
             container.appendChild(btn);
@@ -253,6 +259,13 @@
             btnElement.classList.add('active');
         }
         renderQuestions();
+    }
+
+    // 將文字中的 {{圖檔名}} 轉換為 <img> 標籤的函數
+    function parseImages(text) {
+        if (!text) return '';
+        // 尋找 {{字串}} 並替換成指向 mock_image 資料夾的 HTML 圖片標籤
+        return text.replace(/\{\{([^}]+)\}\}/g, '<img src="mock_image/$1.png" class="question-image" alt="附圖 $1">');
     }
 
     function renderQuestions() {
@@ -279,8 +292,16 @@
             const card = document.createElement('div');
             card.className = 'question-card';
 
-            const explanationContent = q.解析 && q.解析.trim() !== "" 
-                ? `<div class="explanation-text">解析：\n${q.解析}</div>` 
+            // 處理所有文字欄位的圖片轉換
+            const parsedTitle = parseImages(q.題目);
+            const parsedOptA = parseImages(q.選項A);
+            const parsedOptB = parseImages(q.選項B);
+            const parsedOptC = parseImages(q.選項C);
+            const parsedOptD = parseImages(q.選項D);
+            const parsedExplanation = parseImages(q.解析);
+
+            const explanationContent = parsedExplanation && parsedExplanation.trim() !== "" 
+                ? `<div class="explanation-text">解析：\n${parsedExplanation}</div>` 
                 : `<div class="explanation-text empty-explanation">解析：目前尚無解析。</div>`;
 
             card.innerHTML = `
@@ -288,12 +309,12 @@
                     <span>題號：${q.題號 || '無'}</span>
                     <span>來源：${q.來源 || '無'}</span>
                 </div>
-                <div class="question-title">${q.題目}</div>
+                <div class="question-title">${parsedTitle}</div>
                 <ul class="options-list">
-                    ${q.選項A ? `<li class="option-item">${q.選項A}</li>` : ''}
-                    ${q.選項B ? `<li class="option-item">${q.選項B}</li>` : ''}
-                    ${q.選項C ? `<li class="option-item">${q.選項C}</li>` : ''}
-                    ${q.選項D ? `<li class="option-item">${q.選項D}</li>` : ''}
+                    ${q.選項A ? `<li class="option-item">${parsedOptA}</li>` : ''}
+                    ${q.選項B ? `<li class="option-item">${parsedOptB}</li>` : ''}
+                    ${q.選項C ? `<li class="option-item">${parsedOptC}</li>` : ''}
+                    ${q.選項D ? `<li class="option-item">${parsedOptD}</li>` : ''}
                 </ul>
                 <button class="toggle-btn" onclick="toggleAnswer('ans-${index}')">顯示答案與解析</button>
                 <div class="answer-section" id="ans-${index}">

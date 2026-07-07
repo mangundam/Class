@@ -753,7 +753,21 @@
     // 啟動初始化
     syncTime();
     initNotificationSecurity(); 
-    setInterval(updateClock, 50); 
+    //setInterval(updateClock, 50); 
+	if (window.Worker) {
+		const myWorker = new Worker('timer-worker.js');
+		
+		myWorker.onmessage = function(e) {
+			if (e.data === 'tick') {
+				updateClock(); // 觸發原本的時間與通知檢查
+			}
+		};
+		
+		console.log("背景 Worker 核心啟動成功，已具備抗休眠能力。");
+	} else {
+		// 備用方案：如果瀏覽器不支援 Worker 則用舊方法
+		setInterval(updateClock, 50);
+	}
     setInterval(syncTime, 60000);
 </script>
 

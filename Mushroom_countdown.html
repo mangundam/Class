@@ -174,6 +174,25 @@
             background-color: #0062cc;
         }
 
+        /* 移至最底部的全部清除按鈕樣式 */
+        button#clearAllBtn {
+            width: 100%;
+            padding: 12px;
+            background-color: #ffffff;
+            color: #d9383a;
+            border: 1px solid #fca5a5;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+        button#clearAllBtn:hover {
+            background-color: #fef2f2;
+            border-color: #d9383a;
+        }
         /* 獨立多組卡片與折疊樣式 */
         .mushroom-card {
             background: #ffffff;
@@ -201,7 +220,12 @@
             font-weight: 600;
             font-size: 16px;
             color: #111;
+            cursor: pointer;
         }
+		.card-title:hover {
+            text-decoration: underline;
+        }
+		
         .card-summary-countdown {
             font-size: 13px;
             font-weight: bold;
@@ -323,6 +347,7 @@
         .delete-btn:hover {
             color: #d9383a;
         }
+
     </style>
 </head>
 <body>
@@ -364,6 +389,7 @@
     </div>
 
     <div id="mushroomCardsContainer"></div>
+    <button id="clearAllBtn" style="display: none;">全部清除</button>
 </div>
 
 <script>
@@ -377,6 +403,70 @@
 	// 全域變數：追蹤子母畫面視窗
     let pipWindow = null;
 	
+	// 暫存存檔函式
+    function saveToStorage() {
+        const dataToSave = {
+            launchTime: document.getElementById('launchTime').value,
+            groups: activeMushroomGroups.map(g => ({
+                id: g.id,
+                name: g.name,
+                isCollapsed: g.isCollapsed,
+                eliminateTimestamp: g.eliminateTimestamp,
+                eliminateStr: g.eliminateStr,
+                alertTriggered: g.alertTriggered
+            }))
+        };
+        localStorage.setItem('mushroom_timer_data', JSON.stringify(dataToSave));
+        updateClearAllBtnVisibility();
+    }
+
+    // 暫存讀取函式
+    function loadFromStorage() {
+        const saved = localStorage.getItem('mushroom_timer_data');
+        if (!saved) {
+            updateClearAllBtnVisibility();
+            return;
+        }
+        try {
+            const parsed = JSON.parse(saved);
+            if (parsed.launchTime !== undefined) {
+                document.getElementById('launchTime').value = parsed.launchTime;
+            }
+            if (Array.isArray(parsed.groups)) {
+                parsed.groups.forEach(g => {
+                    restoreMushroomGroup(g);
+                });
+            }
+        } catch (e) {
+            console.error("無法讀取暫存資料:", e);
+        }
+        updateClearAllBtnVisibility();
+    }
+
+    // 控制全部清除按鈕顯示狀態
+    function updateClearAllBtnVisibility() {
+        const btn = document.getElementById('clearAllBtn');
+        if (!btn) return;
+        btn.style.display = activeMushroomGroups.length > 0 ? 'block' : 'none';
+    }
+
+    // 修改蘑菇名稱函式
+    function editMushroomName(event, groupId) {
+        event.stopPropagation(); // 阻止卡片折疊
+        const group = activeMushroomGroups.find(g => g.id === groupId);
+        if (!group) return;
+
+        const newName = prompt("請輸入新的蘑菇名稱：", group.name);
+        if (newName !== null && newName.trim() !== "") {
+            group.name = newName.trim();
+            const cardEl = document.getElementById(groupId);
+            if (cardEl) {
+                const titleEl = cardEl.querySelector('.card-title');
+                if (titleEl) titleEl.innerText = group.name;
+            }
+            saveToStorage();
+        }
+    }
     async function syncTime() {
         try {
             const start = performance.now();
@@ -415,7 +505,95 @@
         return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
     }
 
+	// 還原單組卡片資料用函式
+    function restoreMushroomGroup(savedGroup) {
+        const launchTimeVal = document.getElementById('launchTime').value;
+        const launchTimeCost = launchTimeVal === '' ? 0 : parseInt(launchTimeVal, 10);
+        const baseRespawnTime = new Date(savedGroup.eliminateTimestamp + 5 * 60 * 1000);
+        const eliminateTime = new Date(savedGroup.eliminateTimestamp);
+
+        let calculatedTimes = [];
+        calculatedTimes.push({
+            id: 'base',
+            timestamp: baseRespawnTime.getTime(),
+            labelText: '基準復活時間點'
+        });
+
+        for (let i = 1; i <= 8; i++) {
+            const backwardSeconds = i * 8;
+            const expectedGameTime = new Date(baseRespawnTime.getTime() - backwardSeconds * 1000);
+            const actualActionTime = new Date(expectedGameTime.getTime() - launchTimeCost * 1000);
+            calculatedTimes.push({
+                id: String(i),
+                timestamp: actualActionTime.getTime(),
+                labelText: `提前 ${backwardSeconds}s`
+            });
+        }
+
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'mushroom-card';
+        cardDiv.id = savedGroup.id;
+        
+        const displayStyle = savedGroup.isCollapsed ? 'style="display: none;"' : '';
+
+        cardDiv.innerHTML = `
+            <div class="card-header" onclick="toggleCardCollapse('${savedGroup.id}')">
+                <span class="card-title" onclick="editMushroomName(event, '${savedGroup.id}')" title="點擊修改名稱">${savedGroup.name}</span>
+                <div style="display: flex; align-items: center;">
+                    <span class="card-summary-countdown" id="summary-${savedGroup.id}">載入中...</span>
+                    <button class="delete-btn" onclick="deleteMushroomGroup(event, '${savedGroup.id}')">x</button>
+                </div>
+            </div>
+            <div class="card-body" id="body-${savedGroup.id}" ${displayStyle}>
+                <div class="record-container">
+                    <div class="record-box"><strong>消滅時間</strong><br>${formatExactTime(eliminateTime)}</div>
+                    <div class="respawn-box"><strong>預計復活</strong><br>${formatExactTime(baseRespawnTime)}</div>
+                </div>
+                <div class="results">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>推算</th>
+                                <th>倒數計時</th>
+                                <th class="highlight">開遊戲</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="${savedGroup.id}-row-base">
+                                <td class="row-meta" style="font-weight:600;">基準復活時間點</td>
+                                <td class="countdown-cell">-</td>
+                                <td class="highlight">${formatExactTime(baseRespawnTime)}</td>
+                            </tr>
+                            ${[1,2,3,4,5,6,7,8].map(i => {
+                                const tObj = calculatedTimes[i];
+                                return `
+                                <tr id="${savedGroup.id}-row-${i}">
+                                    <td class="row-meta">提前 ${i*8}s </td>
+                                    <td class="countdown-cell">-</td>
+                                    <td class="highlight">${formatExactTime(new Date(tObj.timestamp))}</td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div id="${savedGroup.id}-elimination-monitor" class="elimination-monitor">計算中...</div>
+            </div>
+        `;
+
+        document.getElementById('mushroomCardsContainer').appendChild(cardDiv);
+
+        activeMushroomGroups.push({
+            id: savedGroup.id,
+            name: savedGroup.name,
+            isCollapsed: savedGroup.isCollapsed, 
+            eliminateTimestamp: savedGroup.eliminateTimestamp, 
+            eliminateStr: savedGroup.eliminateStr,
+            timings: calculatedTimes,
+            alertTriggered: savedGroup.alertTriggered || false 
+        });
+    }
     function createNewMushroomGroup(eliminateTime) {
+		const launchTimeVal = document.getElementById('launchTime').value;
         const launchTimeCost = parseInt(document.getElementById('launchTime').value, 10) || 0;
         const nameInput = document.getElementById('mushroomName').value.trim();
         const finalName = nameInput || `蘑菇 #${activeMushroomGroups.length + 1}`;
@@ -449,7 +627,7 @@
         /* 核心修改 1：將 style 設為 display: none，使新卡片預設隱藏收合 */
         cardDiv.innerHTML = `
             <div class="card-header" onclick="toggleCardCollapse('${groupId}')">
-                <span class="card-title">${finalName}</span>
+                <span class="card-title" onclick="editMushroomName(event, '${groupId}')" title="點擊修改名稱">${finalName}</span>
                 <div style="display: flex; align-items: center;">
                     <span class="card-summary-countdown" id="summary-${groupId}">載入中...</span>
                     <button class="delete-btn" onclick="deleteMushroomGroup(event, '${groupId}')">x</button>
@@ -506,6 +684,7 @@
         document.getElementById('mushroomName').value = '';
         document.getElementById('reserveMin').value = '0';
         document.getElementById('reserveSec').value = '0';
+        saveToStorage(); // 建立後儲存
     }
 
     function updateCardTimingsAndSummary(group, currentTimestamp) {
@@ -547,6 +726,7 @@
         if (target64sItem && !group.alertTriggered) {
             if (currentTimestamp >= target64sItem.timestamp) {
                 group.alertTriggered = true; 
+                saveToStorage();
                 triggerMushroomAlert(group.name);
             }
         }
@@ -755,6 +935,7 @@
         if (bodyDiv) {
             bodyDiv.style.display = group.isCollapsed ? 'none' : 'block';
         }
+        saveToStorage(); // 折疊狀態切換時儲存
     }
 
     function deleteMushroomGroup(event, groupId) {
@@ -763,6 +944,7 @@
             const cardElement = document.getElementById(groupId);
             if (cardElement) cardElement.remove();
             activeMushroomGroups = activeMushroomGroups.filter(g => g.id !== groupId);
+            saveToStorage(); // 刪除單組後儲存
         }
     }
 
@@ -848,7 +1030,16 @@
         const targetEliminateTime = new Date(getExactTime().getTime() + totalMsOffset);
         createNewMushroomGroup(targetEliminateTime);
     });
-    
+	
+    // 全部清除按鈕事件綁定
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+        if (activeMushroomGroups.length === 0) return;
+        if (confirm("確定要清除所有蘑菇紀錄嗎？")) {
+            document.getElementById('mushroomCardsContainer').innerHTML = '';
+            activeMushroomGroups = [];
+            saveToStorage();
+        }
+    });
     [document.getElementById('reserveMin'), document.getElementById('reserveSec'), document.getElementById('mushroomName')].forEach(input => {
         input.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
@@ -857,9 +1048,12 @@
             }
         });
     });
+	
+	document.getElementById('launchTime').addEventListener('change', saveToStorage);
+    document.getElementById('launchTime').addEventListener('input', saveToStorage);
 
     /* 核心修改 2：為時間相關數字欄位加上自動清空與防空值處理 */
-    [document.getElementById('launchTime'), document.getElementById('reserveMin'), document.getElementById('reserveSec')].forEach(input => {
+   [document.getElementById('launchTime'), document.getElementById('reserveMin'), document.getElementById('reserveSec')].forEach(input => {
         // 當游標點入欄位時
         input.addEventListener('focus', function() {
             if (this.value === '0' || this.value === '') {
@@ -873,10 +1067,11 @@
             }
         });
     });
-
+	
     // 啟動初始化
     syncTime();
     initNotificationSecurity(); 
+    loadFromStorage(); // 載入儲存的紀錄
     setInterval(updateClock, 50); 
     setInterval(syncTime, 60000);
 </script>

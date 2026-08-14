@@ -73,6 +73,12 @@
             border-color: #007aff;
         }
 
+		/* 針對小視窗按鈕設計獨立顏色 */
+        .toggle-btn.pip-active {
+            background-color: #8b5cf6;
+            color: #ffffff;
+            border-color: #8b5cf6;
+        }
         .container {
             max-width: 650px;
             width: 100%;
@@ -328,6 +334,7 @@
             網路標準時間載入中...
         </div>
         <button id="soundToggleBtn" class="toggle-btn active">有音效</button>
+		<button id="pipToggleBtn" class="toggle-btn">小視窗</button>
     </div>
 </div>
 
@@ -367,6 +374,9 @@
     let isNotificationEnabled = false;
     let isSoundEnabled = true;
 
+	// 全域變數：追蹤子母畫面視窗
+    let pipWindow = null;
+	
     async function syncTime() {
         try {
             const start = performance.now();
@@ -396,6 +406,9 @@
         activeMushroomGroups.forEach(group => {
             updateCardTimingsAndSummary(group, currentTimestamp);
         });
+		if (pipWindow) {
+            updatePiPContent(currentTimestamp);
+        }
     }
 
     function formatExactTime(date) {
@@ -593,11 +606,122 @@
                         row.classList.remove('nearest-row');
                         row.querySelector('.countdown-cell').innerText = '-';
                     }
+				}
+			}
+		}
+	}
+    // 更新子母畫面內容的核心函式
+    function updatePiPContent(currentTimestamp) {
+        let globalClosestTime = Infinity;
+        let globalClosestName = "--";
+
+        // 遍歷所有蘑菇，尋大全場距離「開遊戲」最近的一顆
+        activeMushroomGroups.forEach(group => {
+            for (let i = 0; i < group.timings.length; i++) {
+                const diff = group.timings[i].timestamp - currentTimestamp;
+                if (diff >= 0 && diff < globalClosestTime) {
+                    globalClosestTime = diff;
+                    globalClosestName = group.name;
                 }
+            }
+        });
+
+        // 抓取小視窗內的 DOM 元素
+        const nameEl = pipWindow.document.getElementById('pipName');
+        const timeEl = pipWindow.document.getElementById('pipTime');
+
+        if (globalClosestTime !== Infinity) {
+            const totalSecLeft = Math.ceil(globalClosestTime / 1000);
+            const m = String(Math.floor(totalSecLeft / 60)).padStart(2, '0');
+            const s = String(totalSecLeft % 60).padStart(2, '0');
+
+            if (nameEl) nameEl.textContent = globalClosestName;
+            if (timeEl) {
+                timeEl.textContent = `${m}分 ${s}秒`;
+                timeEl.style.color = '#ef4444'; // 紅色警示
+            }
+        } else {
+            if (nameEl) nameEl.textContent = "--";
+            if (timeEl) {
+                timeEl.textContent = "全部結束";
+                timeEl.style.color = '#9ca3af'; // 灰色
             }
         }
     }
 
+    // 啟動或關閉子母畫面 (PiP)
+    async function togglePiP() {
+        const btn = document.getElementById('pipToggleBtn');
+        
+        // 如果已經開啟，則關閉
+        if (pipWindow) {
+            pipWindow.close();
+            return;
+        }
+
+        // 檢查瀏覽器支援度
+        if (!('documentPictureInPicture' in window)) {
+            alert('您的瀏覽器版本不支援「子母畫面 API」。\n(請使用最新版的 Google Chrome 或 Edge 電腦版，並確保網址為 https)');
+            return;
+        }
+
+        try {
+            // 向瀏覽器請求開一個客製化小視窗
+            pipWindow = await window.documentPictureInPicture.requestWindow({
+                width: 320,
+                height: 180,
+            });
+
+            // 為小視窗注入獨立的 CSS 樣式
+            const style = pipWindow.document.createElement('style');
+            style.textContent = `
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                    background-color: #111827; /* 深色背景，懸浮時更清楚不刺眼 */
+                    color: #f3f4f6;
+                    margin: 0;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                    text-align: center;
+                }
+                .label { font-size: 14px; color: #9ca3af; margin-bottom: 8px; }
+                .name { font-size: 26px; font-weight: 700; margin-bottom: 12px; color: #f9fafb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%; }
+                .time { font-size: 36px; font-weight: 800; color: #ef4444; font-variant-numeric: tabular-nums; }
+            `;
+            pipWindow.document.head.appendChild(style);
+
+            // 注入 HTML 結構
+            pipWindow.document.body.innerHTML = `
+                <div class="label">最快開遊戲時機</div>
+                <div id="pipName" class="name">無排程</div>
+                <div id="pipTime" class="time">--分 --秒</div>
+            `;
+
+            // 更新按鈕樣式
+            btn.classList.add('pip-active');
+            btn.innerText = "視窗已開";
+
+            // 監聽小視窗被使用者手動關閉的事件
+            pipWindow.addEventListener('pagehide', () => {
+                pipWindow = null;
+                btn.classList.remove('pip-active');
+                btn.innerText = "小視窗";
+            });
+
+            // 建立成功後立刻刷一次資料進去
+            updatePiPContent(getExactTime().getTime());
+
+        } catch (error) {
+            console.error("無法開啟小視窗:", error);
+            alert("開啟小視窗失敗，請確認瀏覽器權限。");
+        }
+    }
+
+    // 綁定小視窗按鈕事件
+    document.getElementById('pipToggleBtn').addEventListener('click', togglePiP);
     function triggerMushroomAlert(mushroomName) {
         if (isNotificationEnabled && Notification.permission === "granted") {
             const notification = new Notification("蘑菇計時提醒", {
@@ -753,21 +877,7 @@
     // 啟動初始化
     syncTime();
     initNotificationSecurity(); 
-    //setInterval(updateClock, 50); 
-	if (window.Worker) {
-		const myWorker = new Worker('timer-worker.js');
-		
-		myWorker.onmessage = function(e) {
-			if (e.data === 'tick') {
-				updateClock(); // 觸發原本的時間與通知檢查
-			}
-		};
-		
-		console.log("背景 Worker 核心啟動成功，已具備抗休眠能力。");
-	} else {
-		// 備用方案：如果瀏覽器不支援 Worker 則用舊方法
-		setInterval(updateClock, 50);
-	}
+    setInterval(updateClock, 50); 
     setInterval(syncTime, 60000);
 </script>
 

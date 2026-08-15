@@ -870,6 +870,57 @@
         }
     }
 
+    // 雙向同步通知與音效按鈕外觀
+    function syncToggleUI() {
+        const notiBtn = document.getElementById('notiToggleBtn');
+        const soundBtn = document.getElementById('soundToggleBtn');
+
+        if (notiBtn) {
+            notiBtn.className = isNotificationEnabled ? 'toggle-btn active' : 'toggle-btn';
+            notiBtn.innerText = isNotificationEnabled ? '有通知' : '無通知';
+        }
+        if (soundBtn) {
+            soundBtn.className = isSoundEnabled ? 'toggle-btn active' : 'toggle-btn';
+            soundBtn.innerText = isSoundEnabled ? '有音效' : '無音效';
+        }
+
+        if (pipWindow) {
+            const pipNotiBtn = pipWindow.document.getElementById('pipNotiBtn');
+            const pipSoundBtn = pipWindow.document.getElementById('pipSoundBtn');
+            if (pipNotiBtn) {
+                pipNotiBtn.className = isNotificationEnabled ? 'pip-btn active' : 'pip-btn';
+                pipNotiBtn.innerText = isNotificationEnabled ? '有通知' : '無通知';
+            }
+            if (pipSoundBtn) {
+                pipSoundBtn.className = isSoundEnabled ? 'pip-btn active' : 'pip-btn';
+                pipSoundBtn.innerText = isSoundEnabled ? '有音效' : '無音效';
+            }
+        }
+    }
+
+    // 切換通知狀態
+    function handleToggleNotification() {
+        if (!isNotificationEnabled) {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    isNotificationEnabled = true;
+                } else {
+                    alert("權限已被拒絕，請至瀏覽器網址列左側調整允許此網頁發送通知。");
+                    isNotificationEnabled = false;
+                }
+                syncToggleUI();
+            });
+        } else {
+            isNotificationEnabled = false;
+            syncToggleUI();
+        }
+    }
+
+    // 切換音效狀態
+    function handleToggleSound() {
+        isSoundEnabled = !isSoundEnabled;
+        syncToggleUI();
+    }
     // 啟動或關閉子母畫面 (PiP)
     async function togglePiP() {
         const btn = document.getElementById('pipToggleBtn');
@@ -907,7 +958,31 @@
                     align-items: center;
                     justify-content: space-between;
                     height: 80vh;
+					box-sizing: border-box;
                     text-align: center;
+                }
+                .pip-header {
+                    display: flex;
+                    gap: 8px;
+                    width: 100%;
+                    justify-content: center;
+                    margin-bottom: 4px;
+                }
+                .pip-btn {
+                    padding: 4px 10px;
+                    background-color: #374151;
+                    color: #d1d5db;
+                    border: 1px solid #4b5563;
+                    border-radius: 4px;
+                    font-size: 11px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                .pip-btn.active {
+                    background-color: #007aff;
+                    color: #ffffff;
+                    border-color: #007aff;
                 }
                 .main-box { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
                 .label { font-size: 14px; color: #9ca3af; margin-bottom: 4px; }
@@ -921,6 +996,10 @@
 
             // 注入 HTML 結構
             pipWindow.document.body.innerHTML = `
+				<div class="pip-header">
+                    <button id="pipNotiBtn" class="pip-btn">無通知</button>
+                    <button id="pipSoundBtn" class="pip-btn">無音效</button>
+                </div>
                 <div class="main-box">
                     <div class="label">最快復活蘑菇</div>
                     <div id="pipName" class="name">無排程</div>
@@ -929,6 +1008,10 @@
                 </div>
                 <div id="pipSecondary" class="secondary-box">下一顆：無</div>
             `;
+
+            pipWindow.document.getElementById('pipNotiBtn').addEventListener('click', handleToggleNotification);
+            pipWindow.document.getElementById('pipSoundBtn').addEventListener('click', handleToggleSound);
+
 
             // 更新按鈕樣式
             btn.classList.add('pip-active');
@@ -940,7 +1023,7 @@
                 btn.classList.remove('pip-active');
                 btn.innerText = "小視窗";
             });
-
+            syncToggleUI();
             // 建立成功後立刻刷一次資料進去
             updatePiPContent(getExactTime().getTime());
 
@@ -952,7 +1035,7 @@
 
     // 綁定小視窗按鈕事件
     document.getElementById('pipToggleBtn').addEventListener('click', togglePiP);
-    function triggerMushroomAlert(mushroomName) {
+	function triggerMushroomAlert(mushroomName) {
         if (isNotificationEnabled && Notification.permission === "granted") {
             const notification = new Notification("蘑菇計時提醒", {
                 body: `您的蘑菇 [${mushroomName}] 已到提前 64 秒開遊戲時機！`,
@@ -962,18 +1045,24 @@
 
             notification.onshow = function() {
                 if (isSoundEnabled) {
-                    const audio = new Audio('mushroom_sound.mp3');
-                    audio.play().catch(err => {
-                        console.log("網頁背景音效遭阻擋，已改由作業系統預設通知音效提示。");
-                    });
+                    playAlertSound();
                 }
             };
-        } else {
-            if (isSoundEnabled && document.visibilityState === "visible") {
-                const audio = new Audio('mushroom_sound.mp3');
-                audio.play().catch(err => console.error(err));
-            }
+				
+        } else if (isSoundEnabled) {
+            playAlertSound();
         }
+    }
+	function playAlertSound() {
+        const audioDoc = pipWindow ? pipWindow.document : document;
+        const audio = audioDoc.createElement('audio');
+        audio.src = 'mushroom_sound.mp3';
+        audioDoc.body.appendChild(audio);
+        audio.onended = () => audio.remove();
+        audio.play().catch(err => {
+            console.log("音效播放遭阻擋:", err);
+            audio.remove();
+        });
     }
 
     function toggleCardCollapse(groupId) {
@@ -1000,68 +1089,26 @@
 
     /* 一進入網頁即自動強制執行權限驗證與請求彈窗 */
     function initNotificationSecurity() {
-        const btn = document.getElementById('notiToggleBtn');
-        
         if (!("Notification" in window)) {
-            btn.classList.remove('active');
-            btn.innerText = "無通知";
             isNotificationEnabled = false;
+            syncToggleUI();
             return;
         }
-
         if (Notification.permission === "default") {
             Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    isNotificationEnabled = true;
-                    btn.classList.add('active');
-                    btn.innerText = "有通知";
-                } else {
-                    isNotificationEnabled = false;
-                    btn.classList.remove('active');
-                    btn.innerText = "無通知";
-                }
+                isNotificationEnabled = (permission === "granted");
+                syncToggleUI();
             });
-        } 
-        else if (Notification.permission === "granted") {
+        } else if (Notification.permission === "granted") {
             isNotificationEnabled = true;
-            btn.classList.add('active');
-            btn.innerText = "有通知";
-        } 
-        else {
+            syncToggleUI();
+        } else {
             isNotificationEnabled = false;
-            btn.classList.remove('active');
-            btn.innerText = "無通知";
+            syncToggleUI();
         }
     }
-
-    document.getElementById('notiToggleBtn').addEventListener('click', function() {
-        if (!isNotificationEnabled) {
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    isNotificationEnabled = true;
-                    this.classList.add('active');
-                    this.innerText = "有通知";
-                } else {
-                    alert("權限已被拒絕，請至瀏覽器網址列左側調整允許此網頁發送通知。");
-                }
-            });
-        } else {
-            isNotificationEnabled = false;
-            this.classList.remove('active');
-            this.innerText = "無通知";
-        }
-    });
-
-    document.getElementById('soundToggleBtn').addEventListener('click', function() {
-        isSoundEnabled = !isSoundEnabled;
-        if (isSoundEnabled) {
-            this.classList.add('active');
-            this.innerText = "有音效";
-        } else {
-            this.classList.remove('active');
-            this.innerText = "無音效";
-        }
-    });
+    document.getElementById('notiToggleBtn').addEventListener('click', handleToggleNotification);
+    document.getElementById('soundToggleBtn').addEventListener('click', handleToggleSound);
 
     document.getElementById('eliminateBtn').addEventListener('click', () => {
         createNewMushroomGroup(getExactTime());

@@ -816,10 +816,6 @@
             .filter(g => g.respawnTimestamp >= currentTimestamp)
             .sort((a, b) => a.respawnTimestamp - b.respawnTimestamp);
 
-	
-	 
-
-			 
         const nameEl = pipWindow.document.getElementById('pipName');
         const exactTimeEl = pipWindow.document.getElementById('pipExactTime');
         const countdownEl = pipWindow.document.getElementById('pipCountdown');
@@ -827,9 +823,14 @@
 
         if (activeList.length > 0) {
             const first = activeList[0];
+            
+            // 計算第一顆距離復活還有多久
+            const firstRespawnSec = Math.ceil((first.respawnTimestamp - currentTimestamp) / 1000);
+            const firstM = String(Math.floor(firstRespawnSec / 60)).padStart(2, '0');
+            const firstS = String(firstRespawnSec % 60).padStart(2, '0');
 
             if (nameEl) nameEl.textContent = first.name;
-            if (exactTimeEl) exactTimeEl.textContent = `${first.respawnTimeStr} 復活`;
+            if (exactTimeEl) exactTimeEl.textContent = `${first.respawnTimeStr} 復活 (${firstM}分${firstS}秒後)`;
 
             // 紅色字倒數：倒數開遊戲的時間
             if (countdownEl) {
@@ -845,13 +846,17 @@
                 }
             }
 
-
             if (secondaryEl) {
                 if (activeList.length > 1) {
                     const second = activeList[1];
-                    secondaryEl.innerHTML = `次順位：<span class="secondary-highlight">${second.name}</span> <br>(${second.respawnTimeStr} 復活)`;
+                    // 計算第二顆距離復活還有多久
+                    const secondRespawnSec = Math.ceil((second.respawnTimestamp - currentTimestamp) / 1000);
+                    const secondM = String(Math.floor(secondRespawnSec / 60)).padStart(2, '0');
+                    const secondS = String(secondRespawnSec % 60).padStart(2, '0');
+
+                    secondaryEl.innerHTML = `下一顆：<span class="secondary-highlight">${second.name}</span> <br>${second.respawnTimeStr} 復活(${secondM}分${secondS}秒後)`;
                 } else {
-                    secondaryEl.textContent = `次順位：無`;
+                    secondaryEl.textContent = `下一顆：無`;
                 }
             }
         } else {
@@ -861,7 +866,7 @@
                 countdownEl.textContent = "已無排程";
                 countdownEl.style.color = '#9ca3af';
             }
-            if (secondaryEl) secondaryEl.textContent = `次順位：無`;
+            if (secondaryEl) secondaryEl.textContent = `下一顆：無`;
         }
     }
 
@@ -885,7 +890,7 @@
             // 向瀏覽器請求開一個客製化小視窗
             pipWindow = await window.documentPictureInPicture.requestWindow({
                 width: 320,
-                height: 200,
+                height: 210,
             });
 
             // 為小視窗注入獨立的 CSS 樣式
@@ -922,7 +927,7 @@
                     <div id="pipExactTime" class="exact-time">--:--:-- 復活</div>
                     <div id="pipCountdown" class="countdown">--分 --秒</div>
                 </div>
-                <div id="pipSecondary" class="secondary-box">次順位：無</div>
+                <div id="pipSecondary" class="secondary-box">下一顆：無</div>
             `;
 
             // 更新按鈕樣式

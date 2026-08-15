@@ -403,6 +403,23 @@
 	// 全域變數：追蹤子母畫面視窗
     let pipWindow = null;
 	
+    // 常駐預載音效實例與解鎖標記
+    const globalAudio = new Audio('mushroom_sound.mp3');
+    globalAudio.preload = 'auto';
+    let isAudioUnlocked = false;
+
+    // 透過任何使用者互動解鎖音訊播放限制
+    function unlockAudio() {
+        if (isAudioUnlocked) return;
+        globalAudio.muted = true;
+        globalAudio.play().then(() => {
+            globalAudio.pause();
+            globalAudio.currentTime = 0;
+            globalAudio.muted = false;
+            isAudioUnlocked = true;
+        }).catch(() => {});
+    }
+	
 	// 暫存存檔函式
     function saveToStorage() {
         const dataToSave = {
@@ -453,6 +470,7 @@
     // 修改蘑菇名稱函式
     function editMushroomName(event, groupId) {
         event.stopPropagation(); // 阻止卡片折疊
+        unlockAudio();
         const group = activeMushroomGroups.find(g => g.id === groupId);
         if (!group) return;
 
@@ -900,6 +918,7 @@
 
     // 切換通知狀態
     function handleToggleNotification() {
+        unlockAudio();
         if (!isNotificationEnabled) {
             Notification.requestPermission().then(permission => {
                 if (permission === "granted") {
@@ -918,11 +937,13 @@
 
     // 切換音效狀態
     function handleToggleSound() {
+        unlockAudio();
         isSoundEnabled = !isSoundEnabled;
         syncToggleUI();
     }
     // 啟動或關閉子母畫面 (PiP)
     async function togglePiP() {
+        unlockAudio();
         const btn = document.getElementById('pipToggleBtn');
         
         // 如果已經開啟，則關閉
@@ -1054,18 +1075,14 @@
         }
     }
 	function playAlertSound() {
-        const audioDoc = pipWindow ? pipWindow.document : document;
-        const audio = audioDoc.createElement('audio');
-        audio.src = 'mushroom_sound.mp3';
-        audioDoc.body.appendChild(audio);
-        audio.onended = () => audio.remove();
-        audio.play().catch(err => {
+        globalAudio.currentTime = 0;
+        globalAudio.play().catch(err => {
             console.log("音效播放遭阻擋:", err);
-            audio.remove();
         });
     }
 
     function toggleCardCollapse(groupId) {
+        unlockAudio();
         const group = activeMushroomGroups.find(g => g.id === groupId);
         if (!group) return;
 
@@ -1079,6 +1096,7 @@
 
     function deleteMushroomGroup(event, groupId) {
         event.stopPropagation(); 
+        unlockAudio();
         if (confirm("確定要刪除這組蘑菇記錄嗎？")) {
             const cardElement = document.getElementById(groupId);
             if (cardElement) cardElement.remove();
@@ -1111,10 +1129,12 @@
     document.getElementById('soundToggleBtn').addEventListener('click', handleToggleSound);
 
     document.getElementById('eliminateBtn').addEventListener('click', () => {
+        unlockAudio();
         createNewMushroomGroup(getExactTime());
     });
 
     document.getElementById('reserveBtn').addEventListener('click', () => {
+        unlockAudio();
         const minOffset = parseInt(document.getElementById('reserveMin').value, 10) || 0;
         const secOffset = parseInt(document.getElementById('reserveSec').value, 10) || 0;
         const totalMsOffset = ((minOffset * 60) + secOffset) * 1000;
@@ -1130,6 +1150,7 @@
 	
     // 全部清除按鈕事件綁定
     document.getElementById('clearAllBtn').addEventListener('click', () => {
+        unlockAudio();
         if (activeMushroomGroups.length === 0) return;
         if (confirm("確定要清除所有蘑菇紀錄嗎？")) {
             document.getElementById('mushroomCardsContainer').innerHTML = '';
@@ -1153,6 +1174,7 @@
    [document.getElementById('launchTime'), document.getElementById('reserveMin'), document.getElementById('reserveSec')].forEach(input => {
         // 當游標點入欄位時
         input.addEventListener('focus', function() {
+        unlockAudio();
             if (this.value === '0' || this.value === '') {
                 this.value = ''; // 點擊時自己清空，不用退格刪除0
             }
@@ -1165,6 +1187,7 @@
         });
     });
 	
+    document.addEventListener('click', unlockAudio, { once: true });
     // 啟動初始化
     syncTime();
     initNotificationSecurity(); 

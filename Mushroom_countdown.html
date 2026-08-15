@@ -901,19 +901,6 @@
             soundBtn.className = isSoundEnabled ? 'toggle-btn active' : 'toggle-btn';
             soundBtn.innerText = isSoundEnabled ? '有音效' : '無音效';
         }
-
-        if (pipWindow) {
-            const pipNotiBtn = pipWindow.document.getElementById('pipNotiBtn');
-            const pipSoundBtn = pipWindow.document.getElementById('pipSoundBtn');
-            if (pipNotiBtn) {
-                pipNotiBtn.className = isNotificationEnabled ? 'pip-btn active' : 'pip-btn';
-                pipNotiBtn.innerText = isNotificationEnabled ? '有通知' : '無通知';
-            }
-            if (pipSoundBtn) {
-                pipSoundBtn.className = isSoundEnabled ? 'pip-btn active' : 'pip-btn';
-                pipSoundBtn.innerText = isSoundEnabled ? '有音效' : '無音效';
-            }
-        }
     }
 
     // 切換通知狀態
@@ -1017,10 +1004,6 @@
 
             // 注入 HTML 結構
             pipWindow.document.body.innerHTML = `
-				<div class="pip-header">
-                    <button id="pipNotiBtn" class="pip-btn">無通知</button>
-                    <button id="pipSoundBtn" class="pip-btn">無音效</button>
-                </div>
                 <div class="main-box">
                     <div class="label">最快復活蘑菇</div>
                     <div id="pipName" class="name">無排程</div>
@@ -1029,10 +1012,6 @@
                 </div>
                 <div id="pipSecondary" class="secondary-box">下一顆：無</div>
             `;
-
-            pipWindow.document.getElementById('pipNotiBtn').addEventListener('click', handleToggleNotification);
-            pipWindow.document.getElementById('pipSoundBtn').addEventListener('click', handleToggleSound);
-
 
             // 更新按鈕樣式
             btn.classList.add('pip-active');

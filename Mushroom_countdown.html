@@ -790,42 +790,78 @@
 			}
 		}
 	}
-    // 更新子母畫面內容的核心函式
+	
     function updatePiPContent(currentTimestamp) {
-        let globalClosestTime = Infinity;
-        let globalClosestName = "--";
+        const activeList = activeMushroomGroups
+            .map(g => {
+                const respawnTs = g.timings[0].timestamp;
+                // 找出該組蘑菇中，距離現在最接近且尚未到期的開遊戲時間點（timings[1~8] 或 基準點）
+                let nextActionTs = null;
+                let minDiff = Infinity;
+                for (let i = 0; i < g.timings.length; i++) {
+                    const diff = g.timings[i].timestamp - currentTimestamp;
+                    if (diff >= 0 && diff < minDiff) {
+                        minDiff = diff;
+                        nextActionTs = g.timings[i].timestamp;
+                    }
+                }
 
-        // 遍歷所有蘑菇，尋大全場距離「開遊戲」最近的一顆
-        activeMushroomGroups.forEach(group => {
-            for (let i = 0; i < group.timings.length; i++) {
-                const diff = group.timings[i].timestamp - currentTimestamp;
-                if (diff >= 0 && diff < globalClosestTime) {
-                    globalClosestTime = diff;
-                    globalClosestName = group.name;
+                return {
+                    name: g.name,
+                    respawnTimestamp: respawnTs,
+                    respawnTimeStr: formatExactTime(new Date(respawnTs)),
+                    nextActionTimestamp: nextActionTs
+                };
+            })
+            .filter(g => g.respawnTimestamp >= currentTimestamp)
+            .sort((a, b) => a.respawnTimestamp - b.respawnTimestamp);
+
+	
+	 
+
+			 
+        const nameEl = pipWindow.document.getElementById('pipName');
+        const exactTimeEl = pipWindow.document.getElementById('pipExactTime');
+        const countdownEl = pipWindow.document.getElementById('pipCountdown');
+        const secondaryEl = pipWindow.document.getElementById('pipSecondary');
+
+        if (activeList.length > 0) {
+            const first = activeList[0];
+
+            if (nameEl) nameEl.textContent = first.name;
+            if (exactTimeEl) exactTimeEl.textContent = `${first.respawnTimeStr} 復活`;
+
+            // 紅色字倒數：倒數開遊戲的時間
+            if (countdownEl) {
+                if (first.nextActionTimestamp !== null) {
+                    const totalSecLeft = Math.ceil((first.nextActionTimestamp - currentTimestamp) / 1000);
+                    const m = String(Math.floor(totalSecLeft / 60)).padStart(2, '0');
+                    const s = String(totalSecLeft % 60).padStart(2, '0');
+                    countdownEl.textContent = `${m}分 ${s}秒`;
+                    countdownEl.style.color = '#ef4444';
+                } else {
+                    countdownEl.textContent = `已過開遊戲期`;
+                    countdownEl.style.color = '#9ca3af';
                 }
             }
-        });
 
-        // 抓取小視窗內的 DOM 元素
-        const nameEl = pipWindow.document.getElementById('pipName');
-        const timeEl = pipWindow.document.getElementById('pipTime');
 
-        if (globalClosestTime !== Infinity) {
-            const totalSecLeft = Math.ceil(globalClosestTime / 1000);
-            const m = String(Math.floor(totalSecLeft / 60)).padStart(2, '0');
-            const s = String(totalSecLeft % 60).padStart(2, '0');
-
-            if (nameEl) nameEl.textContent = globalClosestName;
-            if (timeEl) {
-                timeEl.textContent = `${m}分 ${s}秒`;
-                timeEl.style.color = '#ef4444'; // 紅色警示
+            if (secondaryEl) {
+                if (activeList.length > 1) {
+                    const second = activeList[1];
+                    secondaryEl.innerHTML = `次順位：<span class="secondary-highlight">${second.name}</span> <br>(${second.respawnTimeStr} 復活)`;
+                } else {
+                    secondaryEl.textContent = `次順位：無`;
+                }
             }
         } else {
-            if (nameEl) nameEl.textContent = "--";
-            if (timeEl) {
-                timeEl.textContent = "全部結束";
-                timeEl.style.color = '#9ca3af'; // 灰色
+            if (nameEl) nameEl.textContent = "全部結束";
+            if (exactTimeEl) exactTimeEl.textContent = "--:--:--";
+            if (countdownEl) {
+                countdownEl.textContent = "已無排程";
+                countdownEl.style.color = '#9ca3af';
             }
+            if (secondaryEl) secondaryEl.textContent = `次順位：無`;
         }
     }
 
@@ -849,7 +885,7 @@
             // 向瀏覽器請求開一個客製化小視窗
             pipWindow = await window.documentPictureInPicture.requestWindow({
                 width: 320,
-                height: 180,
+                height: 190,
             });
 
             // 為小視窗注入獨立的 CSS 樣式
@@ -860,24 +896,33 @@
                     background-color: #111827; /* 深色背景，懸浮時更清楚不刺眼 */
                     color: #f3f4f6;
                     margin: 0;
+                    padding: 12px;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    justify-content: center;
-                    height: 100vh;
+                    justify-content: space-between;
+                    height: 80vh;
                     text-align: center;
                 }
-                .label { font-size: 14px; color: #9ca3af; margin-bottom: 8px; }
-                .name { font-size: 26px; font-weight: 700; margin-bottom: 12px; color: #f9fafb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%; }
-                .time { font-size: 36px; font-weight: 800; color: #ef4444; font-variant-numeric: tabular-nums; }
+                .main-box { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+                .label { font-size: 14px; color: #9ca3af; margin-bottom: 4px; }
+                .name { font-size: 24px; font-weight: 700; color: #f9fafb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; margin-bottom: 2px; }
+                .exact-time { font-size: 18px; color: #38bdf8; font-weight: 600; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+                .countdown { font-size: 28px; font-weight: 800; color: #ef4444; font-variant-numeric: tabular-nums; }
+                .secondary-box { border-top: 1px solid #374151; padding-top: 6px; font-size: 16px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+                .secondary-highlight { color: #fbbf24; font-weight: 600; }
             `;
             pipWindow.document.head.appendChild(style);
 
             // 注入 HTML 結構
             pipWindow.document.body.innerHTML = `
-                <div class="label">最快開遊戲時機</div>
-                <div id="pipName" class="name">無排程</div>
-                <div id="pipTime" class="time">--分 --秒</div>
+                <div class="main-box">
+                    <div class="label">最快復活蘑菇</div>
+                    <div id="pipName" class="name">無排程</div>
+                    <div id="pipExactTime" class="exact-time">--:--:-- 復活</div>
+                    <div id="pipCountdown" class="countdown">--分 --秒</div>
+                </div>
+                <div id="pipSecondary" class="secondary-box">次順位：無</div>
             `;
 
             // 更新按鈕樣式

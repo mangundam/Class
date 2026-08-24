@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>工作排程演算法</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --border: #cbd5e1;
+      --accent: #f1f5f9;
+      --success-bg: #ecfdf5;
+      --success-border: #10b981;
+      --error-bg: #fef2f2;
+      --error-border: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 860px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: #64748b;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      font-weight: bold;
+    }
+
+    .badge {
+      background: #e0e7ff;
+      color: #3730a3;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    .instruction {
+      font-size: 1.05rem;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    th {
+      background-color: var(--accent);
+    }
+
+    .app-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: bold;
+    }
+
+    .color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .gantt-wrapper {
+      margin: 20px 0;
+    }
+
+    .timeline-label {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .gantt-chart {
+      display: flex;
+      width: 100%;
+      min-height: 54px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .gantt-block {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 4px 6px;
+      border-right: 1px solid rgba(0, 0, 0, 0.1);
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      font-size: 0.85rem;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: flex-grow 0.2s;
+    }
+
+    .gantt-block:last-child {
+      border-right: none;
+    }
+
+    .gantt-name {
+      font-weight: bold;
+    }
+
+    .gantt-duration {
+      font-size: 0.75rem;
+      opacity: 0.95;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .option-btn {
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 14px;
+      border-radius: 6px;
+      text-align: left;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+
+    .option-btn.selected {
+      border-color: var(--primary);
+      background: #dbeafe;
+      font-weight: bold;
+    }
+
+    .drag-section {
+      margin-bottom: 20px;
+    }
+
+    .zone-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .source-pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      min-height: 56px;
+      padding: 10px;
+      background: var(--accent);
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+
+    .target-slot-container {
+      width: 100%;
+      min-height: 64px;
+      border: 2px dashed #3b82f6;
+      border-radius: 6px;
+      background: #f8fafc;
+      display: flex;
+      align-items: stretch;
+      padding: 4px;
+      gap: 4px;
+      position: relative;
+    }
+
+    .target-slot-container.empty::after {
+      content: "請將上方工作拖曳至此處進行排程 (可左右拖曳調換順序)";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .draggable-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 4px;
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: grab;
+      user-select: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .draggable-card.in-slot {
+      flex-grow: var(--weight);
+      cursor: grab;
+    }
+
+    .draggable-card.dragging {
+      opacity: 0.35;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-submit:hover {
+      background: var(--primary-hover);
+    }
+
+    .feedback-box {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 6px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .feedback-box.correct {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: #065f46;
+    }
+
+    .feedback-box.incorrect {
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      color: #991b1b;
+    }
+
+    .feedback-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .feedback-reason {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #1e293b;
+    }
+
+    .result-section {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .form-group {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .form-group input {
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    /* 鎖定模式全螢幕容器 */
+    .final-image-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      gap: 16px;
+    }
+
+    .final-image-wrapper img {
+      width: 100%;
+      max-width: 760px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="main-container">
+  <!-- 測驗進行區 -->
+  <div id="quiz-ui">
+    <h1>排程演算法</h1>
+    <div class="subtitle">單元：系統平台資源分配與工作排程</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <div class="question-header">
+      <span id="question-index">第 1 / 8 題</span>
+      <span class="badge" id="question-type-badge">題型</span>
+    </div>
+
+    <div class="instruction" id="question-text"></div>
+    
+    <div id="table-container"></div>
+    <div id="visual-container"></div>
+    <div id="interaction-container"></div>
+
+    <div id="feedback-container" class="feedback-box">
+      <div id="feedback-title" class="feedback-title"></div>
+      <div id="feedback-reason" class="feedback-reason"></div>
+    </div>
+
+    <button id="action-btn" class="btn-submit" style="margin-top: 16px;" onclick="handleAction()">確認送出</button>
+  </div>
+
+  <!-- 資料填寫區 -->
+  <div id="result-ui" class="result-section">
+    <h1>測驗完成</h1>
+    <div class="subtitle">輸入學號姓名</div>
+
+    <div class="form-group">
+      <label for="student-id">學號：</label>
+      <input type="text" id="student-id" >
+    </div>
+
+    <div class="form-group">
+      <label for="student-name">姓名：</label>
+      <input type="text" id="student-name">
+    </div>
+
+    <button class="btn-submit" style="max-width: 400px;" onclick="generateAndLock()">產生結果</button>
+  </div>
+</div>
+
+<script>
+  const TOTAL_QUESTIONS = 8;
+  
+  const APP_CONFIG = {
+    "Word": { color: "#2b579a" },
+    "Chrome": { color: "#ea4335" },
+    "LINE": { color: "#06c755" },
+    "YouTube": { color: "#cc0000" },
+    "Spotify": { color: "#1db954" },
+    "PowerPoint": { color: "#d24726" },
+    "Excel": { color: "#217346" },
+    "Instagram": { color: "#c13584" }
+  };
+
+  const BASE_APP_NAMES = ["Word", "Chrome", "LINE"];
+  const EXTRA_APP_NAMES = ["YouTube", "Spotify", "PowerPoint", "Excel", "Instagram"];
+
+  const ALGORITHMS = [
+    { id: "FCFS", name: "先到先服務排程 (FCFS)" },
+    { id: "SJF", name: "最短工作優先排程 (SJF)" },
+    { id: "PRIORITY", name: "優先權排程 (Priority)" },
+    { id: "RR", name: "循環排程 (Round-Robin, 配額=2)" }
+  ];
+
+  let currentQuestionIndex = 0;
+  let score = 0;
+  let questions = [];
+  let userChoice = null;
+  let isAnswered = false;
+
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function shuffleArray(arr) {
+    return arr.slice().sort(() => Math.random() - 0.5);
+  }
+
+  function generateProcesses(qIndex) {
+    let count = 3;
+    if (qIndex >= 3 && qIndex < 6) count = 4;
+    if (qIndex >= 6) count = 5;
+
+    let available = [...BASE_APP_NAMES, ...EXTRA_APP_NAMES];
+    let selected = available.slice(0, count);
+
+    let burstTimes = [];
+    while (burstTimes.length < count) {
+      let b = getRandomInt(2, 6);
+      if (!burstTimes.includes(b)) burstTimes.push(b);
+    }
+
+    let priorities = [];
+    while (priorities.length < count) {
+      let p = getRandomInt(1, 9);
+      if (!priorities.includes(p)) priorities.push(p);
+    }
+
+    return selected.map((name, idx) => ({
+      name: name,
+      color: APP_CONFIG[name].color,
+      burstTime: burstTimes[idx],
+      priority: priorities[idx]
+    }));
+  }
+
+  function computeSchedule(processes, algoId) {
+    let procs = JSON.parse(JSON.stringify(processes));
+    let sequence = [];
+
+    if (algoId === "FCFS") {
+      procs.forEach(p => sequence.push({ name: p.name, duration: p.burstTime, color: p.color }));
+    } else if (algoId === "SJF") {
+      procs.sort((a, b) => a.burstTime - b.burstTime);
+      procs.forEach(p => sequence.push({ name: p.name, duration: p.burstTime, color: p.color }));
+    } else if (algoId === "PRIORITY") {
+      procs.sort((a, b) => b.priority - a.priority);
+      procs.forEach(p => sequence.push({ name: p.name, duration: p.burstTime, color: p.color }));
+    } else if (algoId === "RR") {
+      let queue = procs.map(p => ({ ...p, remaining: p.burstTime }));
+      while (queue.some(p => p.remaining > 0)) {
+        for (let p of queue) {
+          if (p.remaining > 0) {
+            let run = Math.min(2, p.remaining);
+            sequence.push({ name: p.name, duration: run, color: p.color });
+            p.remaining -= run;
+          }
+        }
+      }
+    }
+    return sequence;
+  }
+
+  function buildQuiz() {
+    questions = [];
+    for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+      let type = i % 2 === 0 ? "CHOICE" : "DRAG";
+      let procs = generateProcesses(i);
+      
+      let algoPool = (type === "DRAG") 
+        ? ALGORITHMS.filter(a => a.id !== "RR") 
+        : ALGORITHMS;
+      
+      let targetAlgo = algoPool[getRandomInt(0, algoPool.length - 1)];
+      let schedule = computeSchedule(procs, targetAlgo.id);
+
+      questions.push({
+        type: type,
+        processes: procs,
+        targetAlgo: targetAlgo,
+        schedule: schedule
+      });
+    }
+  }
+
+  function renderQuestion() {
+    isAnswered = false;
+    userChoice = null;
+    const q = questions[currentQuestionIndex];
+
+    document.getElementById("progress-fill").style.width = `${((currentQuestionIndex) / TOTAL_QUESTIONS) * 100}%`;
+    document.getElementById("question-index").innerText = `第 ${currentQuestionIndex + 1} / ${TOTAL_QUESTIONS} 題`;
+    document.getElementById("feedback-container").style.display = "none";
+    document.getElementById("action-btn").innerText = "確認送出";
+
+    const badge = document.getElementById("question-type-badge");
+    const qText = document.getElementById("question-text");
+    const tblContainer = document.getElementById("table-container");
+    const visualContainer = document.getElementById("visual-container");
+    const interactContainer = document.getElementById("interaction-container");
+
+    tblContainer.innerHTML = "";
+    visualContainer.innerHTML = "";
+    interactContainer.innerHTML = "";
+
+    let isPriorityInvolved = (q.targetAlgo.id === "PRIORITY") || (q.type === "CHOICE");
+    let tableHtml = `
+      <table>
+        <thead>
+          <tr>
+            <th>應用程式名稱</th>
+            <th>執行所需時間</th>
+            ${isPriorityInvolved ? '<th>優先權 (數值越大代表越優先)</th>' : ''}
+          </tr>
+        </thead>
+        <tbody>
+          ${q.processes.map(p => `
+            <tr>
+              <td>
+                <span class="app-tag">
+                  <span class="color-dot" style="background-color: ${p.color};"></span>
+                  ${p.name}
+                </span>
+              </td>
+              <td><strong>${p.burstTime}</strong> 單位</td>
+              ${isPriorityInvolved ? `<td>${p.priority}</td>` : ''}
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+    tblContainer.innerHTML = tableHtml;
+
+    if (q.type === "CHOICE") {
+      badge.innerText = "題型：排程辨識 (選擇題)";
+      qText.innerText = "請觀察下方各程式所需時間，判斷系統正在使用何種排程演算法？";
+
+      let ganttHtml = `
+        <div class="gantt-wrapper">
+          <div class="timeline-label">
+            <span>開始 (0)</span>
+            <span>時間軸 (由左至右) ➔</span>
+          </div>
+          <div class="gantt-chart">
+      `;
+      q.schedule.forEach(item => {
+        ganttHtml += `
+          <div class="gantt-block" style="flex-grow: ${item.duration}; background-color: ${item.color};">
+            <span class="gantt-name">${item.name}</span>
+            <span class="gantt-duration">${item.duration}單位</span>
+          </div>
+        `;
+      });
+      ganttHtml += `</div></div>`;
+      visualContainer.innerHTML = ganttHtml;
+
+      let optionsHtml = `<div class="options-grid">`;
+      ALGORITHMS.forEach(algo => {
+        optionsHtml += `
+          <button class="option-btn" onclick="selectOption('${algo.id}', this)">
+            ${algo.name}
+          </button>
+        `;
+      });
+      optionsHtml += `</div>`;
+      interactContainer.innerHTML = optionsHtml;
+
+    } else {
+      badge.innerText = "題型：自主排程 (拖曳填空)";
+      qText.innerHTML = `請依照 <strong>【${q.targetAlgo.name}】</strong> 的規則，將上方工作拖曳至下方排程槽中，排出由左至右的正確執行順序：`;
+
+      let shuffled = shuffleArray(q.processes);
+      let dragHtml = `
+        <div class="drag-section">
+          <div class="zone-title">待分配工作區：</div>
+          <div class="source-pool" id="source-pool">
+            ${shuffled.map(p => `
+              <div class="draggable-card" draggable="true" data-name="${p.name}" data-duration="${p.burstTime}" style="background-color: ${p.color};">
+                <span>${p.name}</span>
+                <span style="font-size:0.75rem; font-weight:normal;">需時: ${p.burstTime}${q.targetAlgo.id === 'PRIORITY' ? ` | 優先權: ${p.priority}` : ''}</span>
+              </div>
+            `).join("")}
+          </div>
+
+          <div class="zone-title">排程執行槽 (由左至右依序執行)：</div>
+          <div class="target-slot-container empty" id="target-slot"></div>
+        </div>
+      `;
+      interactContainer.innerHTML = dragHtml;
+      initSlotDragEvents();
+    }
+  }
+
+  function selectOption(id, btnElement) {
+    if (isAnswered) return;
+    userChoice = id;
+    document.querySelectorAll(".option-btn").forEach(el => el.classList.remove("selected"));
+    btnElement.classList.add("selected");
+  }
+
+  function initSlotDragEvents() {
+    const sourcePool = document.getElementById("source-pool");
+    const targetSlot = document.getElementById("target-slot");
+    let draggedElement = null;
+
+    function handleDragStart(e) {
+      draggedElement = e.target.closest(".draggable-card");
+      if (draggedElement) draggedElement.classList.add("dragging");
+    }
+
+    function handleDragEnd() {
+      if (draggedElement) draggedElement.classList.remove("dragging");
+      draggedElement = null;
+      updateTargetSlotStyle();
+    }
+
+    sourcePool.addEventListener("dragstart", handleDragStart);
+    sourcePool.addEventListener("dragend", handleDragEnd);
+    targetSlot.addEventListener("dragstart", handleDragStart);
+    targetSlot.addEventListener("dragend", handleDragEnd);
+
+    sourcePool.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      if (draggedElement && draggedElement.parentElement !== sourcePool) {
+        draggedElement.classList.remove("in-slot");
+        draggedElement.style.removeProperty("--weight");
+        sourcePool.appendChild(draggedElement);
+      }
+    });
+
+    targetSlot.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      if (!draggedElement) return;
+
+      if (!draggedElement.classList.contains("in-slot")) {
+        draggedElement.classList.add("in-slot");
+        draggedElement.style.setProperty("--weight", draggedElement.dataset.duration);
+      }
+
+      const afterElement = getDragAfterElementHorizontal(targetSlot, e.clientX);
+      if (afterElement == null) {
+        targetSlot.appendChild(draggedElement);
+      } else {
+        targetSlot.insertBefore(draggedElement, afterElement);
+      }
+    });
+
+    targetSlot.addEventListener("click", (e) => {
+      if (isAnswered) return;
+      const card = e.target.closest(".draggable-card");
+      if (card) {
+        card.classList.remove("in-slot");
+        card.style.removeProperty("--weight");
+        sourcePool.appendChild(card);
+        updateTargetSlotStyle();
+      }
+    });
+
+    function updateTargetSlotStyle() {
+      if (targetSlot.children.length === 0) {
+        targetSlot.classList.add("empty");
+      } else {
+        targetSlot.classList.remove("empty");
+      }
+    }
+  }
+
+  function getDragAfterElementHorizontal(container, x) {
+    const draggableElements = [...container.querySelectorAll(".draggable-card:not(.dragging)")];
+    return draggableElements.reduce((closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = x - box.left - box.width / 2;
+      if (offset < 0 && offset > closest.offset) {
+        return { offset: offset, element: child };
+      } else {
+        return closest;
+      }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+  }
+
+  function handleAction() {
+    if (!isAnswered) {
+      checkCurrentAnswer();
+    } else {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < TOTAL_QUESTIONS) {
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+  }
+
+  function checkCurrentAnswer() {
+    const q = questions[currentQuestionIndex];
+    let isCorrect = false;
+    let reason = "";
+
+    if (q.type === "CHOICE") {
+      if (!userChoice) {
+        alert("請先選擇一個選項！");
+        return;
+      }
+      isCorrect = (userChoice === q.targetAlgo.id);
+      
+      if (q.targetAlgo.id === "FCFS") {
+        reason = `正確演算法為 <strong>先到先服務 (FCFS)</strong>。程式依照抵達次序（${q.processes.map(p=>p.name).join(" ➔ ")}）依序完整執行。`;
+      } else if (q.targetAlgo.id === "SJF") {
+        let sorted = [...q.processes].sort((a,b)=>a.burstTime - b.burstTime).map(p=>`${p.name}(${p.burstTime})`).join(" ➔ ");
+        reason = `正確演算法為 <strong>最短工作優先 (SJF)</strong>。執行時間最短者先執行，順序為：${sorted}。`;
+      } else if (q.targetAlgo.id === "PRIORITY") {
+        let sorted = [...q.processes].sort((a,b)=>b.priority - a.priority).map(p=>`${p.name}(優先權${p.priority})`).join(" ➔ ");
+        reason = `正確演算法為 <strong>優先權排程 (Priority)</strong>。優先權數值最高者先執行，順序為：${sorted}。`;
+      } else if (q.targetAlgo.id === "RR") {
+        reason = `正確演算法為 <strong>循環排程 (RR)</strong>。每個程式輪流分配固定時間配額 (2單位)。`;
+      }
+
+    } else {
+      const slot = document.getElementById("target-slot");
+      const currentOrder = [...slot.querySelectorAll(".draggable-card")].map(el => el.dataset.name);
+      const expectedOrder = q.schedule.map(item => item.name);
+
+      if (currentOrder.length !== q.processes.length) {
+        alert("請將所有工作都拖曳至下方排程槽中！");
+        return;
+      }
+
+      isCorrect = (JSON.stringify(currentOrder) === JSON.stringify(expectedOrder));
+      
+      let orderDesc = q.schedule.map(s => s.name).join(" ➔ ");
+      if (q.targetAlgo.id === "FCFS") {
+        reason = `依 <strong>FCFS</strong> 規則，應按預設抵達順序排程：${orderDesc}。`;
+      } else if (q.targetAlgo.id === "SJF") {
+        reason = `依 <strong>SJF</strong> 規則，執行時間短的優先排在左邊：${orderDesc}。`;
+      } else if (q.targetAlgo.id === "PRIORITY") {
+        reason = `依 <strong>優先權 (Priority)</strong> 規則，優先權數值高者排在左邊：${orderDesc}。`;
+      }
+    }
+
+    if (isCorrect) score += 1;
+
+    const feedbackBox = document.getElementById("feedback-container");
+    const feedbackTitle = document.getElementById("feedback-title");
+    const feedbackReason = document.getElementById("feedback-reason");
+
+    feedbackBox.className = `feedback-box ${isCorrect ? 'correct' : 'incorrect'}`;
+    feedbackTitle.innerText = isCorrect ? "回答正確！" : "回答錯誤！";
+    feedbackReason.innerHTML = reason;
+    feedbackBox.style.display = "block";
+
+    isAnswered = true;
+    document.getElementById("action-btn").innerText = (currentQuestionIndex + 1 < TOTAL_QUESTIONS) ? "下一題 ➔" : "查看總結成果 ➔";
+  }
+
+  function showResults() {
+    document.getElementById("quiz-ui").style.display = "none";
+    document.getElementById("result-ui").style.display = "flex";
+  }
+
+  // 產生成績圖並鎖定全畫面
+  function generateAndLock() {
+    const studentId = document.getElementById("student-id").value.trim();
+    const studentName = document.getElementById("student-name").value.trim();
+
+    if (!studentId || !studentName) {
+      alert("請填寫學號與姓名以產生成績圖！");
+      return;
+    }
+
+    // 建立離屏 Canvas 繪製圖檔
+    const canvas = document.createElement("canvas");
+    canvas.width = 800;
+    canvas.height = 500;
+    const ctx = canvas.getContext("2d");
+    const finalScore = Math.round((score / TOTAL_QUESTIONS) * 100);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.lineWidth = 12;
+    ctx.strokeStyle = "#1e293b";
+    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#94a3b8";
+    ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 28px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("工作排程結果", canvas.width / 2, 90);
+
+    ctx.beginPath();
+    ctx.moveTo(80, 150);
+    ctx.lineTo(canvas.width - 80, 150);
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#334155";
+    ctx.font = "20px sans-serif";
+    ctx.fillText(`學號：${studentId}`, 100, 210);
+    ctx.fillText(`姓名：${studentName}`, 100, 260);
+    ctx.fillText(`答對題數：${score} / ${TOTAL_QUESTIONS} 題`, 100, 310);
+    
+    const now = new Date();
+    const timeStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    ctx.font = "16px sans-serif";
+    ctx.fillStyle = "#64748b";
+    ctx.fillText(`完成時間：${timeStr}`, 100, 370);
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = finalScore >= 60 ? "#15803d" : "#b91c1c";
+    ctx.beginPath();
+    ctx.arc(620, 255, 95, 0, Math.PI * 2);
+    ctx.strokeStyle = finalScore >= 60 ? "#16a34a" : "#dc2626";
+    ctx.lineWidth = 6;
+    ctx.stroke();
+
+    ctx.font = "bold 18px sans-serif";
+    ctx.fillText("總分", 620, 210);
+    ctx.font = "bold 56px sans-serif";
+    ctx.fillText(`${finalScore}`, 620, 275);
+    ctx.font = "14px sans-serif";
+    ctx.fillText(finalScore >= 60 ? "通過 (PASSED)" : "待加強 (REVISE)", 620, 310);
+
+    const hash = Math.random().toString(36).substring(2, 10).toUpperCase();
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "12px monospace";
+    ctx.fillText(`驗證碼：OS-${hash}`, canvas.width / 2, 440);
+
+    // 轉為 Data URL
+    const imgDataUrl = canvas.toDataURL("image/png");
+
+    // 清空整個 container DOM，完全消除輸入欄位與按鈕
+    const container = document.getElementById("main-container");
+    container.innerHTML = `
+      <div class="final-image-wrapper">
+        <img src="${imgDataUrl}" alt="作業評分證明">
+      </div>
+    `;
+  }
+
+  buildQuiz();
+  renderQuestion();
+</script>
+</body>
+</html>

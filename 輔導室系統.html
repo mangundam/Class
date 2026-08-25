@@ -96,12 +96,6 @@
       color: var(--success-text);
     }
 
-    .btn-header.active {
-      background: #0284c7;
-      border-color: #0284c7;
-      color: #ffffff;
-    }
-
     /* 左右雙欄版面 */
     .content-layout {
       display: grid;
@@ -224,7 +218,7 @@
       color: #334155;
     }
 
-    /* 右欄：放大版時間與節次區塊 */
+    /* 右欄：時間與節次區塊 */
     .slot-bar-vertical {
       background: #f8fafc;
       border: 1.5px solid #e2e8f0;
@@ -249,7 +243,12 @@
       min-width: 68px;
     }
 
-    /* 日期顯示：一般模式純文字呈現、無邊框 */
+    .date-display-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .date-text-display {
       font-size: 18px;
       font-weight: 800;
@@ -257,16 +256,20 @@
       letter-spacing: 0.5px;
     }
 
-    /* 補登模式下的日期輸入框 */
-    .date-input-edit {
-      font-size: 16px;
-      font-weight: 700;
-      padding: 5px 10px;
-      border-radius: 8px;
-      border: 1.5px solid var(--border-color);
+    .btn-edit-date {
       background: #ffffff;
-      color: #1e293b;
-      outline: none;
+      border: 1.5px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #2563eb;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+
+    .btn-edit-date:active {
+      background: #eff6ff;
     }
 
     .slot-text {
@@ -404,7 +407,7 @@
       background: #16a34a;
     }
 
-    #excel-file-input {
+    #excel-file-input, #hidden-date-picker {
       display: none;
     }
   </style>
@@ -412,6 +415,9 @@
 <body>
 
 <div id="toast-notify" class="toast-box"></div>
+
+<!-- 隱藏原生日期選擇器，透過按鈕呼叫原生滾輪 -->
+<input type="date" id="hidden-date-picker" onchange="onDatePicked(event)">
 
 <div class="app-container">
   <!-- 頂部資訊列 -->
@@ -422,7 +428,6 @@
         未載入名冊
       </button>
       <input type="file" id="excel-file-input" accept=".xlsx, .xls" onchange="handleExcelUpload(event)">
-      <button type="button" id="btn-retroactive" class="btn-header" onclick="toggleManualMode()">補登模式</button>
     </div>
   </div>
 
@@ -464,15 +469,15 @@
       </div>
     </div>
 
-    <!-- 右欄：放大時間節次 + 18項議題 + 確認登記 (學號驗證通過前鎖定) -->
+    <!-- 右欄：時間節次 + 18項議題 + 確認登記 (學號驗證通過前鎖定) -->
     <div class="col-right disabled-section" id="right-col-panel">
       <div class="slot-bar-vertical">
         <div class="slot-item">
           <span class="slot-item-label">登記日期</span>
-          <!-- 平時純文字呈現，無輸入框 -->
-          <span id="date-label" class="date-text-display">2026-08-25</span>
-          <!-- 僅補登模式時顯示輸入框 -->
-          <input type="date" id="input-date" class="date-input-edit" style="display: none;" onchange="onDateInputChange()">
+          <div class="date-display-group">
+            <span id="date-label" class="date-text-display">2026-08-25</span>
+            <button type="button" class="btn-edit-date" onclick="openDatePicker()">更改日期</button>
+          </div>
           <span class="slot-text" id="slot-indicator">載入中...</span>
         </div>
         <div class="slot-item">
@@ -529,14 +534,14 @@
   let currentStudent = { class: "", id: "", name: "" };
   let primaryTopic = "";
   let secondaryTopic = "";
-  let isManualMode = false;
+  let selectedDate = "";
 
   window.addEventListener('DOMContentLoaded', () => {
     loadLocalDatabase();
     renderTopicButtons();
     updateDateTimeAndSlot();
     setInterval(() => {
-      if (!isManualMode) updateDateTimeAndSlot();
+      updateDateTimeAndSlot(false);
     }, 60000);
   });
 
@@ -581,11 +586,9 @@
       document.getElementById('val-class').innerText = student.className;
       document.getElementById('val-name').innerText = student.name;
 
-      // 學號通過：解除鎖定並即刻重新計算節次
+      // 學號通過：解除鎖定並即刻重新計算當前節次
       rightPanel.classList.remove('disabled-section');
-      if (!isManualMode) {
-        updateDateTimeAndSlot();
-      }
+      updateDateTimeAndSlot(true);
       renderTopicButtons();
     } else {
       currentStudent = { class: "", id: sid, name: "" };
@@ -621,7 +624,6 @@
       btn.onclick = () => handleTopicSelect(topic);
       box.appendChild(btn);
     });
-
   }
 
   function handleTopicSelect(topic) {
@@ -644,15 +646,18 @@
     renderTopicButtons();
   }
 
-  function updateDateTimeAndSlot() {
+  function updateDateTimeAndSlot(resetDate = true) {
     const now = new Date();
     const yyyy = now.getFullYear();
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const dd = String(now.getDate()).padStart(2, '0');
     const formattedDate = `${yyyy}-${mm}-${dd}`;
 
-    document.getElementById('date-label').innerText = formattedDate;
-    document.getElementById('input-date').value = formattedDate;
+    if (resetDate) {
+      selectedDate = formattedDate;
+      document.getElementById('date-label').innerText = formattedDate;
+      document.getElementById('hidden-date-picker').value = formattedDate;
+    }
 
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
     let currentSlot = "一";
@@ -667,37 +672,28 @@
     else currentSlot = "八";
 
     document.getElementById('input-period').value = currentSlot;
-    document.getElementById('slot-indicator').innerText = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} (自動判定)`;
+    document.getElementById('slot-indicator').innerText = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+  }
+
+  // 點擊按鈕開啟 iOS 原生日曆選擇器
+  function openDatePicker() {
+    const picker = document.getElementById('hidden-date-picker');
+    if (picker.showPicker) {
+      picker.showPicker();
+    } else {
+      picker.click();
+    }
+  }
+
+  function onDatePicked(event) {
+    if (event.target.value) {
+      selectedDate = event.target.value;
+      document.getElementById('date-label').innerText = selectedDate;
+    }
   }
 
   function onPeriodChange() {
     document.getElementById('slot-indicator').innerText = `已手動指定`;
-  }
-
-  function onDateInputChange() {
-    document.getElementById('date-label').innerText = document.getElementById('input-date').value;
-  }
-
-  function toggleManualMode() {
-    isManualMode = !isManualMode;
-    const btn = document.getElementById('btn-retroactive');
-    const dateLabel = document.getElementById('date-label');
-    const dateInput = document.getElementById('input-date');
-
-    if (isManualMode) {
-      btn.classList.add('active');
-      btn.innerText = "完成補登";
-      dateLabel.style.display = "none";
-      dateInput.style.display = "inline-block";
-      document.getElementById('slot-indicator').innerText = "自訂補登模式";
-    } else {
-      btn.classList.remove('active');
-      btn.innerText = "補登模式";
-      dateInput.style.display = "none";
-      dateLabel.style.display = "inline-block";
-      dateLabel.innerText = dateInput.value;
-      updateDateTimeAndSlot();
-    }
   }
 
   function handleExcelUpload(event) {
@@ -753,7 +749,7 @@
     const sid = currentStudent.id;
     const sName = currentStudent.name;
     const sClass = currentStudent.class;
-    const sDate = document.getElementById('input-date').value;
+    const sDate = selectedDate || document.getElementById('date-label').innerText;
     const sPeriod = document.getElementById('input-period').value;
 
     if (!sid) {
@@ -807,10 +803,7 @@
     primaryTopic = "";
     secondaryTopic = "";
     renderTopicButtons();
-
-    if (!isManualMode) {
-      updateDateTimeAndSlot();
-    }
+    updateDateTimeAndSlot(true);
   }
 
   function showToast(message, type = "") {

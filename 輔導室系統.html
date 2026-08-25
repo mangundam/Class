@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>輔導諮詢登記系統</title>
-  <!-- 載入 SheetJS 以支援直接讀取 Excel -->
+  <!-- 載入 SheetJS 支援讀取 Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root {
@@ -14,6 +14,7 @@
       --card-bg: #ffffff;
       --text: #1e293b;
       --border: #cbd5e1;
+      --success: #16a34a;
     }
 
     * {
@@ -144,6 +145,7 @@
       padding: 6px 12px;
       border-radius: 8px;
       border: 1px solid var(--border);
+      background: white;
     }
 
     /* 18個選項按鈕網格 */
@@ -184,19 +186,43 @@
       font-weight: bold;
       cursor: pointer;
       margin-top: 10px;
+      transition: opacity 0.2s;
     }
 
-    .btn-submit:active {
-      background: var(--primary-hover);
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
-    /* 資料庫設定隱藏區塊 */
+    /* 提示訊息 Toast */
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: bold;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+
+    .toast.success {
+      background: var(--success);
+    }
+
     #db-file-input {
       display: none;
     }
   </style>
 </head>
 <body>
+
+<div id="toast-msg" class="toast"></div>
 
 <div class="container">
   <!-- 頂部功能列 -->
@@ -225,15 +251,8 @@
     </div>
   </div>
 
-  <!-- 實際送出到 Google 表單的 Form -->
-  <form id="google-form" action="https://docs.google.com/forms/d/e/1FAIpQLSdyz8XcXFHyBm0G8EPPTh0au2pL-Mp06viiFqoG6QY418emqA/formResponse" method="POST">
-    
-    <!-- 隱藏的表單欄位 -->
-    <input type="hidden" name="entry.1911797044" id="form-class">
-    <input type="hidden" name="entry.120175835" id="form-id">
-    <input type="hidden" name="entry.1779294009" id="form-name">
-    <input type="hidden" name="entry.1132188772" id="form-topic">
-
+  <!-- 表單主體 -->
+  <div>
     <!-- 學號輸入區 -->
     <div class="section">
       <div class="section-title">輸入學號</div>
@@ -244,9 +263,9 @@
     <div class="section">
       <div class="section-title">登記時間與節次</div>
       <div class="time-slot-box">
-        <input type="date" name="entry.948472445" id="form-date" class="edit-slot-select" readonly>
+        <input type="date" id="form-date" class="edit-slot-select" readonly>
         <span class="time-slot-text" id="slot-display-text">載入中...</span>
-        <select name="entry.1089912776" id="form-period" class="edit-slot-select" onchange="onPeriodChange()">
+        <select id="form-period" class="edit-slot-select" onchange="onPeriodChange()">
           <option value="一">第一節</option>
           <option value="二">第二節</option>
           <option value="三">第三節</option>
@@ -265,13 +284,23 @@
       <div class="options-grid" id="options-container"></div>
     </div>
 
-    <!-- 登記送出按鈕 -->
-    <button type="submit" class="btn-submit" onclick="return validateAndSubmit()">確認登記</button>
-  </form>
+    <!-- 登記按鈕 -->
+    <button type="button" id="submit-btn" class="btn-submit" onclick="submitToGoogleForm()">確認登記</button>
+  </div>
 </div>
 
 <script>
-  // 18 項議題選項
+  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdyz8XcXFHyBm0G8EPPTh0au2pL-Mp06viiFqoG6QY418emqA/formResponse";
+
+  const ENTRY_IDS = {
+    class: "entry.1911797044",
+    id: "entry.120175835",
+    name: "entry.1779294009",
+    date: "entry.948472445",
+    period: "entry.1089912776",
+    topic: "entry.1132188772"
+  };
+
   const TOPICS = [
     "人際困擾", "師生關係", "家庭困擾",
     "自我探索", "情緒困擾", "生活壓力",
@@ -281,23 +310,11 @@
     "中離(輟)拒學", "藥物濫用", "精神疾患"
   ];
 
-  // 節次時間表定義 (起訖分鐘數轉換，下課時間自動歸入下一節)
-  const PERIOD_SCHEDULE = [
-    { period: "一", endH: 8, endM: 50 },
-    { period: "二", endH: 9, endM: 50 },
-    { period: "三", endH: 10, endM: 50 },
-    { period: "四", endH: 11, endM: 50 },
-    { period: "五", endH: 13, endM: 50 },
-    { period: "六", endH: 14, endM: 50 },
-    { period: "七", endH: 15, endM: 50 },
-    { period: "八", endH: 17, endM: 0 }
-  ];
-
   let studentDatabase = {};
+  let currentStudent = { class: "", id: "", name: "" };
   let selectedTopic = "";
   let isManualMode = false;
 
-  // 初始化
   window.addEventListener('DOMContentLoaded', () => {
     loadLocalDatabase();
     initOptions();
@@ -307,7 +324,6 @@
     }, 60000);
   });
 
-  // 1. 初始化 18 個選項網格
   function initOptions() {
     const container = document.getElementById('options-container');
     container.innerHTML = '';
@@ -322,12 +338,10 @@
 
   function selectTopic(topic, element) {
     selectedTopic = topic;
-    document.getElementById('form-topic').value = topic;
     document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
     element.classList.add('selected');
   }
 
-  // 2. 自動判斷時間與節次
   function updateDateTimeAndSlot() {
     const now = new Date();
     const yyyy = now.getFullYear();
@@ -356,7 +370,6 @@
     document.getElementById('slot-display-text').innerText = `已手動指定：第 ${period} 節`;
   }
 
-  // 3. 補登模式切換
   function toggleManualMode() {
     isManualMode = !isManualMode;
     const btn = document.getElementById('manual-mode-btn');
@@ -375,7 +388,6 @@
     }
   }
 
-  // 4. Excel 名冊讀取與儲存到本機 LocalStorage
   function handleExcelUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -405,7 +417,7 @@
 
       studentDatabase = tempDb;
       localStorage.setItem('student_db', JSON.stringify(tempDb));
-      alert(`名冊更新成功！已載入 ${Object.keys(tempDb).length} 筆學生資料。`);
+      showToast(`名冊更新成功！已載入 ${Object.keys(tempDb).length} 筆資料`, "success");
     };
     reader.readAsArrayBuffer(file);
   }
@@ -421,48 +433,100 @@
     }
   }
 
-  // 5. 學號即時比對
   function onStudentIdInput() {
     const sid = document.getElementById('input-student-id').value.trim();
     if (studentDatabase[sid]) {
       const student = studentDatabase[sid];
+      currentStudent = { class: student.className, id: sid, name: student.name };
       document.getElementById('display-class').innerText = student.className;
       document.getElementById('display-id').innerText = sid;
       document.getElementById('display-name').innerText = student.name;
-
-      document.getElementById('form-class').value = student.className;
-      document.getElementById('form-id').value = sid;
-      document.getElementById('form-name').value = student.name;
     } else {
+      currentStudent = { class: "", id: sid, name: "" };
       document.getElementById('display-class').innerText = "-";
       document.getElementById('display-id').innerText = sid || "-";
       document.getElementById('display-name').innerText = "-";
-
-      document.getElementById('form-class').value = "";
-      document.getElementById('form-id').value = sid;
-      document.getElementById('form-name').value = "";
     }
   }
 
-  // 6. 送出前驗證
-  function validateAndSubmit() {
-    const sid = document.getElementById('form-id').value;
-    const sName = document.getElementById('form-name').value;
-    const topic = document.getElementById('form-topic').value;
+  // 背景非同步送出資料
+  async function submitToGoogleForm() {
+    const sid = currentStudent.id;
+    const sName = currentStudent.name;
+    const sClass = currentStudent.class;
+    const sDate = document.getElementById('form-date').value;
+    const sPeriod = document.getElementById('form-period').value;
 
     if (!sid) {
-      alert("請輸入學號！");
-      return false;
+      showToast("請輸入學號");
+      return;
     }
     if (!sName) {
-      alert("查無此學號之學生資料，請確認學號或更新名冊！");
-      return false;
+      showToast("查無此學號學生，請確認學號或更新名冊");
+      return;
     }
-    if (!topic) {
-      alert("請選擇諮詢項目！");
-      return false;
+    if (!selectedTopic) {
+      showToast("請選擇諮詢項目");
+      return;
     }
-    return true;
+
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.innerText = "登記中...";
+
+    const formData = new URLSearchParams();
+    formData.append(ENTRY_IDS.class, sClass);
+    formData.append(ENTRY_IDS.id, sid);
+    formData.append(ENTRY_IDS.name, sName);
+    formData.append(ENTRY_IDS.date, sDate);
+    formData.append(ENTRY_IDS.period, sPeriod);
+    formData.append(ENTRY_IDS.topic, selectedTopic);
+
+    try {
+      await fetch(FORM_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: formData.toString()
+      });
+
+      showToast("登記成功！已送出資料", "success");
+      resetForm();
+    } catch (error) {
+      showToast("送出失敗，請檢查網路連線");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "確認登記";
+    }
+  }
+
+  // 重置表單給下一位學生使用
+  function resetForm() {
+    document.getElementById('input-student-id').value = "";
+    document.getElementById('display-class').innerText = "-";
+    document.getElementById('display-id').innerText = "-";
+    document.getElementById('display-name').innerText = "-";
+    currentStudent = { class: "", id: "", name: "" };
+
+    selectedTopic = "";
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+
+    if (!isManualMode) {
+      updateDateTimeAndSlot();
+    }
+    document.getElementById('input-student-id').focus();
+  }
+
+  function showToast(message, type = "") {
+    const toast = document.getElementById('toast-msg');
+    toast.innerText = message;
+    toast.className = `toast ${type}`;
+    toast.style.display = "block";
+    setTimeout(() => {
+      toast.style.display = "none";
+    }, 2500);
   }
 </script>
 </body>

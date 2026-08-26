@@ -165,7 +165,7 @@
       text-align: right;
     }
 
-    /* 左欄：數字鍵盤樣式與強制反饋 */
+    /* 左欄：純原生單次精準反饋鍵盤 */
     .keypad-container {
       background: #f8fafc;
       border: 1.5px solid #e2e8f0;
@@ -205,15 +205,13 @@
       cursor: pointer;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
       touch-action: manipulation;
-      transition: all 0.06s ease-out;
     }
 
-    /* 支援原生的 :active 與 JS 觸發的 .pressed 樣式 */
-    .num-btn:active, .num-btn.pressed {
-      background: #94a3b8 !important;
-      color: #ffffff !important;
-      transform: scale(0.92) !important;
-      box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.2) !important;
+    /* 原生 :active 單次反饋 */
+    .num-btn:active {
+      background: #94a3b8;
+      color: #ffffff;
+      transform: scale(0.94);
     }
 
     .num-btn.fn-btn {
@@ -222,9 +220,10 @@
       color: #334155;
     }
 
-    .num-btn.fn-btn:active, .num-btn.fn-btn.pressed {
-      background: #64748b !important;
-      color: #ffffff !important;
+    .num-btn.fn-btn:active {
+      background: #64748b;
+      color: #ffffff;
+      transform: scale(0.94);
     }
 
     /* 右欄：時間與節次區塊 */
@@ -281,6 +280,10 @@
       cursor: pointer;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
       display: block;
+    }
+
+    .btn-edit-date:active {
+      background: #eff6ff;
     }
 
     .overlay-date-input {
@@ -359,7 +362,10 @@
       text-align: center;
       padding: 4px;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-      transition: all 0.15s ease;
+    }
+
+    .topic-btn:active {
+      transform: scale(0.96);
     }
 
     .topic-btn.primary-selected {
@@ -393,7 +399,7 @@
 
     .btn-submit-main:active {
       background: var(--primary-hover);
-      transform: scale(0.99);
+      transform: scale(0.98);
     }
 
     .btn-submit-main:disabled {
@@ -444,7 +450,7 @@
 
   <!-- 雙欄排版 -->
   <div class="content-layout">
-    <!-- 左欄：垂直學生卡片 + 放大版按鍵 -->
+    <!-- 左欄：垂直學生卡片 + 數字鍵盤 -->
     <div class="col-left">
       <div class="student-card-vertical">
         <div class="info-row">
@@ -464,18 +470,18 @@
       <div class="keypad-container">
         <div class="keypad-header">學號輸入按鍵</div>
         <div class="keypad-grid">
-          <div class="num-btn" onclick="pressKey('1', this)">1</div>
-          <div class="num-btn" onclick="pressKey('2', this)">2</div>
-          <div class="num-btn" onclick="pressKey('3', this)">3</div>
-          <div class="num-btn" onclick="pressKey('4', this)">4</div>
-          <div class="num-btn" onclick="pressKey('5', this)">5</div>
-          <div class="num-btn" onclick="pressKey('6', this)">6</div>
-          <div class="num-btn" onclick="pressKey('7', this)">7</div>
-          <div class="num-btn" onclick="pressKey('8', this)">8</div>
-          <div class="num-btn" onclick="pressKey('9', this)">9</div>
-          <div class="num-btn fn-btn" onclick="clearKeypad(this)">清空</div>
-          <div class="num-btn" onclick="pressKey('0', this)">0</div>
-          <div class="num-btn fn-btn" onclick="deleteKey(this)">刪除 ⌫</div>
+          <div class="num-btn" onclick="pressKey('1')">1</div>
+          <div class="num-btn" onclick="pressKey('2')">2</div>
+          <div class="num-btn" onclick="pressKey('3')">3</div>
+          <div class="num-btn" onclick="pressKey('4')">4</div>
+          <div class="num-btn" onclick="pressKey('5')">5</div>
+          <div class="num-btn" onclick="pressKey('6')">6</div>
+          <div class="num-btn" onclick="pressKey('7')">7</div>
+          <div class="num-btn" onclick="pressKey('8')">8</div>
+          <div class="num-btn" onclick="pressKey('9')">9</div>
+          <div class="num-btn fn-btn" onclick="clearKeypad()">清空</div>
+          <div class="num-btn" onclick="pressKey('0')">0</div>
+          <div class="num-btn fn-btn" onclick="deleteKey()">刪除 ⌫</div>
         </div>
       </div>
     </div>
@@ -588,15 +594,6 @@
     } catch (e) {}
   }
 
-  // 強制觸發視覺下沉反饋
-  function triggerVisualFeedback(element) {
-    if (!element) return;
-    element.classList.add('pressed');
-    setTimeout(() => {
-      element.classList.remove('pressed');
-    }, 100);
-  }
-
   window.addEventListener('DOMContentLoaded', () => {
     loadLocalDatabase();
     renderTopicButtons();
@@ -618,25 +615,22 @@
     }
   }
 
-  function pressKey(digit, element) {
+  function pressKey(digit) {
     playKeySound('default');
-    triggerVisualFeedback(element);
     if (currentStudentId.length < 10) {
       currentStudentId += digit;
       updateStudentMatch();
     }
   }
 
-  function deleteKey(element) {
+  function deleteKey() {
     playKeySound('delete');
-    triggerVisualFeedback(element);
     currentStudentId = currentStudentId.slice(0, -1);
     updateStudentMatch();
   }
 
-  function clearKeypad(element) {
+  function clearKeypad() {
     playKeySound('clear');
-    triggerVisualFeedback(element);
     currentStudentId = "";
     updateStudentMatch();
   }

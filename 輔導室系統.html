@@ -165,7 +165,7 @@
       text-align: right;
     }
 
-    /* 左欄：放大版數字鍵盤 */
+    /* 左欄：放大版數字鍵盤（加強觸控反饋） */
     .keypad-container {
       background: #f8fafc;
       border: 1.5px solid #e2e8f0;
@@ -205,17 +205,24 @@
       cursor: pointer;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
       touch-action: manipulation;
+      transition: transform 0.08s ease, background-color 0.08s ease, box-shadow 0.08s ease;
     }
 
     .num-btn:active {
-      background: #e2e8f0;
-      transform: scale(0.97);
+      background: #cbd5e1;
+      transform: scale(0.92);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .num-btn.fn-btn {
       background: #f1f5f9;
       font-size: 16px;
       color: #334155;
+    }
+
+    .num-btn.fn-btn:active {
+      background: #94a3b8;
+      color: #ffffff;
     }
 
     /* 右欄：時間與節次區塊 */
@@ -275,7 +282,7 @@
       display: block;
     }
 
-    /* 透明覆蓋在按鈕上的實體 Date Input，確保 iPad 日曆在按鈕旁彈出 */
+    /* 透明覆蓋在按鈕上的實體 Date Input */
     .overlay-date-input {
       position: absolute;
       top: 0;
@@ -367,15 +374,6 @@
       color: #ffffff;
       border-color: #0284c7;
       box-shadow: 0 3px 8px rgba(2, 132, 199, 0.25);
-    }
-
-    .tag-mark {
-      font-size: 11px;
-      font-weight: 800;
-      background: rgba(255, 255, 255, 0.3);
-      padding: 1px 4px;
-      border-radius: 3px;
-      margin-right: 4px;
     }
 
     /* 送出登記按鈕 */
@@ -555,6 +553,48 @@
   let secondaryTopic = "";
   let selectedDate = "";
 
+  // Web Audio API 實體按鍵反饋音效
+  let audioCtx = null;
+
+  function playKeySound(type = 'default') {
+    try {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'sine';
+      
+      // 根據操作類型提供不同頻率的微型回饋音
+      if (type === 'delete') {
+        osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(220, audioCtx.currentTime + 0.04);
+      } else if (type === 'clear') {
+        osc.frequency.setValueAtTime(260, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(180, audioCtx.currentTime + 0.05);
+      } else {
+        osc.frequency.setValueAtTime(560, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(420, audioCtx.currentTime + 0.04);
+      }
+
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.04);
+    } catch (e) {
+      // 忽略瀏覽器音訊限制
+    }
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
     loadLocalDatabase();
     renderTopicButtons();
@@ -577,6 +617,7 @@
   }
 
   function pressKey(digit) {
+    playKeySound('default');
     if (currentStudentId.length < 10) {
       currentStudentId += digit;
       updateStudentMatch();
@@ -584,11 +625,13 @@
   }
 
   function deleteKey() {
+    playKeySound('delete');
     currentStudentId = currentStudentId.slice(0, -1);
     updateStudentMatch();
   }
 
   function clearKeypad() {
+    playKeySound('clear');
     currentStudentId = "";
     updateStudentMatch();
   }
@@ -647,6 +690,7 @@
 
   function handleTopicSelect(topic) {
     if (!currentStudent.name) return;
+    playKeySound('default');
 
     if (primaryTopic === topic) {
       primaryTopic = secondaryTopic;

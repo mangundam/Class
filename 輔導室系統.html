@@ -256,6 +256,12 @@
       letter-spacing: 0.5px;
     }
 
+    /* 更改日期按鈕容器 (相對定位) */
+    .date-picker-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
     .btn-edit-date {
       background: #ffffff;
       border: 1.5px solid var(--border-color);
@@ -266,10 +272,22 @@
       color: #2563eb;
       cursor: pointer;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+      display: block;
     }
 
-    .btn-edit-date:active {
-      background: #eff6ff;
+    /* 透明覆蓋在按鈕上的實體 Date Input，確保 iPad 日曆在按鈕旁彈出 */
+    .overlay-date-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      border: none;
+      margin: 0;
+      padding: 0;
+      z-index: 10;
     }
 
     .slot-text {
@@ -407,7 +425,7 @@
       background: #16a34a;
     }
 
-    #excel-file-input, #hidden-date-picker {
+    #excel-file-input {
       display: none;
     }
   </style>
@@ -415,9 +433,6 @@
 <body>
 
 <div id="toast-notify" class="toast-box"></div>
-
-<!-- 隱藏原生日期選擇器，透過按鈕呼叫原生滾輪 -->
-<input type="date" id="hidden-date-picker" onchange="onDatePicked(event)">
 
 <div class="app-container">
   <!-- 頂部資訊列 -->
@@ -476,7 +491,11 @@
           <span class="slot-item-label">登記日期</span>
           <div class="date-display-group">
             <span id="date-label" class="date-text-display">2026-08-25</span>
-            <button type="button" class="btn-edit-date" onclick="openDatePicker()">更改日期</button>
+            <!-- 實體透明覆蓋，精準在按鈕周圍彈出日曆 -->
+            <div class="date-picker-wrapper">
+              <button type="button" class="btn-edit-date">更改日期</button>
+              <input type="date" id="native-date-input" class="overlay-date-input" onchange="onDatePicked(event)">
+            </div>
           </div>
           <span class="slot-text" id="slot-indicator">載入中...</span>
         </div>
@@ -656,7 +675,7 @@
     if (resetDate) {
       selectedDate = formattedDate;
       document.getElementById('date-label').innerText = formattedDate;
-      document.getElementById('hidden-date-picker').value = formattedDate;
+      document.getElementById('native-date-input').value = formattedDate;
     }
 
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
@@ -673,16 +692,6 @@
 
     document.getElementById('input-period').value = currentSlot;
     document.getElementById('slot-indicator').innerText = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-  }
-
-  // 點擊按鈕開啟 iOS 原生日曆選擇器
-  function openDatePicker() {
-    const picker = document.getElementById('hidden-date-picker');
-    if (picker.showPicker) {
-      picker.showPicker();
-    } else {
-      picker.click();
-    }
   }
 
   function onDatePicked(event) {

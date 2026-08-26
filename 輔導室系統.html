@@ -516,7 +516,7 @@
 
       <div class="topics-section">
         <div class="topics-header">
-          <div class="topics-title">諮詢項目（點選第 1 項為主因、第 2 項為副因）</div>
+          <div class="topics-title">諮詢項目（最多兩項）</div>
         </div>
         <div class="topics-grid" id="topics-box"></div>
       </div>
@@ -632,10 +632,10 @@
 
       if (topic === primaryTopic) {
         btn.classList.add('primary-selected');
-        btn.innerHTML = `<span class="tag-mark">主</span>${topic}`;
+        btn.innerHTML = `${topic}`;
       } else if (topic === secondaryTopic) {
         btn.classList.add('secondary-selected');
-        btn.innerHTML = `<span class="tag-mark">副</span>${topic}`;
+        btn.innerHTML = `${topic}`;
       } else {
         btn.innerText = topic;
       }

@@ -165,7 +165,7 @@
       text-align: right;
     }
 
-    /* 左欄：放大版數字鍵盤（加強觸控反饋） */
+    /* 左欄：數字鍵盤樣式與強制反饋 */
     .keypad-container {
       background: #f8fafc;
       border: 1.5px solid #e2e8f0;
@@ -203,15 +203,17 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
       touch-action: manipulation;
-      transition: transform 0.08s ease, background-color 0.08s ease, box-shadow 0.08s ease;
+      transition: all 0.06s ease-out;
     }
 
-    .num-btn:active {
-      background: #cbd5e1;
-      transform: scale(0.92);
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* 支援原生的 :active 與 JS 觸發的 .pressed 樣式 */
+    .num-btn:active, .num-btn.pressed {
+      background: #94a3b8 !important;
+      color: #ffffff !important;
+      transform: scale(0.92) !important;
+      box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.2) !important;
     }
 
     .num-btn.fn-btn {
@@ -220,9 +222,9 @@
       color: #334155;
     }
 
-    .num-btn.fn-btn:active {
-      background: #94a3b8;
-      color: #ffffff;
+    .num-btn.fn-btn:active, .num-btn.fn-btn.pressed {
+      background: #64748b !important;
+      color: #ffffff !important;
     }
 
     /* 右欄：時間與節次區塊 */
@@ -263,7 +265,6 @@
       letter-spacing: 0.5px;
     }
 
-    /* 更改日期按鈕容器 (相對定位) */
     .date-picker-wrapper {
       position: relative;
       display: inline-block;
@@ -282,7 +283,6 @@
       display: block;
     }
 
-    /* 透明覆蓋在按鈕上的實體 Date Input */
     .overlay-date-input {
       position: absolute;
       top: 0;
@@ -376,7 +376,6 @@
       box-shadow: 0 3px 8px rgba(2, 132, 199, 0.25);
     }
 
-    /* 送出登記按鈕 */
     .btn-submit-main {
       background: var(--primary);
       color: #ffffff;
@@ -402,7 +401,6 @@
       cursor: not-allowed;
     }
 
-    /* Toast 提示 */
     .toast-box {
       position: fixed;
       top: 18px;
@@ -428,7 +426,7 @@
     }
   </style>
 </head>
-<body>
+<body ontouchstart="">
 
 <div id="toast-notify" class="toast-box"></div>
 
@@ -466,30 +464,29 @@
       <div class="keypad-container">
         <div class="keypad-header">學號輸入按鍵</div>
         <div class="keypad-grid">
-          <div class="num-btn" onclick="pressKey('1')">1</div>
-          <div class="num-btn" onclick="pressKey('2')">2</div>
-          <div class="num-btn" onclick="pressKey('3')">3</div>
-          <div class="num-btn" onclick="pressKey('4')">4</div>
-          <div class="num-btn" onclick="pressKey('5')">5</div>
-          <div class="num-btn" onclick="pressKey('6')">6</div>
-          <div class="num-btn" onclick="pressKey('7')">7</div>
-          <div class="num-btn" onclick="pressKey('8')">8</div>
-          <div class="num-btn" onclick="pressKey('9')">9</div>
-          <div class="num-btn fn-btn" onclick="clearKeypad()">清空</div>
-          <div class="num-btn" onclick="pressKey('0')">0</div>
-          <div class="num-btn fn-btn" onclick="deleteKey()">刪除 ⌫</div>
+          <div class="num-btn" onclick="pressKey('1', this)">1</div>
+          <div class="num-btn" onclick="pressKey('2', this)">2</div>
+          <div class="num-btn" onclick="pressKey('3', this)">3</div>
+          <div class="num-btn" onclick="pressKey('4', this)">4</div>
+          <div class="num-btn" onclick="pressKey('5', this)">5</div>
+          <div class="num-btn" onclick="pressKey('6', this)">6</div>
+          <div class="num-btn" onclick="pressKey('7', this)">7</div>
+          <div class="num-btn" onclick="pressKey('8', this)">8</div>
+          <div class="num-btn" onclick="pressKey('9', this)">9</div>
+          <div class="num-btn fn-btn" onclick="clearKeypad(this)">清空</div>
+          <div class="num-btn" onclick="pressKey('0', this)">0</div>
+          <div class="num-btn fn-btn" onclick="deleteKey(this)">刪除 ⌫</div>
         </div>
       </div>
     </div>
 
-    <!-- 右欄：時間節次 + 18項議題 + 確認登記 (學號驗證通過前鎖定) -->
+    <!-- 右欄：時間節次 + 18項議題 + 確認登記 -->
     <div class="col-right disabled-section" id="right-col-panel">
       <div class="slot-bar-vertical">
         <div class="slot-item">
           <span class="slot-item-label">登記日期</span>
           <div class="date-display-group">
             <span id="date-label" class="date-text-display">2026-08-25</span>
-            <!-- 實體透明覆蓋，精準在按鈕周圍彈出日曆 -->
             <div class="date-picker-wrapper">
               <button type="button" class="btn-edit-date">更改日期</button>
               <input type="date" id="native-date-input" class="overlay-date-input" onchange="onDatePicked(event)">
@@ -553,7 +550,6 @@
   let secondaryTopic = "";
   let selectedDate = "";
 
-  // Web Audio API 實體按鍵反饋音效
   let audioCtx = null;
 
   function playKeySound(type = 'default') {
@@ -570,7 +566,6 @@
 
       osc.type = 'sine';
       
-      // 根據操作類型提供不同頻率的微型回饋音
       if (type === 'delete') {
         osc.frequency.setValueAtTime(320, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(220, audioCtx.currentTime + 0.04);
@@ -590,9 +585,16 @@
 
       osc.start();
       osc.stop(audioCtx.currentTime + 0.04);
-    } catch (e) {
-      // 忽略瀏覽器音訊限制
-    }
+    } catch (e) {}
+  }
+
+  // 強制觸發視覺下沉反饋
+  function triggerVisualFeedback(element) {
+    if (!element) return;
+    element.classList.add('pressed');
+    setTimeout(() => {
+      element.classList.remove('pressed');
+    }, 100);
   }
 
   window.addEventListener('DOMContentLoaded', () => {
@@ -616,27 +618,29 @@
     }
   }
 
-  function pressKey(digit) {
+  function pressKey(digit, element) {
     playKeySound('default');
+    triggerVisualFeedback(element);
     if (currentStudentId.length < 10) {
       currentStudentId += digit;
       updateStudentMatch();
     }
   }
 
-  function deleteKey() {
+  function deleteKey(element) {
     playKeySound('delete');
+    triggerVisualFeedback(element);
     currentStudentId = currentStudentId.slice(0, -1);
     updateStudentMatch();
   }
 
-  function clearKeypad() {
+  function clearKeypad(element) {
     playKeySound('clear');
+    triggerVisualFeedback(element);
     currentStudentId = "";
     updateStudentMatch();
   }
 
-  // 學號比對、節次重算與解鎖控制
   function updateStudentMatch() {
     const sid = currentStudentId;
     document.getElementById('val-id').innerText = sid || "-";
@@ -648,7 +652,6 @@
       document.getElementById('val-class').innerText = student.className;
       document.getElementById('val-name').innerText = student.name;
 
-      // 學號通過：解除鎖定並即刻重新計算當前節次
       rightPanel.classList.remove('disabled-section');
       updateDateTimeAndSlot(true);
       renderTopicButtons();
@@ -657,7 +660,6 @@
       document.getElementById('val-class').innerText = "-";
       document.getElementById('val-name').innerText = "-";
 
-      // 未通過：鎖定右側並清空已選項目
       rightPanel.classList.add('disabled-section');
       primaryTopic = "";
       secondaryTopic = "";

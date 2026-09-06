@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>工作排程演算法</title>
+  <title>餐廳出餐大挑戰：作業系統排程演算法測驗</title>
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
       --bg: #f8fafc;
       --card-bg: #ffffff;
       --text: #1e293b;
@@ -37,7 +37,7 @@
 
     .container {
       width: 100%;
-      max-width: 860px;
+      max-width: 880px;
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -82,14 +82,6 @@
       font-weight: bold;
     }
 
-    .badge {
-      background: #e0e7ff;
-      color: #3730a3;
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 0.85rem;
-    }
-
     .instruction {
       font-size: 1.05rem;
       margin-bottom: 16px;
@@ -113,10 +105,10 @@
       background-color: var(--accent);
     }
 
-    .app-tag {
+    .customer-tag {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       font-weight: bold;
     }
 
@@ -157,7 +149,7 @@
       padding: 4px 6px;
       border-right: 1px solid rgba(0, 0, 0, 0.1);
       color: #ffffff;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
       font-size: 0.85rem;
       overflow: hidden;
       white-space: nowrap;
@@ -197,12 +189,12 @@
 
     .option-btn:hover {
       border-color: var(--primary);
-      background: #eff6ff;
+      background: #f0f9ff;
     }
 
     .option-btn.selected {
       border-color: var(--primary);
-      background: #dbeafe;
+      background: #e0f2fe;
       font-weight: bold;
     }
 
@@ -232,7 +224,7 @@
     .target-slot-container {
       width: 100%;
       min-height: 64px;
-      border: 2px dashed #3b82f6;
+      border: 2px dashed #0284c7;
       border-radius: 6px;
       background: #f8fafc;
       display: flex;
@@ -243,7 +235,7 @@
     }
 
     .target-slot-container.empty::after {
-      content: "請將上方工作拖曳至此處進行排程 (可左右拖曳調換順序)";
+      content: "請將上方待處理訂單拖曳至此處進行排程 (可左右拖曳調換順序)";
       position: absolute;
       width: 100%;
       height: 100%;
@@ -363,7 +355,6 @@
       font-size: 1rem;
     }
 
-    /* 鎖定模式全螢幕容器 */
     .final-image-wrapper {
       display: flex;
       flex-direction: column;
@@ -380,6 +371,12 @@
       border-radius: 8px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
+
+    .download-tip {
+      font-size: 0.9rem;
+      color: #64748b;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -387,15 +384,13 @@
 <div class="container" id="main-container">
   <!-- 測驗進行區 -->
   <div id="quiz-ui">
-    <h1>排程演算法</h1>
-    <div class="subtitle">單元：系統平台資源分配與工作排程</div>
+    <h1>餐廳出餐順序練習</h1>
     <div class="progress-bar">
       <div class="progress-fill" id="progress-fill"></div>
     </div>
 
     <div class="question-header">
       <span id="question-index">第 1 / 8 題</span>
-      <span class="badge" id="question-type-badge">題型</span>
     </div>
 
     <div class="instruction" id="question-text"></div>
@@ -412,47 +407,71 @@
     <button id="action-btn" class="btn-submit" style="margin-top: 16px;" onclick="handleAction()">確認送出</button>
   </div>
 
-  <!-- 資料填寫區 -->
+  <!-- 成績確認區 -->
   <div id="result-ui" class="result-section">
     <h1>測驗完成</h1>
-    <div class="subtitle">輸入學號姓名</div>
 
     <div class="form-group">
       <label for="student-id">學號：</label>
-      <input type="text" id="student-id" >
+      <input type="text" id="student-id" placeholder="例：1120101">
     </div>
 
     <div class="form-group">
       <label for="student-name">姓名：</label>
-      <input type="text" id="student-name">
+      <input type="text" id="student-name" placeholder="例：王小明">
     </div>
 
-    <button class="btn-submit" style="max-width: 400px;" onclick="generateAndLock()">產生結果</button>
+    <button class="btn-submit" style="max-width: 400px;" onclick="generateAndLock()">產生作業證明圖</button>
   </div>
 </div>
 
 <script>
   const TOTAL_QUESTIONS = 8;
   
-  const APP_CONFIG = {
-    "Word": { color: "#2b579a" },
-    "Chrome": { color: "#ea4335" },
-    "LINE": { color: "#06c755" },
-    "YouTube": { color: "#cc0000" },
-    "Spotify": { color: "#1db954" },
-    "PowerPoint": { color: "#d24726" },
-    "Excel": { color: "#217346" },
-    "Instagram": { color: "#c13584" }
-  };
+  // 一般情境顧客池 (FCFS, SJF, Priority)
+  const GENERAL_CUSTOMER_POOL = [
+    { name: "現場排隊散客", desc: "現場抽號點餐 (點單杯飲品)", color: "#0284c7" },
+    { name: "電話預約客人", desc: "事先訂位 (點家庭牛排特餐)", color: "#e11d48" },
+    { name: "外帶窗口快點", desc: "外帶單杯熱咖啡與三明治", color: "#16a34a" },
+    { name: "VIP貴賓訂單", desc: "會員包廂 (點主廚特製海鮮宴)", color: "#d97706" },
+    { name: "線上外送訂單", desc: "外送急件單 (點披薩輕食組合)", color: "#7c3aed" },
+    { name: "臨櫃常客點餐", desc: "現場櫃檯直接點雙人特餐", color: "#0d9488" }
+  ];
 
-  const BASE_APP_NAMES = ["Word", "Chrome", "LINE"];
-  const EXTRA_APP_NAMES = ["YouTube", "Spotify", "PowerPoint", "Excel", "Instagram"];
+  // 純內用情境顧客池 (專門提供給 循環排程 RR 題目使用)
+  const DINE_IN_CUSTOMER_POOL = [
+    { name: "內用 A 桌顧客", desc: "多人合菜 (需出菜多次)", color: "#0284c7" },
+    { name: "內用 B 桌顧客", desc: "熱炒合菜套餐", color: "#ea580c" },
+    { name: "內用 C 桌顧客", desc: "雙人排餐全餐", color: "#16a34a" },
+    { name: "內用 D 桌顧客", desc: "家庭聚餐大拼盤", color: "#7c3aed" },
+    { name: "內用 E 桌顧客", desc: "朋友包桌派對餐", color: "#db2777" }
+  ];
 
   const ALGORITHMS = [
-    { id: "FCFS", name: "先到先服務排程 (FCFS)" },
-    { id: "SJF", name: "最短工作優先排程 (SJF)" },
-    { id: "PRIORITY", name: "優先權排程 (Priority)" },
-    { id: "RR", name: "循環排程 (Round-Robin, 配額=2)" }
+    {
+      id: "FCFS",
+      name: "先到先服務排程 (FCFS)",
+      lifeScenario: "一般現場依序出餐",
+      ruleDesc: "完全依照顧客抵達與點餐順序製作，整筆訂單做好才換下一位。"
+    },
+    {
+      id: "SJF",
+      name: "最短工作優先排程 (SJF)",
+      lifeScenario: "尖峰時段快做快銷",
+      ruleDesc: "廚房優先挑選出餐時間最短的訂單快速完成，最有效快速減少排隊顧客數。"
+    },
+    {
+      id: "PRIORITY",
+      name: "優先權排程 (Priority)",
+      lifeScenario: "預約席／VIP 貴賓優先",
+      ruleDesc: "依照 VIP 等級或預約急迫性（數值最高者）優先排入廚房製作。"
+    },
+    {
+      id: "RR",
+      name: "循環排程 (Round-Robin, 配額=2)",
+      lifeScenario: "多桌內用分批輪流上菜",
+      ruleDesc: "強調「內用情境」：每桌每次只上2道菜（配額2單位時間），輪流出餐確保每桌都不乾等。"
+    }
   ];
 
   let currentQuestionIndex = 0;
@@ -469,13 +488,13 @@
     return arr.slice().sort(() => Math.random() - 0.5);
   }
 
-  function generateProcesses(qIndex) {
+  function generateProcesses(qIndex, targetAlgoId) {
     let count = 3;
     if (qIndex >= 3 && qIndex < 6) count = 4;
     if (qIndex >= 6) count = 5;
 
-    let available = [...BASE_APP_NAMES, ...EXTRA_APP_NAMES];
-    let selected = available.slice(0, count);
+    let pool = (targetAlgoId === "RR") ? DINE_IN_CUSTOMER_POOL : GENERAL_CUSTOMER_POOL;
+    let selected = pool.slice(0, count);
 
     let burstTimes = [];
     while (burstTimes.length < count) {
@@ -489,9 +508,10 @@
       if (!priorities.includes(p)) priorities.push(p);
     }
 
-    return selected.map((name, idx) => ({
-      name: name,
-      color: APP_CONFIG[name].color,
+    return selected.map((cust, idx) => ({
+      name: cust.name,
+      desc: cust.desc,
+      color: cust.color,
       burstTime: burstTimes[idx],
       priority: priorities[idx]
     }));
@@ -528,13 +548,13 @@
     questions = [];
     for (let i = 0; i < TOTAL_QUESTIONS; i++) {
       let type = i % 2 === 0 ? "CHOICE" : "DRAG";
-      let procs = generateProcesses(i);
       
       let algoPool = (type === "DRAG") 
         ? ALGORITHMS.filter(a => a.id !== "RR") 
         : ALGORITHMS;
       
       let targetAlgo = algoPool[getRandomInt(0, algoPool.length - 1)];
+      let procs = generateProcesses(i, targetAlgo.id);
       let schedule = computeSchedule(procs, targetAlgo.id);
 
       questions.push({
@@ -556,7 +576,6 @@
     document.getElementById("feedback-container").style.display = "none";
     document.getElementById("action-btn").innerText = "確認送出";
 
-    const badge = document.getElementById("question-type-badge");
     const qText = document.getElementById("question-text");
     const tblContainer = document.getElementById("table-container");
     const visualContainer = document.getElementById("visual-container");
@@ -567,26 +586,30 @@
     interactContainer.innerHTML = "";
 
     let isPriorityInvolved = (q.targetAlgo.id === "PRIORITY") || (q.type === "CHOICE");
+    let isRR = (q.targetAlgo.id === "RR");
+
     let tableHtml = `
       <table>
         <thead>
           <tr>
-            <th>應用程式名稱</th>
-            <th>執行所需時間</th>
-            ${isPriorityInvolved ? '<th>優先權 (數值越大代表越優先)</th>' : ''}
+            <th>${isRR ? '內用桌次' : '顧客／訂單類別'}</th>
+            <th>點餐說明</th>
+            <th>出餐所需時間</th>
+            ${isPriorityInvolved ? '<th>VIP等級／預約優先權 (數值大者優先)</th>' : ''}
           </tr>
         </thead>
         <tbody>
           ${q.processes.map(p => `
             <tr>
               <td>
-                <span class="app-tag">
+                <span class="customer-tag">
                   <span class="color-dot" style="background-color: ${p.color};"></span>
                   ${p.name}
                 </span>
               </td>
-              <td><strong>${p.burstTime}</strong> 單位</td>
-              ${isPriorityInvolved ? `<td>${p.priority}</td>` : ''}
+              <td>${p.desc}</td>
+              <td><strong>${p.burstTime}</strong> 分鐘</td>
+              ${isPriorityInvolved ? `<td><strong>等級 ${p.priority}</strong></td>` : ''}
             </tr>
           `).join("")}
         </tbody>
@@ -595,14 +618,15 @@
     tblContainer.innerHTML = tableHtml;
 
     if (q.type === "CHOICE") {
-      badge.innerText = "題型：排程辨識 (選擇題)";
-      qText.innerText = "請觀察下方各程式所需時間，判斷系統正在使用何種排程演算法？";
+      qText.innerHTML = isRR
+        ? `目前餐廳全數為<strong>「內用顧客」</strong>，主廚決定採取公平分流的出餐規劃。請觀察下方時間軸（色塊長度代表製作時間），判斷此出餐方式對應哪一種作業系統排程演算法？`
+        : `餐廳主廚已按照特定策略完成了各桌的出餐順序。請觀察下方橫向出餐時間軸（色塊長度代表製作時間），判斷主廚採用的是作業系統中的哪一種排程演算法？`;
 
       let ganttHtml = `
         <div class="gantt-wrapper">
           <div class="timeline-label">
-            <span>開始 (0)</span>
-            <span>時間軸 (由左至右) ➔</span>
+            <span>開始出餐 (0分)</span>
+            <span>廚房出餐時間軸 (由左至右) ➔</span>
           </div>
           <div class="gantt-chart">
       `;
@@ -610,7 +634,7 @@
         ganttHtml += `
           <div class="gantt-block" style="flex-grow: ${item.duration}; background-color: ${item.color};">
             <span class="gantt-name">${item.name}</span>
-            <span class="gantt-duration">${item.duration}單位</span>
+            <span class="gantt-duration">${item.duration}分鐘</span>
           </div>
         `;
       });
@@ -621,7 +645,8 @@
       ALGORITHMS.forEach(algo => {
         optionsHtml += `
           <button class="option-btn" onclick="selectOption('${algo.id}', this)">
-            ${algo.name}
+            <strong>${algo.name}</strong><br>
+            <span style="font-size:0.85rem; color:#64748b;">(生活情境：${algo.lifeScenario})</span>
           </button>
         `;
       });
@@ -629,23 +654,22 @@
       interactContainer.innerHTML = optionsHtml;
 
     } else {
-      badge.innerText = "題型：自主排程 (拖曳填空)";
-      qText.innerHTML = `請依照 <strong>【${q.targetAlgo.name}】</strong> 的規則，將上方工作拖曳至下方排程槽中，排出由左至右的正確執行順序：`;
+      qText.innerHTML = `店長指示目前採取 <strong>【${q.targetAlgo.name}】</strong> 策略（情境：${q.targetAlgo.lifeScenario}）。<br>外帶與單筆訂單需整份製作完畢。請將上方訂單拖曳至下方出餐槽，排出由左至右正確的製作順序：`;
 
       let shuffled = shuffleArray(q.processes);
       let dragHtml = `
         <div class="drag-section">
-          <div class="zone-title">待分配工作區：</div>
+          <div class="zone-title">待處理訂單區：</div>
           <div class="source-pool" id="source-pool">
             ${shuffled.map(p => `
               <div class="draggable-card" draggable="true" data-name="${p.name}" data-duration="${p.burstTime}" style="background-color: ${p.color};">
                 <span>${p.name}</span>
-                <span style="font-size:0.75rem; font-weight:normal;">需時: ${p.burstTime}${q.targetAlgo.id === 'PRIORITY' ? ` | 優先權: ${p.priority}` : ''}</span>
+                <span style="font-size:0.75rem; font-weight:normal;">需時: ${p.burstTime}分${q.targetAlgo.id === 'PRIORITY' ? ` | 優先權: ${p.priority}` : ''}</span>
               </div>
             `).join("")}
           </div>
 
-          <div class="zone-title">排程執行槽 (由左至右依序執行)：</div>
+          <div class="zone-title">廚房出餐執行槽 (由左至右依序製作)：</div>
           <div class="target-slot-container empty" id="target-slot"></div>
         </div>
       `;
@@ -767,15 +791,15 @@
       isCorrect = (userChoice === q.targetAlgo.id);
       
       if (q.targetAlgo.id === "FCFS") {
-        reason = `正確演算法為 <strong>先到先服務 (FCFS)</strong>。程式依照抵達次序（${q.processes.map(p=>p.name).join(" ➔ ")}）依序完整執行。`;
+        reason = `正確策略為 <strong>先到先服務 (FCFS)</strong>。<br>就像一般現場排隊點餐，廚房完全依照顧客到達順序（${q.processes.map(p=>p.name).join(" ➔ ")}）整單製作完畢，不論餐點製作時間長短。`;
       } else if (q.targetAlgo.id === "SJF") {
-        let sorted = [...q.processes].sort((a,b)=>a.burstTime - b.burstTime).map(p=>`${p.name}(${p.burstTime})`).join(" ➔ ");
-        reason = `正確演算法為 <strong>最短工作優先 (SJF)</strong>。執行時間最短者先執行，順序為：${sorted}。`;
+        let sorted = [...q.processes].sort((a,b)=>a.burstTime - b.burstTime).map(p=>`${p.name}(${p.burstTime}分)`).join(" ➔ ");
+        reason = `正確策略為 <strong>最短工作優先 (SJF)</strong>。<br>在人潮高峰時，先出製作時間最短的單（例如單純外帶飲品），最快減少現場等候客人總數。順序為：${sorted}。`;
       } else if (q.targetAlgo.id === "PRIORITY") {
-        let sorted = [...q.processes].sort((a,b)=>b.priority - a.priority).map(p=>`${p.name}(優先權${p.priority})`).join(" ➔ ");
-        reason = `正確演算法為 <strong>優先權排程 (Priority)</strong>。優先權數值最高者先執行，順序為：${sorted}。`;
+        let sorted = [...q.processes].sort((a,b)=>b.priority - a.priority).map(p=>`${p.name}(等級${p.priority})`).join(" ➔ ");
+        reason = `正確策略為 <strong>優先權排程 (Priority)</strong>。<br>餐廳依預約訂位或 VIP 貴賓等級高低決定出餐次序。出餐順序為：${sorted}。`;
       } else if (q.targetAlgo.id === "RR") {
-        reason = `正確演算法為 <strong>循環排程 (RR)</strong>。每個程式輪流分配固定時間配額 (2單位)。`;
+        reason = `正確策略為 <strong>循環排程 (Round-Robin)</strong>。<br><strong>觀念重點：</strong>外帶訂單通常需要一次打包帶走，只有在<strong>「多桌內用」</strong>情境下，分批輪流上菜才合情合理！廚房每桌輪流送出固定配額（2分鐘出菜量），避免某桌客人長時間乾等，兼顧公平與即時互動。`;
       }
 
     } else {
@@ -784,19 +808,19 @@
       const expectedOrder = q.schedule.map(item => item.name);
 
       if (currentOrder.length !== q.processes.length) {
-        alert("請將所有工作都拖曳至下方排程槽中！");
+        alert("請將所有訂單都拖曳至下方出餐執行槽中！");
         return;
       }
 
       isCorrect = (JSON.stringify(currentOrder) === JSON.stringify(expectedOrder));
-      
       let orderDesc = q.schedule.map(s => s.name).join(" ➔ ");
+      
       if (q.targetAlgo.id === "FCFS") {
-        reason = `依 <strong>FCFS</strong> 規則，應按預設抵達順序排程：${orderDesc}。`;
+        reason = `依 <strong>FCFS (現場排隊)</strong> 規則，應按預設點餐次序完整製作：${orderDesc}。`;
       } else if (q.targetAlgo.id === "SJF") {
-        reason = `依 <strong>SJF</strong> 規則，執行時間短的優先排在左邊：${orderDesc}。`;
+        reason = `依 <strong>SJF (尖峰快做快銷)</strong> 規則，耗時最短者優先出餐：${orderDesc}。`;
       } else if (q.targetAlgo.id === "PRIORITY") {
-        reason = `依 <strong>優先權 (Priority)</strong> 規則，優先權數值高者排在左邊：${orderDesc}。`;
+        reason = `依 <strong>優先權排程 (VIP/預約優先)</strong> 規則，優先等級數值最高者優先出餐：${orderDesc}。`;
       }
     }
 
@@ -820,7 +844,6 @@
     document.getElementById("result-ui").style.display = "flex";
   }
 
-  // 產生成績圖並鎖定全畫面
   function generateAndLock() {
     const studentId = document.getElementById("student-id").value.trim();
     const studentName = document.getElementById("student-name").value.trim();
@@ -830,7 +853,6 @@
       return;
     }
 
-    // 建立離屏 Canvas 繪製圖檔
     const canvas = document.createElement("canvas");
     canvas.width = 800;
     canvas.height = 500;
@@ -849,9 +871,9 @@
     ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
 
     ctx.fillStyle = "#0f172a";
-    ctx.font = "bold 28px sans-serif";
+    ctx.font = "bold 26px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("工作排程結果", canvas.width / 2, 90);
+    ctx.fillText("餐廳出餐排程", canvas.width / 2, 90);
 
     ctx.beginPath();
     ctx.moveTo(80, 150);
@@ -892,12 +914,10 @@
     ctx.textAlign = "center";
     ctx.fillStyle = "#94a3b8";
     ctx.font = "12px monospace";
-    ctx.fillText(`驗證碼：OS-${hash}`, canvas.width / 2, 440);
+    ctx.fillText(`${hash}`, canvas.width / 2, 440);
 
-    // 轉為 Data URL
     const imgDataUrl = canvas.toDataURL("image/png");
 
-    // 清空整個 container DOM，完全消除輸入欄位與按鈕
     const container = document.getElementById("main-container");
     container.innerHTML = `
       <div class="final-image-wrapper">

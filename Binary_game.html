@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>二進位探索</title>
+    <title>進位制探索</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -33,44 +33,65 @@
 
         .subtitle {
             color: #94a3b8;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .container {
             background-color: var(--card-bg);
             border-radius: 16px;
-            padding: 30px;
+            padding: 25px 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            max-width: 850px;
+            max-width: 860px;
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
+            box-sizing: border-box;
         }
 
-        /* 模式切換鈕 */
-        .mode-toggle {
+        .controls-row {
             display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 8px;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
+        }
+
+        .group-label {
+            font-size: 14px;
+            color: #94a3b8;
+            font-weight: bold;
+            margin-right: 4px;
         }
 
         .btn {
             background-color: #334155;
             color: #f8fafc;
             border: 2px solid transparent;
-            padding: 10px 18px;
+            padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
             transition: all 0.2s ease;
         }
 
         .btn.active {
             background-color: var(--primary);
+            color: #0f172a;
+        }
+
+        .btn-base.active {
+            background-color: #f59e0b;
             color: #0f172a;
         }
 
@@ -82,30 +103,29 @@
         #game-panel {
             display: none;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             width: 100%;
         }
 
         .target-box {
             font-size: 26px;
             background: #090d16;
-            padding: 12px 24px;
+            padding: 10px 24px;
             border-radius: 10px;
             border: 2px dashed var(--primary);
             display: inline-block;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .score-box {
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 25px;
             width: 100%;
-            font-size: 17px;
+            font-size: 16px;
             color: #fbbf24;
         }
 
-        /* 10題完成結算彈出區 */
         #finish-banner {
             display: none;
             background-color: rgba(34, 197, 94, 0.15);
@@ -119,37 +139,38 @@
             box-sizing: border-box;
         }
 
-        /* 位元群組 */
-        .bits-container {
+        /* 卡片群組 */
+        .cards-container {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
             justify-content: center;
-            margin: 20px 0;
+            margin: 15px 0 25px 0;
+            min-height: 140px;
         }
 
-        .bit-column {
+        .digit-column {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .weight-label {
-            font-size: 14px;
+            font-size: 13px;
             color: #94a3b8;
             font-family: monospace;
         }
 
         .weight-val {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #38bdf8;
         }
 
-        .switch-card {
-            width: 75px;
-            height: 110px;
+        .digit-card {
+            width: 76px;
+            height: 105px;
             background-color: #0f172a;
             border: 2px solid var(--inactive);
             border-radius: 12px;
@@ -162,24 +183,31 @@
             transition: transform 0.1s, border-color 0.2s, background-color 0.2s;
         }
 
-        .switch-card:hover {
+        .digit-card:hover {
             transform: translateY(-4px);
         }
 
-        .switch-card.active {
+        .digit-card.active {
             border-color: var(--accent);
             background-color: rgba(34, 197, 94, 0.15);
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+            box-shadow: 0 0 14px rgba(34, 197, 94, 0.4);
         }
 
-        .switch-state {
+        .digit-val {
             font-size: 38px;
             font-weight: 800;
             color: var(--inactive);
+            line-height: 1;
         }
 
-        .switch-card.active .switch-state {
+        .digit-card.active .digit-val {
             color: var(--accent);
+        }
+
+        .hint-text {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 4px;
         }
 
         /* 結果顯示板 */
@@ -187,16 +215,16 @@
             width: 100%;
             background-color: #0f172a;
             border-radius: 10px;
-            padding: 20px;
+            padding: 18px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 14px;
         }
 
         .formula-line {
             font-family: monospace;
-            font-size: 16px;
+            font-size: 15px;
             color: #cbd5e1;
             word-break: break-all;
             line-height: 1.5;
@@ -205,43 +233,54 @@
 
         .val-tags {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             flex-wrap: wrap;
         }
 
         .tag {
             background-color: #1e293b;
-            padding: 10px 18px;
+            padding: 10px 14px;
             border-radius: 8px;
-            font-size: 15px;
+            font-size: 14px;
             flex: 1;
-            min-width: 130px;
+            min-width: 120px;
             text-align: center;
         }
 
         .tag strong {
             display: block;
-            font-size: 26px;
+            font-size: 24px;
             color: #38bdf8;
-            margin-top: 5px;
+            margin-top: 4px;
             font-family: monospace;
         }
     </style>
 </head>
 <body>
 
-    <h1>二進位練習</h1>
-    <div class="subtitle"></div>
+    <h1>進位制探索實驗室</h1>
+    <div class="subtitle">點擊卡片遞增數值，探索位值與權重運作原理</div>
 
     <div class="container">
-        <!-- 模式切換 -->
-        <div class="mode-toggle">
-            <button class="btn active" id="btn-explore" onclick="setMode('explore')">自由探索</button>
-            <button class="btn" id="btn-quiz10" onclick="setMode('quiz10')">10題闖關 (不計時)</button>
-            <button class="btn" id="btn-timed" onclick="setMode('timed')">限時挑戰 (15秒)</button>
+        <div class="controls-row">
+            <!-- 進位制切換 -->
+            <div class="toggle-group">
+                <span class="group-label">進位制：</span>
+                <button class="btn btn-base active" id="btn-base2" onclick="setBase(2)">二進位 (BIN)</button>
+                <button class="btn btn-base" id="btn-base8" onclick="setBase(8)">八進位 (OCT)</button>
+                <button class="btn btn-base" id="btn-base16" onclick="setBase(16)">十六進位 (HEX)</button>
+            </div>
+
+            <!-- 遊玩模式切換 -->
+            <div class="toggle-group">
+                <span class="group-label">模式：</span>
+                <button class="btn active" id="btn-explore" onclick="setMode('explore')">自由探索</button>
+                <button class="btn" id="btn-quiz10" onclick="setMode('quiz10')">10題闖關 (不計時)</button>
+                <button class="btn" id="btn-timed" onclick="setMode('timed')">限時挑戰 (15秒)</button>
+            </div>
         </div>
 
-        <!-- 挑戰面板 -->
+        <!-- 遊戲面板 -->
         <div id="game-panel">
             <div class="target-box">
                 目標十進位：<span id="targetNumber" style="color: #f43f5e; font-weight: bold;">0</span>
@@ -252,33 +291,43 @@
             </div>
         </div>
 
-        <!-- 完成結算區 -->
+        <!-- 10題完成橫幅 -->
         <div id="finish-banner">
-            <h2 style="margin: 0 0 8px 0; color: #4ade80;">🎉 恭喜通關！</h2>
-            <p style="margin: 0 0 12px 0;">你已順利完成 10 題二進位換算！</p>
+            <h2 style="margin: 0 0 6px 0; color: #4ade80;">🎉 恭喜通關！</h2>
+            <p style="margin: 0 0 12px 0;">已順利完成 10 題數字系統轉換！</p>
             <button class="btn" style="background-color: var(--accent); color: #0f172a;" onclick="setMode('quiz10')">再玩一次</button>
         </div>
 
-        <!-- 位元開關區 (8-bit) -->
-        <div class="bits-container" id="bitsContainer"></div>
+        <!-- 卡片操作區 -->
+        <div class="cards-container" id="cardsContainer"></div>
 
-        <!-- 即時計算與結果看板 -->
+        <!-- 即時算式與進位展示 -->
         <div class="display-board">
             <div>
-                <span style="color: #94a3b8; font-size: 14px;">權重累加計算過程：</span>
+                <span style="color: #94a3b8; font-size: 13px;">權重累加計算過程：</span>
                 <div class="formula-line" id="formula">0</div>
             </div>
             <div class="val-tags">
+                <div class="tag">二進位 (BIN)<strong id="binDisplay">0</strong></div>
+                <div class="tag">八進位 (OCT)<strong id="octDisplay">0</strong></div>
                 <div class="tag">十進位 (DEC)<strong id="decDisplay">0</strong></div>
                 <div class="tag">十六進位 (HEX)<strong id="hexDisplay">0</strong></div>
-                <div class="tag">八進位 (OCT)<strong id="octDisplay">0</strong></div>
             </div>
         </div>
     </div>
 
     <script>
-        const BITS_COUNT = 8;
-        let bits = new Array(BITS_COUNT).fill(0);
+        const HEX_CHARS = "0123456789ABCDEF";
+
+        // 各進位制配置：位數與上限 (控制最大值約在 255~511，便於心算練習)
+        const BASE_CONFIG = {
+            2:  { length: 8, maxTarget: 255 },  // 2^8 = 256
+            8:  { length: 3, maxTarget: 511 },  // 8^3 = 512
+            16: { length: 2, maxTarget: 255 }   // 16^2 = 256
+        };
+
+        let currentBase = 2;
+        let digits = [];
         let mode = 'explore'; // 'explore', 'quiz10', 'timed'
         let targetValue = 0;
         let timerId = null;
@@ -286,37 +335,49 @@
         let currentQuestion = 1;
         const TOTAL_QUESTIONS = 10;
 
-        // 初始化開關介面
-        function initBits() {
-            const container = document.getElementById('bitsContainer');
+        // 格式化單一數值為該進位的文字符號
+        function formatDigit(val) {
+            return HEX_CHARS[val];
+        }
+
+        // 初始化卡片區
+        function initCards() {
+            const config = BASE_CONFIG[currentBase];
+            digits = new Array(config.length).fill(0);
+
+            const container = document.getElementById('cardsContainer');
             container.innerHTML = '';
-            for (let i = 0; i < BITS_COUNT; i++) {
-                const exp = BITS_COUNT - 1 - i;
-                const weight = Math.pow(2, exp);
 
-                const bitCol = document.createElement('div');
-                bitCol.className = 'bit-column';
+            for (let i = 0; i < config.length; i++) {
+                const exp = config.length - 1 - i;
+                const weight = Math.pow(currentBase, exp);
 
-                bitCol.innerHTML = `
-                    <div class="weight-label">2<sup>${exp}</sup></div>
+                const col = document.createElement('div');
+                col.className = 'digit-column';
+
+                col.innerHTML = `
+                    <div class="weight-label">${currentBase}<sup>${exp}</sup></div>
                     <div class="weight-val">${weight}</div>
-                    <div class="switch-card" id="bitCard-${i}" onclick="toggleBit(${i})">
-                        <span class="switch-state" id="bitState-${i}">0</span>
+                    <div class="digit-card" id="card-${i}" onclick="incrementDigit(${i})">
+                        <span class="digit-val" id="val-${i}">0</span>
                     </div>
+                    <div class="hint-text">點擊+1</div>
                 `;
-                container.appendChild(bitCol);
+                container.appendChild(col);
             }
             updateDisplays();
         }
 
-        // 切換位元
-        function toggleBit(index) {
-            bits[index] = bits[index] === 0 ? 1 : 0;
-            const card = document.getElementById(`bitCard-${index}`);
-            const state = document.getElementById(`bitState-${index}`);
+        // 點擊卡片：數值 +1 並循環
+        function incrementDigit(index) {
+            digits[index] = (digits[index] + 1) % currentBase;
 
-            state.innerText = bits[index];
-            if (bits[index] === 1) {
+            const card = document.getElementById(`card-${index}`);
+            const valEl = document.getElementById(`val-${index}`);
+
+            valEl.innerText = formatDigit(digits[index]);
+
+            if (digits[index] > 0) {
                 card.classList.add('active');
             } else {
                 card.classList.remove('active');
@@ -329,35 +390,58 @@
             }
         }
 
-        // 更新數值與公式顯示 (不帶 0x 與 0o)
+        // 即時計算數值與公式
         function updateDisplays() {
+            const config = BASE_CONFIG[currentBase];
             let total = 0;
             let formulaParts = [];
 
-            for (let i = 0; i < BITS_COUNT; i++) {
-                const exp = BITS_COUNT - 1 - i;
-                const weight = Math.pow(2, exp);
-                if (bits[i] === 1) {
-                    total += weight;
-                    formulaParts.push(`<span style="color: #22c55e;">${weight}</span>`);
+            for (let i = 0; i < config.length; i++) {
+                const exp = config.length - 1 - i;
+                const weight = Math.pow(currentBase, exp);
+                const val = digits[i];
+                if (val > 0) {
+                    total += val * weight;
+                    if (currentBase === 2) {
+                        formulaParts.push(`<span style="color: #22c55e;">${weight}</span>`);
+                    } else {
+                        formulaParts.push(`<span style="color: #22c55e;">(${formatDigit(val)} × ${weight})</span>`);
+                    }
                 }
             }
 
-            document.getElementById('decDisplay').innerText = total;
-            // 移除了 0x 與 0o 前綴，十六進位轉為純大寫
-            document.getElementById('hexDisplay').innerText = total.toString(16).toUpperCase();
+            // 更新四種進位制數值（均無 0x / 0o 前綴）
+            document.getElementById('binDisplay').innerText = total.toString(2);
             document.getElementById('octDisplay').innerText = total.toString(8);
+            document.getElementById('decDisplay').innerText = total;
+            document.getElementById('hexDisplay').innerText = total.toString(16).toUpperCase();
 
             const formulaEl = document.getElementById('formula');
-            formulaEl.innerHTML = formulaParts.length > 0 ? formulaParts.join(' + ') + ` = ${total}` : '0 (無開關啟動)';
+            formulaEl.innerHTML = formulaParts.length > 0 ? formulaParts.join(' + ') + ` = ${total}` : '0 (尚未設定任何數值)';
         }
 
-        // 切換模式
+        // 切換進位制
+        function setBase(base) {
+            if (currentBase === base) return;
+            currentBase = base;
+
+            document.getElementById('btn-base2').className = `btn btn-base ${base === 2 ? 'active' : ''}`;
+            document.getElementById('btn-base8').className = `btn btn-base ${base === 8 ? 'active' : ''}`;
+            document.getElementById('btn-base16').className = `btn btn-base ${base === 16 ? 'active' : ''}`;
+
+            initCards();
+
+            // 若在遊戲中，重抽一題符合該進位制範圍的題目
+            if (mode !== 'explore') {
+                nextRound();
+            }
+        }
+
+        // 切換遊玩模式
         function setMode(newMode) {
             mode = newMode;
             clearInterval(timerId);
 
-            // 更新按鈕樣式
             document.getElementById('btn-explore').className = `btn ${mode === 'explore' ? 'active' : ''}`;
             document.getElementById('btn-quiz10').className = `btn ${mode === 'quiz10' ? 'active' : ''}`;
             document.getElementById('btn-timed').className = `btn ${mode === 'timed' ? 'active' : ''}`;
@@ -371,7 +455,7 @@
 
             if (mode === 'explore') {
                 gamePanel.style.display = 'none';
-                resetBits();
+                resetDigits();
             } else if (mode === 'quiz10') {
                 gamePanel.style.display = 'block';
                 timerInfo.style.display = 'none';
@@ -387,23 +471,26 @@
             }
         }
 
-        // 清空所有開關
-        function resetBits() {
-            bits = new Array(BITS_COUNT).fill(0);
-            for (let i = 0; i < BITS_COUNT; i++) {
-                const card = document.getElementById(`bitCard-${i}`);
-                const state = document.getElementById(`bitState-${i}`);
-                state.innerText = '0';
-                card.classList.remove('active');
+        // 歸零所有卡片
+        function resetDigits() {
+            const config = BASE_CONFIG[currentBase];
+            digits = new Array(config.length).fill(0);
+            for (let i = 0; i < config.length; i++) {
+                const card = document.getElementById(`card-${i}`);
+                const valEl = document.getElementById(`val-${i}`);
+                if (card && valEl) {
+                    valEl.innerText = '0';
+                    card.classList.remove('active');
+                }
             }
             updateDisplays();
         }
 
         // 產生下一題
         function nextRound() {
-            resetBits();
-            // 隨機產生 1 ~ 255 的數值
-            targetValue = Math.floor(Math.random() * 255) + 1;
+            resetDigits();
+            const config = BASE_CONFIG[currentBase];
+            targetValue = Math.floor(Math.random() * config.maxTarget) + 1;
             document.getElementById('targetNumber').innerText = targetValue;
 
             if (mode === 'timed') {
@@ -422,13 +509,12 @@
             }
         }
 
-        // 判定答案
+        // 檢查作答
         function checkAnswer() {
             const currentTotal = parseInt(document.getElementById('decDisplay').innerText, 10);
             if (currentTotal === targetValue) {
                 if (mode === 'quiz10') {
                     if (currentQuestion >= TOTAL_QUESTIONS) {
-                        // 完成10題
                         document.getElementById('game-panel').style.display = 'none';
                         document.getElementById('finish-banner').style.display = 'block';
                     } else {
@@ -446,8 +532,9 @@
             }
         }
 
-        // 頁面加載完成後初始化
-        window.onload = initBits;
+        window.onload = () => {
+            initCards();
+        };
     </script>
 </body>
 </html>

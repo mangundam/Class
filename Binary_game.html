@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二進位探索</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #38bdf8;
+            --accent: #22c55e;
+            --inactive: #475569;
+            --text-light: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 25px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 850px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 模式切換鈕 */
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background-color: #334155;
+            color: #f8fafc;
+            border: 2px solid transparent;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .btn.active {
+            background-color: var(--primary);
+            color: #0f172a;
+        }
+
+        .btn:hover:not(.active) {
+            background-color: #475569;
+        }
+
+        /* 遊戲面板 */
+        #game-panel {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .target-box {
+            font-size: 26px;
+            background: #090d16;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: 2px dashed var(--primary);
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .score-box {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+            font-size: 17px;
+            color: #fbbf24;
+        }
+
+        /* 10題完成結算彈出區 */
+        #finish-banner {
+            display: none;
+            background-color: rgba(34, 197, 94, 0.15);
+            border: 2px solid var(--accent);
+            color: #f8fafc;
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            width: 90%;
+            box-sizing: border-box;
+        }
+
+        /* 位元群組 */
+        .bits-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .bit-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .weight-label {
+            font-size: 14px;
+            color: #94a3b8;
+            font-family: monospace;
+        }
+
+        .weight-val {
+            font-size: 18px;
+            font-weight: bold;
+            color: #38bdf8;
+        }
+
+        .switch-card {
+            width: 75px;
+            height: 110px;
+            background-color: #0f172a;
+            border: 2px solid var(--inactive);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s, border-color 0.2s, background-color 0.2s;
+        }
+
+        .switch-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .switch-card.active {
+            border-color: var(--accent);
+            background-color: rgba(34, 197, 94, 0.15);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+        }
+
+        .switch-state {
+            font-size: 38px;
+            font-weight: 800;
+            color: var(--inactive);
+        }
+
+        .switch-card.active .switch-state {
+            color: var(--accent);
+        }
+
+        /* 結果顯示板 */
+        .display-board {
+            width: 100%;
+            background-color: #0f172a;
+            border-radius: 10px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .formula-line {
+            font-family: monospace;
+            font-size: 16px;
+            color: #cbd5e1;
+            word-break: break-all;
+            line-height: 1.5;
+            min-height: 24px;
+        }
+
+        .val-tags {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background-color: #1e293b;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 15px;
+            flex: 1;
+            min-width: 130px;
+            text-align: center;
+        }
+
+        .tag strong {
+            display: block;
+            font-size: 26px;
+            color: #38bdf8;
+            margin-top: 5px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>二進位練習</h1>
+    <div class="subtitle"></div>
+
+    <div class="container">
+        <!-- 模式切換 -->
+        <div class="mode-toggle">
+            <button class="btn active" id="btn-explore" onclick="setMode('explore')">自由探索</button>
+            <button class="btn" id="btn-quiz10" onclick="setMode('quiz10')">10題闖關 (不計時)</button>
+            <button class="btn" id="btn-timed" onclick="setMode('timed')">限時挑戰 (15秒)</button>
+        </div>
+
+        <!-- 挑戰面板 -->
+        <div id="game-panel">
+            <div class="target-box">
+                目標十進位：<span id="targetNumber" style="color: #f43f5e; font-weight: bold;">0</span>
+            </div>
+            <div class="score-box">
+                <span id="progress-info">題數：<b id="currentQ">1</b> / 10</span>
+                <span id="timer-info" style="display: none;">倒數：<b id="timer">15</b>s</span>
+            </div>
+        </div>
+
+        <!-- 完成結算區 -->
+        <div id="finish-banner">
+            <h2 style="margin: 0 0 8px 0; color: #4ade80;">🎉 恭喜通關！</h2>
+            <p style="margin: 0 0 12px 0;">你已順利完成 10 題二進位換算！</p>
+            <button class="btn" style="background-color: var(--accent); color: #0f172a;" onclick="setMode('quiz10')">再玩一次</button>
+        </div>
+
+        <!-- 位元開關區 (8-bit) -->
+        <div class="bits-container" id="bitsContainer"></div>
+
+        <!-- 即時計算與結果看板 -->
+        <div class="display-board">
+            <div>
+                <span style="color: #94a3b8; font-size: 14px;">權重累加計算過程：</span>
+                <div class="formula-line" id="formula">0</div>
+            </div>
+            <div class="val-tags">
+                <div class="tag">十進位 (DEC)<strong id="decDisplay">0</strong></div>
+                <div class="tag">十六進位 (HEX)<strong id="hexDisplay">0</strong></div>
+                <div class="tag">八進位 (OCT)<strong id="octDisplay">0</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BITS_COUNT = 8;
+        let bits = new Array(BITS_COUNT).fill(0);
+        let mode = 'explore'; // 'explore', 'quiz10', 'timed'
+        let targetValue = 0;
+        let timerId = null;
+        let timeLeft = 15;
+        let currentQuestion = 1;
+        const TOTAL_QUESTIONS = 10;
+
+        // 初始化開關介面
+        function initBits() {
+            const container = document.getElementById('bitsContainer');
+            container.innerHTML = '';
+            for (let i = 0; i < BITS_COUNT; i++) {
+                const exp = BITS_COUNT - 1 - i;
+                const weight = Math.pow(2, exp);
+
+                const bitCol = document.createElement('div');
+                bitCol.className = 'bit-column';
+
+                bitCol.innerHTML = `
+                    <div class="weight-label">2<sup>${exp}</sup></div>
+                    <div class="weight-val">${weight}</div>
+                    <div class="switch-card" id="bitCard-${i}" onclick="toggleBit(${i})">
+                        <span class="switch-state" id="bitState-${i}">0</span>
+                    </div>
+                `;
+                container.appendChild(bitCol);
+            }
+            updateDisplays();
+        }
+
+        // 切換位元
+        function toggleBit(index) {
+            bits[index] = bits[index] === 0 ? 1 : 0;
+            const card = document.getElementById(`bitCard-${index}`);
+            const state = document.getElementById(`bitState-${index}`);
+
+            state.innerText = bits[index];
+            if (bits[index] === 1) {
+                card.classList.add('active');
+            } else {
+                card.classList.remove('active');
+            }
+
+            updateDisplays();
+
+            if (mode === 'quiz10' || mode === 'timed') {
+                checkAnswer();
+            }
+        }
+
+        // 更新數值與公式顯示 (不帶 0x 與 0o)
+        function updateDisplays() {
+            let total = 0;
+            let formulaParts = [];
+
+            for (let i = 0; i < BITS_COUNT; i++) {
+                const exp = BITS_COUNT - 1 - i;
+                const weight = Math.pow(2, exp);
+                if (bits[i] === 1) {
+                    total += weight;
+                    formulaParts.push(`<span style="color: #22c55e;">${weight}</span>`);
+                }
+            }
+
+            document.getElementById('decDisplay').innerText = total;
+            // 移除了 0x 與 0o 前綴，十六進位轉為純大寫
+            document.getElementById('hexDisplay').innerText = total.toString(16).toUpperCase();
+            document.getElementById('octDisplay').innerText = total.toString(8);
+
+            const formulaEl = document.getElementById('formula');
+            formulaEl.innerHTML = formulaParts.length > 0 ? formulaParts.join(' + ') + ` = ${total}` : '0 (無開關啟動)';
+        }
+
+        // 切換模式
+        function setMode(newMode) {
+            mode = newMode;
+            clearInterval(timerId);
+
+            // 更新按鈕樣式
+            document.getElementById('btn-explore').className = `btn ${mode === 'explore' ? 'active' : ''}`;
+            document.getElementById('btn-quiz10').className = `btn ${mode === 'quiz10' ? 'active' : ''}`;
+            document.getElementById('btn-timed').className = `btn ${mode === 'timed' ? 'active' : ''}`;
+
+            const gamePanel = document.getElementById('game-panel');
+            const timerInfo = document.getElementById('timer-info');
+            const progressInfo = document.getElementById('progress-info');
+            const finishBanner = document.getElementById('finish-banner');
+
+            finishBanner.style.display = 'none';
+
+            if (mode === 'explore') {
+                gamePanel.style.display = 'none';
+                resetBits();
+            } else if (mode === 'quiz10') {
+                gamePanel.style.display = 'block';
+                timerInfo.style.display = 'none';
+                progressInfo.style.display = 'inline';
+                currentQuestion = 1;
+                document.getElementById('currentQ').innerText = currentQuestion;
+                nextRound();
+            } else if (mode === 'timed') {
+                gamePanel.style.display = 'block';
+                timerInfo.style.display = 'inline';
+                progressInfo.style.display = 'none';
+                nextRound();
+            }
+        }
+
+        // 清空所有開關
+        function resetBits() {
+            bits = new Array(BITS_COUNT).fill(0);
+            for (let i = 0; i < BITS_COUNT; i++) {
+                const card = document.getElementById(`bitCard-${i}`);
+                const state = document.getElementById(`bitState-${i}`);
+                state.innerText = '0';
+                card.classList.remove('active');
+            }
+            updateDisplays();
+        }
+
+        // 產生下一題
+        function nextRound() {
+            resetBits();
+            // 隨機產生 1 ~ 255 的數值
+            targetValue = Math.floor(Math.random() * 255) + 1;
+            document.getElementById('targetNumber').innerText = targetValue;
+
+            if (mode === 'timed') {
+                timeLeft = 15;
+                document.getElementById('timer').innerText = timeLeft;
+                clearInterval(timerId);
+                timerId = setInterval(() => {
+                    timeLeft--;
+                    document.getElementById('timer').innerText = timeLeft;
+                    if (timeLeft <= 0) {
+                        clearInterval(timerId);
+                        alert(`⏰ 時間到！目標數字是 ${targetValue}，重新開始挑戰！`);
+                        nextRound();
+                    }
+                }, 1000);
+            }
+        }
+
+        // 判定答案
+        function checkAnswer() {
+            const currentTotal = parseInt(document.getElementById('decDisplay').innerText, 10);
+            if (currentTotal === targetValue) {
+                if (mode === 'quiz10') {
+                    if (currentQuestion >= TOTAL_QUESTIONS) {
+                        // 完成10題
+                        document.getElementById('game-panel').style.display = 'none';
+                        document.getElementById('finish-banner').style.display = 'block';
+                    } else {
+                        currentQuestion++;
+                        document.getElementById('currentQ').innerText = currentQuestion;
+                        setTimeout(nextRound, 150);
+                    }
+                } else if (mode === 'timed') {
+                    clearInterval(timerId);
+                    setTimeout(() => {
+                        alert('🎉 答對了！進入下一題！');
+                        nextRound();
+                    }, 120);
+                }
+            }
+        }
+
+        // 頁面加載完成後初始化
+        window.onload = initBits;
+    </script>
+</body>
+</html>

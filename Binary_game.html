@@ -99,7 +99,7 @@
             background-color: #475569;
         }
 
-        /* 遊戲面板 */
+        /* 遊戲資訊面板 */
         #game-panel {
             display: none;
             text-align: center;
@@ -108,13 +108,13 @@
         }
 
         .target-box {
-            font-size: 26px;
+            font-size: 24px;
             background: #090d16;
-            padding: 10px 24px;
+            padding: 12px 24px;
             border-radius: 10px;
             border: 2px dashed var(--primary);
             display: inline-block;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .score-box {
@@ -126,12 +126,35 @@
             color: #fbbf24;
         }
 
+        /* 猜十進位輸入區 */
+        #guess-input-container {
+            display: none;
+            margin: 15px 0;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .dec-input {
+            background-color: #0f172a;
+            border: 2px solid var(--primary);
+            color: #fff;
+            padding: 10px 15px;
+            font-size: 20px;
+            border-radius: 8px;
+            width: 140px;
+            text-align: center;
+            outline: none;
+            font-family: monospace;
+        }
+
+        /* 結算橫幅 */
         #finish-banner {
             display: none;
             background-color: rgba(34, 197, 94, 0.15);
             border: 2px solid var(--accent);
             color: #f8fafc;
-            padding: 15px 25px;
+            padding: 20px 25px;
             border-radius: 12px;
             margin-bottom: 20px;
             text-align: center;
@@ -145,7 +168,7 @@
             flex-wrap: wrap;
             gap: 12px;
             justify-content: center;
-            margin: 15px 0 25px 0;
+            margin: 15px 0 20px 0;
             min-height: 140px;
         }
 
@@ -191,6 +214,14 @@
             border-color: var(--accent);
             background-color: rgba(34, 197, 94, 0.15);
             box-shadow: 0 0 14px rgba(34, 197, 94, 0.4);
+        }
+
+        .digit-card.readonly {
+            cursor: default;
+        }
+
+        .digit-card.readonly:hover {
+            transform: none;
         }
 
         .digit-val {
@@ -258,12 +289,12 @@
 </head>
 <body>
 
-    <h1>進位制探索實驗室</h1>
-    <div class="subtitle">點擊卡片遞增數值，探索位值與權重運作原理</div>
+    <h1>進位制探索</h1>
+    <div class="subtitle"></div>
 
     <div class="container">
         <div class="controls-row">
-            <!-- 進位制切換 -->
+            <!-- 進位制選擇 -->
             <div class="toggle-group">
                 <span class="group-label">進位制：</span>
                 <button class="btn btn-base active" id="btn-base2" onclick="setBase(2)">二進位 (BIN)</button>
@@ -271,39 +302,46 @@
                 <button class="btn btn-base" id="btn-base16" onclick="setBase(16)">十六進位 (HEX)</button>
             </div>
 
-            <!-- 遊玩模式切換 -->
+            <!-- 模式選擇 -->
             <div class="toggle-group">
                 <span class="group-label">模式：</span>
                 <button class="btn active" id="btn-explore" onclick="setMode('explore')">自由探索</button>
                 <button class="btn" id="btn-quiz10" onclick="setMode('quiz10')">10題闖關 (不計時)</button>
-                <button class="btn" id="btn-timed" onclick="setMode('timed')">限時挑戰 (15秒)</button>
+                <button class="btn" id="btn-timed" onclick="setMode('timed')">限時極限 (1分鐘)</button>
             </div>
         </div>
 
-        <!-- 遊戲面板 -->
+        <!-- 遊戲目標與狀態 -->
         <div id="game-panel">
-            <div class="target-box">
+            <div class="target-box" id="targetInstruction">
                 目標十進位：<span id="targetNumber" style="color: #f43f5e; font-weight: bold;">0</span>
             </div>
             <div class="score-box">
                 <span id="progress-info">題數：<b id="currentQ">1</b> / 10</span>
-                <span id="timer-info" style="display: none;">倒數：<b id="timer">15</b>s</span>
+                <span id="score-info" style="display: none;">答對題數：<b id="timedScore">0</b> 題</span>
+                <span id="timer-info" style="display: none;">剩餘時間：<b id="timer">60</b>s</span>
             </div>
         </div>
 
-        <!-- 10題完成橫幅 -->
+        <!-- 猜十進位作答區 -->
+        <div id="guess-input-container">
+            <input type="number" id="decInput" class="dec-input" placeholder="輸入十進位" onkeydown="if(event.key==='Enter') submitGuess()">
+            <button class="btn" style="background-color: var(--accent); color: #0f172a;" onclick="submitGuess()">送出答案</button>
+        </div>
+
+        <!-- 通關/結束結算區 -->
         <div id="finish-banner">
-            <h2 style="margin: 0 0 6px 0; color: #4ade80;">🎉 恭喜通關！</h2>
-            <p style="margin: 0 0 12px 0;">已順利完成 10 題數字系統轉換！</p>
-            <button class="btn" style="background-color: var(--accent); color: #0f172a;" onclick="setMode('quiz10')">再玩一次</button>
+            <h2 id="finishTitle" style="margin: 0 0 6px 0; color: #4ade80;">🎉 挑戰結束！</h2>
+            <p id="finishMsg" style="margin: 0 0 14px 0;"></p>
+            <button class="btn" style="background-color: var(--accent); color: #0f172a;" onclick="restartCurrentMode()">再玩一次</button>
         </div>
 
         <!-- 卡片操作區 -->
         <div class="cards-container" id="cardsContainer"></div>
 
         <!-- 即時算式與進位展示 -->
-        <div class="display-board">
-            <div>
+        <div class="display-board" id="displayBoard">
+            <div id="formulaSection">
                 <span style="color: #94a3b8; font-size: 13px;">權重累加計算過程：</span>
                 <div class="formula-line" id="formula">0</div>
             </div>
@@ -319,32 +357,30 @@
     <script>
         const HEX_CHARS = "0123456789ABCDEF";
 
-        // 各進位制配置：位數與上限 (控制最大值約在 255~511，便於心算練習)
         const BASE_CONFIG = {
-            2:  { length: 8, maxTarget: 255 },  // 2^8 = 256
-            8:  { length: 3, maxTarget: 511 },  // 8^3 = 512
-            16: { length: 2, maxTarget: 255 }   // 16^2 = 256
+            2:  { name: '二進位', length: 8, maxTarget: 255 },
+            8:  { name: '八進位', length: 3, maxTarget: 511 },
+            16: { name: '十六進位', length: 2, maxTarget: 255 }
         };
 
         let currentBase = 2;
         let digits = [];
         let mode = 'explore'; // 'explore', 'quiz10', 'timed'
+        let qType = 'build';  // 'build': 點開關拼十進位, 'guess': 給N進位猜十進位
         let targetValue = 0;
         let timerId = null;
-        let timeLeft = 15;
+        let timeLeft = 60;
         let currentQuestion = 1;
         const TOTAL_QUESTIONS = 10;
+        let timedScore = 0;
 
-        // 格式化單一數值為該進位的文字符號
         function formatDigit(val) {
             return HEX_CHARS[val];
         }
 
         // 初始化卡片區
-        function initCards() {
+        function initCards(isReadOnly = false) {
             const config = BASE_CONFIG[currentBase];
-            digits = new Array(config.length).fill(0);
-
             const container = document.getElementById('cardsContainer');
             container.innerHTML = '';
 
@@ -355,28 +391,34 @@
                 const col = document.createElement('div');
                 col.className = 'digit-column';
 
+                const readOnlyClass = isReadOnly ? 'readonly' : '';
+                const clickHandler = isReadOnly ? '' : `onclick="incrementDigit(${i})"`;
+                const hintText = isReadOnly ? '觀察此位元' : '點擊+1';
+
                 col.innerHTML = `
                     <div class="weight-label">${currentBase}<sup>${exp}</sup></div>
                     <div class="weight-val">${weight}</div>
-                    <div class="digit-card" id="card-${i}" onclick="incrementDigit(${i})">
-                        <span class="digit-val" id="val-${i}">0</span>
+                    <div class="digit-card ${readOnlyClass}" id="card-${i}" ${clickHandler}>
+                        <span class="digit-val" id="val-${i}">${formatDigit(digits[i] || 0)}</span>
                     </div>
-                    <div class="hint-text">點擊+1</div>
+                    <div class="hint-text">${hintText}</div>
                 `;
                 container.appendChild(col);
+                if ((digits[i] || 0) > 0) {
+                    col.querySelector('.digit-card').classList.add('active');
+                }
             }
-            updateDisplays();
         }
 
-        // 點擊卡片：數值 +1 並循環
+        // 點擊卡片增加數值
         function incrementDigit(index) {
-            digits[index] = (digits[index] + 1) % currentBase;
+            if (qType === 'guess' && mode !== 'explore') return;
 
+            digits[index] = (digits[index] + 1) % currentBase;
             const card = document.getElementById(`card-${index}`);
             const valEl = document.getElementById(`val-${index}`);
 
             valEl.innerText = formatDigit(digits[index]);
-
             if (digits[index] > 0) {
                 card.classList.add('active');
             } else {
@@ -385,13 +427,13 @@
 
             updateDisplays();
 
-            if (mode === 'quiz10' || mode === 'timed') {
-                checkAnswer();
+            if (qType === 'build' && (mode === 'quiz10' || mode === 'timed')) {
+                checkBuildAnswer();
             }
         }
 
-        // 即時計算數值與公式
-        function updateDisplays() {
+        // 更新各進位數值展示
+        function updateDisplays(maskDec = false) {
             const config = BASE_CONFIG[currentBase];
             let total = 0;
             let formulaParts = [];
@@ -399,7 +441,7 @@
             for (let i = 0; i < config.length; i++) {
                 const exp = config.length - 1 - i;
                 const weight = Math.pow(currentBase, exp);
-                const val = digits[i];
+                const val = digits[i] || 0;
                 if (val > 0) {
                     total += val * weight;
                     if (currentBase === 2) {
@@ -410,14 +452,22 @@
                 }
             }
 
-            // 更新四種進位制數值（均無 0x / 0o 前綴）
+            // 更新四個看板（皆移除 0x / 0o 前綴）
             document.getElementById('binDisplay').innerText = total.toString(2);
             document.getElementById('octDisplay').innerText = total.toString(8);
-            document.getElementById('decDisplay').innerText = total;
             document.getElementById('hexDisplay').innerText = total.toString(16).toUpperCase();
 
+            const decDisplay = document.getElementById('decDisplay');
             const formulaEl = document.getElementById('formula');
-            formulaEl.innerHTML = formulaParts.length > 0 ? formulaParts.join(' + ') + ` = ${total}` : '0 (尚未設定任何數值)';
+
+            if (maskDec) {
+                // 猜數字題目隱藏十進位答案與算式
+                decDisplay.innerText = '?';
+                formulaEl.innerHTML = '<span style="color: #94a3b8;">(回答猜測模式中，請自行計算上方權重累加)</span>';
+            } else {
+                decDisplay.innerText = total;
+                formulaEl.innerHTML = formulaParts.length > 0 ? formulaParts.join(' + ') + ` = ${total}` : '0 (尚未設定任何數值)';
+            }
         }
 
         // 切換進位制
@@ -429,15 +479,17 @@
             document.getElementById('btn-base8').className = `btn btn-base ${base === 8 ? 'active' : ''}`;
             document.getElementById('btn-base16').className = `btn btn-base ${base === 16 ? 'active' : ''}`;
 
-            initCards();
+            digits = new Array(BASE_CONFIG[currentBase].length).fill(0);
+            initCards(false);
 
-            // 若在遊戲中，重抽一題符合該進位制範圍的題目
             if (mode !== 'explore') {
-                nextRound();
+                restartCurrentMode();
+            } else {
+                updateDisplays(false);
             }
         }
 
-        // 切換遊玩模式
+        // 切換模式
         function setMode(newMode) {
             mode = newMode;
             clearInterval(timerId);
@@ -449,16 +501,23 @@
             const gamePanel = document.getElementById('game-panel');
             const timerInfo = document.getElementById('timer-info');
             const progressInfo = document.getElementById('progress-info');
+            const scoreInfo = document.getElementById('score-info');
             const finishBanner = document.getElementById('finish-banner');
+            const guessContainer = document.getElementById('guess-input-container');
 
             finishBanner.style.display = 'none';
+            guessContainer.style.display = 'none';
 
             if (mode === 'explore') {
                 gamePanel.style.display = 'none';
-                resetDigits();
+                qType = 'build';
+                digits = new Array(BASE_CONFIG[currentBase].length).fill(0);
+                initCards(false);
+                updateDisplays(false);
             } else if (mode === 'quiz10') {
                 gamePanel.style.display = 'block';
                 timerInfo.style.display = 'none';
+                scoreInfo.style.display = 'none';
                 progressInfo.style.display = 'inline';
                 currentQuestion = 1;
                 document.getElementById('currentQ').innerText = currentQuestion;
@@ -466,74 +525,146 @@
             } else if (mode === 'timed') {
                 gamePanel.style.display = 'block';
                 timerInfo.style.display = 'inline';
+                scoreInfo.style.display = 'inline';
                 progressInfo.style.display = 'none';
-                nextRound();
+                timedScore = 0;
+                document.getElementById('timedScore').innerText = timedScore;
+                startTimedChallenge();
             }
         }
 
-        // 歸零所有卡片
-        function resetDigits() {
-            const config = BASE_CONFIG[currentBase];
-            digits = new Array(config.length).fill(0);
-            for (let i = 0; i < config.length; i++) {
-                const card = document.getElementById(`card-${i}`);
-                const valEl = document.getElementById(`val-${i}`);
-                if (card && valEl) {
-                    valEl.innerText = '0';
-                    card.classList.remove('active');
-                }
-            }
-            updateDisplays();
+        function restartCurrentMode() {
+            setMode(mode);
         }
 
-        // 產生下一題
-        function nextRound() {
-            resetDigits();
-            const config = BASE_CONFIG[currentBase];
-            targetValue = Math.floor(Math.random() * config.maxTarget) + 1;
-            document.getElementById('targetNumber').innerText = targetValue;
+        // 開始 1 分鐘極限挑戰
+        function startTimedChallenge() {
+            timeLeft = 60;
+            document.getElementById('timer').innerText = timeLeft;
+            clearInterval(timerId);
 
-            if (mode === 'timed') {
-                timeLeft = 15;
+            timerId = setInterval(() => {
+                timeLeft--;
                 document.getElementById('timer').innerText = timeLeft;
-                clearInterval(timerId);
-                timerId = setInterval(() => {
-                    timeLeft--;
-                    document.getElementById('timer').innerText = timeLeft;
-                    if (timeLeft <= 0) {
-                        clearInterval(timerId);
-                        alert(`⏰ 時間到！目標數字是 ${targetValue}，重新開始挑戰！`);
-                        nextRound();
-                    }
-                }, 1000);
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    endTimedChallenge();
+                }
+            }, 1000);
+
+            nextRound();
+        }
+
+        // 結束挑戰並結算
+        function endTimedChallenge() {
+            document.getElementById('game-panel').style.display = 'none';
+            document.getElementById('guess-input-container').style.display = 'none';
+
+            const finishBanner = document.getElementById('finish-banner');
+            const finishTitle = document.getElementById('finishTitle');
+            const finishMsg = document.getElementById('finishMsg');
+
+            finishTitle.innerText = "⏰ 1分鐘時間到！";
+            finishMsg.innerHTML = `你在 1 分鐘內共答對了 <b style="color: #fbbf24; font-size: 22px;">${timedScore}</b> 題！`;
+            finishBanner.style.display = 'block';
+        }
+
+        // 產生題目（隨機出 題型A：組裝題 或 題型B：猜數字題）
+        function nextRound() {
+            const config = BASE_CONFIG[currentBase];
+            // 隨機題型：約 50% 機率是猜十進位
+            qType = Math.random() < 0.5 ? 'guess' : 'build';
+
+            targetValue = Math.floor(Math.random() * config.maxTarget) + 1;
+            const targetInstruction = document.getElementById('targetInstruction');
+            const guessContainer = document.getElementById('guess-input-container');
+            const inputField = document.getElementById('decInput');
+
+            if (qType === 'build') {
+                // 題型 A：給十進位，學生點卡片拼出來
+                guessContainer.style.display = 'none';
+                targetInstruction.innerHTML = `請點擊組合出十進位：<span style="color: #f43f5e; font-weight: bold;">${targetValue}</span>`;
+                digits = new Array(config.length).fill(0);
+                initCards(false);
+                updateDisplays(false);
+            } else {
+                // 題型 B：卡片已排好，學生猜十進位數值
+                guessContainer.style.display = 'flex';
+                inputField.value = '';
+                inputField.focus();
+
+                // 把 targetValue 轉成對應進位的位元陣列
+                digits = new Array(config.length).fill(0);
+                let temp = targetValue;
+                for (let i = config.length - 1; i >= 0; i--) {
+                    digits[i] = temp % currentBase;
+                    temp = Math.floor(temp / currentBase);
+                }
+
+                let baseStr = targetValue.toString(currentBase).toUpperCase();
+                targetInstruction.innerHTML = `觀察下方 ${config.name} 數值 <b style="color: #38bdf8;">${baseStr}</b>，它是十進位的多少？`;
+
+                initCards(true); // 鎖定卡片唯讀
+                updateDisplays(true); // 遮蔽答案
             }
         }
 
-        // 檢查作答
-        function checkAnswer() {
-            const currentTotal = parseInt(document.getElementById('decDisplay').innerText, 10);
-            if (currentTotal === targetValue) {
-                if (mode === 'quiz10') {
-                    if (currentQuestion >= TOTAL_QUESTIONS) {
-                        document.getElementById('game-panel').style.display = 'none';
-                        document.getElementById('finish-banner').style.display = 'block';
-                    } else {
-                        currentQuestion++;
-                        document.getElementById('currentQ').innerText = currentQuestion;
-                        setTimeout(nextRound, 150);
-                    }
-                } else if (mode === 'timed') {
-                    clearInterval(timerId);
-                    setTimeout(() => {
-                        alert('🎉 答對了！進入下一題！');
-                        nextRound();
-                    }, 120);
+        // 判定題型 A（組裝題）
+        function checkBuildAnswer() {
+            let total = 0;
+            const config = BASE_CONFIG[currentBase];
+            for (let i = 0; i < config.length; i++) {
+                total += (digits[i] || 0) * Math.pow(currentBase, config.length - 1 - i);
+            }
+
+            if (total === targetValue) {
+                handleCorrectAnswer();
+            }
+        }
+
+        // 判定題型 B（猜十進位送出）
+        function submitGuess() {
+            const inputField = document.getElementById('decInput');
+            const userGuess = parseInt(inputField.value, 10);
+
+            if (isNaN(userGuess)) return;
+
+            if (userGuess === targetValue) {
+                handleCorrectAnswer();
+            } else {
+                alert(`❌ 答錯囉！請檢查各項乘冪權重累加，再試一次！`);
+                inputField.select();
+            }
+        }
+
+        // 答對時的處理
+        function handleCorrectAnswer() {
+            if (mode === 'quiz10') {
+                if (currentQuestion >= TOTAL_QUESTIONS) {
+                    document.getElementById('game-panel').style.display = 'none';
+                    document.getElementById('guess-input-container').style.display = 'none';
+
+                    const finishBanner = document.getElementById('finish-banner');
+                    const finishTitle = document.getElementById('finishTitle');
+                    const finishMsg = document.getElementById('finishMsg');
+
+                    finishTitle.innerText = "🎉 恭喜通過 10 題闖關！";
+                    finishMsg.innerText = `你已經完全掌握了 ${BASE_CONFIG[currentBase].name} 與十進位的雙向轉換！`;
+                    finishBanner.style.display = 'block';
+                } else {
+                    currentQuestion++;
+                    document.getElementById('currentQ').innerText = currentQuestion;
+                    setTimeout(nextRound, 150);
                 }
+            } else if (mode === 'timed') {
+                timedScore++;
+                document.getElementById('timedScore').innerText = timedScore;
+                setTimeout(nextRound, 120);
             }
         }
 
         window.onload = () => {
-            initCards();
+            initCards(false);
         };
     </script>
 </body>

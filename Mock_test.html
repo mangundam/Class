@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數位科技模考題目</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+            --success-color: #20c997;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        /* 模式切換按鈕樣式 */
+        .mode-toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .mode-btn {
+            background-color: #e9ecef;
+            border: 2px solid transparent;
+            color: var(--text-main);
+            padding: 10px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn:hover { background-color: #dee2e6; }
+        .mode-btn.active-mode {
+            background-color: var(--accent-color);
+            color: #ffffff;
+            box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3);
+        }
+
+        .filter-section {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .filter-title {
+            font-size: 1.1em;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tag-btn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.2s ease;
+        }
+        .tag-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        .tag-btn.active {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: #ffffff;
+        }
+
+        .question-card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        /* 題目標頭與白板工具列 */
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .header-info {
+            color: var(--text-muted);
+            font-size: 0.9em;
+        }
+
+        .drawing-toolbar {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tool-btn {
+            background-color: #f1f3f5;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tool-btn:hover { background-color: #e9ecef; }
+        
+        /* 畫筆啟動狀態 (紅色) */
+        .tool-btn.active-pen { background-color: #ff7675; color: white; border-color: #d63031; }
+        /* 橡皮擦啟動狀態 (黃色) */
+        .tool-btn.active-eraser { background-color: #ffeaa7; color: #d35400; border-color: #fdcb6e; }
+        /* 游標啟動狀態 (藍色) */
+        .tool-btn.active-cursor { background-color: #74b9ff; color: white; border-color: #0984e3; }
+
+        /* 畫布容器與設定 */
+        .canvas-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .drawing-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            cursor: crosshair;
+            /* 防止大屏觸控時預設的選取或雙擊放大 */
+            touch-action: none; 
+        }
+        
+        /* 當切換為游標模式時，讓事件穿透畫布，才能選取文字 */
+        .drawing-canvas.cursor-mode {
+            pointer-events: none;
+        }
+
+        .question-title {
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+        .option-item { padding: 8px 0; }
+
+        .toggle-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95em;
+            position: relative;
+            z-index: 20; /* 確保按鈕在畫布之上 */
+        }
+        .toggle-btn:hover { background-color: #1aa179; }
+
+        .answer-section {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f1f8f6;
+            border-radius: 4px;
+            border-left: 4px solid var(--success-color);
+        }
+        .answer-section.visible { display: block; }
+        .answer-text { font-weight: bold; color: var(--primary-color); margin-bottom: 10px; }
+        .explanation-text { color: var(--text-main); white-space: pre-wrap; }
+        .empty-explanation { color: var(--text-muted); font-style: italic; }
+        .status-message { text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 1.1em; }
+        .question-image { max-width: 100%; height: auto; display: block; margin: 10px 0; border-radius: 4px; }
+
+        /* 行動裝置隱藏工具列的防呆，若不需要可刪 */
+        @media (max-width: 600px) {
+            .question-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .drawing-toolbar { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>數位科技模考題目</h1>
+
+    <div class="mode-toggle-container">
+        <button id="btn-unit-mode" class="mode-btn active-mode" onclick="setMode('unit')">單元模式</button>
+        <button id="btn-exam-mode" class="mode-btn" onclick="setMode('exam')">考卷模式</button>
+    </div>
+
+    <div class="filter-section">
+        <div id="filterTitle" class="filter-title">請選擇測驗單元 (可複選)：</div>
+        <div class="tags-container" id="tagsContainer">
+            <div class="status-message" style="margin-top: 0;">載入標籤中...</div>
+        </div>
+    </div>
+
+    <div id="questionsContainer">
+        <div class="status-message">載入題庫中，請稍候...</div>
+    </div>
+</div>
+
+<script>
+    let allQuestions = [];
+    let tagCounts = {};
+    let examCounts = {};
+    let selectedTags = new Set();
+    let currentMode = 'unit';
+
+    fetch('mock_questions_database.json')
+        .then(response => {
+            if (!response.ok) throw new Error('無法讀取題庫檔案');
+            return response.json();
+        })
+        .then(data => {
+            allQuestions = data;
+            extractDataAndCount();
+            renderTags();
+            renderQuestions();
+        })
+        .catch(error => {
+            document.getElementById('questionsContainer').innerHTML = 
+                '<div class="status-message" style="color: red;">讀取失敗。請確認是否透過本機伺服器執行，或已將檔案上傳至伺服器。</div>';
+            console.error('Error fetching questions:', error);
+        });
+
+    function extractDataAndCount() {
+        allQuestions.forEach(q => {
+            if (q.標籤) {
+                let tagsArray = q.標籤.split(',');
+                tagsArray.forEach(tag => {
+                    let trimmedTag = tag.trim();
+                    if (trimmedTag !== "") tagCounts[trimmedTag] = (tagCounts[trimmedTag] || 0) + 1;
+                });
+            }
+            if (q.來源) {
+                let source = q.來源.trim();
+                if (source !== "") examCounts[source] = (examCounts[source] || 0) + 1;
+            }
+        });
+    }
+
+    function setMode(mode) {
+        if (currentMode === mode) return;
+        currentMode = mode;
+        selectedTags.clear();
+        
+        document.getElementById('btn-unit-mode').classList.toggle('active-mode', mode === 'unit');
+        document.getElementById('btn-exam-mode').classList.toggle('active-mode', mode === 'exam');
+        document.getElementById('filterTitle').textContent = mode === 'unit' ? '請選擇測驗單元 (可複選)：' : '請選擇測驗考卷 (可複選)：';
+
+        renderTags();
+        renderQuestions();
+    }
+
+    function renderTags() {
+        const container = document.getElementById('tagsContainer');
+        container.innerHTML = '';
+        let targetCounts = currentMode === 'unit' ? tagCounts : examCounts;
+        let sortedTags = Object.keys(targetCounts).sort();
+
+        sortedTags.forEach(tag => {
+            const btn = document.createElement('button');
+            btn.className = 'tag-btn';
+            btn.textContent = `${tag} (${targetCounts[tag]})`;
+            btn.onclick = () => toggleTag(tag, btn);
+            container.appendChild(btn);
+        });
+    }
+
+    function toggleTag(tag, btnElement) {
+        if (selectedTags.has(tag)) {
+            selectedTags.delete(tag);
+            btnElement.classList.remove('active');
+        } else {
+            selectedTags.add(tag);
+            btnElement.classList.add('active');
+        }
+        renderQuestions();
+    }
+
+    function escapeHTML(text) {
+        if (!text) return '';
+        return text.toString()
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function parseImages(text) {
+        if (!text) return '';
+        return text.replace(/\{\{([^}]+)\}\}/g, '<img src="mock_image/$1.png" class="question-image" alt="附圖 $1">');
+    }
+
+    function renderQuestions() {
+        const container = document.getElementById('questionsContainer');
+        container.innerHTML = '';
+
+        if (selectedTags.size === 0) {
+            let msg = currentMode === 'unit' ? '請從上方選擇一或多個單元標籤以顯示題目。' : '請從上方選擇一或多份考卷以顯示題目。';
+            container.innerHTML = `<div class="status-message">${msg}</div>`;
+            return;
+        }
+
+        const filteredQuestions = allQuestions.filter(q => {
+            if (currentMode === 'unit') {
+                if (!q.標籤) return false;
+                let qTags = q.標籤.split(',').map(t => t.trim());
+                return qTags.some(t => selectedTags.has(t));
+            } else {
+                if (!q.來源) return false;
+                return selectedTags.has(q.來源.trim());
+            }
+        });
+
+        if (filteredQuestions.length === 0) {
+            container.innerHTML = '<div class="status-message">所選項目目前沒有對應的題目。</div>';
+            return;
+        }
+
+        filteredQuestions.forEach((q, index) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.id = `card-${index}`;
+
+            const parsedTitle = parseImages(escapeHTML(q.題目));
+            const parsedOptA = parseImages(escapeHTML(q.選項A));
+            const parsedOptB = parseImages(escapeHTML(q.選項B));
+            const parsedOptC = parseImages(escapeHTML(q.選項C));
+            const parsedOptD = parseImages(escapeHTML(q.選項D));
+            const parsedExplanation = parseImages(escapeHTML(q.解析));
+
+            const explanationContent = parsedExplanation && parsedExplanation.trim() !== "" 
+                ? `<div class="explanation-text">解析：\n${parsedExplanation}</div>` 
+                : '<div class="explanation-text empty-explanation">解析：目前尚無解析。</div>';
+
+            card.innerHTML = `
+                <div class="question-header">
+                    <div class="header-info">
+                        <span style="font-weight:bold; color:var(--primary-color);">題號：${q.題號 || '無'}</span> &nbsp;|&nbsp;
+                        <span>來源：${q.來源 || '無'}</span>
+                    </div>
+                    
+                    <!-- 白板專用工具列 -->
+                    <div class="drawing-toolbar">
+                        <button id="btn-pen-${index}" class="tool-btn" onclick="setDrawMode(${index}, 'pen')">畫筆</button>
+                        <button id="btn-eraser-${index}" class="tool-btn" onclick="setDrawMode(${index}, 'eraser')">橡皮擦</button>
+                        <button class="tool-btn" onclick="clearCanvas(${index})">清空</button>
+                        <button id="btn-cursor-${index}" class="tool-btn active-cursor" onclick="setDrawMode(${index}, 'cursor')">滑動</button>
+                    </div>
+                </div>
+
+                <!-- 題目與畫布的共用容器 -->
+                <div class="canvas-wrapper" id="wrapper-${index}">
+                    <canvas id="canvas-${index}" class="drawing-canvas"></canvas>
+                    <div class="question-title">${parsedTitle}</div>
+                    <ul class="options-list">
+                        ${q.選項A ? `<li class="option-item">${parsedOptA}</li>` : ''}
+                        ${q.選項B ? `<li class="option-item">${parsedOptB}</li>` : ''}
+                        ${q.選項C ? `<li class="option-item">${parsedOptC}</li>` : ''}
+                        ${q.選項D ? `<li class="option-item">${parsedOptD}</li>` : ''}
+                    </ul>
+                </div>
+
+                <button class="toggle-btn" onclick="toggleAnswer('ans-${index}')">顯示答案與解析</button>
+                <div class="answer-section" id="ans-${index}">
+                    <div class="answer-text">標準答案：${escapeHTML(q.答案)}</div>
+                    ${explanationContent}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        // 渲染完 DOM 後，初始化所有畫布
+        initCanvases();
+    }
+
+    function toggleAnswer(elementId) {
+        const section = document.getElementById(elementId);
+        if (section.classList.contains('visible')) {
+            section.classList.remove('visible');
+            section.previousElementSibling.textContent = '顯示答案與解析';
+        } else {
+            section.classList.add('visible');
+            section.previousElementSibling.textContent = '隱藏答案與解析';
+        }
+    }
+
+    // ==========================================
+    // 白板畫布系統 (Canvas Drawing System)
+    // ==========================================
+
+    function initCanvases() {
+        const wrappers = document.querySelectorAll('.canvas-wrapper');
+        
+        wrappers.forEach((wrapper, index) => {
+            const canvas = document.getElementById(`canvas-${index}`);
+            if(!canvas) return;
+            
+            // 初始設定尺寸
+            canvas.width = wrapper.offsetWidth;
+            canvas.height = wrapper.offsetHeight;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            canvas.mode = 'cursor'; // 預設為紅筆模式
+            
+            // 監聽容器尺寸變化 (例如圖片載入完成撐開高度時)，確保筆跡不消失
+            const observer = new ResizeObserver(() => {
+                if(canvas.width === wrapper.offsetWidth && canvas.height === wrapper.offsetHeight) return;
+                
+                // 備份現有筆跡
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                // 調整畫布大小
+                canvas.width = wrapper.offsetWidth;
+                canvas.height = wrapper.offsetHeight;
+                
+                // 恢復筆跡與設定
+                ctx.putImageData(imgData, 0, 0);
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            });
+            observer.observe(wrapper);
+            
+            // 取得觸控或滑鼠的座標
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+            
+            function start(e) {
+                if (canvas.mode === 'cursor') return;
+                isDrawing = true;
+                const pos = getPos(e);
+                lastX = pos.x;
+                lastY = pos.y;
+                // 防止大屏白板預設的捲動與雙擊放大
+                if(e.type.includes('touch')) e.preventDefault();
+            }
+            
+            function draw(e) {
+                if (!isDrawing || canvas.mode === 'cursor') return;
+                const pos = getPos(e);
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(pos.x, pos.y);
+                
+                if (canvas.mode === 'eraser') {
+                    // 橡皮擦模式 (透明化路徑)
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.lineWidth = 30; // 橡皮擦範圍較大
+                } else {
+                    // 畫筆模式
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.strokeStyle = '#e74c3c'; // 預設紅色筆跡
+                    ctx.lineWidth = 3;
+                }
+                
+                ctx.stroke();
+                lastX = pos.x;
+                lastY = pos.y;
+                
+                if(e.type.includes('touch')) e.preventDefault();
+            }
+            
+            function stop(e) {
+                isDrawing = false;
+            }
+            
+            // 電腦滑鼠事件
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stop);
+            canvas.addEventListener('mouseout', stop);
+            
+            // 白板/平板觸控事件 (passive: false 確保 e.preventDefault() 能生效)
+            canvas.addEventListener('touchstart', start, {passive: false});
+            canvas.addEventListener('touchmove', draw, {passive: false});
+            canvas.addEventListener('touchend', stop);
+        });
+    }
+
+    // 切換畫筆、橡皮擦或游標模式
+    function setDrawMode(index, mode) {
+        const canvas = document.getElementById(`canvas-${index}`);
+        if(!canvas) return;
+        
+        canvas.mode = mode;
+        
+        // 更新按鈕的視覺狀態
+        const penBtn = document.getElementById(`btn-pen-${index}`);
+        const eraserBtn = document.getElementById(`btn-eraser-${index}`);
+        const cursorBtn = document.getElementById(`btn-cursor-${index}`);
+        
+        penBtn.className = 'tool-btn';
+        eraserBtn.className = 'tool-btn';
+        cursorBtn.className = 'tool-btn';
+        
+        if (mode === 'pen') penBtn.classList.add('active-pen');
+        if (mode === 'eraser') eraserBtn.classList.add('active-eraser');
+        if (mode === 'cursor') cursorBtn.classList.add('active-cursor');
+        
+        // 若切換為閱讀/游標模式，將畫布設定為「不可觸控」，讓滑動事件穿透到題目文字上
+        if (mode === 'cursor') {
+            canvas.classList.add('cursor-mode');
+        } else {
+            canvas.classList.remove('cursor-mode');
+        }
+    }
+
+    // 清空該題的所有筆跡
+    function clearCanvas(index) {
+        const canvas = document.getElementById(`canvas-${index}`);
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+</script>
+
+</body>
+</html>

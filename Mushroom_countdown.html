@@ -403,13 +403,25 @@
 	// 全域變數：追蹤子母畫面視窗
     let pipWindow = null;
 	
-    // 常駐預載音效實例與解鎖標記
+   // Web Audio API 記憶體快取與解鎖（解決斷網無法播放）
+    let audioCtx = null;
+    let memoryAudioBuffer = null;
     const globalAudio = new Audio('mushroom_sound.mp3');
     globalAudio.preload = 'auto';
     let isAudioUnlocked = false;
 
+    function initAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
     // 透過任何使用者互動解鎖音訊播放限制
     function unlockAudio() {
+        initAudioContext();
         if (isAudioUnlocked) return;
         globalAudio.muted = true;
         globalAudio.play().then(() => {
@@ -418,6 +430,52 @@
             globalAudio.muted = false;
             isAudioUnlocked = true;
         }).catch(() => {});
+    }
+
+    // 將音效檔案下載至記憶體，並在 localStorage 快取 Base64，保證完全離線可用
+    function preloadOfflineAudio() {
+        const cachedBase64 = localStorage.getItem('mushroom_cached_sound');
+        if (cachedBase64) {
+            decodeBase64Audio(cachedBase64);
+        }
+
+        fetch('mushroom_sound.mp3')
+            .then(res => res.arrayBuffer())
+            .then(arrayBuffer => {
+                try {
+                    let binary = '';
+                    const bytes = new Uint8Array(arrayBuffer);
+                    const len = bytes.byteLength;
+                    for (let i = 0; i < len; i++) {
+                        binary += String.fromCharCode(bytes[i]);
+                    }
+                    localStorage.setItem('mushroom_cached_sound', window.btoa(binary));
+                } catch(e) {}
+
+                initAudioContext();
+                return audioCtx.decodeAudioData(arrayBuffer);
+            })
+            .then(decoded => {
+                memoryAudioBuffer = decoded;
+            })
+            .catch(err => {
+                console.log("目前處於離線狀態，若先前已有快取將直接從離線快取播放。");
+            });
+    }
+
+    function decodeBase64Audio(b64) {
+        try {
+            initAudioContext();
+            const binary = window.atob(b64);
+            const len = binary.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            audioCtx.decodeAudioData(bytes.buffer).then(decoded => {
+                memoryAudioBuffer = decoded;
+            }).catch(() => {});
+        } catch(e) {}
     }
 	
 	// 暫存存檔函式
@@ -1030,6 +1088,18 @@
         }
     }
 	function playAlertSound() {
+        initAudioContext();
+        if (memoryAudioBuffer && audioCtx) {
+            try {
+                const source = audioCtx.createBufferSource();
+                source.buffer = memoryAudioBuffer;
+                source.connect(audioCtx.destination);
+                source.start(0);
+                return;
+            } catch(e) {
+                console.log("Web Audio 播放錯誤，嘗試備用方案:", e);
+            }
+        }
         globalAudio.currentTime = 0;
         globalAudio.play().catch(err => {
             console.log("音效播放遭阻擋:", err);
@@ -1145,6 +1215,7 @@
     document.addEventListener('click', unlockAudio, { once: true });
     // 啟動初始化
     syncTime();
+    preloadOfflineAudio(); // 啟動記憶體與本機離線音效快取
     initNotificationSecurity(); 
     loadFromStorage(); // 載入儲存的紀錄
     setInterval(updateClock, 50); 

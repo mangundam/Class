@@ -1,0 +1,766 @@
+{
+"E": [
+{
+"id": "E1",
+"chartConfig": {
+"type": "bar",
+"data": {
+"labels": ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"],
+"datasets": [
+{ "label": "奶粉銷量", "data": [20, 22, 19, 24, 30, 85, 92], "backgroundColor": "rgba(54, 162, 235, 0.7)" },
+{ "label": "啤酒銷量", "data": [35, 30, 32, 40, 55, 110, 125], "backgroundColor": "rgba(255, 206, 86, 0.7)" }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "某大型賣場一週商品銷量比較 (食/經典案例)" } } }
+},
+"q1": {
+"text": "觀察圖表，週末時[奶粉]與[啤酒]的銷量呈現了[一起上升]的趨勢。",
+"distractors": ["尿布", "沐浴乳", "咖啡", "一起下降", "呈現反比", "無關聯", "互相排斥"]
+},
+"q2": {
+"text": "這代表購買者多為[男性]，在[假日]照顧小孩時會順便買酒看球賽。",
+"distractors": ["女性", "長輩", "青少年", "平日", "連假", "寒假", "深夜"]
+},
+"q3": {
+"text": "應對策略：賣場應該把這兩樣商品的貨架[放一起]，以提高[提袋率]。",
+"distractors": ["分開擺放", "停止進貨", "放在門口", "退貨率", "客訴率", "點擊率"]
+}
+},
+{
+"id": "E2",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["20度", "22度", "25度", "28度", "32度", "35度"],
+"datasets": [
+{ "label": "冷飲日銷量", "data": [100, 120, 180, 250, 400, 600], "borderColor": "#34d399", "tension": 0.1 }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "氣溫與冷飲銷量關係 (食)" } } }
+},
+"q1": {
+"text": "圖表顯示，氣溫[越高]，[冷飲]的銷量成長越明顯。",
+"distractors": ["越低", "不變", "熱飲", "湯品", "冰塊"]
+},
+"q2": {
+"text": "這代表當天氣[炎熱]時，學生會有強烈的[解渴]需求。",
+"distractors": ["寒冷", "潮濕", "保暖", "充飢", "保濕"]
+},
+"q3": {
+"text": "應對策略：店家應在[高溫]警報時，推出[冰品促銷]活動。",
+"distractors": ["低溫", "雨天", "熱飲買一送一", "公休", "減少庫存"]
+}
+},
+{
+"id": "E3",
+"chartConfig": {
+"type": "bar",
+"data": {
+"labels": ["週一", "週二", "週三", "週四", "週五"],
+"datasets": [
+{ "label": "運動服替換購買量", "data": [15, 12, 65, 18, 20], "backgroundColor": "#f43f5e" }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "學校合作社服裝購買量 (衣)" } } }
+},
+"q1": {
+"text": "每逢星期[三]，[運動服]的替換購買率特別高。",
+"distractors": ["一", "五", "二", "制服", "外套", "皮鞋"]
+},
+"q2": {
+"text": "這代表當天全校可能有共同的[體育活動]，學生容易弄髒衣服。",
+"distractors": ["朝會", "午休", "放學", "考試", "社團"]
+},
+"q3": {
+"text": "應對策略：合作社應在週三前備妥[運動服]的[庫存]。",
+"distractors": ["制服", "外套", "便服", "降價", "退貨"]
+}
+},
+{
+"id": "E4",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["晴天", "多雲", "陰天", "小雨", "大雨", "豪雨"],
+"datasets": [
+{ "label": "捷運搭乘人次", "data": [5000, 5100, 5300, 7500, 9000, 11000], "borderColor": "#3b82f6", "tension": 0.2 }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "天氣狀況與捷運運量關係 (行)" } } }
+},
+"q1": {
+"text": "數據顯示，只要[下雨]，搭乘[捷運]的人數就會暴增。",
+"distractors": ["放晴", "陰天", "起風", "公車", "計程車", "腳踏車"]
+},
+"q2": {
+"text": "代表學生為了避免[淋濕]，放棄走路或騎YouBike。",
+"distractors": ["遲到", "流汗", "吹風", "省錢", "運動"]
+},
+"q3": {
+"text": "應對策略：捷運站點可在雨天增加[雨傘機]的[補貨]。",
+"distractors": ["售票機", "口罩", "廁所", "減少", "撤除"]
+}
+},
+{
+"id": "E5",
+"chartConfig": {
+"type": "bar",
+"data": {
+"labels": ["週一", "週二", "週三", "週四", "週五", "週六", "週日"],
+"datasets": [
+{ "label": "電影票房收入", "data": [20, 18, 25, 22, 50, 120, 110], "backgroundColor": "#8b5cf6" }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "電影院單週票房趨勢 (樂)" } } }
+},
+"q1": {
+"text": "圖表指出，[週末]的電影票房收入遠高於[平日]。",
+"distractors": ["週一", "週三", "週五", "早場", "午夜場"]
+},
+"q2": {
+"text": "代表學生與上班族在[放假]時才有[時間]進行休閒娛樂。",
+"distractors": ["上班", "上學", "補習", "金錢", "精神"]
+},
+"q3": {
+"text": "應對策略：電影院應將熱門大片安排在[週五]晚上首映以吸引[人潮]。",
+"distractors": ["週一", "週三", "早上", "資金", "客訴"]
+}
+},
+{
+"id": "E6",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["1月", "3月", "5月", "7月", "9月", "11月"],
+"datasets": [
+{ "label": "平均家庭用電度數", "data": [300, 280, 450, 850, 700, 350], "borderColor": "#eab308", "tension": 0.3 }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "家庭年度用電趨勢 (住)" } } }
+},
+"q1": {
+"text": "圖表中，[七月]的家庭[用電量]達到全年的最高點。",
+"distractors": ["一月", "三月", "十一月", "用水量", "瓦斯量"]
+},
+"q2": {
+"text": "這是因為進入[夏季]，多數家庭需要開啟[冷氣]降溫。",
+"distractors": ["冬季", "春季", "秋季", "暖氣", "除濕機"]
+},
+"q3": {
+"text": "應對策略：家電賣場應在[五月]前提早推出[節能]家電的促銷。",
+"distractors": ["九月", "十一月", "一月", "耗電", "發熱"]
+}
+},
+{
+"id": "E7",
+"chartConfig": {
+"type": "bar",
+"data": {
+"labels": ["開學週", "第4週", "第8週(期中考)", "第12週", "第18週(期末考)"],
+"datasets": [
+{ "label": "原子筆/螢光筆銷量", "data": [300, 100, 280, 110, 290], "backgroundColor": "#14b8a6" }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "校園書局文具銷量 (育)" } } }
+},
+"q1": {
+"text": "除了開學，文具銷量在[期中考]與[期末考]當週會大幅上升。",
+"distractors": ["第4週", "第12週", "寒假", "暑假", "校慶"]
+},
+"q2": {
+"text": "代表學生為了[考試]，會臨時購買[螢光筆]來畫重點。",
+"distractors": ["放假", "作業", "打掃", "漫畫", "玩具"]
+},
+"q3": {
+"text": "應對策略：書局應在[段考]前設立[考試必備]文具專區。",
+"distractors": ["放假", "校慶", "畢業", "便宜", "出清"]
+}
+},
+{
+"id": "E8",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["06:00", "07:00", "08:00", "09:00", "10:00", "11:00"],
+"datasets": [
+{ "label": "三明治現貨銷量", "data": [10, 80, 20, 5, 2, 1], "borderColor": "#f97316", "tension": 0.1 }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "早餐店現做三明治銷售時段 (食)" } } }
+},
+"q1": {
+"text": "三明治的銷量在早上[七點]時呈現[爆發性]成長。",
+"distractors": ["六點", "九點", "十一點", "緩慢", "下降"]
+},
+"q2": {
+"text": "代表學生為了趕在[上學]前進教室，需要拿了就走的[快食]。",
+"distractors": ["放學", "補習", "睡覺", "慢用", "熱湯"]
+},
+"q3": {
+"text": "應對策略：早餐店阿姨應在六點半前[提前]做好大量三明治[擺在檯面]。",
+"distractors": ["延後", "停止", "現點現做", "丟棄", "藏起來"]
+}
+},
+{
+"id": "E9",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["10/1", "10/15", "11/1", "11/15(寒流)", "12/1", "12/15"],
+"datasets": [
+{ "label": "發熱衣銷量", "data": [10, 15, 30, 250, 100, 80], "borderColor": "#06b6d4", "tension": 0.2 }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "服飾店秋冬商品銷售趨勢 (衣)" } } }
+},
+"q1": {
+"text": "發熱衣的銷量在 11/15 [寒流]來襲時達到[最高峰]。",
+"distractors": ["10/1", "12/15", "熱浪", "最低點", "停滯"]
+},
+"q2": {
+"text": "代表消費者通常不會[提早]買冬裝，而是等到[變冷]才買。",
+"distractors": ["延後", "夏天", "變熱", "降價", "打折"]
+},
+"q3": {
+"text": "應對策略：服飾店應緊盯[天氣預報]，在降溫前將發熱衣移到[顯眼處]。",
+"distractors": ["股票", "新聞", "倉庫", "特價區", "收起來"]
+}
+},
+{
+"id": "E10",
+"chartConfig": {
+"type": "bar",
+"data": {
+"labels": ["平時", "期中考週", "三天連假", "春節連假", "暑假第一週"],
+"datasets": [
+{ "label": "遊戲同時上線人數", "data": [1000, 300, 3500, 5000, 8000], "backgroundColor": "#10b981" }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "手遊伺服器在線人數 (樂)" } } }
+},
+"q1": {
+"text": "遊戲人數在[期中考週]最低，而在[暑假]第一週衝到最高。",
+"distractors": ["平時", "三天連假", "春節連假", "寒假"]
+},
+"q2": {
+"text": "代表學生的[休閒時間]長短，直接影響了遊戲的[活躍度]。",
+"distractors": ["零用錢", "成績", "退費率", "課金量", "客訴"]
+},
+"q3": {
+"text": "應對策略：遊戲公司應在[長假]前夕推出大型更新與[登入獎勵]。",
+"distractors": ["平時", "段考", "伺服器維修", "刪檔", "關機"]
+}
+}
+],
+"M": [
+{
+"id": "M1",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["08:00", "12:00", "16:00", "18:00", "20:00", "22:00", "00:00"],
+"datasets": [
+{ "label": "貼文互動數", "data": [120, 300, 250, 400, 600, 1500, 800], "borderColor": "#ec4899", "tension": 0.3 }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "官方 IG 帳號整日互動數據 (社群)" } } }
+},
+"q1": {
+"text": "折線圖顯示，晚上[十點]後的限時動態[互動率]達到最高峰。",
+"distractors": ["八點", "十二點", "十六點", "退追率", "分享數", "退貨率"]
+},
+"q2": {
+"text": "代表學生目標客群這段時間通常已經[寫完作業]，有空閒[滑手機]。",
+"distractors": ["剛放學", "正在補習", "吃晚餐", "看電視", "運動"]
+},
+"q3": {
+"text": "應對策略：小編應該把最重要的活動公告[排程]在[深夜]發布。",
+"distractors": ["刪除", "隱藏", "中午", "早上", "清晨"]
+}
+},
+{
+"id": "M2",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["06:00", "08:00", "10:00", "12:00", "17:00", "20:00"],
+"datasets": [
+{ "label": "住宅區租借", "data": [20, 150, 30, 40, 45, 50], "borderColor": "#3b82f6" },
+{ "label": "學校區歸還", "data": [10, 140, 40, 50, 30, 20], "borderColor": "#10b981" }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "YouBike 租借站早晨數據 (行)" } } }
+},
+"q1": {
+"text": "早上[八點]時，住宅區的租借量與學校區的[歸還量]形成雙高峰。",
+"distractors": ["六點", "十點", "十二點", "租借量", "遺失量"]
+},
+"q2": {
+"text": "這顯示了明顯的[通勤]車流，學生從家裡騎車到[學校]。",
+"distractors": ["觀光", "運動", "賣場", "補習班", "公園"]
+},
+"q3": {
+"text": "應對策略：調度員需在早晨將學校的[空車]運回[住宅區]。",
+"distractors": ["滿車", "故障車", "學校", "維修站", "報廢區"]
+}
+},
+{
+"id": "M3",
+"chartConfig": {
+"type": "bar",
+"data": {
+"labels": ["晴天", "陰天", "小雨", "豪雨", "颱風天"],
+"datasets": [
+{ "label": "外送訂單量", "data": [100, 110, 250, 400, 600], "backgroundColor": "#f59e0b" },
+{ "label": "平均等待時間(分)", "data": [20, 22, 35, 50, 80], "backgroundColor": "#ef4444" }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "天氣狀況與外送平台數據 (食)" } } }
+},
+"q1": {
+"text": "當天氣越[惡劣]，訂單量與等待時間都會[同步增加]。",
+"distractors": ["晴朗", "穩定", "同步減少", "毫無變化", "反向變動"]
+},
+"q2": {
+"text": "代表消費者不想出門，但此時外送員[出勤率]反而[下降]。",
+"distractors": ["離職率", "客訴率", "上升", "不變", "暴增"]
+},
+"q3": {
+"text": "應對策略：平台應在雨天給予外送員[加給]，並向顧客顯示[延遲]提示。",
+"distractors": ["扣薪", "放假", "提早", "免費", "打折"]
+}
+},
+{
+"id": "M4",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["5分鐘", "10分鐘", "15分鐘", "30分鐘", "60分鐘"],
+"datasets": [
+{ "label": "線上課程完課率", "data": [95, 85, 70, 40, 15], "borderColor": "#6366f1", "tension": 0.2 }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "教學影片長度與完課率 (育)" } } }
+},
+"q1": {
+"text": "影片長度越[長]，學生的[完課率]就呈現穩定下滑。",
+"distractors": ["短", "有趣", "退費率", "點閱率", "購買率"]
+},
+"q2": {
+"text": "這代表現代學生的[注意力]較為[短暫]，難以長時間專注。",
+"distractors": ["視力", "聽力", "持久", "集中", "無限"]
+},
+"q3": {
+"text": "應對策略：老師應將長影片[剪輯]成多個[微課程]單元。",
+"distractors": ["加長", "刪除", "大長篇", "電影", "直播"]
+}
+},
+{
+"id": "M5",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["發表前", "發表當日", "發表後1天", "發表後3天", "發表後7天"],
+"datasets": [
+{ "label": "網紅發文數", "data": [5, 50, 45, 20, 5], "borderColor": "#ec4899" },
+{ "label": "球鞋搜尋量", "data": [100, 800, 2000, 1500, 300], "borderColor": "#14b8a6" }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "限量球鞋發售社群數據 (衣)" } } }
+},
+"q1": {
+"text": "網紅在[發表當日]大量發文後，隔天的球鞋[搜尋量]達到巔峰。",
+"distractors": ["發表前", "發表後7天", "退貨量", "庫存量", "客訴量"]
+},
+"q2": {
+"text": "代表社群上的[意見領袖]能有效帶動消費者的[跟風]效應。",
+"distractors": ["酸民", "客服", "抵制", "退貨", "反感"]
+},
+"q3": {
+"text": "應對策略：品牌應將[行銷預算]集中在發售[初期]引爆話題。",
+"distractors": ["研發預算", "人事成本", "末期", "隔年", "隨機"]
+}
+},
+{
+"id": "M6",
+"chartConfig": {
+"type": "doughnut",
+"data": {
+"labels": ["恐怖驚悚", "搞笑喜劇", "浪漫愛情", "紀錄片", "動作片"],
+"datasets": [
+{ "data": [45, 20, 15, 5, 15], "backgroundColor": ["#1e293b", "#fde047", "#f43f5e", "#94a3b8", "#ef4444"] }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "午夜時段(00:00-03:00)串流平台觀看類型 (樂)" } } }
+},
+"q1": {
+"text": "圓餅圖顯示，在午夜時段觀看[恐怖驚悚]片的比例[最高]。",
+"distractors": ["紀錄片", "浪漫愛情", "最低", "平均", "為零"]
+},
+"q2": {
+"text": "代表觀眾在深夜時追求更強烈的[感官刺激]與[氣氛]。",
+"distractors": ["助眠效果", "知識學習", "吵鬧", "無聊", "安靜"]
+},
+"q3": {
+"text": "應對策略：平台首頁應在晚上十一點後[自動推薦][鬼片]片單。",
+"distractors": ["隱藏", "刪除", "卡通", "新聞", "紀錄片"]
+}
+},
+{
+"id": "M7",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["100公尺", "300公尺", "500公尺", "800公尺", "1公里以上"],
+"datasets": [
+{ "label": "平均分租套房租金(元)", "data": [12000, 11500, 10000, 8500, 7000], "borderColor": "#8b5cf6", "tension": 0.1 }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "租金與捷運站距離關係圖 (住)" } } }
+},
+"q1": {
+"text": "租屋處距離捷運站越[遠]，平均租金就越[便宜]。",
+"distractors": ["近", "高", "昂貴", "不變", "波動"]
+},
+"q2": {
+"text": "代表學生與上班族願意為了[交通便利]支付更高的[溢價]。",
+"distractors": ["裝潢", "安靜", "違約金", "押金", "水電費"]
+},
+"q3": {
+"text": "應對策略：若預算有限，可選擇距離[較遠]但提供[機車位]的物件。",
+"distractors": ["較近", "捷運旁", "電梯", "管理員", "頂加"]
+}
+},
+{
+"id": "M8",
+"chartConfig": {
+"type": "bar",
+"data": {
+"labels": ["滿千免運", "滿500免運", "無免運", "運費半價"],
+"datasets": [
+{ "label": "購物車結帳率", "data": [65, 85, 20, 40], "backgroundColor": "#10b981" }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "促銷活動與結帳轉換率 (網購)" } } }
+},
+"q1": {
+"text": "只要有[免運]活動，購物車的[結帳率]就會大幅提升。",
+"distractors": ["打折", "贈品", "退貨率", "客訴率", "點閱率"]
+},
+"q2": {
+"text": "代表年輕消費者對[運費]有一種心理上的[抗拒感]。",
+"distractors": ["包裝", "品牌", "依賴感", "優越感", "無感"]
+},
+"q3": {
+"text": "應對策略：商家可調高[商品定價]，將運費成本[內含]來營造免運錯覺。",
+"distractors": ["降低", "獨立", "外加", "退款", "運費"]
+}
+},
+{
+"id": "M9",
+"chartConfig": {
+"type": "doughnut",
+"data": {
+"labels": ["15-22歲(學生)", "23-35歲", "36-50歲", "51歲以上"],
+"datasets": [
+{ "data": [50, 30, 15, 5], "backgroundColor": ["#f43f5e", "#3b82f6", "#10b981", "#94a3b8"] }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "平價燒肉吃到飽客群年齡分佈 (食)" } } }
+},
+"q1": {
+"text": "圓餅圖顯示，平價吃到飽餐廳最大的客群是[學生]。",
+"distractors": ["上班族", "長輩", "兒童", "嬰兒", "外國人"]
+},
+"q2": {
+"text": "代表這個年齡層講求[CP值]，且擁有較大的[食量]。",
+"distractors": ["精緻度", "服務", "收入", "存款", "膽量"]
+},
+"q3": {
+"text": "應對策略：餐廳行銷可針對憑[學生證]打折，並多進貨[飽足感]高的食材。",
+"distractors": ["敬老卡", "名片", "昂貴", "精緻", "頂級"]
+}
+},
+{
+"id": "M10",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["10秒", "15秒", "30秒", "60秒", "3分鐘"],
+"datasets": [
+{ "label": "影片重播率", "data": [80, 85, 40, 10, 2], "borderColor": "#a855f7", "tension": 0.2 }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "短影音長度與重播率關係 (社群)" } } }
+},
+"q1": {
+"text": "數據指出，長度在[15秒]左右的短影音，[重播率]最高。",
+"distractors": ["10秒", "60秒", "3分鐘", "退追率", "檢舉率"]
+},
+"q2": {
+"text": "代表節奏緊湊、能瞬間提供[笑點]的內容最容易讓人[重複觀看]。",
+"distractors": ["知識", "悲傷", "睡著", "滑走", "關閉"]
+},
+"q3": {
+"text": "應對策略：創作者應將最精彩的[精華]放在影片[開頭]三秒。",
+"distractors": ["片尾", "中間", "留言區", "無聊", "廢話"]
+}
+}
+],
+"H": [
+{
+"id": "H1",
+"chartConfig": {
+"type": "doughnut",
+"data": {
+"labels": ["期待落差", "尺寸不合", "商品瑕疵", "衝動購物", "物流太慢"],
+"datasets": [
+{ "data": [55, 20, 10, 10, 5], "backgroundColor": ["#f87171", "#60a5fa", "#fbbf24", "#34d399", "#a78bfa"] }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "網購服飾店「退貨原因」佔比 (電商)" } } }
+},
+"q1": {
+"text": "圓餅圖中佔比最大(55%)的退貨原因是消費者的[期待落差]。",
+"distractors": ["尺寸不合", "商品瑕疵", "物流太慢", "價格太貴"]
+},
+"q2": {
+"text": "這通常發生在商品頁面缺乏買家的[實穿照片]時，導致[退貨率]飆高。",
+"distractors": ["官方介紹", "網紅推薦", "文字評價", "點閱率", "轉換率"]
+},
+"q3": {
+"text": "應對策略：賣場應舉辦[拍照好評]送[折價券]的活動，增加真實評價。",
+"distractors": ["免運活動", "降價促銷", "找網紅業配", "現金", "貼紙"]
+}
+},
+{
+"id": "H2",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["平時", "段考前兩週", "段考前一週", "段考當週", "考完後"],
+"datasets": [
+{ "label": "深夜泡麵與能量飲銷量", "data": [50, 80, 250, 300, 40], "borderColor": "#ef4444", "tension": 0.2 }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "校園周邊超商深夜銷量趨勢 (食)" } } }
+},
+"q1": {
+"text": "在[段考當週]與前一週，深夜的泡麵銷量達到整月[高峰]。",
+"distractors": ["平時", "考完後", "寒假", "低谷", "停滯"]
+},
+"q2": {
+"text": "代表學生為了[熬夜念書]，需要快速方便的[宵夜]與提神飲料。",
+"distractors": ["打電動", "早睡", "早餐", "午餐", "助眠"]
+},
+"q3": {
+"text": "應對策略：便利商店可在考前設立[考生應援]的[專區]刺激消費。",
+"distractors": ["過年", "情人節", "倉庫", "隱藏區", "垃圾桶"]
+}
+},
+{
+"id": "H3",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["6月", "7月", "8月", "9月(新機發表)", "10月"],
+"datasets": [
+{ "label": "舊款手機殼銷量", "data": [500, 480, 200, 50, 20], "borderColor": "#64748b" },
+{ "label": "新款手機殼搜尋量", "data": [10, 50, 300, 1000, 1500], "borderColor": "#3b82f6" }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "3C配件銷售與搜尋數據 (科技)" } } }
+},
+"q1": {
+"text": "蘋果[新機發表]前一個月，[舊款]手機殼的銷量出現斷崖式下滑。",
+"distractors": ["6月", "10月", "新款", "平板", "耳機"]
+},
+"q2": {
+"text": "這是一種反直覺現象，代表消費者在[觀望]新機，延遲了原有的[消費意願]。",
+"distractors": ["衝動", "無視", "退貨意願", "存款", "薪水"]
+},
+"q3": {
+"text": "應對策略：商家應在發表會[前]針對舊款配件進行[出清特賣]。",
+"distractors": ["後", "隔年", "漲價", "囤貨", "銷毀"]
+}
+},
+{
+"id": "H4",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["提前30天", "提前14天", "提前7天", "提前3天", "當天"],
+"datasets": [
+{ "label": "平均訂房價格", "data": [2000, 2200, 2800, 3500, 1500], "borderColor": "#f59e0b", "tension": 0.3 }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "商務旅館房價與預訂時間關係 (住)" } } }
+},
+"q1": {
+"text": "房價隨著入住日接近而變貴，但卻在[當天]突然[大跌]。",
+"distractors": ["提前30天", "提前7天", "飆漲", "不變", "免費"]
+},
+"q2": {
+"text": "因為旅館的房間是[無法庫存]的商品，沒賣出去就是[零收入]。",
+"distractors": ["實體商品", "可保存", "暴利", "負債", "資產"]
+},
+"q3": {
+"text": "應對策略：業者會推出[晚鳥優惠]，以超低價吸引[臨時]找房間的旅客。",
+"distractors": ["早鳥優惠", "原價", "長期", "計畫性", "商務"]
+}
+},
+{
+"id": "H5",
+"chartConfig": {
+"type": "bar",
+"data": {
+"labels": ["連假前1天", "連假第1天", "連假第2天", "連假最後1天"],
+"datasets": [
+{ "label": "出國機票價格", "data": [15000, 18000, 12000, 8000], "backgroundColor": "#3b82f6" },
+{ "label": "回國機票價格", "data": [8000, 9000, 15000, 20000], "backgroundColor": "#10b981" }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "連假期間機票動態定價 (行)" } } }
+},
+"q1": {
+"text": "出國機票在連假[第1天]最貴，而回國機票在連假[最後1天]最貴。",
+"distractors": ["第2天", "連假前1天", "平日", "最便宜", "免費"]
+},
+"q2": {
+"text": "航空公司的系統會透過大數據預測[剛需]，實施[動態定價]最大化利潤。",
+"distractors": ["運氣", "天氣", "固定定價", "慈善", "抽籤"]
+},
+"q3": {
+"text": "應對策略：若想省錢，學生可選擇[請假]避開尖峰，進行[反向]操作。",
+"distractors": ["曠課", "休學", "順向", "跟風", "排隊"]
+}
+},
+{
+"id": "H6",
+"chartConfig": {
+"type": "bar",
+"data": {
+"labels": ["上架第1週", "第2週", "第3週", "第4週", "第5週"],
+"datasets": [
+{ "label": "快時尚新品原價銷量", "data": [1000, 800, 300, 50, 10], "backgroundColor": "#8b5cf6" }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "快時尚服飾產品生命週期 (衣)" } } }
+},
+"q1": {
+"text": "新品在度過前兩週的蜜月期後，第三週銷量會出現[斷崖式]的[衰退]。",
+"distractors": ["穩定", "緩慢", "成長", "爆發", "不變"]
+},
+"q2": {
+"text": "代表快時尚產業的[流行性]極強，產品[生命週期]非常短。",
+"distractors": ["保暖性", "耐用度", "保固期", "保存期限", "歷史"]
+},
+"q3": {
+"text": "應對策略：品牌必須在第[三]週果斷祭出[打折]，快速清空庫存換現金。",
+"distractors": ["一", "五", "漲價", "囤貨", "銷毀"]
+}
+},
+{
+"id": "H7",
+"chartConfig": {
+"type": "line",
+"data": {
+"labels": ["早上8點", "早上10點", "中午12點", "下午2點", "晚上6點"],
+"datasets": [
+{ "label": "圖書館座位使用率", "data": [95, 98, 40, 90, 30], "borderColor": "#0ea5e9", "tension": 0.1 },
+{ "label": "桌上留有物品率", "data": [5, 10, 80, 15, 5], "borderColor": "#ef4444", "tension": 0.1 }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "期中考週圖書館佔位現象數據 (育)" } } }
+},
+"q1": {
+"text": "在[中午12點]時，座位使用率大跌，但桌上[留有物品]的比例卻飆高到80%。",
+"distractors": ["早上8點", "晚上6點", "乾淨無物", "有人在睡", "電腦開啟"]
+},
+"q2": {
+"text": "這證明了學生用物品[佔位]去吃午餐，導致嚴重的空間[浪費]。",
+"distractors": ["失竊", "打掃", "節省", "利用", "共享"]
+},
+"q3": {
+"text": "應對策略：館方應導入座位[系統]，若離席超過一小時即[自動釋出]座位。",
+"distractors": ["人工", "收費", "永久保留", "報警", "沒收"]
+}
+},
+{
+"id": "H8",
+"chartConfig": {
+"type": "bar",
+"data": {
+"labels": ["1月", "2月", "3月", "4月", "5月"],
+"datasets": [
+{ "label": "健身房新辦會員數", "data": [500, 150, 100, 80, 50], "backgroundColor": "#10b981" },
+{ "label": "實際進場鍛鍊次數", "data": [2000, 800, 300, 150, 100], "backgroundColor": "#f43f5e" }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "健身房業績與出席率分析 (樂/健康)" } } }
+},
+"q1": {
+"text": "健身房在[一月]會湧入大量新會員，但後續的[實際進場]次數卻雪崩式下滑。",
+"distractors": ["五月", "三月", "退費", "客訴", "續約"]
+},
+"q2": {
+"text": "這被稱為[新年新希望]效應，消費者買的是對未來的[幻想]而非真實習慣。",
+"distractors": ["情人節", "聖誕節", "絕望", "過去", "現實"]
+},
+"q3": {
+"text": "應對策略：健身房的商業模式其實依賴[不來]的會員繳交[年費]來獲利。",
+"distractors": ["天天來", "受傷", "單次", "月費", "保險"]
+}
+},
+{
+"id": "H9",
+"chartConfig": {
+"type": "bar",
+"data": {
+"labels": ["4.2顆星", "4.5顆星", "4.8顆星", "5.0顆星(滿分)"],
+"datasets": [
+{ "label": "商品轉換率(購買率)", "data": [2, 5, 12, 3], "backgroundColor": "#f59e0b" }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "電商評價星數與購買轉換率 (電商)" } } }
+},
+"q1": {
+"text": "圖表呈現一個反直覺現象：[4.8顆星]的轉換率竟然大勝完美的[5.0顆星]。",
+"distractors": ["4.2顆星", "4.5顆星", "1.0顆星", "點閱率", "退貨率"]
+},
+"q2": {
+"text": "因為現代學生消費者很聰明，認為全滿分太像[洗評價]的假數據，適度的[負評]反而真實。",
+"distractors": ["好物", "正品", "好評", "稱讚", "完美"]
+},
+"q3": {
+"text": "應對策略：賣家不需要刪除所有負評，應保留少數[無傷大雅]的批評並展現優良的[客服]回覆。",
+"distractors": ["致命", "惡意", "封鎖", "提告", "無視"]
+}
+},
+{
+"id": "H10",
+"chartConfig": {
+"type": "doughnut",
+"data": {
+"labels": ["線上預購免排隊", "現場排隊購買", "事後網購補貨"],
+"datasets": [
+{ "data": [20, 70, 10], "backgroundColor": ["#3b82f6", "#ec4899", "#94a3b8"] }
+]
+},
+"options": { "responsive": true, "maintainAspectRatio": false, "plugins": { "title": { "display": true, "text": "偶像演唱會周邊商品營收來源 (樂)" } } }
+},
+"q1": {
+"text": "雖然線上預購很方便，但[現場排隊]購買的營收佔比仍然高達[70%]。_。",
+"distractors": ["線上預購", "事後網購", "10%", "20%", "0%"]
+},
+"q2": {
+"text": "這證明了現場的[從眾效應]與氣氛，會引發粉絲的[衝動]購物慾望。",
+"distractors": ["冷靜", "比價效應", "理性", "省錢", "猶豫"]
+},
+"q3": {
+"text": "應對策略：主辦單位應故意在現場製造[排隊人潮]，並販售[現場限定]的商品。",
+"distractors": ["空蕩蕩", "冷清", "全通路", "過期", "瑕疵"]
+}
+}
+]
+}

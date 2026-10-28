@@ -2,7 +2,7 @@ import os
 from bs4 import BeautifulSoup
 
 input_file = "丙檢工作項目04.html"
-output_file = "列印版_工作項目04.html"
+output_file = "列印版_無解_丙檢工作項目04.html"
 
 
 def convert_to_compact_format():
@@ -117,7 +117,6 @@ def convert_to_compact_format():
             <div class="q-block">
                 <span class="q-header">{num}.【{ans}】</span>{question_main}
                 <div class="options">{options_part}</div>
-                <span class="note">解：{analysis}</span>
             </div>
         """
         html_template += item_html

@@ -1,0 +1,1282 @@
+
+    <!DOCTYPE html>
+    <html lang="zh-Hant">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            /* 設定基礎字體與極窄行距 */
+            body { 
+                font-family: "Microsoft JhengHei", sans-serif; 
+                font-size: 12px; 
+                line-height: 1.2; 
+                margin: 0;
+                padding: 0;
+            }
+            
+            /* 列印邊界設定為 0.5cm */
+            @media print {
+                @page { 
+                    margin: 0.5cm; 
+                }
+                button { display: none; }
+            }
+
+            h2 { text-align: center; font-size: 16px; margin: 5px 0; }
+            
+            /* 雙欄排版，欄間距縮小 */
+            .container { 
+                column-count: 2; 
+                column-gap: 20px; 
+                column-rule: 0.5px solid #eee; 
+            }
+
+            /* 題目區塊：緊湊排列 */
+            .q-block { 
+                break-inside: avoid; 
+                margin-bottom: 6px; 
+                padding-bottom: 4px; 
+                border-bottom: 0.5px solid #f0f0f0; 
+            }
+
+            .q-header { font-weight: bold; }
+            .ans { color: #d32f2f; font-weight: bold; }
+            
+            /* 選項與解析緊貼題目 */
+            .options { margin-left: 10px; color: #333; }
+            
+            /* 針對選項中的圖片進行縮放，避免破壞排版 */
+            .options img {
+                max-height: 16px;    /* 限制圖片高度，使其與文字差不多高 */
+                width: auto;         /* 依比例自動調整寬度 */
+                vertical-align: middle; /* 讓圖片與文字對齊 */
+                margin: 0 2px;       /* 圖片左右留一點點空隙 */
+            }
+            
+            .note { 
+                font-size: 11px; 
+                color: #777; 
+                display: block; 
+                margin-top: 1px;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>電腦軟體應用 丙級 項目03</h2>
+        <div style="text-align:center;"><button onclick="window.print()">直接列印</button></div>
+        <div class="container">
+    
+            <div class="q-block">
+                <span class="q-header">389.【D】</span>下列何者是指電腦中所使用的中文字型，是依每一筆劃的起點、方向以及終點等資料儲存？
+                <div class="options">(A) 點字法 (B) 字根法 (C) 矩陣法 (D) 線段法</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">390.【D】</span>關於「中文內碼」的說明，下列何者正確？
+                <div class="options">(A) 一字一碼，長度不定 (B) 一字多碼，長度不定 (C) 一字多碼，長度一定 (D) 一字一碼，長度一定</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">391.【B】</span>電腦中，一個24×24點的中文字型，在記憶體中共佔用了多少位元組？
+                <div class="options">(A) 24 (B) 72 (C) 64 (D) 48</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">392.【C】</span>目前中文內碼（BIG-5）中，使用兩個位元組，其高位元組十六進位值均大於下列何值？
+                <div class="options">(A) 10 (B) F0 (C) 80 (D) 40</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">393.【A】</span>下列何者是多人多工的作業系統？
+                <div class="options">(A) UNIX (B) CP/M (C) Windows (D) MS-DOS</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">394.【A】</span>在「命令提示字元」下，無法執行下列何種格式檔案？
+                <div class="options">(A) .SYS檔 (B) .COM檔 (C) .EXE檔 (D) .BAT檔</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">395.【D】</span>下列何種印表機一定無法列印中文字？
+                <div class="options">(A) 雷射印表機 (B) 點陣式印表機 (C) 噴墨式印表機 (D) 菊輪式印表機</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">396.【A】</span>下列何種副檔名的檔案其內容包含控制硬體操作的裝置資訊或指令檔？
+                <div class="options">(A) inf (B) tmp (C) exe (D) bat</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">397.【D】</span>在 Windows 作業系統中，按下電源按鈕時，下列何者功能可設定為休眠？
+                <div class="options">(A) 更新與安全性 (B) 輕鬆存取 (C) 個人化 (D) 電源選項</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">398.【D】</span>使用下列何組按鍵，可以顯示「開始」功能表？
+                <div class="options">(A) Ctrl+Alt (B) Alt+Shift (C) Alt+Esc (D) Ctrl+Esc</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">399.【C】</span>當要離開 Windows 作業系統並關閉電腦，下列何種方式正確？
+                <div class="options">(A) 按Ctrl+Alt+Delete鍵 (B) 按PC上的Reset鍵 (C) 使用開始功能表的電腦關機指令 (D) 按鍵盤上ESC鍵</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">400.【C】</span>在 Windows 作業系統之裝置管理員內發現有任何裝置與別的裝置發生衝突，會在該裝置前面顯示何種符號？
+                <div class="options">(A) 打Ｘ (B) 問號 (C) 驚歎號 (D) 錢幣符號</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">401.【A】</span>作業系統的主要功能為記憶體管理、處理機管理、設備管理及下列何項？
+                <div class="options">(A) I/O管理 (B) 程式管理 (C) 資料管理 (D) 中文管理</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">402.【D】</span>下列作業中，何項並非作業系統所提供之功能？
+                <div class="options">(A) 多工作業（Multitasking） (B) 多工程式作業（Multi-programming） (C) 分時作業（Time-sharing） (D) 程式翻譯作業（Language Translation）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">403.【D】</span>作業系統（Operating System）之主要目的，是為了幫助使用者更有效率及更方便的使用電腦的硬體資源，下列何項不是一種作業系統的名稱？
+                <div class="options">(A) UNIX (B) Linux (C) Windows (D) PL/1</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">404.【A】</span>在Linux作業系統中，若要查看其他指令用途及說明，可使用下列何種指令？
+                <div class="options">(A) man (B) make (C) mkdir (D) more</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">405.【A】</span>下列敘述何者錯誤？
+                <div class="options">(A) BIG-5碼是中文的外碼 (B) ASCII碼為常用的文數字資料的編碼 (C) 通用漢字標準交換碼為目前我國之國家標準交換碼 (D) BCD碼使用一組4位元表示一個十進位制的數字</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">406.【A】</span>在中文資料處理中，兩種不同資料之傳送過程必須靠下列何種碼來傳送？
+                <div class="options">(A) 交換碼 (B) 內碼 (C) 輸出碼 (D) 輸入碼</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">407.【C】</span>下列何者負責監督電腦系統工作？
+                <div class="options">(A) 套裝程式 (B) 應用程式 (C) 作業系統 (D) 編譯程式</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">408.【C】</span>對於 Windows 作業系統的「開始」鈕操作介面敘述，下列何者正確？
+                <div class="options">(A) 只具有功能表 (B) 不能設定為全螢幕顯示 (C) 可以在「個人化」進行顯示應用程式清單的設定 (D) 只具有動態磚功能</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">409.【C】</span>在Linux作業系統下，使用何種指令可以顯示目前的目錄？
+                <div class="options">(A) fg (B) cat (C) pwd (D) makdir</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">410.【A】</span>下列何種中文輸入法與拆碼無關？
+                <div class="options">(A) 手寫輸入法 (B) 大易輸入法 (C) 行列輸入法 (D) 倉頡輸入法</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">411.【C】</span>在 Windows 作業系統的「命令提示字元」視窗中，下列敘述何者錯誤？
+                <div class="options">(A) RMDIR所欲刪除之目錄必須是個空目錄，否則將會拒絕刪除 (B) 根目錄（Root）也是一個目錄，而且不能被刪除 (C) 如果根目錄下沒有USR這個子目錄（Subdirectory），就不能執行MD\USR\ABC (D) VER指令用於顯示Windows版本</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">412.【A】</span>何者為Internet的遠端登入（login）功能？
+                <div class="options">(A) telnet (B) ping (C) crd (D) cmd</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">413.【C】</span>數據機傳輸資料的速率之單位為何？
+                <div class="options">(A) Bps（Byte per second） (B) Mps（Mega per second） (C) bps（bit per second） (D) Gps（Giga per second）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">414.【C】</span>「注音輸入法」是依照文字的什麼輸入？
+                <div class="options">(A) 字義 (B) 字形 (C) 字音 (D) 字根</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">415.【C】</span>下列系統何者可幫助使用者管理硬體資源，使電腦發揮最大的效能？
+                <div class="options">(A) 媒體 (B) 資料系統 (C) 作業系統 (D) 編修系統</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">416.【B】</span>下列敘述何者錯誤？
+                <div class="options">(A) 作業系統目的是為了更方便和更有效率的使用電腦 (B) COBOL及BASIC皆屬於作業系統軟體 (C) 電腦系統包含硬體、作業系統、應用程式及使用者 (D) 程式執行、檔案存取等皆屬於作業系統服務範疇</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">417.【A】</span>下列何者符合程式多工處理（Multiprogramming）的工作原理？
+                <div class="options">(A) 電腦一次可以處理多個工作（Process），但同一時段內只處理一件工作中的一部分 (B) 同時段內處理所有工作的輸出入動作（I/O Operation） (C) 電腦同時段內可處理多件工作 (D) 處理完一件工作後，才處理下一件工作</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">418.【D】</span>使用直譯器（Interpreter）將程式翻譯成機器語言的方式，下列敘述何者正確？
+                <div class="options">(A) 直譯器與編譯器（Compiler）翻譯方式一樣 (B) 在鍵入程式的同時，立即翻譯並執行 (C) 先翻譯成目的碼再執行之 (D) 依行號順序，依序翻譯並執行</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">419.【C】</span>下列何者不屬於系統軟體？
+                <div class="options">(A) 編譯程式（Compiler） (B) 公用程式（Utility） (C) 會計系統（Accounting System） (D) 作業系統（Operating System）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">420.【A】</span>在安裝介面卡時，若PC內已有其他介面卡，則應該注意I/O位址、IRQ及下列何項是否相衝突？
+                <div class="options">(A) DMA (B) Baud Rate (C) Packet Size (D) Frame Size</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">421.【D】</span>下列敘述何者正確？
+                <div class="options">(A) 編譯器（Compiler）可編譯應用程式，故屬於應用軟體 (B) 作業系統不能編譯程式，所以不是系統軟體 (C) 作業系統（Operation System）可以編譯程式，所以屬於系統軟體 (D) 物流管理系統軟體屬於應用軟體</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">422.【D】</span>下列何者是一種高速的數位電話服務，可提高使用者連接Internet或公司區域網路（LAN）的速度？
+                <div class="options">(A) ETHERNET (B) ADSL (C) ISBN (D) ISDN</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">423.【A】</span>在Linux作業系統中，發送電子郵件之指令為？
+                <div class="options">(A) mail (B) vi (C) mv (D) vc</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">424.【D】</span>下列何者具有「動態連結函式庫及支援動態資料交換」功能？
+                <div class="options">(A) OEM (B) OCR (C) IDE (D) OLE</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">425.【A】</span>以下何者為CD音效的取樣頻率？
+                <div class="options">(A) 44.1KHz (B) 11.025KHz (C) 22.05KHz (D) 33.75KHz</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">426.【C】</span>在 Windows 作業系統電腦開機時，想要同時執行某一程式，可以將該程式放在下列何處？
+                <div class="options">(A) 系統 (B) 個人化 (C) 啟動 (D) 協助工具</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">427.【A】</span>在Windows作業系統中，對於檔案的管理是採用何種結構？
+                <div class="options">(A) 樹狀 (B) 環狀 (C) 線狀 (D) 網狀</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">428.【D】</span>「台灣學術網路」簡稱為何？
+                <div class="options">(A) TELNET (B) SEEDNET (C) INTERNET (D) TANET</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">429.【B】</span>下列何者不是作業系統的功能？
+                <div class="options">(A) 輸出／入裝置的管理 (B) 輸入法的管理 (C) 處理程序的管理 (D) 記憶體的管理</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">430.【D】</span>銀行每半年一次的計息工作，適合使用下列何種作業方式？
+                <div class="options">(A) 交談式處理作業 (B) 即時處理作業 (C) 平行式處理作業 (D) 批次處理作業</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">431.【D】</span>硬碟結構中的系統區，檔案的真實位置被完整記錄在下列何區？
+                <div class="options">(A) 根目錄區 (B) 啟動區 (C) 硬碟分割區 (D) 檔案配置區</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">432.【A】</span>在 Windows 作業系統環境下，要使用2個顯示器分別顯示不同的軟體視窗，則要在「多部顯示器」表單選取下列何項功能？
+                <div class="options">(A) 延伸這些顯示器 (B) 只在2顯示 (C) 只在1顯示 (D) 在這些顯示器上同步顯示</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">433.【A】</span>在系統軟體中，透過軟體與輔助儲存裝置來擴展主記憶體容量，使數個大型程式得以同時放在主記憶體內執行的技術是？
+                <div class="options">(A) 虛擬記憶體（Virtual Memory） (B) 延伸記憶體（Extended Memory） (C) 虛擬磁碟機（Virtual Disk） (D) 抽取式硬碟（Removable Disk）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">434.【A】</span>有關「符合綠色環保電腦的條件」之敘述，下列何者錯誤？
+                <div class="options">(A) 必須是木製外殼 (B) 必須是低污染，低輻射 (C) 必須是省電的 (D) 必須符合人體工學</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">435.【C】</span>以下何種內碼可以涵蓋世界各種不同文字？
+                <div class="options">(A) ASCII (B) BIG-5 (C) UNICODE (D) EBCDIC</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">436.【C】</span>在 Windows 作業系統預設狀態，下列何種操作可以顯示快顯功能表？
+                <div class="options">(A) 按一下滑鼠左鍵 (B) 按一下滑鼠左鍵並拖曳 (C) 按一下滑鼠右鍵 (D) 按二下滑鼠左鍵</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">437.【A】</span>在 Windows 作業系統中，如果要更改桌面圖示的大小，可以執行下列何種設定？
+                <div class="options">(A) 調整解析度 (B) 設定自訂文字大小 (C) 調整亮度 (D) 校正色彩</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">438.【D】</span>在 Windows 作業系統之中文輸入法中，要開啟或關閉中文輸入法，預設值為按下列何種按鍵？
+                <div class="options">(A) Shift+Space (B) Ctrl+Shift (C) Ctrl+Alt (D) Ctrl+Space</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">439.【A】</span>在 Windows 作業系統中，內建防火牆（Firewall）之功能敘述，下列何者錯誤？
+                <div class="options">(A) 可阻擋DDoS網際網路之攻擊 (B) 可阻擋未設定為例外的應用程式與網際網路連接 (C) 可偵測或停用電腦上的病毒及蠕蟲 (D) 可記錄連線至電腦的所有成功、失敗相關資訊</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">440.【B】</span>下列何者是合法的一致性命名慣例UNC（Uniform Naming Convention）？
+                <div class="options">(A) \\DATA\G:\ (B) \\COM\document\ (C) \\BYTE\program (D) H:\XCD\program</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">441.【C】</span>下列何種服務是組織建立公開金鑰基礎結構（PKI），並提供公開金鑰密碼編譯、數位憑證及數位簽章功能？
+                <div class="options">(A) 保密服務 (B) 系統工具 (C) 憑證服務 (D) 協助工具服務</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">442.【B】</span>在 Windows 作業系統中，要切換不同「虛擬桌面」，可以按下何種組合鍵？
+                <div class="options">(A) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-54-3.jpg"/> (B) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-54-1.jpg"/> (C) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-54-2.jpg"/> (D) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-54-4.jpg"/></div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">443.【B】</span>在 Windows 作業系統中，欲將檔案上傳到微軟雲端硬碟，可用下列何種軟體？
+                <div class="options">(A) UpDrive (B) OneDrive (C) UpLoad (D) CloudDrive</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">444.【D】</span>在 Windows 作業系統預設狀態，要新增「虛擬桌面」可以按下哪個組合鍵？
+                <div class="options">(A) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-56-3.jpg"/> (B) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-56-4.jpg"/> (C) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-56-2.jpg"/> (D) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-56-1.jpg"/></div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">445.【C】</span>在 Windows 作業系統中，內建壓縮檔案與資料夾功能，壓縮後的預設副檔名為何？
+                <div class="options">(A) tgz (B) tar (C) zip (D) arj</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">446.【C】</span>在 Windows 作業系統之Microsoft Edge軟體中，在網址列輸入查詢關鍵字，會啟動何種預設的搜尋服務？
+                <div class="options">(A) Ging (B) Xing (C) Bing (D) Fing</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">447.【C】</span>在 Windows 作業系統中，如何查看CPU現在的使用效能？
+                <div class="options">(A) 排定的工作 (B) 系統 (C) 工作管理員 (D) 協助工具選項</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">448.【B】</span>在 Windows 作業系統中，何種軟體不能插入圖片？
+                <div class="options">(A) Excel (B) 記事本 (C) PowerPoint (D) WordPad</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">449.【D】</span>下列何者不是作業系統？
+                <div class="options">(A) UNIX (B) LINUX (C) Windows (D) DBASE</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">450.【D】</span>在 Windows 作業系統中，下列何種功能可用來選擇要安裝的語言？
+                <div class="options">(A) 系統 (B) 字型 (C) 鍵盤 (D) 時間與語言</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">451.【C】</span>在 Windows 作業系統中，執行「複製」、「剪下」指令所得的資料，再執行「貼上」至目的位置前，其資料會暫存在哪裡？
+                <div class="options">(A) 控制台 (B) 記事本 (C) 剪貼簿 (D) 檔案總管</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">452.【B】</span>電腦網路通訊時，通訊雙方必須遵守的資料格式與時序稱為什麼？
+                <div class="options">(A) 網路協定 (B) 通訊協定 (C) 資訊協定 (D) 安全協定</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">453.【D】</span>在 Windows 作業系統中，要切換微軟中文輸入法的中文/英文輸入模式，應該使用何鍵？
+                <div class="options">(A) Ctrl (B) Tab (C) Alt (D) Shift</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">454.【D】</span>同樣像素的圖片（例如：800x600），使用何種檔案格式儲存，所佔用的磁碟空間最多？
+                <div class="options">(A) GIF (B) JPG (C) PNG (D) BMP</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">455.【A】</span>如果電腦的速度變慢，增加下列何者的容量或速度大小將不會加快電腦反應速度？
+                <div class="options">(A) 光碟機 (B) CPU (C) 虛擬記憶體 (D) 隨機存取記憶體</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">456.【B】</span>下列何種字型於放大或縮小後不失真？
+                <div class="options">(A) 點陣型 (B) 向量型 (C) 平面型 (D) 立體型</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">457.【B】</span>在 Windows 作業系統中，若工作列的通知區域顯示OneDrive的圖示為圓形箭頭，表示OneDrive處於何種狀態？
+                <div class="options">(A) 帳號被封鎖 (B) 正在進行同步處理 (C) 同步處理完畢 (D) 暫停同步處理</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">458.【B】</span>在 Windows 作業系統中，下列何種功能可用來同時顯示不同時區的時間？
+                <div class="options">(A) 個人化 (B) 時間與語言 (C) 輕鬆存取 (D) 裝置</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">459.【A】</span>在 Windows 作業系統中，要關閉「虛擬桌面」可以按下列何種組合鍵？
+                <div class="options">(A) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-71-2.jpg"/> (B) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-71-1.jpg"/> (C) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-71-3.jpg"/> (D) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-71-4.jpg"/></div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">460.【D】</span>下列何者不是磁碟檔案配置格式？
+                <div class="options">(A) NTFS (B) FAT32 (C) FAT16 (D) FETS</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">461.【C】</span>下列何種圖案於放大或縮小後不失真？
+                <div class="options">(A) 點陣圖 (B) 矩陣圖 (C) 向量圖 (D) 立體圖</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">462.【C】</span>在 Windows 作業系統中，可以同時顯示不同時區的時間，最多可以顯示幾個？
+                <div class="options">(A) 沒有限制 (B) 2 (C) 3 (D) 4</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">463.【A】</span>集線器（HUB）不包括下列何者？
+                <div class="options">(A) 積極型（Aggressive） (B) 主動式（Active） (C) 被動式（Passive） (D) 智慧型（Intelligent）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">464.【A】</span>下列何者是IBM公司所產生的作業系統？
+                <div class="options">(A) OS 2 (B) Linux (C) Android (D) OS X</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">465.【B】</span>在 Windows Server 作業系統中，可以讓使用者直接在電腦網路上架設Web網站伺服器的軟體為何？
+                <div class="options">(A) MySQL (B) IIS (C) ASP (D) PHP</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">466.【A】</span>在 Windows 作業系統中，要利用「工作檢視」來管理視窗及桌面，可以按下何種組合鍵來開啟？
+                <div class="options">(A) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-78-1.jpg"/> (B) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-78-4.jpg"/> (C) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-78-2.jpg"/> (D) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-78-3.jpg"/></div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">467.【A】</span>在Internet上做什麼是違法的？
+                <div class="options">(A) 下載未授權檔案 (B) 用LINE聊天 (C) 股票交易 (D) 基金買賣</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">468.【C】</span>下列何種類型的電腦效能最佳？
+                <div class="options">(A) 中大型電腦 (B) 工作站 (C) 超級電腦 (D) 個人電腦</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">469.【A】</span>對於在Internet上的電腦而言，具有辨識獨一無二身分的資訊為何？
+                <div class="options">(A) IP位址 (B) 住家地址 (C) 使用者名稱 (D) 使用者密碼</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">470.【C】</span>下列何種記憶體或輔助記憶體存取速度最快？
+                <div class="options">(A) DRAM (B) USB碟 (C) SRAM (D) Hard Disk</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">471.【C】</span>網路使用權限不包括下列何者？
+                <div class="options">(A) Guest (B) Administrators (C) Anyone (D) Remote Desktop Users</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">472.【A】</span>下列何種副檔名的檔案對電腦來說是多餘的，刪除也不影響其原本運作？
+                <div class="options">(A) .tmp (B) .exe (C) .ini (D) .bat</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">473.【B】</span>連接電腦後不需重新啟動電腦即可使用的設備，為具有何種特性？
+                <div class="options">(A) all in one (B) plug and play (C) pull and play (D) input and output</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">474.【B】</span>下列何者為 Windows 作業系統之內建瀏覽器？
+                <div class="options">(A) Microsoft Home (B) Microsoft Edge (C) Microsoft line (D) Microsoft Page</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">475.【D】</span>下列何種網路之連接規格的速率最快？
+                <div class="options">(A) MODEM撥接 (B) ADSL (C) T1 (D) T3</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">476.【C】</span>計算電腦記憶體（含輔助記憶體）容量大小的單位，下列何者最大？
+                <div class="options">(A) MB (B) GB (C) TB (D) KB</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">477.【B】</span>何者非網路服務通訊協定？
+                <div class="options">(A) NNTP (B) Netscape (C) HTTP (D) POP</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">478.【C】</span>在Linux作業系統中，使用何種指令可以複製檔案或目錄？
+                <div class="options">(A) mkdir (B) echo (C) cp (D) alias</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">479.【B】</span>下列何者為網際網路服務提供商的英文縮寫？
+                <div class="options">(A) PHP (B) ISP (C) ASP (D) DSP</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">480.【D】</span>想要使用Giga-Fast Ethernet至少要使用下列何種網路纜線等級？
+                <div class="options">(A) Category 4 (B) Category 5 (C) Category 4t (D) Category 5e</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">481.【B】</span>下列何種電信服務的頻寬最大？
+                <div class="options">(A) T3 (B) STM-1 (C) T1 (D) E1</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">482.【D】</span>大多數的Linux作業系統中，man page指令以何種形式呈現資訊？
+                <div class="options">(A) 使用Vi編輯器 (B) 使用Mozilla網頁瀏覽器 (C) 使用以X為基礎的自訂應用程式 (D) 使用less程式</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">483.【C】</span>下列何者不屬於系統程式（System Program）？
+                <div class="options">(A) Compiler (B) Loader (C) Microsoft Office (D) Linker</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">484.【B】</span>在Linux作業系統中，如果想要儲存ifconfig的執行結果至文字檔（file.txt），以供未來參考，同時想要覆蓋掉已存在的檔案資料，該如何下指令？
+                <div class="options">(A) ifconfig ＜ file.txt (B) ifconfig ＞ file.txt (C) ifconfig ＞＞ file.txt (D) ifconfig | file.txt</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">485.【D】</span>Linux作業系統使用者在bash下輸入kill -9 2013指令，假設該指令有效，則可能的執行結果為何？
+                <div class="options">(A) 要求程序ID為2013的伺服器，重新載入設定檔 (B) 切斷TCP port 2013的網路連結 (C) 顯示訊號為2013的程序，過去九天被終止的數量 (D) 終結或停止程序ID為2013的程式</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">486.【C】</span>下列何種目錄是Linux作業系統預設的資料暫存或快取的儲存目錄？
+                <div class="options">(A) /usr (B) /boot (C) /var (D) /home</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">487.【D】</span>Linux作業系統的 ls指令可以顯示檔案或目錄的屬性，其中共有10個屬性，若第一個屬性顯示為「b」則表示為？
+                <div class="options">(A) 連結 (B) 檔案 (C) 目錄 (D) 周邊設備</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">488.【B】</span>在Linux作業系統中，可以按下哪一個組合鍵來中斷目前程式的執行？
+                <div class="options">(A) Ctrl+z (B) Ctrl+c (C) Ctrl+d (D) Ctrl+b</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">489.【C】</span>下列哪個Linux作業系統之指令無法用來改變檔案的權限？
+                <div class="options">(A) chmod (B) chgrp (C) bc (D) chown</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">490.【A】</span>下列何種檔案系統的單一檔案之大小上限為4GB？
+                <div class="options">(A) FAT32 (B) NTFS (C) ext 2 (D) ext 3</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">491.【B】</span>在Linux作業系統中，若是test.sh檔案屬性為「-rwxr-xr--」，要將檔案屬性改為「-r-xr-xr-x」，下列何種指令可以完成？
+                <div class="options">(A) chmod 755 test.sh (B) chmod 555 test.sh (C) chmod o-x test.sh (D) chmod u=rx test.sh</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">492.【C】</span>在 Windows 作業系統中，要取得免費遊戲軟體，可以經由下列何種內建軟體中取得？
+                <div class="options">(A) 控制台/遊戲 (B) OneDrive (C) 市集 (D) 露天</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">493.【D】</span>QR code有提供「回」字定位點，所以可以任何角度掃描。請問一個正常QR Code應該提供幾個定位點？
+                <div class="options">(A) 4 (B) 5 (C) 2 (D) 3</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">494.【C】</span>LCD規格中「燭光/平方公尺」所指的是？
+                <div class="options">(A) 反應時間 (B) 對比率 (C) 亮度 (D) 可視角度</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">495.【B】</span>Mac OSX中，擷取全螢幕畫面的快捷鍵為何？
+                <div class="options">(A) PrintScreen (B) Command+Shift+3 (C) Command+Shift+PrintScreen (D) Command+PrintScreen</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">496.【D】</span>Mac OSX 中，強制重新啟動的快捷鍵為何？
+                <div class="options">(A) 按住電源按鈕5秒 (B) 按住電源按鈕1.5秒 (C) 直接按下電源按鈕即可 (D) Command+Control+電源按鈕</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">497.【B】</span>直接把光纖接到用戶的家中之網路技術是？
+                <div class="options">(A) Cable Modem (B) FTTH (C) ADSL (D) Ethernet</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">498.【A】</span>作業系統的搶救回復（recovery）機制中，檢查點（checkpoint）的作用是？
+                <div class="options">(A) 加速系統回復的效率 (B) 檢查系統狀態的一致性 (C) 解決磁碟毀損後的回復問題 (D) 改善資料異動執行的效率</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">499.【B】</span>下列何種區域網路標準，傳輸速率最慢？
+                <div class="options">(A) Ethernet (B) ARCnet (C) FDDI (D) ATM</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">500.【B】</span>請問組譯程式（Assembler）與虛擬運算指令（Pseudo operation）的關係為何？
+                <div class="options">(A) 組譯程式是用來連結虛擬運算指令 (B) 組譯程式可用來編譯虛擬運算指令寫成的程式 (C) 虛擬運算指令可以編譯組譯程式 (D) 虛擬運算指令編寫成的程式就是組譯程式</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">501.【B】</span>下列何者不是智慧型手機作業系統？
+                <div class="options">(A) Android (B) Mongo (C) Symbian (D) iOS</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">502.【C】</span>在Linux作業系統中，想要顯示目前已掛載檔案系統磁碟的inode使用狀況指令為何？
+                <div class="options">(A) free–i (B) su–I (C) df–i (D) du–I</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">503.【B】</span>在Linux作業系統中，查看目前的網路設定指令為何？
+                <div class="options">(A) ipsetting (B) ifconfig (C) ipconfig (D) ifsetting</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">504.【C】</span>在Linux作業系統中，修改檔案擁有者指令為何？
+                <div class="options">(A) modown (B) chmod (C) chown (D) modch</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">505.【A】</span>下列有關140.92.18.10/25網段之敘述，何者是不正確的？
+                <div class="options">(A) broadcast：140.92.18.128 (B) network：140.92.18.0 (C) subnet mask：255.255.255.128 (D) 可用IP數量為126個</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">506.【D】</span>在Linux作業系統中，/var/test是一個擁有下層檔案及子資料夾的資料夾，想要刪除/var/test的指令為何？
+                <div class="options">(A) del/var/test/* (B) rm -rf /var/test/* (C) del -Rf /var/test/* (D) rm -rf /var/test</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">507.【A】</span>關於固態硬碟SSD（Solid State Disk）之敘述，下列何者錯誤？
+                <div class="options">(A) SSD資料儲存密度高，故價格/每單位儲存容量也比傳統硬碟便宜 (B) 比起傳統的標準機械硬碟來說，SSD所能承受的操作衝擊耐受度較高 (C) 無須驅動馬達、承軸或旋轉頭裝置，具有低耗電、低熱能的優點 (D) 採用DRAM或Flash取代傳統硬碟的碟片，讀寫速度快</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">508.【B】</span>關於XML（eXtensible Markup Language）之敘述，下列何者錯誤？
+                <div class="options">(A) XML提供一個跨平台、跨網路、跨程式語言的資料描述格式 (B) XML和HTML一樣，都只能使用事先定義的標籤（tag） (C) DTD是用來規範XML文件的格式 (D) XSL用來提供XML套用排版樣式之功能</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">509.【B】</span>下列何者是使得Java程式能夠完成跨平台（cross platform）運作的主要機制？
+                <div class="options">(A) 例外處理 (B) 虛擬機器 (C) 多執行緒（multi-thread） (D) 物件導向</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">510.【A】</span>下列有關作業系統的操作中，何者是不需要使用系統呼叫（system call）？
+                <div class="options">(A) 計算費伯納西數列（Fibonacci sequence） (B) 開啟一個檔案（open file） (C) 在螢幕上印出一些文字（screen output） (D) 刪除一個行程（kill process）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">511.【C】</span>有關資料傳輸的介面，根據官方所公布的規格，下列何者傳輸速度最快？
+                <div class="options">(A) USB3.0 (B) IEEE 1394b (C) SATA3 (D) eSATA</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">512.【D】</span>有關「雲端運算」技術概念之敘述，下列何者正確？
+                <div class="options">(A) 空軍在雲層中利用電腦進行運算 (B) 在電腦上進行雲狀式的數學運算 (C) 兩台電腦以藍芽互相傳送機密性資料 (D) 透過網路連線取得遠端主機提供的服務</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">513.【D】</span>下列何者的傳輸媒介不是使用光纖？
+                <div class="options">(A) 10BaseF (B) FDDI (C) 1000BaseSX (D) 1000BaseT</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">514.【C】</span>下列行動通訊網路系統中，何者可提供之資料傳輸速率最快？
+                <div class="options">(A) GSM（Global System for Mobile communications） (B) GPRS（General Packet Radio Service） (C) HSDPA（High-Speed Downlink Packet Access） (D) IS-95（Interim Standard 95）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">515.【C】</span>下列何者不是目前ISP（Internet Service Provider）所提供的服務？
+                <div class="options">(A) 提供個人網頁 (B) 提供電子郵件信箱 (C) 提供作業系統安裝 (D) 撥接上網</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">516.【A】</span>當使用者將PC開機時，下列敘述何者正確？
+                <div class="options">(A) 部分的作業系統從磁碟被複製到記憶體 (B) 部分的作業系統被編譯 (C) 部分的作業系統從記憶體被複製到磁碟 (D) 部分的作業系統被重新複寫</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">517.【A】</span>辦公室中有數部電腦，將這些電腦以網路線與集線器（Hub）連接，以網路實體線路拓樸的概念來看，此種連接方式稱為？
+                <div class="options">(A) 星狀網路 (B) 網狀網路 (C) 匯流排網路 (D) 環狀網路</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">518.【A】</span>IPv6位址是使用128bit的長度來標示電腦所在位址，所可以容許的位址個數是IPv4位址（位址長度為32bit）的幾倍？
+                <div class="options">(A) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-130-4.jpg"/> (B) 96 (C) 4 (D) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/3-130-3.jpg"/></div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">519.【B】</span>下列何者是不合法的IPv6位址寫法？
+                <div class="options">(A) 1001:DB8:2de::e46 (B) 1001::25de::cade (C) 1001:0DB8:0:0:0:0:1482:57ab (D) 1001:0d8b:85a3:083d:1319:82ae:0360:7455</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">520.【C】</span>IPv4中提供使用私有IP位址空間的網路，例如192.168.0.0-192.168.255.255的區塊，下列何者是IPv6私有IP位址空間的寫法？
+                <div class="options">(A) FF02::A001 (B) FE80::1 (C) FEC0::2 (D) FF02::1:FF00:0101:0202</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">521.【D】</span>在MAC OS中使用「遠端桌面連線用戶端」的預設連接埠為？
+                <div class="options">(A) 5900 (B) 8080 (C) 3660 (D) 3389</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">522.【B】</span>GNU/Linux的最高系統管理員帳號是？
+                <div class="options">(A) supervisor (B) root (C) administrator (D) admin</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">523.【D】</span>在Linux作業系統中，可以使用bash Shell Script來撰寫簡單的Script程式。撰寫判斷結構指令時，使用if敘述開頭，結束敘述的指令為何？
+                <div class="options">(A) end (B) endif (C) then (D) fi</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">524.【B】</span>在 Windows 作業系統中，若要更改顯示器的視窗外框色彩，應在「個人化」按哪一個選項？
+                <div class="options">(A) 佈景主題 (B) 色彩 (C) 音效 (D) 背景</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">525.【B】</span>在 Windows 作業系統中的「WordPad」軟體在預設狀況下，無法將資料儲存成下列哪一種檔案類型？
+                <div class="options">(A) txt (B) pdf (C) rtf (D) odt</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">526.【B】</span>在 Windows 作業系統中，使用Windows Defender程式不能夠執行下列哪一個操作？
+                <div class="options">(A) 定時掃描電腦 (B) 電腦設定檔備份復原 (C) 防護惡意或間諜程式 (D) 偵測電腦病毒</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">527.【D】</span>下列何種作業系統無法在PC個人電腦上使用？
+                <div class="options">(A) Windows (B) Windows Server (C) Linux (D) VAX-11</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">528.【B】</span>在 Windows 作業系統中，若按下Print Screen鍵後，下列敘述何者正確？
+                <div class="options">(A) 將目前所執行的視窗畫面儲存至剪貼簿內 (B) 將螢幕目前所顯示的畫面儲存至剪貼簿內 (C) 將目前所執行的視窗畫面由印表機印出 (D) 將螢幕目前所顯示的畫面由印表機印出</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">529.【C】</span>在 Windows 作業系統之「檔案總管」，若要更改檔案的屬性，則應在選取這個檔案後，按一下滑鼠右鍵，在快顯功能表中選取哪一個指令？
+                <div class="options">(A) 編輯 (B) 開啟 (C) 內容 (D) 傳送到</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">530.【D】</span>在 Windows 作業系統之「檔案總管」，若選取C磁碟中的一個資料夾，然後拖曳至D磁碟中，則會執行下列哪一個動作？
+                <div class="options">(A) 刪除 (B) 搬移 (C) 剪下 (D) 複製</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">531.【D】</span>在 Windows 作業系統之「檔案總管」，若選取C磁碟中的一個檔案，然後拖曳至桌面上，則會執行下列哪一個動作？
+                <div class="options">(A) 將這個檔案刪除 (B) 將檔案內容顯示桌面上 (C) 這個操作不被允許 (D) 將這個檔案搬移到桌面上</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">532.【B】</span>若要移除被安裝在Windows作業系統中的套裝軟體，則採用下列何種處理方法最適當？
+                <div class="options">(A) 刪除程式集中的選項 (B) 利用控制台的「新增/移除程式」 (C) 刪除該套裝軟體的資料夾 (D) 刪除桌面上的捷徑</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">533.【C】</span>在 Windows 作業系統之中文輸入狀態下，若要在螢幕上顯示「符號小鍵盤」，則預設值為按下列何種組合按鍵？
+                <div class="options">(A) Ctrl＋Alt＋L (B) Ctrl＋Alt＋K (C) Ctrl＋Alt＋, (D) Ctrl＋Alt＋M</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">534.【B】</span>在 Windows 作業系統之中文輸入狀態下，若要切換不同的輸入法，則預設值為按下列何種組合按鍵？
+                <div class="options">(A) Shift＋Space (B) Ctrl＋Shift (C) Ctrl＋Space (D) Ctrl＋Alt</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">535.【A】</span>在 Windows 作業系統之中文輸入狀態下，若要切換全型輸入與半形輸入，則預設值為按下列何種組合按鍵？
+                <div class="options">(A) Shift＋Space (B) Ctrl＋Alt (C) Ctrl＋Space (D) Ctrl＋Shift</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">536.【C】</span>同一顯示器，設定下列哪一種螢幕解析度，圖片呈現尺寸最小？
+                <div class="options">(A) 1024×768 (B) 800×600 (C) 1280×960 (D) 640×480</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">537.【C】</span>在Windows作業系統中，若在視窗的標題列上連按滑鼠左鍵二下，則可完成下列何種操作？
+                <div class="options">(A) 視窗最小化 (B) 移動視窗位置 (C) 視窗最大化或還原成原來大小 (D) 關閉視窗</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">538.【B】</span>在 Windows 作業系統中，若要依裝置類型來檢視電腦中硬體裝置的狀態，則應該查看何者？
+                <div class="options">(A) 遠端設定 (B) 裝置管理員 (C) 系統保護 (D) 效能</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">539.【B】</span>在 Windows 作業系統中所使用的TrueType字型，其檔案類型為下列何者？
+                <div class="options">(A) .ini (B) .ttf (C) .fon (D) .sys</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">540.【C】</span>在 Windows 作業系統中，用來搜尋硬碟，並列出可以安全刪除的暫時檔、資源回收筒與不必要的程式檔，以協助釋放硬碟空間，可以使用下列何種程式？
+                <div class="options">(A) 磁碟壓縮 (B) 磁碟重組 (C) 磁碟清理 (D) 磁碟掃描</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">541.【A】</span>在 Windows 作業系統中，若要檢視系統的完整組態資訊，包含硬體資源、軟體環境等，則可以使用下列何者？
+                <div class="options">(A) 系統資訊 (B) 系統監視程式 (C) 檔案總管 (D) 電腦</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">542.【D】</span>在 Windows 作業系統之「檔案總管」，若要以滑鼠選取不連續的檔案，則必須要配合下列何種按鍵？
+                <div class="options">(A) Shift鍵 (B) Tab鍵 (C) Alt鍵 (D) Ctrl鍵</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">543.【D】</span>在 Windows 作業系統中，檔案命名不可使用下列何種字元？
+                <div class="options">(A) ~ (B) . (C) - (D) ?</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">544.【D】</span>在 Windows 作業系統中，若要更改桌面背景，則可以使用「設定」的何種功能？
+                <div class="options">(A) 系統 (B) 顯示 (C) 色彩管理 (D) 個人化</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">545.【D】</span>在 Windows 作業系統中，若要擷取某一個工作中的視窗畫面成為一個圖案，應按一下哪一個（組）按鍵？
+                <div class="options">(A) Ctrl＋Print Screen (B) Shift＋Print Screen (C) Print Screen (D) Alt＋Print Screen</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">546.【A】</span>在 Windows 作業系統中，若要查詢本機電腦在網路上的TCP/IP組態設定值，應使用哪一個指令？
+                <div class="options">(A) ipconfig (B) ping (C) route (D) telnet</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">547.【B】</span>在 Windows 作業系統中，用來偵測本端主機和遠端主機間的網路是否為連線狀態，可以使用以下哪一個指令？
+                <div class="options">(A) cmd (B) ping (C) route (D) ipconfig</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">548.【D】</span>在 Windows 作業系統預設狀態，若要對硬碟進行格式化，則該硬碟可使用之檔案格式為下列哪一種？
+                <div class="options">(A) ext3 (B) EFS (C) DOS (D) NTFS</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">549.【C】</span>在 Windows 作業系統之「檔案總管」，若刪除一個檔案時，不想讓檔案移至資源回收筒內，則應使用下列哪一個（組）按鍵？
+                <div class="options">(A) Ctrl＋Delete (B) Alt＋Delete (C) Shift＋Delete (D) Delete</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">550.【A】</span>在 Windows 作業系統中，若要關閉作用中的視窗，則可以使用下列何種（組）按鍵？
+                <div class="options">(A) Alt＋F4 (B) Ctrl＋F4 (C) F4 (D) Shift＋F4</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">551.【B】</span>在 Windows 作業系統中，若要將自己的照片設定成桌面的圖案，則應在「個人化」視窗按下何種選項？
+                <div class="options">(A) 色彩 (B) 背景 (C) 音效 (D) 螢幕保護裝置</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">552.【A】</span>下列軟體「Windows、Android、Avira AntiVirus、iOS、Kaspersky、Firefox、Ubuntu」中，共有幾種屬於系統軟體？
+                <div class="options">(A) 4 (B) 6 (C) 7 (D) 2</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">553.【D】</span>在 Windows 作業系統中，若要擷取整個螢幕成為一個圖案，則應按下列何種（組）按鍵？
+                <div class="options">(A) Ctrl＋P (B) Alt＋P (C) Ctrl＋Print Screen (D) Print Screen</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">554.【B】</span>在 Windows 作業系統中，若要移除一個硬體的設定值，則應在下列何處操作？
+                <div class="options">(A) 使用者帳戶 (B) 裝置管理員 (C) 個人化 (D) 輕鬆存取中心</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">555.【A】</span>在 Windows 作業系統中的「檔案總管」，若要檢視檔案的修改日期，則應選擇下列何種檢視模式？
+                <div class="options">(A) 詳細資料 (B) 清單 (C) 小圖示 (D) 並排</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">556.【A】</span>在 Windows 作業系統中，若要查看網路上有哪些電腦提供共用的資源，則應使用下列何種指令？
+                <div class="options">(A) net view (B) net init (C) net ver (D) net use</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">557.【D】</span>在 Windows 作業系統中，若要同時調整系統日期與時間，則應如何操作？
+                <div class="options">(A) 在「本機」上按下滑鼠右鍵，再選「內容」設定 (B) 執行「TIME」指令 (C) 執行「DATE」指令 (D) 執行「設定/時間與語言」</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">558.【C】</span>在 Windows 作業系統中的「檔案總管」，若選取一個檔案後，再選取傳送到「隨身碟名稱（隨身碟代號：）」（例如Transcend（H：）），則其功能相當於執行下列何者？
+                <div class="options">(A) 在隨身碟中建立一個指到這個檔案的捷徑 (B) 由隨身碟中複製這個檔案到硬碟 (C) 複製這個檔案到隨身碟 (D) 搬移這個檔案到隨身碟</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">559.【A】</span>在 Windows 作業系統之「檔案總管」的「搜尋」功能中，下列何者敘述錯誤？
+                <div class="options">(A) 可指定要尋找檔案的屬性 (B) 可指定要尋找檔案的大小範圍 (C) 可指定要尋找檔案的資料夾 (D) 可指定要尋找檔案的修改日期範圍</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">560.【A】</span>在 Windows 作業系統中，若點擊Chrome視窗的「最小化」按鈕，則該視窗在螢幕上會有何改變？
+                <div class="options">(A) 縮小到工作列 (B) 縮小到功能表 (C) 縮小並隨即關閉 (D) 縮小到桌面</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">561.【B】</span>在 Windows 作業系統的「網路和共用中心」，無法分享區域網路的何項？
+                <div class="options">(A) 伺服器 (B) 數據機 (C) 印表機 (D) 資料夾的檔案</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">562.【D】</span>在Windows作業系統中，下列何種應用程式可繪製圖形？
+                <div class="options">(A) 記事本 (B) Microsoft Edge (C) 快速助手 (D) 小畫家</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">563.【C】</span>下列何者不是在安裝 Windows 作業系統時，必須要注意的要素？
+                <div class="options">(A) CPU速度是否為1GHz以上 (B) 記憶體容量是否足夠 (C) 是否已安裝音效卡 (D) 硬碟可用空間是否足夠</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">564.【A】</span>在 Windows 作業系統中，要開啟另一個檔案總管視窗，需先按住何種按鍵，並在工作列的資料夾圖示上按滑鼠左鍵？
+                <div class="options">(A) Shift (B) Alt (C) F8 (D) Ctrl</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">565.【A】</span>在 Windows 作業系統中，「檔案名稱」不能含有下列何種字元？
+                <div class="options">(A) * (B) ! (C) _ (D) ＄</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">566.【B】</span>在 Windows 作業系統中，若已經同時執行多個程式，但想透過按鍵方式來選擇其中某一個程式成為使用中應用程式，下列何者操作正確？
+                <div class="options">(A) 先按住Ctrl鍵，再利用Tab鍵來依序切換到所要的應用程式 (B) 先按住Alt鍵，再利用Tab鍵來依序切換到所要的應用程式 (C) 先按住Tab鍵，再利用Ctrl鍵來依序切換到所要的應用程式 (D) 先按住Tab鍵，再利用Alt鍵來依序切換到所要的應用程式</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">567.【B】</span>若在 Windows 作業系統開啟5個應用程式，且要各自使用不同的輸入法，下列敘述何者正確？
+                <div class="options">(A) 最多只能使用2種輸入法 (B) 可達成使用5種輸入法 (C) 無法做到 (D) 最多可使用4種輸入法</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">568.【A】</span>在 Windows 作業系統中，若在「本機」圖示上按滑鼠右鍵，並選取快顯功能表中的「內容」選項，則會出現下列何種項目？
+                <div class="options">(A) 關於 (B) 顯示器 (C) 儲存體 (D) 音效</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">569.【A】</span>在 Windows 作業系統中，「步驟收錄程式」預設是以下列何種形式記錄操作步驟？
+                <div class="options">(A) 文字及截圖 (B) 截圖 (C) 影片 (D) 文字</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">570.【D】</span>在 Windows 作業系統中，想要擷取螢幕畫面上的某一區域，下列何者正確？
+                <div class="options">(A) 同時按下Alt＋PrtSc鍵 (B) 一定要另外購買安裝畫面擷取應用程式 (C) 於所要擷取區域按滑鼠右鍵，並選取快顯功能表中的「複製」選項 (D) 可使用內建的「剪取工具」</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">571.【B】</span>在 Windows 作業系統中，在印表機的「印表機內容」選擇「連接埠」，下列何者不會出現於連接埠選單？
+                <div class="options">(A) FILE: (B) PS/2: (C) LPT1: (D) COM1:</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">572.【A】</span>在登入Windows作業系統時，所輸入密碼的大小寫與原設定不符，會有下列何種結果？
+                <div class="options">(A) 要求重新輸入密碼 (B) 關閉作業系統並重新開機 (C) 以安全模式登入作業系統 (D) 可正常登入作業系統</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">573.【A】</span>在Windows作業系統中，下列何種操作可保留原帳號使用者之工作內容，且可切換到另一個使用者帳號？
+                <div class="options">(A) 切換使用者 (B) 登入 (C) 登出 (D) 重新啟動</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">574.【C】</span>在Windows作業系統中，檔案屬性不包含下列何者？
+                <div class="options">(A) 唯讀 (B) 隱藏 (C) 共享 (D) 系統</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">575.【B】</span>有關 Windows 作業系統中「檔案總管」之敘述，下列何者錯誤？
+                <div class="options">(A) 可設定檔案檢視模式 (B) 具有分割硬碟磁區功能 (C) 具有搜尋功能 (D) 具有檔案複製功能</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">576.【C】</span>在Windows作業系統中，下列何種功能可暫時將記憶體（RAM）中的資訊存到硬碟，且讓系統處於待命及省電的狀態？
+                <div class="options">(A) 安全模式 (B) 關機 (C) 休眠模式 (D) 重新啟動</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">577.【A】</span>有關 Windows 「造字程式」之敘述，下列何者正確？
+                <div class="options">(A) 可指定與現有輸入法連結 (B) 無法匯入點陣字型檔 (C) 只能設定使用UNICODE字碼 (D) 無法造出向量字型</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">578.【D】</span>若要利用Windows連接上Internet，則必須設定下列何種網路通訊協定？
+                <div class="options">(A) IPX/SPX (B) NetBUEI (C) DLC (D) TCP/IP</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">579.【C】</span>在 Windows 作業系統中，若在桌面的空白區域按滑鼠右鍵，並選取快顯功能表的「個人化」選項，則會開啟下列何種項目？
+                <div class="options">(A) 語言 (B) 滑鼠 (C) 背景 (D) 顯示器</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">580.【C】</span>在Windows作業系統中，若設定資料夾為共享，且限定允許可檢視但不可變更檔案資料，則使用權限應設定為下列何者？
+                <div class="options">(A) 變更 (B) 完全控制 (C) 讀取 (D) 讀取/寫入</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">581.【B】</span>在 Windows 作業系統之「Windows系統管理工具」中，不具備下列何種功能？
+                <div class="options">(A) 系統資訊 (B) 工作管理員 (C) 重組並最佳化磁碟機 (D) 磁碟清理</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">582.【D】</span>在 Windows 作業系統中，若要變更開始功能表的設定，則須在「設定」視窗中選取下列何者？
+                <div class="options">(A) 應用程式 (B) 更新與安全性 (C) 系統 (D) 個人化</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">583.【B】</span>在 Windows 作業系統中，若按一下滑鼠左鍵，卻出現快顯功能表，其可能原因為下列何者？
+                <div class="options">(A) 滑鼠故障 (B) 在「設定/裝置/滑鼠」之「選取主要按鈕」被設定為「右」 (C) 滑鼠的驅動程式設定有誤 (D) 開啟觸控螢幕時，觸控點周圍顯示視覺回饋</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">584.【D】</span>在 Windows 作業系統中，若因經常進行複製及刪除檔案，造成檔案存取效率不佳，則可執行下列何種程式來提升效能？
+                <div class="options">(A) 病毒掃描程式 (B) 磁碟掃描工具 (C) 磁碟壓縮程式 (D) 重組並最佳化磁碟機</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">585.【D】</span>在 Windows 作業系統之「命令提示字元」，下列哪一對指令之功能不相同？
+                <div class="options">(A) RENAME與REN (B) CHDIR與CD (C) MKDIR與MD (D) VERIFY與VER</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">586.【C】</span>在Windows 作業系統的「命令提示字元」視窗中，下達「COPY C:\TEST.ABC D:\*.TXT」指令後，下列敘述何者正確？
+                <div class="options">(A) D磁碟會產生檔名為TEST.ABC的檔案 (B) C磁碟會產生檔名為TEST.TXT的檔案 (C) D磁碟會產生檔名為TEST.TXT的檔案 (D) C磁碟檔名為TEST.ABC的檔案將會不存在</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">587.【D】</span>在 Windows 作業系統之「命令提示字元」，下列何者不是可執行檔的副檔名？
+                <div class="options">(A) com (B) bat (C) exe (D) prg</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">588.【D】</span>在 Windows 作業系統之「命令提示字元」，若使用DEL命令刪除某個檔案時，螢幕出現「存取被拒」訊息，則表示此要被刪除檔案的屬性包含下列何者？
+                <div class="options">(A) 系統（System）檔案 (B) 共享（Shared）檔案 (C) 隱藏（Hidden）檔案 (D) 唯讀（Read-Only）檔案</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">589.【A】</span>在Windows作業系統中，若執行「開始」功能表的「登出」選項，則會執行下列何種動作？
+                <div class="options">(A) 可讓新使用者登入 (B) 關閉Windows (C) 讓電腦暫停運作進入省電模式 (D) 重新啟動Windows</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">590.【C】</span>在 Windows 作業系統中，下列何者不是「微軟注音」輸入法內定的鍵盤排列方式？
+                <div class="options">(A) 倚天 (B) 標準 (C) 王安 (D) IBM</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">591.【B】</span>在Windows作業系統中，「Windows Media Player」無法播放下列何種格式的檔案？
+                <div class="options">(A) WAV (B) RMVB (C) MID (D) AVI</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">592.【B】</span>在Windows作業系統的檔案總管視窗中，可透過下列何種組合鍵選取全部資料夾及檔案？
+                <div class="options">(A) Shift＋A (B) Ctrl＋A (C) Alt＋A (D) F1＋A</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">593.【A】</span>在 Windows 作業系統中，有關「語音錄音機」敘述，下列何者正確？
+                <div class="options">(A) 可錄製電腦播放的聲音 (B) 可加入迴音效果 (C) 可執行混音處理 (D) 可儲存為midi檔</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">594.【B】</span>在Windows作業系統中，若要開啟「執行」視窗，則預設組合鍵為下列何者？
+                <div class="options">(A) Win＋Q (B) Win＋R (C) Win＋M (D) Win＋X</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">595.【D】</span>在 Windows 作業系統中，「Windows Media Player」不具備下列何種功能？
+                <div class="options">(A) 觀看網路電視的串流視訊 (B) 播放音樂CD (C) 擷取音樂 (D) 轉錄成MP4檔案</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">596.【D】</span>在 Windows 作業系統中，若要在桌面新增「本機」圖示，可於桌面的空白處按滑鼠右鍵，選取快顯功能表的「個人化」選項，並需在下列何種項目下進行設定？
+                <div class="options">(A) 色彩 (B) 背景 (C) 鎖定畫面 (D) 佈景主題</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">597.【D】</span>在Windows作業系統中，可使用下列何種程式讓使用者登入時，自動執行所指定的程式？
+                <div class="options">(A) 執行 (B) 同步中心 (C) 資源監視器 (D) 工作排程器</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">598.【B】</span>在 Windows 作業系統中，「Windows Defender」的功能為何？
+                <div class="options">(A) 變更使用者帳戶設定和密碼 (B) 協助保護您的電腦不受「惡意程式」的攻擊 (C) 變更此電腦的佈景主題 (D) 檢查是否有軟體及驅動程式更新</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">599.【B】</span>在 Windows 作業系統中，從何處可以還原已被刪除的檔案？
+                <div class="options">(A) 我的文件 (B) 資源回收筒 (C) 控制台 (D) 系統還原</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">600.【A】</span>在 Windows 作業系統中，「小畫家」所編輯的內容預設儲存成何種格式的檔案？
+                <div class="options">(A) .png (B) .jpeg (C) .gif (D) .bmp</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">601.【C】</span>在 Windows 作業系統中，使用下列何者可檢視電腦硬體狀態？
+                <div class="options">(A) 地區及語言選項 (B) 使用者帳戶 (C) 裝置管理員 (D) 協助工具選項</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">602.【C】</span>在 Windows 作業系統之「檔案總管」，使用下列何種功能鍵可以更改檔案或資料夾的名稱？
+                <div class="options">(A) F1 (B) F3 (C) F2 (D) F4</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">603.【C】</span>在 Windows 作業系統中，下列何者功能不包含於「記事本」？
+                <div class="options">(A) 更改字型大小 (B) 字型樣式為粗體 (C) 選擇文字顏色 (D) 變換字型</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">604.【D】</span>在 Windows 作業系統中，關於「帳戶」之說明，下列何者錯誤？
+                <div class="options">(A) 一台電腦中可建立多個使用者帳戶 (B) 使用者帳戶不一定要設密碼 (C) 電腦系統管理員有權限刪除其它使用者帳戶 (D) 建立密碼可防止電腦病毒入侵</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">605.【B】</span>使用下列何者可將已安裝之應用程式從電腦中移除？
+                <div class="options">(A) 清理資源回收筒 (B) 使用設定之「應用程式」 (C) 從開始畫面取消釘選 (D) 在桌面上刪除捷徑</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">606.【B】</span>在 Windows 作業系統中，一個新的硬碟須做下列何項工作才能開始使用？
+                <div class="options">(A) 系統化 (B) 格式化 (C) 初始化 (D) 清除化</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">607.【D】</span>在Windows 作業系統中，若要以滑鼠選取連續多個檔案，滑鼠先點選第一個檔案後，再按住下列何鍵，並用滑鼠點選要選取的最後一個檔案？
+                <div class="options">(A) Alt (B) Tab (C) Ctrl (D) Shift</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">608.【D】</span>在 Windows 作業系統中，「檔案總管」以何種檢視狀態呈現，可同時顯示所有磁碟容量的大小？
+                <div class="options">(A) 清單 (B) 小圖示 (C) 大圖示 (D) 詳細資料</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">609.【D】</span>在 Windows 作業系統中，有關使用「命令提示字元」查看目錄資訊之敘述，下列何者錯誤？
+                <div class="options">(A) 「C:\」代表C硬碟根目錄 (B) 「..」代表上一層 (C) 「\」代表根目錄 (D) 「.」代表下一層</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">610.【C】</span>在 Windows 作業系統中，「資源回收筒」最大容量為何？
+                <div class="options">(A) 10MB (B) 依磁碟容量等級固定大小 (C) 依磁碟容量可自訂大小 (D) 依磁碟容量固定百分比</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">611.【A】</span>在 Windows 作業系統中，使用一段時間後儲存大檔案效率逐漸變差，為改善效率，適合針對原磁碟機作下列何項合理處理？
+                <div class="options">(A) 重組並最佳化磁碟機 (B) 磁碟檢查錯誤 (C) 修護磁碟機 (D) 磁碟清理</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">612.【C】</span>下列何種作業系統最大的特點是開放原始程式碼給所有使用者？
+                <div class="options">(A) Windows (B) iOS (C) Linux (D) macOS X</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">613.【D】</span>在 Windows 作業系統時，若尚未進入Windows作業系統之前，按下列何種功能鍵，可以選擇進入安全模式？
+                <div class="options">(A) F12 (B) F10 (C) F4 (D) F8</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">614.【A】</span>在 Windows 作業系統中，內建何種多媒體播放工具，可以進行播放音樂CD及DVD影音檔案的功能？
+                <div class="options">(A) Windows Media Player (B) Power DVD (C) iTunes (D) iKala</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">615.【A】</span>下列敘述何者正確？
+                <div class="options">(A) 在 Windows 作業系統中，能夠同時播放.mid與.wav檔的音效 (B) 在 Windows 作業系統中，滑鼠左右鍵的用法已經固定，不可以被修改 (C) Linux作業系統不支援TCP/IP通訊協定，因此無法用來架設網站 (D) 「多媒體電腦」是指電腦同時應用到多個新聞媒體的採訪報導</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">616.【D】</span>在 Windows 作業系統中，內建可觀賞和錄製電視節目軟體為何？
+                <div class="options">(A) Windows Media Player (B) Windows Movie Maker (C) 遠端桌面連線 (D) Windows Media Center</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">617.【B】</span>有關UNIX作業系統之基本指令敘述，下列何者正確？
+                <div class="options">(A) man用於顯示現在目錄的路徑 (B) chmod用於改變檔案許可權 (C) cd用於顯示目錄內容 (D) ls用於查詢工作目錄</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">618.【B】</span>下列何者不是 Windows 作業系統之桌面背景圖片可使用的檔案類型？
+                <div class="options">(A) .gif (B) .dwg (C) .bmp (D) .jpg</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">619.【A】</span>有關UNIX作業系統之敘述，下列何者錯誤？
+                <div class="options">(A) cd用於查詢工作目錄 (B) 檔名大小寫是相異的 (C) mkdir用於建立目錄 (D) vi為該作業系統最常見的文字編輯器</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">620.【C】</span>UNIX 和 Windows 作業系統之比較敘述，下列何者錯誤？
+                <div class="options">(A) Windows 以副檔名分類檔案類型，UNIX則無此規則 (B) UNIX 廣泛使用於企業伺服器中，Windows 用於個人電腦 (C) Windows 會分辨指令的英文字母大小寫，UNIX不會分辨 (D) 關於日誌式的檔案系統，Windows 只支援 NTFS，UNIX可以支援多種檔案系統</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">621.【B】</span>在作業系統中進行檔案複製或刪除，屬於下列何種程序？
+                <div class="options">(A) 程序管理 (B) 檔案管理 (C) 資源管理 (D) 網路管理</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">622.【A】</span>有關微軟Windows作業系統之敘述，下列何者錯誤？
+                <div class="options">(A) Windows 為伺服器作業系統 (B) 具分配管理電腦資源的功能 (C) Windows 可用於PC及NB (D) Windows Server 支援多人多工</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">623.【C】</span>下列何種作業系統不支援多點觸控？
+                <div class="options">(A) Ubuntu (B) macOS (C) MS DOS (D) Android</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">624.【D】</span>在作業系統中刪除系統檔案時，會立即跳出警告訊息，這是屬於何種類型的管理程序？
+                <div class="options">(A) 程序管理 (B) 檔案管理 (C) 資源管理 (D) 錯誤偵測</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">625.【B】</span>有關 Windows 作業系統之敘述，下列何者錯誤？
+                <div class="options">(A) 可管理主記憶體 (B) 屬於單工作業系統 (C) 具GUI及文字介面 (D) 提供程式執行環境，並可控制程式執行</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">626.【D】</span>有關Windows 作業系統之操作敘述，下列何者正確？
+                <div class="options">(A) 透過Ctrl＋Shift組合鍵可選擇「開始」功能表 (B) Windows之系統資料一定在磁碟D槽 (C) 隨身碟位置一定在磁碟C槽 (D) 透過Ctrl＋Alt＋Delete組合鍵可選擇工作管理員</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">627.【B】</span>有關Linux作業系統之敘述，下列何者錯誤？
+                <div class="options">(A) 屬於自由軟體 (B) 只有文字命令介面 (C) 可支援多人多工作業環境 (D) 屬於開放原始碼</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">628.【C】</span>下列何者不是Windows 作業系統中「工作管理員」的功能？
+                <div class="options">(A) 查詢整體CPU使用率 (B) 顯示應用程式使用記憶體狀態 (C) 顯示驅動程式的版本 (D) 結束執行中的應用程式</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">629.【C】</span>有關作業系統之敘述，下列何者錯誤？
+                <div class="options">(A) Windows 是由Microsoft所開發 (B) Android是以Linux為基礎開發而成 (C) Android不支援多點觸控功能 (D) iOS是由Apple所開發的智慧型手機作業系統</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">630.【B】</span>下列何者不屬於系統軟體？
+                <div class="options">(A) 直譯器 (B) 資料庫軟體 (C) 作業系統 (D) 編譯器</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">631.【A】</span>在Windows 作業系統中，下列何種按鍵方式可擷取工作中視窗畫面？
+                <div class="options">(A) Alt＋PrintScreen (B) Alt＋Ctrl＋PrintScreen (C) Ctrl＋PrintScreen (D) PrintScreen</div>
+            </div>
+        </div></body></html>

@@ -1,0 +1,567 @@
+
+    <!DOCTYPE html>
+    <html lang="zh-Hant">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            /* 設定基礎字體與極窄行距 */
+            body { 
+                font-family: "Microsoft JhengHei", sans-serif; 
+                font-size: 12px; 
+                line-height: 1.2; 
+                margin: 0;
+                padding: 0;
+            }
+            
+            /* 列印邊界設定為 0.5cm */
+            @media print {
+                @page { 
+                    margin: 0.5cm; 
+                }
+                button { display: none; }
+            }
+
+            h2 { text-align: center; font-size: 16px; margin: 5px 0; }
+            
+            /* 雙欄排版，欄間距縮小 */
+            .container { 
+                column-count: 2; 
+                column-gap: 20px; 
+                column-rule: 0.5px solid #eee; 
+            }
+
+            /* 題目區塊：緊湊排列 */
+            .q-block { 
+                break-inside: avoid; 
+                margin-bottom: 6px; 
+                padding-bottom: 4px; 
+                border-bottom: 0.5px solid #f0f0f0; 
+            }
+
+            .q-header { font-weight: bold; }
+            .ans { color: #d32f2f; font-weight: bold; }
+            
+            /* 選項與解析緊貼題目 */
+            .options { margin-left: 10px; color: #333; }
+            
+            /* 針對選項中的圖片進行縮放，避免破壞排版 */
+            .options img {
+                max-height: 16px;    /* 限制圖片高度，使其與文字差不多高 */
+                width: auto;         /* 依比例自動調整寬度 */
+                vertical-align: middle; /* 讓圖片與文字對齊 */
+                margin: 0 2px;       /* 圖片左右留一點點空隙 */
+            }
+            
+            .note { 
+                font-size: 11px; 
+                color: #777; 
+                display: block; 
+                margin-top: 1px;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>電腦軟體應用 丙級 共同科目90006</h2>
+        <div style="text-align:center;"><button onclick="window.print()">直接列印</button></div>
+        <div class="container">
+    
+            <div class="q-block">
+                <span class="q-header">1.【D】</span>對於核計勞工所得有無低於基本（最低）工資，下列何者錯誤？
+                <div class="options">(A) 僅計入在正常工時內之報酬 (B) 不計入競賽獎金 (C) 不計入休假日出勤加給之工資 (D) 應計入加班費</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">2.【C】</span>下列何者之工資日數得列入計算平均工資？
+                <div class="options">(A) 請事假期間 (B) 職災醫療期間 (C) 發生計算事由之當日前6個月 (D) 放無薪假期間</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">3.【A】</span>有關「例假」之敘述，下列何者錯誤？
+                <div class="options">(A) 須給假，不必給工資 (B) 每7日應有例假1日 (C) 天災出勤時，工資加倍及補休 (D) 工資照給</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">4.【C】</span>勞動基準法第84條之1規定之工作者，因工作性質特殊，就其工作時間之敘述，下列何者正確？
+                <div class="options">(A) 無例假與休假 (B) 完全不受限制 (C) 得由勞雇雙方另行約定 (D) 不另給予延時工資</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">5.【C】</span>依勞動基準法規定，雇主應置備勞工工資清冊並應保存幾年？
+                <div class="options">(A) 10年 (B) 2年 (C) 5年 (D) 1年</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">6.【D】</span>事業單位僱用勞工多少人以上者，應依勞動基準法規定訂立工作規則？
+                <div class="options">(A) 100人 (B) 50人 (C) 200人 (D) 30人</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">7.【C】</span>依勞動基準法規定，雇主延長勞工之工作時間連同正常工作時間，每日不得超過多少小時？
+                <div class="options">(A) 10小時 (B) 15小時 (C) 12小時 (D) 11小時</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">8.【A】</span>依勞動基準法規定，下列何者屬不定期契約？
+                <div class="options">(A) 有繼續性的工作 (B) 特定性的工作 (C) 臨時性或短期性的工作 (D) 季節性的工作</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">9.【C】</span>依職業安全衛生法規定，事業單位勞動場所發生死亡職業災害時，雇主應於多少小時內通報勞動檢查機構？
+                <div class="options">(A) 12小時 (B) 48小時 (C) 8小時 (D) 24小時</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">10.【C】</span>有關事業單位之勞資會議主席，下列何者正確？
+                <div class="options">(A) 由勞資雙方協議推派之 (B) 由產業工會推派之 (C) 由勞資雙方輪流擔任之 (D) 由企業工會推派之</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">11.【D】</span>職業安全衛生法所稱有母性健康危害之虞之工作，不包括下列何種工作型態？
+                <div class="options">(A) 輪班及工作負荷 (B) 人力提舉、搬運及推拉重物 (C) 長時間站立姿勢作業 (D) 駕駛運輸車輛</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">12.【A】</span>依職業安全衛生法施行細則規定，下列何者非屬特別危害健康之作業？
+                <div class="options">(A) 會計作業 (B) 噪音作業 (C) 粉塵作業 (D) 游離輻射作業</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">13.【A】</span>從事於易踏穿材料構築之屋頂修繕作業時，應有何種作業主管在場執行主管業務？
+                <div class="options">(A) 屋頂 (B) 施工架組配 (C) 模板支撐 (D) 擋土支撐組配</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">14.【B】</span>有關「工讀生」之敘述，下列何者正確？
+                <div class="options">(A) 屬短期工作者，加班只能補休 (B) 國定假日出勤，工資加倍發給 (C) 每日正常工作時間得超過8小時 (D) 工資不得低於基本工資之80％</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">15.【A】</span>勞工工作時手部嚴重受傷，住院醫療期間公司應按下列何者給予職業災害補償？
+                <div class="options">(A) 原領工資 (B) 基本工資 (C) 前1年平均工資 (D) 前6個月平均工資</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">16.【C】</span>勞工在何種情況下，雇主得不經預告終止勞動契約？
+                <div class="options">(A) 經常遲到早退者 (B) 非連續曠工但1個月內累計3日者 (C) 不服指揮對雇主暴力相向者 (D) 確定被法院判刑6個月以內並諭知緩刑超過1年以上者</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">17.【A】</span>對於吹哨者保護規定，下列何者錯誤？
+                <div class="options">(A) 為實施勞動檢查，必要時得告知事業單位有關勞工申訴人身分 (B) 事業單位不得有不利勞工申訴人之處分 (C) 事業單位不得對勞工申訴人終止勞動契約 (D) 勞動檢查機構受理勞工申訴必須保密</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">18.【C】</span>職業安全衛生法所稱有母性健康危害之虞之工作，係指對於具生育能力之女性勞工從事工作，可能會導致的一些影響。下列何者除外？
+                <div class="options">(A) 胚胎發育 (B) 妊娠期間之母體健康 (C) 經期紊亂 (D) 哺乳期間之嬰兒健康</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">19.【A】</span>下列何者非屬職業安全衛生法規定之勞工法定義務？
+                <div class="options">(A) 實施自動檢查 (B) 參加安全衛生教育訓練 (C) 遵守安全衛生工作守則 (D) 定期接受健康檢查</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">20.【A】</span>下列何者非屬應對在職勞工施行之健康檢查？
+                <div class="options">(A) 體格檢查 (B) 特定對象及特定項目之檢查 (C) 一般健康檢查 (D) 特殊健康檢查</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">21.【A】</span>下列何者非為防範有害物食入之方法？
+                <div class="options">(A) 穿工作服 (B) 有害物與食物隔離 (C) 常洗手、漱口 (D) 不在工作場所進食或飲水</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">22.【A】</span>原事業單位如有違反職業安全衛生法或有關安全衛生規定，致承攬人所僱勞工發生職業災害時，有關承攬管理責任，下列敘述何者正確？
+                <div class="options">(A) 原事業單位應與承攬人負連帶賠償責任 (B) 原事業單位不需負連帶補償責任 (C) 勞工投保單位即為職業災害之賠償單位 (D) 承攬廠商應自負職業災害之賠償責任</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">23.【D】</span>依勞動基準法規定，主管機關或檢查機構於接獲勞工申訴事業單位違反本法及其他勞工法令規定後，應為必要之調查，並於幾日內將處理情形，以書面通知勞工？
+                <div class="options">(A) 14日 (B) 20日 (C) 30日 (D) 60日</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">24.【D】</span>我國中央勞動業務主管機關為下列何者？
+                <div class="options">(A) 勞工保險局 (B) 經濟部 (C) 內政部 (D) 勞動部</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">25.【B】</span>對於勞動部公告列入應實施型式驗證之機械、設備或器具，下列何種情形不得免驗證？
+                <div class="options">(A) 輸入僅供科技研發之專用機型 (B) 輸入僅供收藏使用之限量品 (C) 供國防軍事用途使用者 (D) 依其他法律規定實施驗證者</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">26.【D】</span>對於墜落危險之預防設施，下列敘述何者較為妥適？
+                <div class="options">(A) 高度2m以上之邊緣開口部分處應圍起警示帶 (B) 安全帶應確實配掛在低於足下之堅固點 (C) 在外牆施工架等高處作業應盡量使用繫腰式安全帶 (D) 高度2m以上之開口處應設護欄或安全網</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">27.【A】</span>對於感電電流流過人體可能呈現的症狀，下列何者錯誤？
+                <div class="options">(A) 血壓降低、呼吸急促、精神亢奮 (B) 造成組織灼傷 (C) 痛覺 (D) 強烈痙攣</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">28.【A】</span>下列何者非屬於容易發生墜落災害的作業場所或設施？
+                <div class="options">(A) 廚房 (B) 施工架 (C) 屋頂 (D) 梯子</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">29.【C】</span>下列何者非屬危險物儲存場所應採取之火災爆炸預防措施？
+                <div class="options">(A) 裝設可燃性氣體偵測裝置 (B) 標示「嚴禁煙火」 (C) 使用工業用電風扇 (D) 使用防爆電氣設備</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">30.【C】</span>雇主於臨時用電設備加裝漏電斷路器，可減少下列何種災害發生？
+                <div class="options">(A) 被撞 (B) 墜落 (C) 感電 (D) 物體倒塌、崩塌</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">31.【D】</span>雇主要求確實管制人員不得進入吊舉物下方，可避免下列何種災害發生？
+                <div class="options">(A) 墜落 (B) 缺氧 (C) 感電 (D) 物體飛落</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">32.【C】</span>職業上危害因子所引起的勞工疾病，稱為何種疾病？
+                <div class="options">(A) 遺傳性疾病 (B) 流行性疾病 (C) 職業疾病 (D) 法定傳染病</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">33.【D】</span>事業招人承攬時，其承攬人就承攬部分負雇主之責任，原事業單位就職業災害補償部分之責任為何？
+                <div class="options">(A) 依承攬契約決定責任 (B) 依工程性質決定責任 (C) 視職業災害原因判定是否補償 (D) 仍應與承攬人負連帶責任</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">34.【A】</span>預防職業病最根本的措施為何？
+                <div class="options">(A) 實施作業環境改善 (B) 實施定期健康檢查 (C) 實施特殊健康檢查 (D) 實施僱用前體格檢查</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">35.【A】</span>在地下室作業，當通風換氣充分時，則不易發生一氧化碳中毒、缺氧危害或火災爆炸危險。「通風換氣充分」係指下列何種描述？
+                <div class="options">(A) 風險控制方法 (B) 風險 (C) 發生機率 (D) 危害源</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">36.【C】</span>勞工為節省時間，在未斷電情況下清理機臺，易發生危害為何？
+                <div class="options">(A) 崩塌 (B) 墜落 (C) 捲夾 (D) 缺氧</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">37.【B】</span>工作場所具有揮發性化學有害物質進入人體，最常見途徑為下列何者？
+                <div class="options">(A) 口腔 (B) 呼吸道 (C) 眼睛 (D) 皮膚</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">38.【C】</span>活線作業勞工應佩戴何種防護手套？
+                <div class="options">(A) 耐熱手套 (B) 防振手套 (C) 絕緣手套 (D) 棉紗手套</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">39.【D】</span>下列何者非屬電氣災害之種類？
+                <div class="options">(A) 電弧灼傷 (B) 靜電危害 (C) 電氣火災 (D) 雷電閃爍</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">40.【A】</span>下列何者非屬於工作場所作業會發生墜落災害的潛在危害因子？
+                <div class="options">(A) 未確實配戴耳罩 (B) 未設置安全之上下設備 (C) 屋頂開口下方未張掛安全網 (D) 開口未設置護欄</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">41.【C】</span>在噪音防治之對策中，從下列何者著手最為有效？
+                <div class="options">(A) 個人防護具 (B) 傳播途徑 (C) 噪音源 (D) 偵測儀器</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">42.【B】</span>勞工於室外高氣溫作業環境工作，可能對身體產生之熱危害，下列何者非屬熱危害之症狀？
+                <div class="options">(A) 熱衰竭 (B) 痛風 (C) 中暑 (D) 熱痙攣</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">43.【C】</span>下列何者是消除職業病發生率之源頭管理對策？
+                <div class="options">(A) 健康檢查 (B) 使用個人防護具 (C) 改善作業環境 (D) 多運動</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">44.【A】</span>下列何者非職業病預防之危害因子？
+                <div class="options">(A) 遺傳性疾病 (B) 化學性危害 (C) 物理性危害 (D) 人因工程危害</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">45.【D】</span>依職業安全衛生設施規則規定，下列何者非屬使用合梯，應符合之規定？
+                <div class="options">(A) 有安全之防滑梯面 (B) 合梯應具有堅固之構造 (C) 合梯材質不得有顯著之損傷、腐蝕等 (D) 梯腳與地面之角度應在80度以上</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">46.【D】</span>下列何者非屬勞工從事電氣工作安全之規定？
+                <div class="options">(A) 停電作業應斷開、檢電、接地及掛牌 (B) 使其使用電工安全帽 (C) 穿戴絕緣防護具 (D) 穿戴棉質手套絕緣</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">47.【D】</span>為防止勞工感電，下列何者錯誤？
+                <div class="options">(A) 避免不當延長接線 (B) 電線架高或加以防護 (C) 使用防水插頭 (D) 設備有金屬外殼保護即可免接地</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">48.【D】</span>不當抬舉導致肌肉骨骼傷害或肌肉疲勞之現象，可歸類為下列何者？
+                <div class="options">(A) 不安全環境 (B) 被撞事件 (C) 感電事件 (D) 不當動作</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">49.【C】</span>使用鑽孔機時，不應使用下列何護具？
+                <div class="options">(A) 防塵口罩 (B) 耳塞 (C) 手套 (D) 護目鏡</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">50.【B】</span>腕道症候群常發生於下列何種作業？
+                <div class="options">(A) 堆高機作業 (B) 電腦鍵盤作業 (C) 潛水作業 (D) 第一種壓力容器作業</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">51.【C】</span>對於化學燒傷傷患的一般處理原則，下列何者正確？
+                <div class="options">(A) 傷患必須臥下，而且頭、胸部須高於身體其他部位 (B) 於燒傷處塗抹油膏、油脂或發酵粉 (C) 立即用大量清水沖洗 (D) 使用酸鹼中和</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">52.【A】</span>下列何者非屬防止搬運事故之一般原則？
+                <div class="options">(A) 儘量增加搬運距離 (B) 以機械代替人力 (C) 採取適當之搬運方法 (D) 以機動車輛搬運</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">53.【D】</span>對於脊柱或頸部受傷患者，下列何者不是適當的處理原則？
+                <div class="options">(A) 速請醫師 (B) 向急救中心聯絡 (C) 不輕易移動傷患 (D) 如無合用的器材，需2人作徒手搬運</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">54.【D】</span>於使用道路作業之工作場所，為防止工作人員遭車輛撞擊危害，所採取防護措施，下列何者錯誤？
+                <div class="options">(A) 置交通引導人員 (B) 設置警告標示 (C) 管制非工作人員不得進入 (D) 各包商之車輛一律停放於工地現場</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">55.【C】</span>安全帽承受巨大外力衝擊後，雖外觀良好，應採下列何種處理方式？
+                <div class="options">(A) 送修 (B) 繼續使用 (C) 廢棄 (D) 油漆保護</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">56.【A】</span>因舉重而扭腰係由於身體動作不自然姿勢，動作之反彈，引起扭筋、扭腰及形成類似狀態造成職業災害，其災害類型為下列何者？
+                <div class="options">(A) 不當動作 (B) 不當設備 (C) 不當方針 (D) 不當狀態</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">57.【D】</span>有關工作場所安全衛生之敘述，下列何者錯誤？
+                <div class="options">(A) 事業單位應備置足夠急救藥品及器材 (B) 對於勞工從事其身體或衣著有被污染之虞之特殊作業時，應備置該勞工洗眼、洗澡、漱口、更衣、洗濯等設備 (C) 勞工應定期接受健康檢查 (D) 事業單位應備置足夠的零食自動販賣機</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">58.【C】</span>在地下室從事油漆粉刷作業，可能呼吸到揮發性有機化合物時，下列措施何者恰當？
+                <div class="options">(A) 配戴防塵口罩 (B) 用手帕遮擋鼻子 (C) 配戴濾毒罐面具 (D) 配戴醫用口罩</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">59.【C】</span>安全門或緊急出口平時應維持何狀態？
+                <div class="options">(A) 門可上鎖但不可封死 (B) 與一般進出門相同，視各樓層規定可開可關 (C) 門應關上但不可上鎖 (D) 保持開門狀態以保持逃生路徑暢通</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">60.【D】</span>下列何種防護具較能消減噪音對聽力的危害？
+                <div class="options">(A) 碎布球 (B) 棉花球 (C) 耳塞 (D) 耳罩</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">61.【B】</span>勞工若面臨長期工作負荷壓力及工作疲勞累積，沒有獲得適當休息及充足睡眠，便可能影響體能及精神狀態，甚而較易促發下列何種疾病？
+                <div class="options">(A) 肺水腫 (B) 腦心血管疾病 (C) 多發性神經病變 (D) 皮膚癌</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">62.【C】</span>「勞工腦心血管疾病發病的風險與年齡、吸菸、總膽固醇數值、家族病史、生活型態、心臟方面疾病」之相關性為何？
+                <div class="options">(A) 無 (B) 可正可負 (C) 正 (D) 負</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">63.【B】</span>下列何者非屬職場不法侵害類型？
+                <div class="options">(A) 肢體暴力 (B) 家庭暴力 (C) 語言暴力 (D) 性騷擾</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">64.【D】</span>職場內部常見之身體或精神不法侵害，不包含下列何者？
+                <div class="options">(A) 脅迫、名譽損毀、侮辱、嚴重辱罵勞工 (B) 過度介入勞工私人事宜 (C) 強求勞工執行業務上明顯不必要或不可能之工作 (D) 使勞工執行與能力、經驗相符的工作</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">65.【A】</span>下列何種措施較可避免工作單調重複或負荷過重？
+                <div class="options">(A) 排班保有規律性 (B) 工時過長 (C) 連續夜班 (D) 經常性加班</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">66.【A】</span>減輕皮膚燒傷程度之最重要步驟為何？
+                <div class="options">(A) 儘速用清水沖洗 (B) 立即刺破水泡 (C) 在燒傷處塗抹麵粉 (D) 立即在燒傷處塗抹油脂</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">67.【C】</span>眼內噴入化學物或其他異物，應立即使用下列何者沖洗眼睛？
+                <div class="options">(A) 牛奶 (B) 蘇打水 (C) 清水 (D) 稀釋的醋</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">68.【A】</span>石綿最可能引起下列何種疾病？
+                <div class="options">(A) 間皮細胞瘤 (B) 心臟病 (C) 白指症 (D) 巴金森氏症</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">69.【D】</span>作業場所高頻率噪音較易導致下列何種症狀？
+                <div class="options">(A) 腕道症候群 (B) 肺部疾病 (C) 失眠 (D) 聽力損失</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">70.【A】</span>廚房設置之排油煙機，為下列何者？
+                <div class="options">(A) 局部排氣裝置 (B) 吹吸型換氣裝置 (C) 排氣煙囪 (D) 整體換氣裝置</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">71.【B】</span>下列何者為選用防塵口罩時，最不重要之考量因素？
+                <div class="options">(A) 吸氣阻抗愈低愈好 (B) 視野愈小愈好 (C) 捕集效率愈高愈好 (D) 重量愈輕愈好</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">72.【D】</span>若勞工工作性質需與陌生人接觸、工作中需處理不可預期的突發事件或工作場所治安狀況較差，較容易遭遇下列何種危害？
+                <div class="options">(A) 潛涵症 (B) 組織內部不法侵害 (C) 多發性神經病變 (D) 組織外部不法侵害</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">73.【A】</span>下列何者不是發生電氣火災的主要原因？
+                <div class="options">(A) 電纜線置於地上 (B) 漏電 (C) 電氣火花 (D) 電器接點短路</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">74.【A】</span>依勞工職業災害保險及保護法規定，職業災害保險之保險效力，自何時開始起算，至離職當日停止？
+                <div class="options">(A) 到職當日 (B) 通知當日 (C) 雇主訂定當日 (D) 勞雇雙方合意之日</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">75.【B】</span>依勞工職業災害保險及保護法規定，勞工職業災害保險以下列何者為保險人，辦理保險業務？
+                <div class="options">(A) 財團法人職業災害預防及重建中心 (B) 勞動部勞工保險局 (C) 勞動部勞動基金運用局 (D) 勞動部職業安全衛生署</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">76.【B】</span>有關「童工」之敘述，下列何者正確？
+                <div class="options">(A) 不得於午後8時至翌晨8時之時間內工作 (B) 每日工作時間不得超過8小時 (C) 例假日得在監視下工作 (D) 工資不得低於基本工資之70％</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">77.【D】</span>依勞動檢查法施行細則規定，事業單位如不服勞動檢查結果，應於勞動檢查結果通知書送達之次日起10日內，以書面敘明理由向勞動檢查機構提出？
+                <div class="options">(A) 抗議 (B) 陳情 (C) 申訴 (D) 異議</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">78.【D】</span>工作者若因雇主違反職業安全衛生法規定而發生職業災害、疑似罹患職業病或身體、精神遭受不法侵害所提起之訴訟，得向勞動部委託之民間團體提出下列何者？
+                <div class="options">(A) 國家賠償 (B) 精神補償 (C) 災害理賠 (D) 申請扶助</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">79.【D】</span>計算平日加班費須按平日每小時工資額加給計算，下列何者錯誤？
+                <div class="options">(A) 前2小時至少加給1/3倍 (B) 經勞資協商同意後，一律加給0.5倍 (C) 超過2小時部分至少加給2/3倍 (D) 未經雇主同意給加班費者，一律補休</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">80.【C】</span>下列工作場所何者非屬勞動檢查法所定之危險性工作場所？【 】之工作場所
+                <div class="options">(A) 從事石油裂解之石化工業 (B) 火藥類製造 (C) 金屬表面處理 (D) 農藥製造</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">81.【B】</span>依職業安全衛生設施規則規定，有關電氣安全，下列何者錯誤？
+                <div class="options">(A) 不可以濕手操作電氣開關，且切斷開關應迅速 (B) 110伏特之電壓不致造成人員死亡 (C) 220伏特為低壓電 (D) 電氣室應禁止非工作人員進入</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">82.【D】</span>依職業安全衛生設施規則規定，下列何者非屬於車輛系營建機械？
+                <div class="options">(A) 平土機 (B) 推土機 (C) 鏟土機 (D) 堆高機</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">83.【A】</span>下列何者非為事業單位勞動場所發生職業災害者，雇主應於8小時內通報勞動檢查機構？
+                <div class="options">(A) 勞工受傷無須住院治療 (B) 發生災害之罹災人數在1人以上，且需住院治療 (C) 發生死亡災害 (D) 發生災害之罹災人數在3人以上</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">84.【D】</span>依職業安全衛生管理辦法規定，下列何者非屬「自動檢查」之內容？
+                <div class="options">(A) 機械之定期檢查 (B) 機械、設備之重點檢查 (C) 機械、設備之作業檢點 (D) 勞工健康檢查</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">85.【A】</span>下列何者係針對於機械操作點的捲夾危害特性可以採用之防護裝置？
+                <div class="options">(A) 設置護圍、護罩 (B) 穿戴防護衣 (C) 強化教育訓練 (D) 穿戴棉紗手套</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">86.【B】</span>下列何者非屬從事起重吊掛作業導致物體飛落災害之可能原因？
+                <div class="options">(A) 吊鉤未設防滑舌片致吊掛鋼索鬆脫 (B) 過捲揚警報裝置過度靈敏 (C) 超過額定荷重作業 (D) 鋼索斷裂</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">87.【A】</span>勞工不遵守安全衛生工作守則規定，屬於下列何者？
+                <div class="options">(A) 不安全行為 (B) 不安全設備 (C) 管理缺陷 (D) 不安全環境</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">88.【D】</span>下列何者不屬於局限空間內作業場所應採取之缺氧、中毒等危害預防措施？
+                <div class="options">(A) 測定氧氣、危險物、有害物濃度 (B) 實施通風換氣 (C) 進入作業許可程序 (D) 使用柴油內燃機發電提供照明</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">89.【A】</span>下列何者非通風換氣之目的？
+                <div class="options">(A) 防止游離輻射 (B) 稀釋空氣中有害物 (C) 補充新鮮空氣 (D) 防止火災爆炸</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">90.【A】</span>已在職之勞工，首次從事特別危害健康作業，應實施下列何種檢查？
+                <div class="options">(A) 特殊健康檢查 (B) 一般體格檢查 (C) 一般體格檢查及特殊健康檢查 (D) 特殊體格檢查</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">91.【A】</span>依職業安全衛生設施規則規定，噪音超過多少分貝之工作場所，應標示並公告噪音危害之預防事項，使勞工周知？
+                <div class="options">(A) 90分貝 (B) 85分貝 (C) 80分貝 (D) 75分貝</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">92.【D】</span>下列何者非屬工作安全分析的目的？
+                <div class="options">(A) 發現並杜絕工作危害 (B) 確立工作安全所需工具與設備 (C) 作為員工在職訓練的參考 (D) 懲罰犯錯的員工</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">93.【C】</span>可能對勞工之心理或精神狀況造成負面影響的狀態，如異常工作壓力、超時工作、語言脅迫或恐嚇等，可歸屬於下列何者管理不當？
+                <div class="options">(A) 職業安全 (B) 職業衛生 (C) 勞工健康 (D) 環保</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">94.【C】</span>有關女性工作者妊娠期間宜避免作業之敘述，下列何者錯誤？
+                <div class="options">(A) 避免每班站立7小時以上之作業 (B) 避免砷或鉛之暴露 (C) 避免提舉1公斤重物之職務 (D) 避免重體力勞動之職務</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">95.【B】</span>熱中暑時，易發生下列何現象？
+                <div class="options">(A) 體溫下降 (B) 體溫上升 (C) 體溫正常 (D) 體溫忽高忽低</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">96.【C】</span>下列何者不會使電路發生過電流？
+                <div class="options">(A) 電氣設備過載 (B) 電路漏電 (C) 電路斷路 (D) 電路短路</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">97.【D】</span>下列何者較屬安全、尊嚴的職場組織文化？
+                <div class="options">(A) 強求勞工執行業務上明顯不必要或不可能之工作 (B) 公開在眾人面前長時間責罵勞工 (C) 不斷責備勞工 (D) 不介入勞工私人事宜</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">98.【A】</span>下列何者與職場母性健康保護較不相關？
+                <div class="options">(A) 動力堆高機型式驗證 (B) 妊娠與分娩後女性及未滿十八歲勞工禁止從事危險性或有害性工作認定標準 (C) 性別平等工作法 (D) 職業安全衛生法</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">99.【A】</span>油漆塗裝工程應注意防火防爆事項，下列何者錯誤？
+                <div class="options">(A) 緊密門窗以減少溶劑擴散揮發 (B) 確實通風 (C) 嚴禁煙火 (D) 注意電氣火花</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">100.【B】</span>依職業安全衛生設施規則規定，雇主對於物料儲存，為防止氣候變化或自然發火發生危險者，下列何者為最佳之採取措施？
+                <div class="options">(A) 密閉 (B) 與外界隔離及溫濕控制 (C) 靜置於倉儲區，避免陽光直射 (D) 保持自然通風</div>
+            </div>
+        </div></body></html>

@@ -1,0 +1,1737 @@
+
+    <!DOCTYPE html>
+    <html lang="zh-Hant">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            /* 設定基礎字體與極窄行距 */
+            body { 
+                font-family: "Microsoft JhengHei", sans-serif; 
+                font-size: 12px; 
+                line-height: 1.2; 
+                margin: 0;
+                padding: 0;
+            }
+            
+            /* 列印邊界設定為 0.5cm */
+            @media print {
+                @page { 
+                    margin: 0.5cm; 
+                }
+                button { display: none; }
+            }
+
+            h2 { text-align: center; font-size: 16px; margin: 5px 0; }
+            
+            /* 雙欄排版，欄間距縮小 */
+            .container { 
+                column-count: 2; 
+                column-gap: 20px; 
+                column-rule: 0.5px solid #eee; 
+            }
+
+            /* 題目區塊：緊湊排列 */
+            .q-block { 
+                break-inside: avoid; 
+                margin-bottom: 6px; 
+                padding-bottom: 4px; 
+                border-bottom: 0.5px solid #f0f0f0; 
+            }
+
+            .q-header { font-weight: bold; }
+            .ans { color: #d32f2f; font-weight: bold; }
+            
+            /* 選項與解析緊貼題目 */
+            .options { margin-left: 10px; color: #333; }
+            
+            /* 針對選項中的圖片進行縮放，避免破壞排版 */
+            .options img {
+                max-height: 16px;    /* 限制圖片高度，使其與文字差不多高 */
+                width: auto;         /* 依比例自動調整寬度 */
+                vertical-align: middle; /* 讓圖片與文字對齊 */
+                margin: 0 2px;       /* 圖片左右留一點點空隙 */
+            }
+            
+            .note { 
+                font-size: 11px; 
+                color: #777; 
+                display: block; 
+                margin-top: 1px;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>電腦軟體應用 丙級 項目01</h2>
+        <div style="text-align:center;"><button onclick="window.print()">直接列印</button></div>
+        <div class="container">
+    
+            <div class="q-block">
+                <span class="q-header">1.【B】</span>關於「個人電腦所使用之記憶體」之敘述，下列何者錯誤？
+                <div class="options">(A) ROM常用來存放系統程式 (B) ROM中之資料僅能存入，不能被讀出 (C) 軟碟與磁帶均屬於輔助記憶體 (D) 電腦關機後，RAM內部所儲存之資料會消失</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">2.【B】</span>下列何者之傳輸速度最快？
+                <div class="options">(A) 電話線 (B) 光纖 (C) 同軸電纜 (D) 雙絞線</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">3.【B】</span>下列何者為資料傳輸速度的單位？
+                <div class="options">(A) CPS (B) BPS (C) BPI (D) CPI</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">4.【A】</span>在ASCII Code的表示法中，下列之大小關係何者錯誤？
+                <div class="options">(A) A＞B＞C (B) c＞b＞a (C) 3＞2＞1 (D) p＞g＞e</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">5.【D】</span>以ASCII Code儲存字串"PC-586"，但不包含引號"，共需使用多少位元組之記憶體空間？
+                <div class="options">(A) 1 (B) 2 (C) 3 (D) 6</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">6.【B】</span>在微電腦系統中，要安裝週邊設備時，常在電腦主機板上安插一硬體配件，以便系統和週邊設備能適當溝通，其中該配件名稱為何？
+                <div class="options">(A) 讀卡機 (B) 介面卡 (C) 掃描器 (D) 繪圖機</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">7.【C】</span>表示0到9的十進制數值，至少需要幾個二進位位元？
+                <div class="options">(A) 3 (B) 2 (C) 4 (D) 1</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">8.【C】</span>以「http://www.labor.gov.tw」來表示，則下列何者代表國家或地理區域之網域？
+                <div class="options">(A) labor (B) gov (C) tw (D) www</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">9.【C】</span>下列何者可為圖形檔的副檔名？
+                <div class="options">(A) .EXE (B) .DOC (C) .GIF (D) .HTML</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">10.【D】</span>下列何者為計算機的心臟，且由控制單元與算術邏輯單元所組成？
+                <div class="options">(A) Register (B) ALU (C) CU (D) CPU</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">11.【B】</span>有關「記憶體」之敘述，下列何者錯誤？
+                <div class="options">(A) 一般而言，主記憶體指的是RAM (B) ROM儲存應用程式，且電源關閉後，所儲存的資料將消失 (C) 唯讀記憶體（ROM）只能讀取，但不可寫入 (D) 隨機存取記憶體（RAM）可讀取且可寫入</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">12.【D】</span>設B=5，C=10，則計算A=B+C時，控制單元是到何處取出代表B及C之值，再送到ALU相加？
+                <div class="options">(A) CPU (B) 輸出單元 (C) 輸入單元 (D) 記憶體</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">13.【D】</span>CPU必先將要存取的位址存入何處，才能到主記憶體中存取資料？
+                <div class="options">(A) 輸出單元 (B) 指令暫存器 (C) 資料暫存器 (D) 位址暫存器</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">14.【A】</span>1258291 Bytes約為？
+                <div class="options">(A) 1.2MB (B) 121KB (C) 1.2GB (D) 1.2KB</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">15.【B】</span>以「hello@mymail.com.tw」來表示，@的左邊「hello」代表的是
+                <div class="options">(A) 個人的網址 (B) 個人的帳號 (C) 個人的姓名 (D) 個人的密碼</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">16.【A】</span>關於「RAM」之敘述，下列何者錯誤？
+                <div class="options">(A) 與ROM的主要差別在於記憶容量大小 (B) 儲存的資料能被讀出 (C) 電源關掉後，所儲存的資料內容都消失 (D) 能寫入資料</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">17.【C】</span>在接收郵件時，若郵件上出現「迴紋針」符號，表示此封郵件
+                <div class="options">(A) 為「急件」 (B) 帶有病毒的郵件 (C) 含有「附加檔案」的郵件 (D) 為「已刪除」郵件</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">18.【A】</span>資料傳輸時可作雙向傳輸，但無法同時雙向傳輸的傳輸方法為何？
+                <div class="options">(A) 半雙工 (B) 多工 (C) 單工 (D) 全雙工</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">19.【C】</span>下列何者不屬於區域網路的標準？
+                <div class="options">(A) Token Ring (B) Ethernet (C) Seednet (D) ARCnet</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">20.【D】</span>在各種多媒體播放程式下，下列何種檔案非屬可播放的音樂檔案類型？
+                <div class="options">(A) .mp3 (B) .mid (C) .wav (D) .jpg</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">21.【D】</span>「十進制數的17」等於十六進制數的多少？
+                <div class="options">(A) 10 (B) 17 (C) 21 (D) 11</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">22.【C】</span>作業系統提供了一個介於電腦與使用者之間的一個界面，其中該作業系統係包含了下列何種功能，使得使用者不需關心檔案之儲存方式與位置？
+                <div class="options">(A) 記憶體管理系統 (B) 輸出入系統 (C) 檔案管理系統 (D) 保護系統</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">23.【A】</span>印表機通常可以連接在主機的何處？
+                <div class="options">(A) LPT1 (B) Game Port (C) COM1 (D) COM2</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">24.【A】</span>螢幕的信號線插頭須插在主機的何處？
+                <div class="options">(A) 顯示卡接頭 (B) LPT1 (C) Game Port (D) COM1</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">25.【C】</span>在接收郵件時，若郵件上出現紅色「！」符號，表示此封郵件為下列何者？
+                <div class="options">(A) 「已刪除」郵件 (B) 帶有病毒的郵件 (C) 「急件」 (D) 含有「附加檔案」的郵件</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">26.【A】</span>下列何者不是CPU內控制單元的功能？
+                <div class="options">(A) 計算結果並輸出 (B) 讀出程式並解釋 (C) 啟動處理器內部各單元動作 (D) 控制程式與資料進出主記憶體</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">27.【A】</span>處理機與週邊裝置間之訊息溝通並不通過下列何者？
+                <div class="options">(A) 浮點運算處理器（Floating Point Coprocessor） (B) 通道（Channel） (C) 界面線路（Interface Circuit） (D) 匯流排（Bus）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">28.【A】</span>繪圖機是屬於何種裝置？
+                <div class="options">(A) 輸出裝置 (B) 記憶裝置 (C) 處理裝置 (D) 輸入裝置</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">29.【B】</span>雷射印表機是一種
+                <div class="options">(A) 輸入裝置 (B) 輸出設備 (C) 撞擊式印表機 (D) 利用打擊色帶印字機器</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">30.【A】</span>下列何者可以分擔部分CPU的浮點計算工作，以提高系統的速度？
+                <div class="options">(A) 協同處理機（Coprocessor） (B) 磁碟控制器（Disk Controller） (C) 快取記憶體控制器（Cache Controller） (D) 前端處理器（Front-End Processor）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">31.【C】</span>CPU中的控制單元主要功能在控制電腦的動作，下列何者不是控制單元所執行的動作？
+                <div class="options">(A) 執行 (B) 控制 (C) 計算 (D) 解碼</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">32.【D】</span>「CPU 80586」具64位元的資料匯流排及32位元的位址匯流排，其可定址的最大線性記憶體空間為
+                <div class="options">(A) 8GB (B) 16GB (C) 1GB (D) 4GB</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">33.【C】</span>Internet是採用下列何種通訊協定？
+                <div class="options">(A) ISO的OSI (B) HDLC (C) TCP/IP (D) X.25</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">34.【C】</span>通常電腦內部表示負的整數是用
+                <div class="options">(A) 9的補數表示法 (B) 10的補數表示法 (C) 2的補數表示法 (D) 8的補數表示法</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">35.【D】</span>一個邏輯閘，若有任一輸入為1時，其輸出為0，則此邏輯閘為
+                <div class="options">(A) XOR閘 (B) AND閘 (C) OR閘 (D) NOR閘</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">36.【C】</span>二進制數值1101001轉換為十六進制時，其值為
+                <div class="options">(A) 7A (B) 39 (C) 69 (D) 8A</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">37.【B】</span>磁帶是採用下列何種存取方式？
+                <div class="options">(A) 隨機存取 (B) 循序存取 (C) 索引存取 (D) 直接存取</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">38.【D】</span>下列何者為撞擊式印表機？
+                <div class="options">(A) 噴墨式 (B) 靜電式 (C) 雷射式 (D) 點陣式</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">39.【C】</span>「創新小點子」商店，想藉由網際網路（Internet）提供世界各地的客戶預訂產品，他們應該架設何種系統？
+                <div class="options">(A) FTP伺服器 (B) Mail伺服器 (C) WWW伺服器 (D) DNS伺服器</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">40.【D】</span>所謂「32位元個人電腦」之32位元是指CPU的
+                <div class="options">(A) 位址匯流排 (B) 輸入／輸出匯流排 (C) 控制匯流排 (D) 資料匯流排</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">41.【A】</span>電腦最基本的運算方式為何？
+                <div class="options">(A) 加法 (B) 除法 (C) 減法 (D) 乘法</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">42.【B】</span>下列資料單位何者為由小而大順序排列？
+                <div class="options">(A) MB KB GB TB (B) KB MB GB TB (C) GB TB KB MB (D) TB MB GB KB</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">43.【B】</span>英文字母「A」的10進制ASCII值為65，則字母「Q」的16進制ASCII值為
+                <div class="options">(A) 73 (B) 51 (C) 50 (D) 81</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">44.【A】</span>1101111001之2的補數為下列何者？
+                <div class="options">(A) 0010000111 (B) 1101111010 (C) 1111111001 (D) 0010000110</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">45.【B】</span>「資料緩衝區（Data Buffer）」的作用為何？
+                <div class="options">(A) 增加硬碟（Hard Disk）之容量 (B) 暫存資料，以做後續處理 (C) 避免電腦當機 (D) 防止因斷電所造成之資料流失</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">46.【A】</span>在網際網路（Internet）上，用什麼來識別電腦？
+                <div class="options">(A) IP Address (B) computer name (C) computer ID (D) URL</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">47.【D】</span>下列何者會影響電腦執行數值運算的速度？
+                <div class="options">(A) 打字員的打字速度 (B) 電流強弱 (C) 硬式磁碟機存取資料的速度 (D) CPU的速度</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">48.【D】</span>下列何者為主機與週邊設備溝通時不可或缺之管道？
+                <div class="options">(A) 電話線 (B) 9-Pin接頭 (C) 音效卡 (D) 匯流排（Bus）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">49.【B】</span>若網址列以「https」作為網址開頭，則該網站採用下列何種技術建立安全通道？
+                <div class="options">(A) DES (B) SSL (C) RSA (D) SET</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">50.【D】</span>下列何者是決定印表機列印品質的最重要因素？
+                <div class="options">(A) 送紙方面 (B) 與主機連接介面 (C) 緩衝區（Buffer）大小 (D) DPI（Dot per Inch）的大小</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">51.【A】</span>下列何種服務可將「Domain Name」對應為「IP Address」？
+                <div class="options">(A) DNS (B) Proxy (C) WINS (D) DHCP</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">52.【C】</span>電腦的哪一個部分負責從主記憶體讀取並解釋指令？
+                <div class="options">(A) 主記憶體 (B) 輸出／入單元 (C) 控制單元 (D) 算術邏輯單元</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">53.【D】</span>二進制數值「00001101」之「1的補數」為何？
+                <div class="options">(A) 11110011 (B) 00001110 (C) 10001101 (D) 11110010</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">54.【B】</span>評量點矩陣印表機速度的單位是
+                <div class="options">(A) DPI（Dot Per Inch） (B) CPS（Character Per Second） (C) BPI（Byte Per Inch） (D) BPS（Bit Per Second）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">55.【C】</span>下列何者屬於輸出裝置？
+                <div class="options">(A) 數位板 (B) 滑鼠 (C) 終端顯示器 (D) 鍵盤</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">56.【B】</span>磁碟機讀寫頭移到正確磁軌所花的時間稱為
+                <div class="options">(A) 資料傳輸速率（Data Transfer Rate） (B) 找尋時間（Seek Time） (C) 設定時間（Setting Time） (D) 延遲時間（Latency）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">57.【C】</span>一般高速印表機之印表速度的計量單位為何？
+                <div class="options">(A) DPI（Dot Per Inch） (B) CPS（Character Per Second） (C) LPS（Line Per Second） (D) TPI（Track Per Inch）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">58.【A】</span>「同位檢查（Parity Checking）」是一項資料錯誤檢查的技術，下列何者不具有「偶同位性」？
+                <div class="options">(A) 011110100 (B) 111111110 (C) 101110000 (D) 011100001</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">59.【B】</span>電腦名詞「BBS」是指
+                <div class="options">(A) 電子郵件 (B) 電子佈告欄 (C) 區域網路 (D) 網際網路</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">60.【C】</span>I/O裝置、CPU與記憶體間之資料傳送，經由系統匯流排傳送，下列何者不是系統匯流排？
+                <div class="options">(A) 位址匯流排 (B) 資料匯流排 (C) 通用匯流排 (D) 控制匯流排</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">61.【C】</span>微處理器與外部連接之各種訊號匯流排，何者具有雙向流通性？
+                <div class="options">(A) 控制匯流排 (B) 狀態匯流排 (C) 資料匯流排 (D) 位址匯流排</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">62.【C】</span>下列何種網路的應用可呈現圖片、語音、動畫的效果？
+                <div class="options">(A) Eudora (B) BBS (C) WWW (D) FTP</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">63.【D】</span>在lnternet上的每一台電腦主機都有一個唯一的識別號，這個識別號就是
+                <div class="options">(A) PROXY (B) 帳號 (C) CPU編號 (D) IP位址</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">64.【B】</span>IP位址通常是由四組數字所組成的，每組數字之範圍為何？
+                <div class="options">(A) 0～127 (B) 0～255 (C) 0～512 (D) 0～999</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">65.【C】</span>十進制數（60.875）以二進制表示為何？
+                <div class="options">(A) 110110.111 (B) 110100.110 (C) 111100.111 (D) 101110.110</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">66.【B】</span>二進制數1011 1001 1100 0011以十六進制表示為何？
+                <div class="options">(A) A9D3 (B) B9C3 (C) C9E3 (D) C8E4</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">67.【A】</span>下列何種記憶體內的資料會隨電源中斷而消失？
+                <div class="options">(A) RAM (B) ROM (C) EPROM (D) PROM</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">68.【D】</span>一般若要使用Internet，為了安全性與保密性，必須要有密碼及【　　】才能進入
+                <div class="options">(A) 學號 (B) 信用卡號 (C) 身分證字號 (D) 帳號</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">69.【D】</span>將軟體程式利用硬體電路方式儲存於ROM、PROM或EPROM中，此種「微程式規劃（Micro-programming）」技術，我們稱之為
+                <div class="options">(A) 硬體 (B) 軟電路 (C) 軟體 (D) 韌體</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">70.【D】</span>假設某一CPU共有20條位址線，請問可定址出之實體記憶空間為
+                <div class="options">(A) 16MB (B) 64KB (C) 512KB (D) 1MB</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">71.【B】</span>二進位編碼所組成的資料在運用時，通常會另加一個bit，用來檢查資料是否正確，此bit稱為
+                <div class="options">(A) check bit (B) parity bit (C) extended bit (D) redundancy bit</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">72.【B】</span>RS-232C介面是屬於
+                <div class="options">(A) 搖桿介面 (B) 序列式介面 (C) 顯示介面 (D) 並列式介面</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">73.【B】</span>在主記憶體中，提供程式執行輸入或輸出敘述，存取資料記錄的暫時儲存區，稱之為
+                <div class="options">(A) 磁區 (B) 緩衝區 (C) 記錄區 (D) 控制區</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">74.【B】</span>條碼閱讀機屬於
+                <div class="options">(A) CPU (B) 輸入設備 (C) 輸出設備 (D) 記憶設備</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">75.【D】</span>下列兩個八進位數值之和為何？（23.4）+（56.4）=
+                <div class="options">(A) （515.10） (B) （79.8） (C) （66.0） (D) （102.0）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">76.【D】</span>八進位數值（2345.67）轉換成十六進位數值為
+                <div class="options">(A) （45E.DC） (B) （95.13） (C) （59.13） (D) （4E5.DC）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">77.【C】</span>「全球資訊網（World Wide Web）」使用最普遍的是下列何種格式？
+                <div class="options">(A) .dbf (B) .doc (C) .html (D) .txt</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">78.【A】</span>二進位數值「01101101」，其「2的補數」值為何？
+                <div class="options">(A) 10010011 (B) 01101110 (C) 01101101 (D) 10010010</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">79.【D】</span>八進位數值（456）轉換成十六進位數值為何？
+                <div class="options">(A) 12F (B) 228 (C) 12D (D) 12E</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">80.【C】</span>程式經編譯（Compile）後，不會產生下列何種輸出？
+                <div class="options">(A) 列印原始程式（Source Program Listing） (B) 診斷訊息（Diagnostic Message） (C) 可執行模組（Executable Module） (D) 目的模組（Object Module）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">81.【B】</span>磁碟每一面都由很多同心圓組成，這些同心圓稱為
+                <div class="options">(A) 磁區（Sector） (B) 磁軌（Track） (C) 磁頭（Head） (D) 磁柱（Cylinder）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">82.【B】</span>下列何者是「可程式唯讀記憶體」之縮寫？
+                <div class="options">(A) ROM (B) PROM (C) BIOS (D) RAM</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">83.【A】</span>「BIOS（基本輸入輸出系統）」通常儲存於下列何種記憶體中？
+                <div class="options">(A) ROM (B) RAM (C) 軟碟 (D) 硬碟</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">84.【D】</span>鍵盤是屬於
+                <div class="options">(A) 輸出媒體 (B) 輸入媒體 (C) 輸出設備 (D) 輸入設備</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">85.【D】</span>下列何者屬於輔助記憶體？
+                <div class="options">(A) RS-232介面卡 (B) 控制單元 (C) 算術邏輯單元 (D) 磁碟機</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">86.【C】</span>有關「CPU」之描述，下列何者錯誤？
+                <div class="options">(A) 一部電腦的執行速度主要是由CPU的處理速度決定 (B) 一部電腦中可以有二個以上的CPU (C) 個人電腦的CPU一定是16位元 (D) CPU中具有儲存資料能力的是暫存器</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">87.【C】</span>「程式計數器（Program Counter）」的作用為何？
+                <div class="options">(A) 存放錯誤指令的個數 (B) 存放程式指令 (C) 存放下一個要被執行的指令位址 (D) 存放資料處理的結果</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">88.【A】</span>可以直接被電腦接受的語言是
+                <div class="options">(A) 機器語言 (B) C語言 (C) 組合語言 (D) 高階語言</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">89.【C】</span>以電腦通訊傳輸媒體的傳輸速度而言，下列何種介質最快？
+                <div class="options">(A) 同軸電纜 (B) 雙絞線 (C) 光纖 (D) 電話線</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">90.【B】</span>在個人電腦中，磁碟機存取資料時，下列何者可作為其存取單位？
+                <div class="options">(A) DPI (B) Sector (C) Track (D) bit</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">91.【D】</span>下列何者不屬於週邊設備？
+                <div class="options">(A) 鍵盤 (B) 印表機 (C) CD-ROM (D) CPU</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">92.【D】</span>微秒（Microseconds）是計量電腦速度的微小時間單位之一，一微秒等於
+                <div class="options">(A) 萬分之一秒 (B) 十萬分之一秒 (C) 千分之一秒 (D) 百萬分之一秒</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">93.【B】</span>算術及邏輯單元負責執行所有的運算，而主記憶體與ALU之間的資料傳輸，由誰負責監督執行？
+                <div class="options">(A) 輸入輸出裝置 (B) 控制單元 (C) 主記憶體 (D) 監督程式</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">94.【B】</span>下列何者是「中央處理單元」的英文縮寫？
+                <div class="options">(A) I/O (B) CPU (C) UPS (D) PLC</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">95.【C】</span>「資料處理（Data Processing）」的基本作業是
+                <div class="options">(A) 輸出、處理、輸入 (B) 輸入輸出、顯示、列印 (C) 輸入、處理、輸出 (D) 輸入輸出、處理、列印</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">96.【D】</span>下列何者不屬於Internet的服務？
+                <div class="options">(A) e-mail (B) WWW (C) BBS (D) RFC</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">97.【B】</span>將類似資料收集起來於固定時間一起處理的作業方式稱為
+                <div class="options">(A) 即時處理 (B) 批次處理 (C) 分時處理 (D) 連線處理</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">98.【A】</span>電子計算機的記憶體容量之大小與2的次方有關，所謂1M是指2的幾次方？
+                <div class="options">(A) 20 (B) 10 (C) 50 (D) 15</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">99.【C】</span>電源關掉後，記憶體內之資料內容仍然存在的記憶體稱為
+                <div class="options">(A) DRAM (B) RAM (C) ROM (D) SRAM</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">100.【C】</span>將電路的所有電子元件，如電晶體、二極體、電阻等，製造在一個矽晶片上之電腦元件稱為
+                <div class="options">(A) 真空管 (B) 中央處理單元（CPU） (C) 積體電路（Integrated Circuit） (D) 電晶體</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">101.【C】</span>以「http://www.myweb.com.tw」而言，下列何者代表公司的網域？
+                <div class="options">(A) tw (B) www (C) myweb (D) com</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">102.【A】</span>若一年以365日計算，則須使用多少位元才可表示該數目365？
+                <div class="options">(A) 9 (B) 2 (C) 18 (D) 1</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">103.【D】</span>假設電腦係由五大部門所組成，則專門負責電腦系統之指揮及控制的為何？
+                <div class="options">(A) 輸出入單元 (B) 記憶單元 (C) 算術／邏輯單元 (D) 控制單元</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">104.【C】</span>在網際網路的網域組織中，下列敘述何者錯誤？
+                <div class="options">(A) edu代表教育機構 (B) com代表商業機構 (C) net代表財團法人 (D) gov代表政府機構</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">105.【D】</span>在網際網路的網域組織中，下列敘述何者錯誤？
+                <div class="options">(A) mil代表軍方單位 (B) gov代表政府機構 (C) edu代表教育機構 (D) org代表商業機構</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">106.【D】</span>網際網路的IP位址長度係由多少位元所組成？
+                <div class="options">(A) 64 (B) 48 (C) 16 (D) 32</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">107.【B】</span>已知網際網路的IP位址係由四組數字所組成，下列表示法何者錯誤？
+                <div class="options">(A) 140.6.20.8 (B) 140.6.36.300 (C) 200.100.60.80 (D) 168.95.182.6</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">108.【C】</span>「MIPS」為下列何者之衡量單位？
+                <div class="options">(A) 螢幕之解析度 (B) 印表機之印字速度 (C) CPU之處理速度 (D) 磁碟機之讀取速度</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">109.【D】</span>假設某一記憶體具有14條位址線，則此記憶體共有多少位址空間？
+                <div class="options">(A) 16MB (B) 24B (C) 24KB (D) 16KB</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">110.【A】</span>下列何種軟體是用來作為電腦輔助教學之用？
+                <div class="options">(A) CAI (B) CAE (C) CAM (D) CAD</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">111.【C】</span>在電子商務行為中，下列何者是指消費者個人與消費者個人之間利用網際網路進行商業活動？
+                <div class="options">(A) B2B (B) B2G (C) C2C (D) B2C</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">112.【C】</span>下列何者不是通用串列匯流排（USB）的特色？
+                <div class="options">(A) 高傳輸速率 (B) 支援熱插拔（Hot Swapping）功能 (C) 僅能使用於儲存裝置 (D) 支援隨插即用（Plug and Play）功能</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">113.【B】</span>在二進位數系統中，（00111100）XOR（11000011）的結果為
+                <div class="options">(A) 00001111 (B) 11111111 (C) 00000000 (D) 00111100</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">114.【C】</span>布林（Boolean）代數的運算中，下列何者不正確？
+                <div class="options">(A) 1+1=1 (B) 0+0=0 (C) 0+x=0 (D) 0+1=1</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">115.【C】</span>一個邏輯閘，若有任一輸入為1時，其輸出為1，則此邏輯閘為
+                <div class="options">(A) NOR閘 (B) AND閘 (C) OR閘 (D) NAND閘</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">116.【C】</span>「校務行政管理系統」是屬於
+                <div class="options">(A) 驅動程式 (B) 作業系統 (C) 專案開發軟體 (D) 工具程式</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">117.【B】</span>下列何者不是磁碟機的資料傳輸介面技術？
+                <div class="options">(A) SATA (B) LPT (C) IDE (D) SCSI</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">118.【D】</span>下列何種元件不屬於輔助儲存元件？
+                <div class="options">(A) 硬碟 (B) 隨身碟 (C) 光碟 (D) 記憶體</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">119.【A】</span>「二進位數1010101」等於「八進位數」的
+                <div class="options">(A) 125 (B) 123 (C) 522 (D) 521</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">120.【D】</span>「二進位數01111」等於「十進位數」的
+                <div class="options">(A) 16 (B) 1000 (C) 10 (D) 15</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">121.【C】</span>「十進位數77」等於「八進位數」的
+                <div class="options">(A) 117 (B) 116 (C) 115 (D) 114</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">122.【A】</span>「十六進位數7D1」等於「十進位數」的
+                <div class="options">(A) 2001 (B) 2003 (C) 2101 (D) 2103</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">123.【B】</span>「十六進位數1A1B」等於「八進位數」的
+                <div class="options">(A) 6684 (B) 15033 (C) 1123 (D) 977</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">124.【B】</span>「十六進位數F0」等於「二進位數」的
+                <div class="options">(A) 11000011 (B) 11110000 (C) 00001111 (D) 00111100</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">125.【B】</span>「八進位數123」等於「十進位數」的
+                <div class="options">(A) 97 (B) 83 (C) 38 (D) 79</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">126.【A】</span>1個「八進位」的數字可由幾個「二進位」的數字組成
+                <div class="options">(A) 3 (B) 4 (C) 5 (D) 2</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">127.【D】</span>在電腦系統中，下列有關儲存容量單位之敘述何者錯誤？
+                <div class="options">(A) 1MB=1024KB (B) 1GB=1024MB (C) 1TB=1024GB (D) 1KB=1024TB</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">128.【A】</span>假設某一部個人電腦之記憶體容量為512MB，則該記憶體容量等於
+                <div class="options">(A) 524288KB (B) 512000KB (C) 1GB (D) 2GB</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">129.【A】</span>若利用5bit來表示整數型態資料，且最左位元0代表正數、1代表負數，負數與正數間互為1的補數，則可表示之範圍為
+                <div class="options">(A) 15~-15 (B) 16~-15 (C) 15~-16 (D) 16~-16</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">130.【D】</span>在電腦系統中，1個位元組（Byte）由幾個位元（bit）組成？
+                <div class="options">(A) 16個 (B) 10個 (C) 4個 (D) 8個</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">131.【A】</span>若利用8bit來表示整數型態資料，且最左位元0代表正數、1代表負數，負數與正數間互為2的補數，則可表示之範圍為
+                <div class="options">(A) 127~-128 (B) 128~-127 (C) 128~-128 (D) 127~-127</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">132.【A】</span>設A為bit，B為Record，C為Field，D為Character，通常在電腦內所佔空間的大小，由小到大之順序為
+                <div class="options">(A) ADCB (B) ACBD (C) ACDB (D) ABCD</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">133.【B】</span>下列何者不屬於開放原始碼軟體（Open Source Software）？
+                <div class="options">(A) Python (B) C# (C) Android (D) PHP</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">134.【D】</span>下列何者可將高階語言的程式碼轉換成機器碼？
+                <div class="options">(A) 編輯器（Editor） (B) 直譯器（Interpreter） (C) 組譯器（Assembler） (D) 編譯器（Compiler）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">135.【B】</span>下列何者是在某些網頁中插入惡意的HTML與Script語言，藉此散布惡意程式，或是引發惡意攻擊？
+                <div class="options">(A) 網站掛馬攻擊 (B) 跨站腳本攻擊（Cross-Site Scripting, XSS） (C) 阻斷服務攻擊（Denial of Service, DoS） (D) 零時差攻擊（Zero-day Attack）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">136.【B】</span>下列何者是一般用來表示雷射印表機的列印速度？
+                <div class="options">(A) DPI（Dot Per Inch） (B) PPM（Page Per Minute） (C) BPS（Byte Per Second） (D) CPI（Character Per Inch）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">137.【B】</span>一般衡量電腦執行速率，主要是比較下列哪一個單元？
+                <div class="options">(A) 輸入單元 (B) 中央處理單元 (C) 記憶單元 (D) 輸出單元</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">138.【A】</span>IP位址200.200.200.200應該是屬於哪個Class的IP？
+                <div class="options">(A) Class C (B) Class A (C) Class D (D) Class B</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">139.【A】</span>下列各專有名詞對照中，何者錯誤？
+                <div class="options">(A) OA：全球衛星定位系統 (B) EC：電子商務 (C) FA：工廠自動化 (D) SOHO：小型家庭辦公室</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">140.【D】</span>某遊樂場有一「太空船」遊戲設施，只要看著螢幕，就有如親臨現場，相當震撼，這是使用下列何種技術？
+                <div class="options">(A) 感應體溫 (B) 雷射掃描 (C) 眼球虹膜辨識 (D) 虛擬實境</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">141.【C】</span>下列何者是「揮發性」記憶體？
+                <div class="options">(A) flash memory (B) EEPROM (C) DRAM (D) PROM</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">142.【A】</span>下列何種記憶體是利用紫外線光的照射來清除所儲存的資料？
+                <div class="options">(A) EPROM (B) SRAM (C) EEPROM (D) PROM</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">143.【D】</span>PDA、數位相機、隨身碟等消費性電子設備，大多是使用何種儲存媒體？
+                <div class="options">(A) ROM (B) RAM (C) PROM (D) flash memory</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">144.【C】</span>有一台數位相機擁有800萬像素，此處「800萬像素」是指？
+                <div class="options">(A) 內建儲存容量 (B) 記憶卡最大容量 (C) 最大可拍攝的解析度 (D) 照片每一個點的顏色成分</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">145.【A】</span>MP3是下列何種檔案的壓縮格式？
+                <div class="options">(A) 音樂 (B) 圖片 (C) 影片 (D) 文字</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">146.【B】</span>使用透明玻璃纖維材質來傳輸資料，具有體積小、傳輸速度快、訊號不易衰減等特性的傳輸媒介是
+                <div class="options">(A) 雙絞線 (B) 光纖 (C) 同軸電纜 (D) 微波</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">147.【C】</span>每張Ethernet網路卡都編有一個獨一無二的位址，這個位址稱為「MAC（Media Access Control）位址」，MAC位址是以【　　】表示
+                <div class="options">(A) 8Bytes (B) 4Bytes (C) 6Bytes (D) 7Bytes</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">148.【D】</span>某辦公室內有數台電腦，將這些電腦以網路線與集線器（Hub）連接，此種連接方式為
+                <div class="options">(A) 匯流排網路 (B) 環狀網路 (C) 網狀網路 (D) 星狀網路</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">149.【B】</span>ISO所提出的OSI架構共分成幾層？
+                <div class="options">(A) 3 (B) 7 (C) 5 (D) 9</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">150.【B】</span>具有後進先出（Last In Fast Out）的資料結構是
+                <div class="options">(A) 佇列 (B) 堆疊 (C) 樹狀 (D) 串列</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">151.【A】</span>在鐵路局網路訂票系統中的資料處理方式，下列何者不適用？
+                <div class="options">(A) 批次處理 (B) 分散式處理 (C) 交談式處理 (D) 即時處理</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">152.【A】</span>下列檔案中，何者不是圖片檔案格式？
+                <div class="options">(A) test.mdb (B) test.tif (C) test.gif (D) test.bmp</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">153.【D】</span>在Windows作業系統中，以手動方式設定TCP/IP網路連線，設定項目包含IP位址、子網路遮罩及下列何種設備的IP位址？
+                <div class="options">(A) 橋接器（Bridge） (B) 交換器（Switch） (C) 集線器（Hub） (D) 閘道器（Gateway）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">154.【C】</span>一張長2英吋、寬1英吋的照片，若以解析度為200dpi的掃描器掃描進入電腦，該影像的像素為
+                <div class="options">(A) 100000 (B) 120000 (C) 80000 (D) 60000</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">155.【B】</span>螢幕上的像素是由光的三原色組合而成，下列何者不是三原色
+                <div class="options">(A) 紅色 (B) 白色 (C) 綠色 (D) 藍色</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">156.【B】</span>有一份紙本文件經由掃描器轉換影像文件，若要編輯該影像文件的文字部分，應先利用下列何種軟體做辨識？
+                <div class="options">(A) Photoshop (B) OCR (C) MS Word (D) ADC</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">157.【C】</span>「10BaseT乙太網路（Ethernet）」，其中10表示頻寬為多少Mbps？
+                <div class="options">(A) 100 (B) 1 (C) 10 (D) 20</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">158.【A】</span>「八進位數66」等於「二進位數」的
+                <div class="options">(A) 110110 (B) 110011 (C) 011011 (D) 101101</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">159.【B】</span>下列何者不是GIF檔案的特點？
+                <div class="options">(A) 可製成動畫 (B) 具高效率的壓縮比 (C) 可設背景色為透明 (D) 屬於非破壞性壓縮</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">160.【D】</span>電腦中為檢查資料是否正確，常在每筆資料後增加一個核對位元，此位元稱之為同位檢查位元。請問當資料為01101111時，若採偶數同位檢查，則同位檢查位元應為？
+                <div class="options">(A) 101 (B) 1 (C) -1 (D) 0</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">161.【C】</span>EBCDIC碼使用X位元表示一個字元，UTF-16使用Y位元表示一個字元，則X+Y等於？
+                <div class="options">(A) 32 (B) 16 (C) 24 (D) 64</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">162.【C】</span>數位簽章運作流程，不包含下列何者？
+                <div class="options">(A) 用傳送者的公鑰將訊息摘要解密 (B) 利用雜湊函數產生訊息摘要 (C) 用傳送者的公鑰將訊息摘要加密 (D) 比對訊息摘要</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">163.【D】</span>下列敘述何者正確？
+                <div class="options">(A) RSA是對稱式加密演算法 (B) 對稱式加密法是採用不同的金鑰進行加、解密 (C) DES是非對稱式加密演算法 (D) AES是對稱式加密法</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">164.【D】</span>在公開金鑰密碼系統中，A將機密資料傳給B，B應該使用下列何種金鑰來解密？
+                <div class="options">(A) A的公開金鑰 (B) B的公開金鑰 (C) A的私人金鑰 (D) B的私人金鑰</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">165.【C】</span>電子商務之四流，不包含？
+                <div class="options">(A) 金流 (B) 商流 (C) 訂單流 (D) 物流</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">166.【C】</span>下列何種機制可藉由訂閱方式，即時取得他人部落格的最新內容？
+                <div class="options">(A) FTP（File Transfer Protocol） (B) SET（Secure Electronic Transaction） (C) RSS（Really Simple Syndication） (D) CSS（Cascading Style Sheets）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">167.【D】</span>下列網路服務預設的Port Number，何者對應有誤？
+                <div class="options">(A) Telnet:23 (B) FTP:21 (C) HTTP:80 (D) POP3:120</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">168.【C】</span>IPv4將IP分為多少個等級？
+                <div class="options">(A) 6 (B) 4 (C) 5 (D) 7</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">169.【A】</span>行動電話所使用的無線耳機，最常採用下列何種通訊技術？
+                <div class="options">(A) Bluetooth (B) Wi-Fi (C) RFID (D) WiMAX</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">170.【D】</span>通訊軟體LINE屬ISO所規範的OSI架構中的哪一層？
+                <div class="options">(A) 表達層 (B) 會議層 (C) 傳輸層 (D) 應用層</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">171.【C】</span>小明與弟弟共用家中電腦，小明有些個人的文件檔案不希望被弟弟看到，請問小明可將檔案屬性設定為下列何者？
+                <div class="options">(A) 保存 (B) 保密 (C) 隱藏 (D) 唯讀</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">172.【A】</span>行動裝置所使用的記憶體，除了可供讀出與寫入外，在電源關閉後，記憶的資料也不會消失，下列何種記憶體最符合這項需求？
+                <div class="options">(A) 快閃記憶體 (B) 可程式唯讀記憶體 (C) 靜態隨機存取記憶體 (D) 動態隨機存取記憶體</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">173.【D】</span>下列何者數值與其他不同？
+                <div class="options">(A) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/1-173-4.jpg"/> (B) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/1-173-2.jpg"/> (C) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/1-173-1.jpg"/> (D) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/1-173-3.jpg"/></div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">174.【C】</span>對TB（Tera Byte）之敘述，下列何者正確？
+                <div class="options">(A) 1TB=1024 X 1024GB (B) 1TB=1024 X 1024Byte (C) <img alt="" src="https://onlinetest.tw/btest/test2/database/11800/1-174-2.jpg"/> (D) 1TB=10億位元組</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">175.【B】</span>有關勒索病毒的運作原理，下列何者?述錯誤？
+                <div class="options">(A) 勒索者以握有金鑰來進行威脅 (B) 這是屬於破壞性的攻擊手法 (C) 使用非對稱式加密法來達到目的 (D) 被勒索者需要取得解密的金鑰才能解開檔案</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">176.【B】</span>下列何種無線傳輸方式，因成本較低、無固定傳輸方向障礙等優點，廣泛應用於手機、平板電腦、無線耳機等周邊設備的傳輸工作？
+                <div class="options">(A) 微波 (B) 藍牙 (C) 紅外線 (D) 雷射</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">177.【D】</span>下列何者不是QR-Code的特色？
+                <div class="options">(A) 具容錯能力 (B) 能以多種方向掃描 (C) 外表成正方形，角落會有類似「回」字的圖案 (D) 須使用RFID感應器讀取</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">178.【B】</span>下列何種連接埠不支援熱插拔？
+                <div class="options">(A) e-SATA (B) IDE (C) USB (D) IEEE 1394</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">179.【B】</span>有一個程式需要執行個指令，每個指令平均需要20ps來執行，請問這個程式執行的時間約為多少？
+                <div class="options">(A) 20毫秒 (B) 20秒 (C) 200毫秒 (D) 2秒</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">180.【C】</span>若某顯示卡最高支援1024×768全彩顯示，則該顯示卡至少需要多少容量的Video RAM？
+                <div class="options">(A) 2MB (B) 8MB (C) 4MB (D) 16MB</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">181.【A】</span>主機板的SATA插槽是用來連接下列何種裝置？
+                <div class="options">(A) 硬碟 (B) 鍵盤 (C) 顯示卡 (D) 印表機</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">182.【B】</span>十進位的29.5，若以十六進位表示，結果為何？
+                <div class="options">(A) 1D.A (B) 1D.8 (C) 1D.9 (D) 1D.B</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">183.【D】</span>下列何種匯流排決定CPU可支援的最大記憶體空間？
+                <div class="options">(A) 控制匯流排 (B) 資料匯流排 (C) 記憶匯流排 (D) 位址匯流排</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">184.【C】</span>CPU存取下列何種記憶體的速度最快？
+                <div class="options">(A) 快取記憶體（Cache Memory） (B) 輔助記憶體（Auxiliary Memory） (C) 暫存器（Register） (D) 主記憶體（RAM）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">185.【A】</span>CPU執行一個指令的過程為何？
+                <div class="options">(A) 機器週期 (B) 擷取週期 (C) 儲存週期 (D) 執行週期</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">186.【A】</span>下列何種內碼可以支援多國語言？
+                <div class="options">(A) Unicode碼 (B) EBCDIC碼 (C) Binary碼 (D) BIG-5碼</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">187.【C】</span>下列何者用來存放中央處理單元常用的指令或資料？
+                <div class="options">(A) 硬碟 (B) 控制單元 (C) 快取記憶體 (D) 算術邏輯單元</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">188.【D】</span>下列何者為目前電腦晶片發展的主要技術？
+                <div class="options">(A) 真空管 (B) 電晶體 (C) 二極體 (D) 超大型積體電路</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">189.【B】</span>下列何種介面卡可用來將數位資料轉換成類比訊號並傳送至喇叭？
+                <div class="options">(A) 顯示卡 (B) 音效卡 (C) 數據卡 (D) 網路卡</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">190.【D】</span>下列何種單位是用來表示CPU的執行速度？
+                <div class="options">(A) CPS (B) Mbytes (C) LPM (D) GHz</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">191.【B】</span>中央處理單元（CPU）內部的ALU功能為何？
+                <div class="options">(A) 執行資料傳輸 (B) 執行加法、減法及邏輯運算 (C) 執行中斷程式 (D) 執行控制作業</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">192.【B】</span>若某電腦可定址的最大記憶體容量為4GB，則該電腦有幾條位址線？
+                <div class="options">(A) 8 (B) 32 (C) 4 (D) 16</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">193.【D】</span>下列何種記憶體的存取速度最慢？
+                <div class="options">(A) 靜態隨機存取記憶體 (B) 快取記憶體 (C) 暫存器 (D) 動態隨機存取記憶體</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">194.【C】</span>下列何種連接埠可用來為MP3 Player、手機等3C產品充電？
+                <div class="options">(A) DVI (B) RJ-45 (C) USB (D) PS/2</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">195.【D】</span>以ASCII Code儲存字串"Harry Potter"，若不包含雙引號，則共需使用多少位元組之記憶體空間？
+                <div class="options">(A) 11 (B) 13 (C) 10 (D) 12</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">196.【C】</span>若一CPU的規格為AMD AM3 Athlon II X4 640 3.0GHz，則此CPU的核心數為何？
+                <div class="options">(A) 單核心 (B) 六核心 (C) 四核心 (D) 雙核心</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">197.【C】</span>若一硬碟的轉速為5000RPM，則該硬碟旋轉一圈需要幾秒？
+                <div class="options">(A) 0.002 (B) 0.025 (C) 0.012 (D) 0.12</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">198.【C】</span>若CPU可直接存取1GB的記憶體，則該部電腦最少應有幾條位址線？
+                <div class="options">(A) 24 (B) 2 (C) 30 (D) 28</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">199.【C】</span>若某電腦有34條位址線，則此電腦可定址的最大空間為何？
+                <div class="options">(A) 512MB (B) 8GB (C) 16GB (D) 128MB</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">200.【C】</span>若某彩色雷射印表機標示為1200dpi，下列何者正確？
+                <div class="options">(A) 最多可以列印出1200種不同的顏色 (B) 每小時可以列印1200頁A4大小紙張的內容 (C) 每一英吋可以列印1200個點 (D) 每分鐘可以列印1200個英文字元</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">201.【B】</span>十進位數的0.25，以二進位數表示為下列何者？
+                <div class="options">(A) 0.1 (B) 0.01 (C) 0.11 (D) 0.001</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">202.【D】</span>下列何種連接埠支援隨插即用及熱插拔的功能？
+                <div class="options">(A) LPT (B) PS/2 (C) COM (D) USB</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">203.【A】</span>下列何種記憶體需要週期性充電？
+                <div class="options">(A) 動態隨機存取記憶體 (B) 靜態隨機存取記憶體 (C) 唯讀記憶體 (D) 快閃記憶體</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">204.【A】</span>下列何種記憶體具有可重複讀寫及電源關閉時資料仍保留的特性？
+                <div class="options">(A) Flash Memory (B) PROM (C) SRAM (D) DRAM</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">205.【B】</span>BIOS儲存在下列何種記憶體中？
+                <div class="options">(A) 隨機存取記憶體 (B) 唯讀記憶體 (C) 輔助記憶體 (D) 快取記憶體</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">206.【B】</span>下列何者為快取記憶體（Cache Memory）的主要功能？
+                <div class="options">(A) 可以降低主記憶體的成本 (B) 可以增進程式的整體執行速度 (C) 作為輔助記憶體 (D) 可以減少輔助記憶體的空間需求</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">207.【D】</span>若某桌上型電腦的CPU規格為Intel Core 2 Duo E6700 2.67GHz，則2.67是表示CPU的何種規格？
+                <div class="options">(A) 出廠序號 (B) 內部記憶體容量 (C) 電源電壓 (D) 時脈頻率</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">208.【C】</span>CPU可從下列何者找到下一個要執行的指令之所在位址？
+                <div class="options">(A) 位址暫存器（MAR） (B) 旗標暫存器（FR） (C) 程式計數器（PC） (D) 指令暫存器（IR）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">209.【A】</span>下列何種惡意程式是具有感染其他檔案的特性？
+                <div class="options">(A) 電腦病毒 (B) 後門程式 (C) 電腦蠕蟲 (D) 特洛伊木馬</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">210.【D】</span>下列何者十進位數值為兩個二進位數值101.01及111.11相加的結果？
+                <div class="options">(A) 13.75 (B) 12 (C) 12.5 (D) 13</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">211.【C】</span>下列何者不是主機板的I/O連接埠？
+                <div class="options">(A) PS/2 (B) DVI (C) CPU (D) USB</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">212.【C】</span>某廠商推出64位元CPU，該64位元所代表的意義為何？
+                <div class="options">(A) CPU的工作頻率 (B) 可定址的主記憶體容量 (C) CPU的字組長度 (D) L1快取記憶體的位元數</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">213.【C】</span>關於免費軟體（freeware）之敘述，下列何者錯誤？
+                <div class="options">(A) 部分軟體會在程式中鑲入廣告 (B) 仍受著作權保護 (C) 免費軟體一定安全 (D) 部分軟體發布者希望能獲得自願性資助</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">214.【B】</span>HomeRF無線網路規範家庭設備與藍芽（Bluetooth）是在下列何種頻段上通訊？
+                <div class="options">(A) 25MHz (B) 2.4GHz (C) 100MHz (D) 1GHz</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">215.【C】</span>小英使用手機利用業者服務，想找出距離自己100公尺內的停車場，這種應用屬於下列何者？
+                <div class="options">(A) 無線傳銷 (B) 行動推播 (C) 行動定位 (D) 無線接取</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">216.【B】</span>下列何者不是QR Code主要的應用面？
+                <div class="options">(A) 下載商家折價卷 (B) 將機密資訊加密 (C) 自動取得網站上的推銷資訊 (D) 將數位內容下載至手機</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">217.【B】</span>IPv6是以何者方式來表示其位址？
+                <div class="options">(A) 32個8進位 (B) 32個16進位 (C) 32個10進位 (D) 16個16進位</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">218.【C】</span>具有第四代行動通訊技術標準（4G）的行動裝置，使用者在高速移動狀態下傳輸速率可達多少bps？
+                <div class="options">(A) 200M (B) 600M (C) 100M (D) 400M</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">219.【C】</span>要測試電腦本機網路卡是否正常，可執行下列何種指令測試？
+                <div class="options">(A) ping 245.0.0.1 (B) ping 126.0.0.1 (C) ping 127.0.0.1 (D) ping 255.0.0.1</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">220.【A】</span>電腦傳輸介面USB 3.0的最高傳輸速度規格是USB 2.0的幾倍？
+                <div class="options">(A) 10 (B) 2 (C) 8 (D) 20</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">221.【B】</span>個人電腦的插孔顏色，依PC99規格書建議，「麥克風插孔」是何種顏色？
+                <div class="options">(A) 黃色 (B) 粉紅色 (C) 青綠色 (D) 淺藍色</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">222.【A】</span>觸控螢幕屬電腦四大單元中何者？
+                <div class="options">(A) 輸出/輸入單元 (B) 控制單元 (C) 記憶單元 (D) 算術邏輯單元</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">223.【C】</span>有關大數據（Big Data）之敘述，下列何者正確？
+                <div class="options">(A) 不需考慮資料來源的合法性 (B) 皆為結構化資料，不會有非結構化資料 (C) 具大量、高速、多變等特性 (D) 不包含影片及電子郵件等資料</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">224.【B】</span>進行大數據（Big Data）分析時，通常應該使用多少資料來分析？
+                <div class="options">(A) 最近儲存時間的30%資料 (B) 盡量使用全部資料 (C) 單筆資料量較大的前30%資料 (D) 變化量較快的30%資料</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">225.【B】</span>有關Hadoop之敘述，下列何者正確？
+                <div class="options">(A) MapReduce是分散式檔案系統 (B) Sqoop支援關聯式資料庫與Hadoop之間的資料轉換 (C) HBase是關聯式資料庫 (D) HDFS是循序運算框架</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">226.【A】</span>預設情況下，Hadoop的分散式檔案系統（HDFS）會將資料檔案分割後的每個小塊複製成幾份複本（replica）？
+                <div class="options">(A) 3 (B) 5 (C) 2 (D) 4</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">227.【A】</span>關於Apache Spark運作之敘述，下列何者正確？
+                <div class="options">(A) 能將資料加載至叢集記憶體內，並可多次對其進行查詢 (B) 程式只能在記憶體內做運算 (C) 程式只能在磁碟內做運算 (D) 非常不適合用於機器學習演算法</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">228.【D】</span>下列何者是Hadoop3.0內建的資料庫？
+                <div class="options">(A) Neo4j (B) CouchDB (C) FlockDB (D) HBase</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">229.【A】</span>有關HBase資料庫之敘述，下列何者正確？
+                <div class="options">(A) 可執行於HDFS檔案系統之上 (B) 屬於關聯式資料庫的一種 (C) 沒有開放程式碼 (D) 只可透過SQL來存取資料</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">230.【D】</span>大數據（Big Data）的3Vs中，與資料輸出入速度有關的是何者？
+                <div class="options">(A) Variety (B) Veracity (C) Volume (D) Velocity</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">231.【D】</span>大數據（Big Data）資料來源種類包羅萬象，最簡單分類為結構化與非結構化。非結構化資料從早期的文字資料類型，已擴展到網路影片、視訊、音樂、圖片等，複雜的非結構化資料類型造成儲存、探勘、分析的困難。這樣的特性指的是？
+                <div class="options">(A) Value (B) Velocity (C) Volume (D) Variety</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">232.【D】</span>大數據（Big Data）分析中的”大量數據”，指的是哪個特性？
+                <div class="options">(A) Veracity (B) Velocity (C) Variety (D) Volume</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">233.【A】</span>大數據（Big Data）分析的標的來源為何？
+                <div class="options">(A) 原始數據（Raw Data） (B) 隨機取夠多樣本即可 (C) 分類取樣本 (D) 依據統計理論取樣本</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">234.【A】</span>大數據（Big Data）對於即時性的資料可以快速加入分析，這特性指的是？
+                <div class="options">(A) Velocity (B) Volume (C) Veracity (D) Variety</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">235.【B】</span>大數據（Big Data）分析方式中，最能夠直觀呈現大數據特點的方法是？
+                <div class="options">(A) 預測性分析（Predictive Analysis） (B) 可視化分析（Visibility Analysis） (C) 資料管理分析（Data Management Analysis） (D) 資料探勘（Data Mining）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">236.【C】</span>大數據（Big Data）分析因為採用原始數據（Raw Data）處理，常常會發現以前因為科技所限制而忽略的資料，這類資料稱為
+                <div class="options">(A) 交互式資料（Interaction data） (B) 千兆級資料（Peta data） (C) 暗資料（Dark data） (D) 灰色資料（Gray data）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">237.【D】</span>常用於大數據（Big Data）分析工具Hadoop中的MapReduce架構主要是執行哪一項功能？
+                <div class="options">(A) 互動（Interaction） (B) 儲存（Store） (C) 叢集（Cluster） (D) 運算處理（Process）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">238.【B】</span>大數據（Big Data）分析技術中，常使用NoSQL資料庫，下列哪一個是屬於NoSQL資料庫軟體？
+                <div class="options">(A) MariaDB (B) MongoDB (C) Sybase (D) PostgreSQL</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">239.【C】</span>對於適用大數據分析的叢集運算框架Apache Spark專案中，下列哪項組件是專做分散式機器學習的？
+                <div class="options">(A) Spark SQL (B) GraphX (C) Spark MLlib (D) Spark Streaming</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">240.【C】</span>下列何者程式語言支援Apache Spark叢集運算框架？
+                <div class="options">(A) FORTRAN (B) Auto ISP (C) Python (D) prolog</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">241.【D】</span>下列何者是iPhone所使用的作業系統？
+                <div class="options">(A) Windows (B) Android (C) Unix (D) iOS</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">242.【A】</span>下列何者是開放手機聯盟（Open Handset Alliance）所領導與開發的智慧裝置作業系統？
+                <div class="options">(A) Android (B) Linux (C) Windows (D) Unix</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">243.【C】</span>下列何者可以讓智慧裝置透過人造衛星來完成持有者位置的定位？
+                <div class="options">(A) 加速計 (B) 氣壓計 (C) GPS晶片 (D) 陀螺儀</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">244.【B】</span>智慧裝置透過Google Maps之類的電子地圖服務，將地址轉換成為經度與緯度的過程稱之為何？
+                <div class="options">(A) Reverse geocoding (B) Geocoding (C) Searching (D) Finding</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">245.【C】</span>智慧裝置透過Google Maps之類的電子地圖服務，將經度與緯度轉換成為地址的過程稱之為何？
+                <div class="options">(A) Geocoding (B) Searching (C) Reverse geocoding (D) Finding</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">246.【D】</span>開發智慧手機程式時，若希望先在個人電腦上做程式的測試，而非直接使用智慧型手機來做測試，那麼應該在個人電腦中安裝何者？
+                <div class="options">(A) 手機韌體 (B) 手機驅動程式 (C) 手機同步軟體 (D) 手機模擬器</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">247.【A】</span>MIT App Inventor 2.0中，可以使用下列何種方塊來讀取變數的值？
+                <div class="options">(A) get (B) while (C) initialize global name to (D) set to</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">248.【A】</span>MIT App Inventor 2.0中，可以使用下列何種方塊來建立整體變數？
+                <div class="options">(A) initialize global name to (B) get (C) while (D) set to</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">249.【C】</span>MIT App Inventor 2.0中，若希望透過數值變數之初始值、結束值，以及增加值的指定來完成某些方塊的多次執行，應該使用下列何種方塊？
+                <div class="options">(A) set to (B) get (C) for each from to (D) do</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">250.【C】</span>對於車載通訊發展之敘述，下列何者正確？
+                <div class="options">(A) 車載通訊只運用於車輛內裝之科技通訊技術 (B) 提供定時批次（batch）資訊以增進運輸系統的安全、效率及舒適性 (C) 應用電子、通信、資訊與感測等技術，以整合人、路、車的管理策略 (D) 車載通訊用越多將致使交通越惡化</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">251.【C】</span>對於Bank 4.0帶來的轉變，下列敘述何者正確？
+                <div class="options">(A) 全面撤除傳統線下（offline）實體交易服務 (B) 提供更多服務人員處理銀行收付服務 (C) 大量運用大數據來分析顧客需求 (D) 須增設更多實體人工櫃台</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">252.【A】</span>下列何者是Web 3.0與Web 2.0的差異？
+                <div class="options">(A) 語意解析服務 (B) 社群互動服務 (C) 分享內容服務 (D) 入口網站</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">253.【D】</span>Web 2.0與Web 3.0的比較，下列何者正確？
+                <div class="options">(A) Web 2.0分析使用者行為，Web 3.0則以標籤、關鍵字分類 (B) Web 2.0強調個人的網路世界，Web 3.0則強調讀寫互動 (C) Web 2.0發展分享內容，Web 3.0則發展靜態內容 (D) Web 2.0發展部落格網路，Web 3.0則發展語意化的網路</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">254.【A】</span>有關智慧交通之敘述，下列何者正確？
+                <div class="options">(A) 可以運用感測器與攝影機來即時分析路況 (B) 未經使用者許可之下，仍蒐集行車裝置紀錄來分析路況 (C) 運用智慧交通誘導方式無法降低塞車機率 (D) 運用車間通訊的主要目標是拉遠車輛間的距離</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">255.【C】</span>IBM於2009年提出下列何種概念，可視為物聯網的雛型？
+                <div class="options">(A) 行動地球 (B) 智慧城市 (C) 智慧地球 (D) 感知城市</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">256.【B】</span>有關物聯網之敘述，下列何者正確？
+                <div class="options">(A) 網路層主流關鍵技術包含雲端運算、巨量資料分析、資料探勘、商業智慧（BI） (B) 物聯網可賦予智慧給物件，並擁有與其他物件或人溝通的能力 (C) 透過物聯網蒐集的少量資訊也能發揮顯著價值 (D) 物聯網的英文名稱為Interconnection of Things（IoT）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">257.【D】</span>主動式標籤的特性為何？
+                <div class="options">(A) 主動回傳資料至讀取器是採用散射技術 (B) 不會回傳資料至讀取器只能由讀取器自行讀取 (C) 不需要電源就可主動回傳資料至讀取器 (D) 通常需要裝配電池才可回傳資料至讀取器</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">258.【A】</span>ZigBee在媒體存取層與實體層是採用下列何種標準協定？
+                <div class="options">(A) IEEE 802.15.4 (B) IEEE 802.20 (C) IEEE 802.11n (D) IEEE 802.3</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">259.【B】</span>下列何者屬於智慧交通的一環？
+                <div class="options">(A) 汽車防竊裝置 (B) 智慧型號誌控制系統 (C) 測速照相裝置 (D) 物流管理系統</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">260.【A】</span>下列何者是智慧電網所設計的目的？
+                <div class="options">(A) 管理使用端電量 (B) 提高電價 (C) 提供無線上網 (D) 提高核能發電量</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">261.【A】</span>悠遊卡使用下列何種感測技術？
+                <div class="options">(A) RFID (B) GPS (C) Bluetooth (D) Wi-Fi</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">262.【B】</span>智慧型手機使用下列何種感測器偵測方向及速度？
+                <div class="options">(A) 超音波 (B) 三軸加速計 (C) 無線射頻 (D) 紅外線</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">263.【A】</span>歐洲電信標準協會（ETSI）將物聯網分為哪三個階層？
+                <div class="options">(A) 感知層、網路層、應用層 (B) 感知層、網路層、連結層 (C) 感知層、傳輸層、應用層 (D) 連結層、網路層、應用層</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">264.【A】</span>下列何者為物聯網的英文名稱？
+                <div class="options">(A) Internet of Things (B) Interconnection of Things (C) Interconnection of Telecommunications (D) Internet of Telecommunications</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">265.【A】</span>有關物聯網之敘述，下列何者正確？
+                <div class="options">(A) 每個物件要有可獨立定址的網路位址，以互聯互通 (B) 無須具備自我組織的能力 (C) IPv4可以滿足物聯網的所有技術需求 (D) 只能透過無線網路傳輸訊息</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">266.【C】</span>下列廠商何者最早提出物聯網的概念？
+                <div class="options">(A) Google (B) HP (C) IBM (D) Microsoft</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">267.【B】</span>有關物聯網之應用層的敘述，下列何者正確？
+                <div class="options">(A) 可用於感測溫溼度 (B) 可提供智慧生活的應用 (C) 負責將感測的資訊傳到雲端 (D) 提供物與物之間的訊號傳輸</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">268.【A】</span>下列何者為物聯網之感知層的技術？
+                <div class="options">(A) 無線射頻識別 (B) VoIP網路 (C) 條碼資訊傳播架構 (D) IP網路</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">269.【D】</span>下列何者為台灣政府推動的物聯網相關計畫？
+                <div class="options">(A) E-Taiwan (B) N-Taiwan (C) A-Taiwan (D) U-Taiwan</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">270.【B】</span>下列何項資安威脅就是以密碼鎖住硬碟資料，讓使用者無法使用該資料？
+                <div class="options">(A) 網路釣魚 (B) 勒索軟體 (C) DDOS攻擊 (D) XSS攻擊</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">271.【B】</span>關於資訊安全之敘述，下列何者正確？
+                <div class="options">(A) 只要電腦安裝防毒軟體，就符合資訊安全 (B) 資訊安全是管理議題，技術層面為輔助性議題 (C) 資訊安全是資訊人員的事情，其他人不用理會 (D) 資訊安全主要議題就是防毒軟體的選用</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">272.【B】</span>如何判斷這個資訊安不安全，從High Level角度可以以何者來判斷？
+                <div class="options">(A) 防毒軟體的評價 (B) CIA Triad (C) 資訊機密性強度 (D) 防火牆強度</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">273.【B】</span>資訊安全三要素CIA，其中C指的是？
+                <div class="options">(A) 可鑑別性 (B) 機密性 (C) 可用性 (D) 完整性</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">274.【B】</span>資訊安全三要素CIA，其中I指的是？
+                <div class="options">(A) 機密性 (B) 完整性 (C) 可用性 (D) 不可否認性</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">275.【A】</span>資訊安全三要素CIA，其中A指的是？
+                <div class="options">(A) 可用性 (B) 機密性 (C) 完整性 (D) 存取權控制</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">276.【A】</span>在資訊安全中，個人資料被揭露（disclosure），是破壞資訊安全CIA中的哪一個要素？
+                <div class="options">(A) 機密性 (B) 完整性 (C) 可用性 (D) 存取權控制</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">277.【B】</span>在資訊安全中，個人資料被破壞（destruction），是破壞資訊安全CIA中的哪一個要素？
+                <div class="options">(A) 機密性 (B) 可用性 (C) 可鑑別性 (D) 完整性</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">278.【B】</span>關於3A認證協定，下列何項協定是目前使用率最高的協定？
+                <div class="options">(A) TACACS＋ (B) RADIUS (C) TACACS (D) HWTACACS</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">279.【B】</span>關於3A認證協定，下列何項協定採用UDP網路協定？
+                <div class="options">(A) TACACS (B) RADIUS (C) TACACS＋ (D) HWTACACS</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">280.【A】</span>下列何項技術可有效阻擋跨網站腳本XSS（Cross-Site Scripting）的攻擊？
+                <div class="options">(A) 網頁內容安全政策CSP（Content Security Policy）規範 (B) 禁用cookies (C) 運用cookies資料判斷網站安全性 (D) 只允許POST機制</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">281.【B】</span>在資訊安全中，個人資料被竄改（alteration），是破壞資訊安全CIA中的何項要素？
+                <div class="options">(A) 機密性 (B) 完整性 (C) 不可否認性 (D) 可用性</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">282.【C】</span>對於公司而言，任何機密資訊未經授權前都無法被看到，是符合資訊安全CIA中的何項要素？
+                <div class="options">(A) 完整性 (B) 可鑑別性 (C) 機密性 (D) 可用性</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">283.【D】</span>下列何項攻擊是利用簡訊吸引受害者按下進入假網站？
+                <div class="options">(A) 網路捕鯨（Whaling） (B) 魚叉式網路釣魚（Spear phishing） (C) 複製型釣魚攻擊（Clone phishing） (D) 網路釣魚簡訊和網路釣魚電話（Smishing and vishing）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">284.【C】</span>駭客偽造大量正常連接主機的用戶IP，並發送錯誤數據，迫使主機斷開與這些IP的連接，導致擁有這些IP的用戶無法正常訪問主機。這類型攻擊稱為？
+                <div class="options">(A) Reflection attack (B) Information Explosion (C) IP Spoofing (D) DoS</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">285.【D】</span>駭客發送大量帶有被害者IP地址的數據包給攻擊主機，導致被攻擊主機對IP地址源做出大量回應，造成拒絕服務。這類型攻擊稱為？
+                <div class="options">(A) IP Spoofing (B) XSS (C) SQL injection (D) DRDoS</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">286.【B】</span>在資訊安全中，對一已發生之行動或事件的證明，使該行動或事件往後不能被否認的能力，是屬於下列何種特性？
+                <div class="options">(A) Authentication（鑑別性） (B) Non-repudiation（不可否認性） (C) Access Control（存取權限控制） (D) Confidentiality（機密性）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">287.【C】</span>下列何種攻擊方式是採用TCP三向交（Three Way Handshake）的漏洞進行攻擊的？
+                <div class="options">(A) SQL injection (B) Phishing (C) DDoS (D) XSS</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">288.【C】</span>對於公司而言，應該要確保資料不被未授權的人修改，以及確保資料處理的過程是安全且合規的是符合資訊安全CIA中的何種要素？
+                <div class="options">(A) 可用性 (B) 機密性 (C) 完整性 (D) 不可否認性</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">289.【A】</span>下列何項攻擊是駭客透過修改SQL語句，改變語意，達成竊取或破壞資料的行為？
+                <div class="options">(A) SQL injection (B) DDoS (C) Phishing (D) XSS</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">290.【D】</span>對於公司而言，資料已經取得授權可以即時且不間斷讀取或使用資料，是符合資訊安全CIA中的何種要素？
+                <div class="options">(A) 完整性 (B) 存取權控制 (C) 機密性 (D) 可用性</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">291.【A】</span>對於用戶安全常使用3A認證，下列何項不包含在3A技術中？
+                <div class="options">(A) Audit (B) Authorization (C) Accounting (D) Authentication</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">292.【A】</span>主動式DDoS緩解服務與MDR威脅偵測應變服務是為解決資訊安全五大威脅的何項威脅？
+                <div class="options">(A) 網路安全 (B) 應用程式安全 (C) 雲端運算安全 (D) 系統安全</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">293.【B】</span>找尋專業可靠的公有雲服務、自建雲服務或建立混合雲服務是為解決資訊安全五大威脅的何項威脅？
+                <div class="options">(A) 網路安全 (B) 雲端運算安全 (C) 系統安全 (D) 應用程式安全</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">294.【C】</span>下列何項資安技術是運用防火牆加強資訊安全？
+                <div class="options">(A) 隱藏 (B) 密碼學 (C) 存取控制 (D) 系統癱瘓</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">295.【B】</span>下列何項技術不屬於資安技術？
+                <div class="options">(A) 存取控制 (B) 系統癱瘓 (C) 隱藏 (D) 密碼學</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">296.【B】</span>在網站中，攻擊者通過引導已認證的用戶執行未經授權的更改用戶帳戶設置或修改數據操作。這樣的攻擊是屬於下列何項？
+                <div class="options">(A) 分散式阻斷服務攻擊（DDoS,Distributed Denial of Service） (B) 跨站請求偽造（CSRF,Cross-Site Request Forgery） (C) 點擊劫持Clickjacking） (D) 跨站腳本攻擊（XSS,Cross-Site Scripting）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">297.【C】</span>下列何種攻擊是以簡訊通知優惠，並提供假網站連結騙取網站的帳密？
+                <div class="options">(A) XSS (B) DDoS (C) Phishing (D) SQL injection</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">298.【B】</span>數位浮水印是採用下列何項資安技術？
+                <div class="options">(A) 存取控制 (B) 隱藏 (C) 密碼學 (D) 系統癱瘓</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">299.【A】</span>下列何者是解決DoS攻擊的根本作法？
+                <div class="options">(A) 查清楚攻擊網站網址，拒絕該網站提出的連線需求 (B) 關閉被攻擊網站 (C) 不用管，時間久了就會恢復正常 (D) 停機一段時間再開機就好了</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">300.【B】</span>下列何項攻擊是利用iframe、frame、XMLHttpRequest等方式，以使用者身分執行管理、加好友或發私信等操作？
+                <div class="options">(A) SQL Injection攻擊 (B) XSS攻擊 (C) DDOS攻擊 (D) 零時差攻擊</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">301.【B】</span>下列何項不是網路使用者最擔心的資安問題？
+                <div class="options">(A) 個資外流 (B) 電腦電池無法使用 (C) 病毒入侵 (D) 病毒碼過期</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">302.【D】</span>區塊鏈的公開帳本無法解決下列何項資訊安全問題？
+                <div class="options">(A) 不可變性 (B) 去中心化 (C) 透明性 (D) 勒索攻擊</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">303.【A】</span>區塊鏈的上鏈動作是採用下列何項資安技術？
+                <div class="options">(A) 密碼學 (B) 系統癱瘓 (C) 隱藏 (D) 存取控制</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">304.【A】</span>數位簽章是採用下列何項資安技術？
+                <div class="options">(A) 密碼學 (B) 存取控制 (C) 隱藏 (D) 系統癱瘓</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">305.【D】</span>勒索軟體的攻擊是運用下列何項資安技術？
+                <div class="options">(A) 存取控制 (B) 零知識證明 (C) 隱藏 (D) 密碼學</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">306.【C】</span>若小新想在手機中研發有關銀髮族居家跌倒偵測的APP，則小新的手機須具備下列何種感測器？
+                <div class="options">(A) 近場通訊模組 (B) 高度計 (C) 陀螺儀 (D) 紅外線感測器</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">307.【D】</span>若小明想建置一台可接5顆硬碟的主機，則採用下列何種介面最適合？
+                <div class="options">(A) AT BUS (B) ESDI (C) IDE (D) SCSI</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">308.【D】</span>下列何種類型的記憶體或儲存裝置會因為電源中斷而流失資料？
+                <div class="options">(A) 光碟 (B) 硬碟 (C) 唯讀記憶體（ROM） (D) 隨機存取記憶體（RAM）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">309.【A】</span>下列何種雲端服務架構提供使用者一個開發或執行應用軟體的服務，包括作業系統、程式語言的執行環境、資料庫及網頁伺服器等？
+                <div class="options">(A) PaaS（Platform as a Service） (B) IaaS（Infrastructure as a Service） (C) SaaS（Service as a Service） (D) HaaS（Hardware as a Service）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">310.【D】</span>若檔案儲存在硬碟的不連續磁區上，為提升硬碟的讀取效能，則應定期執行下列何者？
+                <div class="options">(A) 磁碟清理程式 (B) 磁碟掃瞄程式 (C) 磁碟壓縮程式 (D) 磁碟重組程式</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">311.【C】</span>小新的手機儲存空間為4GB，若每一個視訊檔案大小都為300MB，則他的手機最多可以儲存多少個視訊檔案？
+                <div class="options">(A) 19 (B) 14 (C) 13 (D) 12</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">312.【C】</span>有關電腦常用單位之敘述，下列何者錯誤？
+                <div class="options">(A) bit為電腦處理的最小單位 (B) RPM為硬碟轉速的單位 (C) MIPS為印表機列印速度的單位 (D) DPI為螢幕解析度的單位</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">313.【C】</span>電腦硬體結構可分為五大單元，下列何者負責指令解碼的任務？
+                <div class="options">(A) 算術邏輯單元 (B) 輸入單元 (C) 控制單元 (D) 記憶單元</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">314.【B】</span>下列何種介面不支援熱插拔（hot swapping）的功能？
+                <div class="options">(A) IEEE 1394 (B) IDE (C) SCSI (D) USB</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">315.【D】</span>下列何種記憶體存取資料的速度最快？
+                <div class="options">(A) 動態隨機存取記憶體 (B) 可程式唯讀記憶體 (C) 虛擬記憶體 (D) 快取記憶體</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">316.【B】</span>Apple Pay行動支付是使用下列何種技術？
+                <div class="options">(A) ZigBee (B) NFC (C) Bluetooth (D) GPS</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">317.【D】</span>比特幣（Bitcoin）及以太幣（Ether）主要是使用下列何種技術？
+                <div class="options">(A) AR (B) IoT (C) AI (D) Blockchain</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">318.【A】</span>CPU執行一個指令的過程稱為？
+                <div class="options">(A) 機器週期（machine cycle） (B) 擷取週期（fetching cycle） (C) 執行週期（execution cycle） (D) 運算週期（computing cycle）</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">319.【C】</span>CPU執行抓取資料時，讀取記憶體的先後順序？
+                <div class="options">(A) 主記憶體、快取記憶體、輔助記憶體 (B) 快取記憶體、輔助記憶體、主記憶體 (C) 快取記憶體、主記憶體、輔助記憶體 (D) 主記憶體、輔助記憶體、快取記憶體</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">320.【D】</span>若消費者使用外送服務APP訂購餐點，外送員到店家領取餐點再送到指定地址，則此種電子商務模式為？
+                <div class="options">(A) P2P (B) B2B (C) P2O (D) O2O</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">321.【A】</span>下列何者資料儲存量最大？
+                <div class="options">(A) 10TB (B) 220MB (C) 230KB (D) 210GB</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">322.【B】</span>下列何者不屬於物聯網的階層架構？
+                <div class="options">(A) 網路層 (B) 實體層 (C) 感知層 (D) 應用層</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">323.【B】</span>下列何者為高速公路計費系統eTag所使用的技術？
+                <div class="options">(A) Bluetooth (B) RFID (C) ZigBee (D) Wi-Fi</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">324.【C】</span>若某台個人電腦是64位元，則其每一個字組（word）用幾個Byte表示？
+                <div class="options">(A) 2 (B) 4 (C) 8 (D) 64</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">325.【C】</span>有關記憶體之敘述，下列何者正確？
+                <div class="options">(A) DRAM主要用作快取記憶體（Cache Memory） (B) 電腦使用者可在ROM讀取及寫入資料 (C) SRAM存取資料的速度比DRAM快 (D) 當關閉電腦電源時，DRAM的資料不會隨之消失</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">326.【D】</span>小明手機簡訊有中獎領取的網址連結，若點入此連結會洩漏輸入的帳號密碼，則此種詐騙手法屬於下列何者？
+                <div class="options">(A) 殭屍網路 (B) 字典攻擊 (C) 阻絕服務 (D) 網路釣魚</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">327.【C】</span>下列何種作業系統屬於開放原始碼？
+                <div class="options">(A) Mac OS (B) Windows (C) Andriod (D) iOS</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">328.【B】</span>電腦使用下列何種連接埠連接顯示器時，無需額外使用音源線連接螢幕，即可同時傳送聲音？
+                <div class="options">(A) USB (B) HDMI (C) D-Sub (D) DVI</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">329.【D】</span>下列何種網路通訊協定能夠自動分配IP位址？
+                <div class="options">(A) FTP (B) SMTP (C) DNS (D) DHCP</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">330.【D】</span>若某一CPU的工作頻率為100MHz，且執行某一個指令需要2個時脈週期，則此CPU的執行速度為多少MIPS？
+                <div class="options">(A) 100 (B) 2 (C) 200 (D) 50</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">331.【A】</span>下列何者為甲＝（1E）16、乙＝（72）8、丙＝（11111）2三個數值的大小關係？
+                <div class="options">(A) 乙＞丙＞甲 (B) 甲＞乙＞丙 (C) 乙＞甲＞丙 (D) 甲＝乙＝丙</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">332.【A】</span>下列何者不是電腦病毒的傳播途徑？
+                <div class="options">(A) 唯讀記憶體（ROM） (B) 隨身碟 (C) 電子郵件 (D) 社群軟體</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">333.【A】</span>一張點陣圖的影像大小為800*1200像素，若要列印為4英吋6英吋的照片，則此張影像的列印解析度應設定為多少像素/英吋？
+                <div class="options">(A) 200 (B) 800 (C) 400 (D) 100</div>
+            </div>
+        
+            <div class="q-block">
+                <span class="q-header">334.【A】</span>CPU的組成不包含下列何者？
+                <div class="options">(A) 輔助記憶體 (B) 暫存器 (C) 控制單元 (D) 時脈</div>
+            </div>
+        </div></body></html>

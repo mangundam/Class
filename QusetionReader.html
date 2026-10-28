@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>丙級電腦軟體應用術科 圖片閱讀器</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: row; /* 改為左右排列 */
+            height: 100vh;
+            box-sizing: border-box;
+            background-color: #f4f6f8;
+            overflow: hidden;
+        }
+        
+        /* 左側選單欄 */
+        .sidebar {
+            width: 260px;
+            background: white;
+            padding: 20px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .control-group > span {
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+            border-left: 4px solid #007bff;
+            padding-left: 8px;
+            margin-bottom: 5px;
+        }
+
+        /* 題組按鈕使用雙排網格排列節省空間 */
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        
+        /* 項目按鈕垂直排列 */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        button {
+            padding: 10px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+        }
+        
+        button.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #0056b3;
+            font-weight: bold;
+        }
+
+        .nav-btn {
+            background-color: #28a745;
+            color: white;
+            border-color: #218838;
+            font-weight: bold;
+            flex: 1;
+        }
+        
+        .nav-btn:hover {
+            background-color: #218838;
+        }
+
+        .page-indicator {
+            text-align: center;
+            font-weight: bold;
+            color: #007bff;
+            background: #e7f1ff;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        /* 右側圖片展示區 */
+        .page-container {
+            display: flex;
+            flex: 1;
+            padding: 15px;
+            gap: 15px;
+            min-width: 0;
+        }
+        
+        .page-viewer {
+            flex: 1;
+            background: white;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .page-viewer img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* 保持圖片比例並完整顯示 */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 左側選單列 -->
+    <div class="sidebar">
+        <!-- 頁碼狀態 -->
+        <div class="control-group">
+            <div class="page-indicator" id="page-indicator">目前顯示頁碼<br>20 / 21</div>
+        </div>
+
+        <!-- 手動翻頁 -->
+        <div class="control-group">
+            <span>手動翻頁</span>
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="changePage(-1)">◀ 上一頁</button>
+                <button class="nav-btn" onclick="changePage(1)">下一頁 ▶</button>
+            </div>
+        </div>
+
+        <!-- 選擇項目 -->
+        <div class="control-group">
+            <span>選擇項目</span>
+            <div class="task-list" id="task-buttons">
+                <!-- 項目按鈕由 JS 產生 -->
+            </div>
+        </div>
+
+        <!-- 選擇題組 -->
+        <div class="control-group">
+            <span>選擇題組</span>
+            <div class="button-grid" id="group-buttons">
+                <!-- 題組按鈕由 JS 產生 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 右側滿版圖片區 -->
+    <div class="page-container">
+        <div class="page-viewer">
+            <img id="img-left" src="" alt="左頁">
+        </div>
+        <div class="page-viewer">
+            <img id="img-right" src="" alt="右頁">
+        </div>
+    </div>
+
+    <script>
+        // 設定資料夾與檔案名稱規則 (包含兩個空白)
+        const folderName = "11800  電腦軟體應用術科_images";
+        const filePrefix = "11800  電腦軟體應用術科_";
+        const fileExtension = ".webp";
+        
+        // 題組起始頁碼基準
+        const basePages = {
+            '題目1': 20,
+            '題目2': 22,
+            '目錄製作': 25,
+            '合併列印': 28,
+            '文書處理': 30
+        };
+
+        const tasks = Object.keys(basePages);
+        let currentGroup = 1;
+        let currentTask = '題目1';
+        let currentPage = 20;
+
+        function updateView() {
+            // 更新左右圖片的 src
+            const leftImg = document.getElementById('img-left');
+            const rightImg = document.getElementById('img-right');
+            
+            leftImg.src = `${folderName}/${filePrefix}${currentPage}${fileExtension}`;
+            rightImg.src = `${folderName}/${filePrefix}${currentPage + 1}${fileExtension}`;
+            
+            // 更新頁碼文字顯示
+            document.getElementById('page-indicator').innerHTML = `第 <span style="font-size:18px">${currentPage}</span> 頁 / 第 <span style="font-size:18px">${currentPage + 1}</span> 頁`;
+
+            // 更新左側按鈕的活躍狀態
+            document.querySelectorAll('#group-buttons button').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx + 1 === currentGroup);
+            });
+            document.querySelectorAll('#task-buttons button').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === currentTask);
+            });
+        }
+
+        // 點擊「題組」或「項目」時的跳轉邏輯
+        function jumpToTask(group, task) {
+            currentGroup = group;
+            currentTask = task;
+            // 計算公式：基準頁碼 + (題組 - 1) * 13
+            currentPage = basePages[task] + (group - 1) * 13;
+            updateView();
+        }
+
+        // 手動翻頁邏輯 (每次增減 1 頁)
+        function changePage(offset) {
+            currentPage += offset;
+            if (currentPage < 1) currentPage = 1; // 防止頁碼變成負數或 0
+            updateView();
+        }
+
+        // 動態生成題組 1~15 的按鈕 (配置在網格中)
+        const groupContainer = document.getElementById('group-buttons');
+        for (let i = 1; i <= 15; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = `題組 ${i}`;
+            btn.onclick = () => jumpToTask(i, currentTask);
+            groupContainer.appendChild(btn);
+        }
+
+        // 動態生成任務項目的按鈕 (配置在垂直列表中)
+        const taskContainer = document.getElementById('task-buttons');
+        tasks.forEach(task => {
+            const btn = document.createElement('button');
+            btn.textContent = task;
+            btn.onclick = () => jumpToTask(currentGroup, task);
+            taskContainer.appendChild(btn);
+        });
+
+        // 網頁載入時初始化顯示
+        jumpToTask(1, '題目1');
+    </script>
+</body>
+</html>

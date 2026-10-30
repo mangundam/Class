@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雙面書本掃描檔案自動重組工具</title>
+    
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
+    <style>
+        /* CSS 樣式保持不變 */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; max-width: 1100px; margin: 0 auto; background-color: #f4f7f9; }
+        h1 { color: #0056b3; border-bottom: 3px solid #0056b3; padding-bottom: 10px; }
+        .container { background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        hr { border: 0; height: 1px; background: #ddd; margin: 20px 0; }
+        #pdfFileInput, #mergeAndDownloadButton { padding: 12px 20px; font-size: 17px; border-radius: 6px; cursor: pointer; transition: background-color 0.3s; } /* 按鈕加大 */
+        #pdfFileInput { border: 2px dashed #007bff; background: #e9f5ff; }
+        #mergeAndDownloadButton { background-color: #1a73e8; color: white; border: none; font-weight: bold; } /* 顏色改為 Google Blue */
+        #mergeAndDownloadButton:disabled { background-color: #6c757d; cursor: not-allowed; }
+        #mergeAndDownloadButton:not(:disabled):hover { background-color: #155cb8; }
+        #file-list { list-style: none; padding: 0; }
+        .file-entry { display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; margin-bottom: 10px; padding: 15px; border-radius: 4px; border-left: 5px solid #1a73e8; flex-wrap: wrap; } /* 邊框顏色同步 */
+        .file-info { flex-grow: 1; margin-right: 15px; }
+        .controls { display: flex; align-items: center; flex-wrap: wrap; font-size: 14px; } /* 控制項字體微調 */
+        .controls > * { margin-right: 15px; margin-top: 5px; margin-bottom: 5px; }
+        .controls input, .controls select { width: 80px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
+        .status-message { margin-top: 15px; padding: 10px; border-radius: 4px; font-weight: bold; }
+        .status-loading { background-color: #ffe0b2; color: #333; }
+        .status-error { background-color: #ffcdd2; color: #b71c1c; }
+        .status-success { background-color: #c8e6c9; color: #1b5e20; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>雙面書本掃描檔案自動重組工具</h1>
+        <p>此工具會將所有獨立掃描的奇數頁和偶數頁檔案拆散、交叉並重組，以生成一份連續順序的書本 PDF (1, 2, 3, 4, ...)。</p>
+
+        <hr>
+
+        <h2>1️⃣ 匯入單面掃描的 PDF 檔案</h2>
+        <input type="file" id="pdfFileInput" accept=".pdf" multiple>
+        
+        <hr>
+        
+        <h2>2️⃣ 設定每個檔案的書本頁碼範圍與類型</h2>
+        <p style="color: #d93025; font-weight: bold;">⚠️ 請仔細填寫：輸入的「起始」頁碼大於「結束」頁碼時，程式將自動判斷為**倒序掃描**。</p>
+        <ul id="file-list">
+            <li>請先匯入 PDF 檔案...</li>
+        </ul>
+        
+        <hr>
+
+        <h2>3️⃣ 設定總頁數並開始處理</h2>
+        <label for="totalLogicalPages">📚 書本總頁數 (最終輸出頁數 N): </label>
+        <input type="number" id="totalLogicalPages" value="100" min="1" style="width: 100px; padding: 6px;">
+        <p>請設定書本總頁數 N，程式將會生成從 1 到 N 的頁面，並從來源檔案中提取。</p>
+        
+        <br>
+        <button id="mergeAndDownloadButton" disabled>▶️ 開始交叉重組與下載</button>
+        <div id="status" class="status-message" style="display: none;"></div>
+    </div>
+
+    <script>
+        const { PDFDocument } = window.PDFLib;
+        const fileInput = document.getElementById('pdfFileInput');
+        const fileList = document.getElementById('file-list');
+        const mergeButton = document.getElementById('mergeAndDownloadButton');
+        const totalPagesInput = document.getElementById('totalLogicalPages');
+        const statusDiv = document.getElementById('status');
+        
+        let fileDataArray = [];
+
+        function showStatus(msg, type = "loading") {
+            statusDiv.textContent = msg;
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.style.display = "block";
+        }
+
+        // --- 檔案載入與 UI 生成 ---
+        
+        fileInput.addEventListener("change", async (event) => {
+            fileDataArray = [];
+            fileList.innerHTML = "";
+            mergeButton.disabled = true;
+
+            const files = [...event.target.files].sort((a, b) => a.name.localeCompare(b.name));
+            if (files.length === 0) {
+                fileList.innerHTML = "<li>請先匯入檔案...</li>";
+                return;
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+
+                let pdfDoc = null;
+                let totalPages = 0;
+                try {
+                    pdfDoc = await PDFDocument.load(await file.arrayBuffer(), { ignoreEncryption: true });
+                    totalPages = pdfDoc.getPageCount();
+                } catch (e) {
+                    console.error("PDF 讀取錯誤", e);
+                }
+
+                const li = document.createElement("li");
+                li.className = "file-entry";
+                // --- 這裡將 'data-idx' 改為 'data-file-index' 以確保命名一致性 ---
+                li.innerHTML = `
+                    <span class="file-info">
+                        ${i + 1}. <b>${file.name}</b> (${totalPages}頁)
+                    </span>
+                    <div class="controls">
+                        <label>頁面類型:</label>
+                        <select data-file-index="${i}" data-key="pageType">
+                            <option value="odd">奇數頁 (1, 3...)</option>
+                            <option value="even">偶數頁 (2, 4...)</option>
+                        </select>
+                        <label>起始頁碼:</label>
+                        <input type="text" data-file-index="${i}" data-key="startPage" placeholder="1">
+                        <label>結束頁碼:</label>
+                        <input type="text" data-file-index="${i}" data-key="endPage" placeholder="99 或 2">
+                    </div>
+                `;
+                fileList.appendChild(li);
+
+                fileDataArray.push({
+                    file,
+                    doc: pdfDoc,
+                    totalPages,
+                    pageType: "odd",
+                    startPage: 0, 
+                    endPage: 0,   
+                });
+            }
+
+            mergeButton.disabled = false;
+        });
+
+        // --- 核心工具函式：強制同步 DOM 輸入到 fileDataArray ---
+        
+        function syncInputData() {
+            let successfullySynced = true;
+            const allInputs = fileList.querySelectorAll('input[data-key], select[data-key]');
+            
+            allInputs.forEach(input => {
+                const index = parseInt(input.dataset['fileIndex']); // 使用 fileIndex
+                const dataType = input.dataset.key;
+
+                if (index >= 0 && fileDataArray[index]) {
+                    if (dataType === 'startPage' || dataType === 'endPage') {
+                        const inputValue = input.value.trim();
+                        const value = parseInt(inputValue);
+                        
+                        if (inputValue !== "" && !isNaN(value)) { 
+                            fileDataArray[index][dataType] = value;
+                        } else {
+                            successfullySynced = false;
+                            console.error(`[數據同步錯誤] 檔案 ${fileDataArray[index].file.name} 的 ${dataType} 輸入無效或為空: ${inputValue}`);
+                        }
+                    } else if (dataType === 'pageType') {
+                        fileDataArray[index][dataType] = input.value;
+                    }
+                }
+            });
+
+            return successfullySynced;
+        }
+
+
+        // --- 核心邏輯：頁面映射 (mapLogicalToPhysical) ---
+
+        function mapLogicalToPhysical(logicalPageNum, fileData) {
+            const { startPage, endPage, pageType, totalPages } = fileData;
+            
+            if (isNaN(startPage) || isNaN(endPage) || startPage === 0 || endPage === 0) {
+                 return null;
+            }
+
+            const isReversed = startPage > endPage; 
+            const step = 2; 
+
+            const minPage = Math.min(startPage, endPage);
+            const maxPage = Math.max(startPage, endPage);
+            
+            // 1. 範圍檢查
+            if (logicalPageNum < minPage || logicalPageNum > maxPage) return null;
+
+            // 2. 奇偶性檢查
+            const isLogicalPageOdd = logicalPageNum % 2 !== 0;
+            const isFileOddType = pageType === 'odd';
+            
+            if (isLogicalPageOdd !== isFileOddType) return null; 
+
+            // --- 3. 計算相對位置 (RelPos) ---
+            let pageRelativePos; 
+            
+            // 相對位置總是相對於最小頁碼的距離
+            pageRelativePos = Math.floor((logicalPageNum - minPage) / step);
+
+            if (pageRelativePos >= totalPages || pageRelativePos < 0) return null;
+
+            // --- 4. 根據是否倒序計算物理索引 ---
+            let physicalIndex;
+
+            if (isReversed) {
+                // 倒序：RelPos 0 對應 PDF 檔案的最後一頁 (N-1)
+                physicalIndex = totalPages - 1 - pageRelativePos;
+            } else {
+                // 正序：RelPos 0 對應 PDF 檔案的第一頁 (0)
+                physicalIndex = pageRelativePos;
+            }
+
+            return (physicalIndex >= 0 && physicalIndex < totalPages) ? physicalIndex : null;
+        }
+
+        // --- 主執行函數 ---
+
+        mergeButton.addEventListener("click", async () => {
+            if (fileDataArray.length === 0) {
+                showStatus("請先匯入 PDF 檔案。", "error");
+                return;
+            }
+            
+            // 點擊時強制同步輸入
+            if (!syncInputData()) {
+                showStatus("數據同步失敗：請確保所有檔案的起始和結束頁碼都已輸入且為有效數字。", "error");
+                return;
+            }
+            
+            const totalPages = Number(totalPagesInput.value);
+            if (!totalPages) {
+                showStatus("請輸入有效的總頁數", "error");
+                return;
+            }
+
+            mergeButton.disabled = true;
+            showStatus("正在處理 PDF...", "loading");
+
+            try {
+                const output = await PDFDocument.create();
+
+                for (let p = 1; p <= totalPages; p++) {
+                    showStatus(`正在重組頁面 ${p} / ${totalPages}...`, "loading");
+                    let found = false;
+
+                    for (const data of fileDataArray) {
+                        if (!data.doc) continue;
+                        
+                        const idx = mapLogicalToPhysical(p, data); 
+                        
+                        if (idx !== null) {
+                            const copied = await output.copyPages(data.doc, [idx]);
+                            output.addPage(copied[0]);
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!found) {
+                        console.warn(`邏輯頁面 ${p} 未在任何來源檔案中找到，跳過。`);
+                    }
+                }
+
+                const pdfBytes = await output.save();
+                const blob = new Blob([pdfBytes], { type: "application/pdf" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "Recombined_Book_Output.pdf"; // 更改下載檔名
+                link.click();
+
+                showStatus("✅ 恭喜！檔案已成功交叉重組並下載完成。", "success");
+            } catch (err) {
+                showStatus("❌ 處理過程中發生錯誤：" + err.message, "error");
+                console.error(err);
+            } finally {
+                mergeButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

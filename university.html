@@ -279,30 +279,56 @@
         }
 
         function submitForm() {
-            const ref = document.getElementById('reflection').value.trim();
-            if (!ref) {
-                alert('請撰寫參觀心得再送出！');
-                return;
-            }
+			const ref = document.getElementById('reflection').value.trim();
+			if (!ref) {
+				alert('請撰寫參觀心得再送出！');
+				return;
+			}
 
-            const baseUrl = "https://docs.google.com/forms/d/e/1FAIpQLSdH0_BmT51ecteiH59l_zLLZNzwObCKNHLLdaZ2qjTbWMSKnA/viewform?usp=pp_url";
-            const params = [
-                `entry.871765795=${encodeURIComponent(studentData.class)}`,
-                `entry.1183621632=${encodeURIComponent(studentData.number)}`,
-                `entry.1423815459=${encodeURIComponent(studentData.name)}`,
-                `entry.1174958471=${encodeURIComponent(stamps[0].schoolName)}`,
-                `entry.1759328801=${encodeURIComponent(stamps[1].schoolName)}`,
-                `entry.495542782=${encodeURIComponent(stamps[2].schoolName)}`,
-                `entry.351794897=${encodeURIComponent(stamps[3].schoolName)}`,
-                `entry.1176353059=${encodeURIComponent(stamps[4].schoolName)}`,
-                `entry.704948696=${encodeURIComponent(stamps[5].schoolName)}`,
-                `entry.1675069782=${encodeURIComponent(stamps[6].schoolName)}`,
-                `entry.1167011241=${encodeURIComponent(stamps[7].schoolName)}`,
-                `entry.2145257875=${encodeURIComponent(ref)}`
-            ];
-            
-            window.location.href = `${baseUrl}&${params.join('&')}`;
-        }
+			// 將按鈕改為發送中狀態，避免重複點擊
+			const submitBtn = document.querySelector('#submitSection .btn');
+			submitBtn.innerText = "資料傳送中...";
+			submitBtn.disabled = true;
+
+			// 將 viewform 改為 formResponse 以進行自動提交
+			const submitUrl = "https://docs.google.com/forms/d/e/1FAIpQLSdH0_BmT51ecteiH59l_zLLZNzwObCKNHLLdaZ2qjTbWMSKnA/formResponse";
+			
+			// 建立表單資料
+			const formData = new URLSearchParams();
+			formData.append("entry.871765795", studentData.class);
+			formData.append("entry.1183621632", studentData.number);
+			formData.append("entry.1423815459", studentData.name);
+			formData.append("entry.1174958471", stamps[0].schoolName);
+			formData.append("entry.1759328801", stamps[1].schoolName);
+			formData.append("entry.495542782", stamps[2].schoolName);
+			formData.append("entry.351794897", stamps[3].schoolName);
+			formData.append("entry.1176353059", stamps[4].schoolName);
+			formData.append("entry.704948696", stamps[5].schoolName);
+			formData.append("entry.1675069782", stamps[6].schoolName);
+			formData.append("entry.1167011241", stamps[7].schoolName);
+			formData.append("entry.2145257875", ref);
+
+			// 透過 fetch 發送 POST 請求
+			fetch(submitUrl, {
+				method: "POST",
+				mode: "no-cors", // Google 表單跨域傳送必須設定為 no-cors
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded"
+				},
+				body: formData.toString()
+			}).then(() => {
+				alert("✅ 心得與集章紀錄已成功送出！");
+				// 成功後清空暫存，並重新載入頁面還原狀態
+				localStorage.removeItem('expoStamps');
+				localStorage.removeItem('expoUser');
+				window.location.reload();
+			}).catch(err => {
+				console.error(err);
+				alert("❌ 傳送失敗，請檢查網路連線。");
+				submitBtn.innerText = "重新送出資料";
+				submitBtn.disabled = false;
+			});
+		}
     </script>
 </body>
 </html>

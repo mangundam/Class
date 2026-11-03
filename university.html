@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>大學博覽會 - 集章活動</title>
-    <!-- 換成更穩定的 CDN 網址 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
         body { font-family: "微軟正黑體", sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
@@ -17,21 +16,22 @@
         .btn:disabled { background: #aaa; cursor: not-allowed; }
         
         .stamp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
-        .stamp-box { border: 2px dashed #aaa; border-radius: 10px; height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; background: #fafafa; }
-        .stamp-box.completed { border-style: solid; border-color: #e53935; background: #fff; }
-        .stamp-title { font-weight: bold; font-size: 14px; text-align: center; z-index: 2; margin-bottom: 5px; }
-        .school-name { font-size: 12px; color: #555; text-align: center; z-index: 2; padding: 0 5px; }
-        .stamp-img { position: absolute; width: 80px; height: 80px; object-fit: contain; opacity: 0.8; z-index: 1; }
+        .stamp-box { border: 1px solid #ddd; border-radius: 10px; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; cursor: pointer; position: relative; background: #fafafa; padding-top: 10px; box-sizing: border-box; overflow: hidden; }
+        .stamp-box.completed { border-color: #4CAF50; background: #fff; border-width: 2px; }
+        .stamp-title { font-weight: bold; font-size: 14px; text-align: center; z-index: 2; margin-bottom: 5px; background: rgba(255,255,255,0.8); padding: 2px 5px; border-radius: 4px; }
+        .school-name { font-size: 12px; color: #555; text-align: center; z-index: 2; padding: 2px 5px; background: rgba(255,255,255,0.8); border-radius: 4px; }
+        .stamp-img { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85px; height: 85px; object-fit: contain; z-index: 1; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; }
         .modal-content { background: #fff; padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; text-align: center; }
         .modal-content h3 { margin-top: 0; }
         .btn-cancel { background: #f44336; margin-top: 10px; }
+        .btn-primary { background: #2196F3; margin-top: 10px; }
         #reader { width: 100%; max-width: 400px; margin: 0 auto; }
         
-        /* 移除 loginSection 的隱藏，讓畫面至少出得來 */
         #stampSection, #submitSection { display: none; }
         #errorDisplay { display: none; background: #ffebee; color: #c62828; padding: 15px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ef9a9a; }
+        #submittedMsg { display: none; text-align: center; color: #4CAF50; font-weight: bold; margin-top: 15px; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -39,7 +39,7 @@
         <!-- 錯誤訊息顯示區 -->
         <div id="errorDisplay"></div>
 
-        <!-- 登入 / 註冊畫面 (預設顯示) -->
+        <!-- 登入 / 註冊畫面 -->
         <div id="loginSection">
             <h1>博覽會集章活動</h1>
             <div class="form-group">
@@ -77,12 +77,13 @@
         <!-- 填寫心得與送出 -->
         <div id="submitSection" style="margin-top: 30px;">
             <hr>
-            <h2>🎉 恭喜完成所有集章！</h2>
+            <h2>恭喜完成所有集章</h2>
             <div class="form-group">
                 <label>請撰寫參觀心得：</label>
                 <textarea id="reflection" rows="4" placeholder="請寫下您今天的心得收穫..."></textarea>
             </div>
-            <button class="btn" onclick="submitForm()">送出資料</button>
+            <button class="btn" id="submitBtn" onclick="submitForm()">送出資料</button>
+            <div id="submittedMsg">心得已成功送出，感謝您的參與！</div>
         </div>
     </div>
 
@@ -91,7 +92,7 @@
         <div class="modal-content">
             <h3 id="taskTitle">任務說明</h3>
             <p id="taskDesc"></p>
-            <button class="btn" onclick="openScanner()">📸 拍照掃描 QR Code</button>
+            <button class="btn btn-primary" onclick="openScanner()">開啟相機掃描</button>
             <button class="btn btn-cancel" onclick="closeModal('taskModal')">取消</button>
         </div>
     </div>
@@ -100,41 +101,52 @@
     <div class="modal" id="scannerModal">
         <div class="modal-content">
             <h3>掃描 QR Code</h3>
-            <p style="font-size:12px; color:red;">※ 限現場親自拍照掃描，無法上傳照片</p>
+            <p id="scannerTargetText" style="font-weight: bold; color: #1976d2; margin-bottom: 5px;"></p>
+            <p style="font-size:12px; color:red; margin-top: 0;">限現場親自拍照掃描，無法上傳照片</p>
             <div id="reader"></div>
+            <button class="btn btn-primary" id="captureBtn" onclick="requestScan()">進行掃描</button>
             <button class="btn btn-cancel" onclick="closeScanner()">取消掃描</button>
         </div>
     </div>
 
+    <!-- 自訂訊息 Modal (取代 alert) -->
+    <div class="modal" id="messageModal">
+        <div class="modal-content">
+            <h3 id="msgTitle">提示訊息</h3>
+            <p id="msgBody"></p>
+            <button class="btn" onclick="closeModal('messageModal')">確定</button>
+        </div>
+    </div>
+
     <script>
-        // 捕捉未預期的錯誤並顯示在畫面上，避免只看到白屏
         window.onerror = function(message, source, lineno, colno, error) {
             const errDiv = document.getElementById('errorDisplay');
             errDiv.style.display = 'block';
             errDiv.innerHTML = `<strong>系統發生錯誤：</strong><br>${message}<br><small>行號: ${lineno}</small>`;
         };
-
-        const stampImage = 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Sign-check-icon.png/120px-Sign-check-icon.png';
         
         const schoolsData = [{"id": "7c321f55", "name": "醒吾科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "70dfdf1e", "name": "南臺科技大學", "general": false, "tech": true, "national": false, "north": false, "central": false, "south": true, "east": false}, {"id": "4c61d22e", "name": "臺北城市科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "2f70090c", "name": "德明財經科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "8a3a6660", "name": "康寧學校財團法人康寧大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "b7f6c222", "name": "致理科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "3e3e2056", "name": "德育學校財團法人德育護理健康學院", "general": false, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "f04c461c", "name": "健行科技大學 ", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "8628e8ee", "name": "淡江大學學校財團法人淡江大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "55ab6e33", "name": "佛光大學", "general": true, "tech": false, "national": false, "north": false, "central": false, "south": false, "east": true}, {"id": "d86d5643", "name": "朝陽科技大學", "general": false, "tech": true, "national": false, "north": false, "central": true, "south": false, "east": false}, {"id": "ffe20381", "name": "光宇學校財團法人元培醫事科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "e27a3b87", "name": "東南科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "509ce0aa", "name": "大葉大學", "general": true, "tech": false, "national": false, "north": false, "central": true, "south": false, "east": false}, {"id": "e1208aa3", "name": "東吳大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "fde60005", "name": "北部地區人才招募中心", "general": false, "tech": false, "national": false, "north": false, "central": false, "south": false, "east": false}, {"id": "a4d227d6", "name": "真理大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "552ba991", "name": "玄奘大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "5d1e6ee4", "name": "銘傳大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "92185703", "name": "聖約翰科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "33084931", "name": "義守大學", "general": true, "tech": false, "national": false, "north": false, "central": false, "south": true, "east": false}, {"id": "f76d29e0", "name": "萬能科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "2c802e3a", "name": "實踐大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "e23b8f6f", "name": "台北海洋科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "c7333d0a", "name": "景文科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "85b2063b", "name": "弘光科技大學", "general": false, "tech": true, "national": false, "north": false, "central": true, "south": false, "east": false}, {"id": "1c96d8a3", "name": "中國科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "3e5e4e71", "name": "嶺東科技大學", "general": false, "tech": true, "national": false, "north": false, "central": true, "south": false, "east": false}, {"id": "9e67a1c6", "name": "輔仁大學學校財團法人輔仁大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "d7879e96", "name": "開南大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "4772af1c", "name": "中國文化大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "a0e2513c", "name": "文藻外語大學", "general": true, "tech": false, "national": false, "north": false, "central": false, "south": true, "east": false}, {"id": "e08cbeef", "name": "國立東華大學", "general": true, "tech": false, "national": true, "north": false, "central": false, "south": false, "east": true}, {"id": "21cb0637", "name": "台南應用科技大學", "general": false, "tech": true, "national": false, "north": false, "central": false, "south": true, "east": false}, {"id": "7903f6ba", "name": "慈濟學校財團法人慈濟大學", "general": true, "tech": false, "national": false, "north": false, "central": false, "south": false, "east": true}, {"id": "9cc53eff", "name": "國立澎湖科技大學", "general": false, "tech": true, "national": true, "north": false, "central": false, "south": true, "east": false}, {"id": "64c46e3f", "name": "崇右學校財團法人崇右影藝科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "b5676b19", "name": "長庚學校財團法人長庚科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "2b269c61", "name": "世新大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "4698ce20", "name": "南華大學", "general": true, "tech": false, "national": false, "north": false, "central": false, "south": true, "east": false}, {"id": "bfcbcc06", "name": "亞東學校財團法人亞東科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "b9cfd9cc", "name": "宏國德霖科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "b3b1b712", "name": "黎明技術學院", "general": false, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}];
 
+        // 在這裡修改您準備好的黯淡圖 (dimImg) 與彩色圖 (colorImg) 的路徑
         const defaultStamps = [
-            { title: "一般大學", req: "general", collected: false, schoolName: "" },
-            { title: "科技大學", req: "tech", collected: false, schoolName: "" },
-            { title: "國立大學", req: "national", collected: false, schoolName: "" },
-            { title: "北部大學", req: "north", collected: false, schoolName: "" },
-            { title: "中部大學", req: "central", collected: false, schoolName: "" },
-            { title: "南部大學", req: "south", collected: false, schoolName: "" },
-            { title: "東部大學", req: "east", collected: false, schoolName: "" },
-            { title: "最有興趣的大學", req: "any", collected: false, schoolName: "" }
+            { title: "一般大學", req: "general", collected: false, schoolName: "", dimImg: "stamp/一般大學_暗.png", colorImg: "stamp/一般大學.png" },
+            { title: "科技大學", req: "tech", collected: false, schoolName: "", dimImg: "stamp/科技大學_暗.png", colorImg: "stamp/科技大學.png" },
+            { title: "國立大學", req: "national", collected: false, schoolName: "", dimImg: "stamp/國立_暗.png", colorImg: "stamp/國立.png" },
+            { title: "北部大學", req: "north", collected: false, schoolName: "", dimImg: "stamp/北部_暗.png", colorImg: "stamp/北部.png" },
+            { title: "中部大學", req: "central", collected: false, schoolName: "", dimImg: "stamp/中部_暗.png", colorImg: "stamp/中部.png" },
+            { title: "南部大學", req: "south", collected: false, schoolName: "", dimImg: "stamp/南部_暗.png", colorImg: "stamp/南部.png" },
+            { title: "東部大學", req: "east", collected: false, schoolName: "", dimImg: "stamp/東部_暗.png", colorImg: "stamp/東部.png" },
+            { title: "最有興趣的大學", req: "any", collected: false, schoolName: "", dimImg: "stamp/最喜歡_暗.png", colorImg: "stamp/最喜歡.png" }
         ];
 
         let stamps = defaultStamps;
         let studentData = null;
         let currentTargetIndex = -1;
         let html5QrCode = null;
+        let scanRequested = false;
+        let scanTimeout = null;
 
-        // 加入防呆的暫存讀取機制
+        // 讀取暫存資料
         try {
             const savedStamps = localStorage.getItem('expoStamps');
             if (savedStamps) stamps = JSON.parse(savedStamps);
@@ -153,13 +165,24 @@
             }
         };
 
+        // 自訂提示視窗
+        function showMessage(title, text) {
+            document.getElementById('msgTitle').innerText = title;
+            document.getElementById('msgBody').innerText = text;
+            document.getElementById('messageModal').style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
         function saveLogin() {
             const cls = document.getElementById('userClass').value;
             const num = document.getElementById('userNumber').value;
             const name = document.getElementById('userName').value.trim();
             
             if (!cls || !num || !name) {
-                alert('請完整填寫班級、學號與姓名！');
+                showMessage('資料不完整', '請完整填寫班級、學號與姓名！');
                 return;
             }
             
@@ -195,20 +218,28 @@
                     schoolInfo.className = 'school-name';
                     schoolInfo.innerText = stamp.schoolName;
                     box.appendChild(schoolInfo);
-                    
-                    const img = document.createElement('img');
-                    img.src = stampImage;
-                    img.className = 'stamp-img';
-                    box.appendChild(img);
                 } else {
                     allCompleted = false;
                     box.onclick = () => showTaskModal(index);
                 }
+                
+                // 置入圖片 (依照收集狀態判斷要顯示黯淡圖還是彩色圖)
+                const img = document.createElement('img');
+                img.src = stamp.collected ? stamp.colorImg : stamp.dimImg;
+                img.className = 'stamp-img';
+                box.appendChild(img);
+
                 grid.appendChild(box);
             });
 
             if (allCompleted) {
                 document.getElementById('submitSection').style.display = 'block';
+                // 檢查是否已送出過
+                if (localStorage.getItem('expoSubmitted') === 'true') {
+                    document.getElementById('reflection').disabled = true;
+                    document.getElementById('submitBtn').style.display = 'none';
+                    document.getElementById('submittedMsg').style.display = 'block';
+                }
             }
         }
 
@@ -229,12 +260,18 @@
             document.getElementById('taskModal').style.display = 'flex';
         }
 
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-
         function openScanner() {
             closeModal('taskModal');
+            
+            // 設定掃描目標提示文字
+            const targetReq = stamps[currentTargetIndex].title;
+            document.getElementById('scannerTargetText').innerText = `請尋找並掃描符合【${targetReq}】的攤位條碼`;
+            
+            // 重置掃描按鈕狀態
+            scanRequested = false;
+            document.getElementById('captureBtn').innerText = '進行掃描';
+            document.getElementById('captureBtn').disabled = false;
+            
             document.getElementById('scannerModal').style.display = 'flex';
             
             html5QrCode = new Html5Qrcode("reader");
@@ -242,14 +279,37 @@
                 { facingMode: "environment" },
                 { fps: 10, qrbox: { width: 250, height: 250 } },
                 (decodedText) => {
-                    closeScanner(false);
-                    verifyScan(decodedText);
+                    // 只有當使用者按下「進行掃描」時，才處理掃描結果
+                    if (scanRequested) {
+                        scanRequested = false;
+                        clearTimeout(scanTimeout);
+                        closeScanner(false);
+                        verifyScan(decodedText);
+                    }
                 },
                 (errorMessage) => { }
             ).catch((err) => {
-                alert("無法開啟相機！請確認：\n1. 已允許瀏覽器使用相機\n2. 網頁需在 https 或 localhost 環境下執行");
+                showMessage("相機錯誤", "無法開啟相機！請確認已允許瀏覽器使用相機權限。");
                 closeScanner(true);
             });
+        }
+
+        // 學生點擊手動掃描按鈕
+        function requestScan() {
+            scanRequested = true;
+            const btn = document.getElementById('captureBtn');
+            btn.innerText = '掃描分析中，請保持穩定...';
+            btn.disabled = true;
+
+            // 給予 2.5 秒的掃描緩衝期，若沒掃到則重置
+            scanTimeout = setTimeout(() => {
+                if (scanRequested) {
+                    scanRequested = false;
+                    btn.innerText = '進行掃描';
+                    btn.disabled = false;
+                    showMessage('未偵測到條碼', '未能辨識出清晰的 QR Code，請對準條碼後再按一次掃描。');
+                }
+            }, 2500);
         }
 
         function closeScanner(skipStop = false) {
@@ -262,7 +322,7 @@
         function verifyScan(scannedId) {
             const targetSchool = schoolsData.find(s => s.id === scannedId);
             if (!targetSchool) {
-                alert("❌ 無效的 QR Code，請確認掃描的是攤位上的官方條碼！");
+                showMessage("條碼無效", "此 QR Code 無效，請確認掃描的是攤位上的官方條碼！");
                 return;
             }
 
@@ -271,64 +331,57 @@
                 stamps[currentTargetIndex].collected = true;
                 stamps[currentTargetIndex].schoolName = targetSchool.name;
                 localStorage.setItem('expoStamps', JSON.stringify(stamps));
-                alert(`✅ 成功收集！這所學校是：${targetSchool.name}`);
+                showMessage("收集成功", `成功收集！這所學校是：${targetSchool.name}`);
                 renderStamps();
             } else {
-                alert(`❌ 條件不符！\n\n【${targetSchool.name}】不符合此章格 (${stamps[currentTargetIndex].title}) 的要求。`);
+                showMessage("條件不符", `【${targetSchool.name}】不符合此章格 (${stamps[currentTargetIndex].title}) 的要求。`);
             }
         }
 
         function submitForm() {
-			const ref = document.getElementById('reflection').value.trim();
-			if (!ref) {
-				alert('請撰寫參觀心得再送出！');
-				return;
-			}
+            const ref = document.getElementById('reflection').value.trim();
+            if (!ref) {
+                showMessage('資料未填', '請撰寫參觀心得再送出！');
+                return;
+            }
 
-			// 將按鈕改為發送中狀態，避免重複點擊
-			const submitBtn = document.querySelector('#submitSection .btn');
-			submitBtn.innerText = "資料傳送中...";
-			submitBtn.disabled = true;
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.innerText = "資料傳送中...";
+            submitBtn.disabled = true;
 
-			// 將 viewform 改為 formResponse 以進行自動提交
-			const submitUrl = "https://docs.google.com/forms/d/e/1FAIpQLSdH0_BmT51ecteiH59l_zLLZNzwObCKNHLLdaZ2qjTbWMSKnA/formResponse";
-			
-			// 建立表單資料
-			const formData = new URLSearchParams();
-			formData.append("entry.871765795", studentData.class);
-			formData.append("entry.1183621632", studentData.number);
-			formData.append("entry.1423815459", studentData.name);
-			formData.append("entry.1174958471", stamps[0].schoolName);
-			formData.append("entry.1759328801", stamps[1].schoolName);
-			formData.append("entry.495542782", stamps[2].schoolName);
-			formData.append("entry.351794897", stamps[3].schoolName);
-			formData.append("entry.1176353059", stamps[4].schoolName);
-			formData.append("entry.704948696", stamps[5].schoolName);
-			formData.append("entry.1675069782", stamps[6].schoolName);
-			formData.append("entry.1167011241", stamps[7].schoolName);
-			formData.append("entry.2145257875", ref);
+            const submitUrl = "https://docs.google.com/forms/d/e/1FAIpQLSdH0_BmT51ecteiH59l_zLLZNzwObCKNHLLdaZ2qjTbWMSKnA/formResponse";
+            
+            const formData = new URLSearchParams();
+            formData.append("entry.871765795", studentData.class);
+            formData.append("entry.1183621632", studentData.number);
+            formData.append("entry.1423815459", studentData.name);
+            formData.append("entry.1174958471", stamps[0].schoolName);
+            formData.append("entry.1759328801", stamps[1].schoolName);
+            formData.append("entry.495542782", stamps[2].schoolName);
+            formData.append("entry.351794897", stamps[3].schoolName);
+            formData.append("entry.1176353059", stamps[4].schoolName);
+            formData.append("entry.704948696", stamps[5].schoolName);
+            formData.append("entry.1675069782", stamps[6].schoolName);
+            formData.append("entry.1167011241", stamps[7].schoolName);
+            formData.append("entry.2145257875", ref);
 
-			// 透過 fetch 發送 POST 請求
-			fetch(submitUrl, {
-				method: "POST",
-				mode: "no-cors", // Google 表單跨域傳送必須設定為 no-cors
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded"
-				},
-				body: formData.toString()
-			}).then(() => {
-				alert("✅ 心得與集章紀錄已成功送出！");
-				// 成功後清空暫存，並重新載入頁面還原狀態
-				localStorage.removeItem('expoStamps');
-				localStorage.removeItem('expoUser');
-				window.location.reload();
-			}).catch(err => {
-				console.error(err);
-				alert("❌ 傳送失敗，請檢查網路連線。");
-				submitBtn.innerText = "重新送出資料";
-				submitBtn.disabled = false;
-			});
-		}
+            fetch(submitUrl, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: formData.toString()
+            }).then(() => {
+                // 送出成功後，鎖定畫面狀態
+                localStorage.setItem('expoSubmitted', 'true');
+                showMessage('傳送成功', '心得與集章紀錄已成功送出！感謝您的參與。');
+                renderStamps(); // 重新渲染以隱藏送出按鈕
+            }).catch(err => {
+                console.error(err);
+                showMessage('傳送失敗', '請檢查網路連線狀態後重試。');
+                submitBtn.innerText = "重新送出資料";
+                submitBtn.disabled = false;
+            });
+        }
     </script>
 </body>
 </html>

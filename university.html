@@ -246,6 +246,7 @@
             if (allCompleted) {
                 document.getElementById('submitSection').style.display = 'block';
                 if (localStorage.getItem('expoSubmitted') === 'true') {
+					document.getElementById('reflection').value = localStorage.getItem('expoReflection') || "";
                     document.getElementById('reflection').disabled = true;
                     document.getElementById('submitBtn').style.display = 'none';
                     document.getElementById('submittedMsg').style.display = 'block';
@@ -379,6 +380,7 @@
                 body: formData.toString()
             }).then(() => {
                 localStorage.setItem('expoSubmitted', 'true');
+				localStorage.setItem('expoReflection', ref);
                 showMessage('傳送成功', '心得與集章紀錄已成功送出！感謝您的參與。');
                 renderStamps();
             }).catch(err => {

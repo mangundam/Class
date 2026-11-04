@@ -6,7 +6,7 @@
     <title>大學博覽會 - 集章活動</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
-        body { font-family: "微軟正黑體", sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
+		body { font-family: "微軟正黑體", sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
         .container { max-width: 500px; margin: 0 auto; background: #fff; min-height: 100vh; padding: 20px; box-sizing: border-box; }
         h1, h2 { text-align: center; color: #333; }
         .form-group { margin-bottom: 15px; }
@@ -32,9 +32,20 @@
         #stampSection, #submitSection { display: none; }
         #errorDisplay { display: none; background: #ffebee; color: #c62828; padding: 15px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ef9a9a; }
         #submittedMsg { display: none; text-align: center; color: #4CAF50; font-weight: bold; margin-top: 15px; font-size: 18px; }
+        /* 社群軟體瀏覽器阻擋畫面 */
+        #inAppBrowserBlocker { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #333; color: white; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-sizing: border-box; text-align: center; }
+        #inAppBrowserBlocker h2 { color: #ffeb3b; }
+        #inAppBrowserBlocker p { font-size: 18px; line-height: 1.5; margin-bottom: 20px; }
     </style>
 </head>
 <body>
+    <!-- 社群軟體阻擋畫面 -->
+    <div id="inAppBrowserBlocker">
+        <h2>請使用系統瀏覽器開啟</h2>
+        <p>您目前使用的是 LINE 或社群軟體的內建瀏覽器，這會導致<b>無法開啟相機</b>進行集章。</p>
+        <p>請點擊畫面<b>右上角</b>或<b>右下角</b>的選單按鈕 (三個點或分享圖示)，並選擇：<br><br><b>「以預設瀏覽器開啟」</b><br>(Safari 或 Chrome)</p>
+    </div>
+
     <div class="container">
         <!-- 錯誤訊息顯示區 -->
         <div id="errorDisplay"></div>
@@ -87,16 +98,6 @@
         </div>
     </div>
 
-    <!-- 任務說明 Modal -->
-    <div class="modal" id="taskModal">
-        <div class="modal-content">
-            <h3 id="taskTitle">任務說明</h3>
-            <p id="taskDesc"></p>
-            <button class="btn btn-primary" onclick="openScanner()">開啟相機掃描</button>
-            <button class="btn btn-cancel" onclick="closeModal('taskModal')">取消</button>
-        </div>
-    </div>
-
     <!-- 相機掃描 Modal -->
     <div class="modal" id="scannerModal">
         <div class="modal-content">
@@ -104,7 +105,7 @@
             <p id="scannerTargetText" style="font-weight: bold; color: #1976d2; margin-bottom: 5px;"></p>
             <p style="font-size:12px; color:red; margin-top: 0;">限現場親自拍照掃描，無法上傳照片</p>
             <div id="reader"></div>
-            <button class="btn btn-primary" id="captureBtn" onclick="requestScan()">進行掃描</button>
+            <button class="btn btn-primary" id="captureBtn" disabled>相機啟動中...</button>
             <button class="btn btn-cancel" onclick="closeScanner()">取消掃描</button>
         </div>
     </div>
@@ -119,6 +120,16 @@
     </div>
 
     <script>
+        // 偵測是否為 LINE / FB / IG 內建瀏覽器
+        function checkInAppBrowser() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            if (ua.indexOf("Line") > -1 || ua.indexOf("FBAN") > -1 || ua.indexOf("FBAV") > -1 || ua.indexOf("Instagram") > -1) {
+                document.getElementById('inAppBrowserBlocker').style.display = 'flex';
+                return true;
+            }
+            return false;
+        }
+
         window.onerror = function(message, source, lineno, colno, error) {
             const errDiv = document.getElementById('errorDisplay');
             errDiv.style.display = 'block';
@@ -127,7 +138,6 @@
         
         const schoolsData = [{"id": "7c321f55", "name": "醒吾科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "70dfdf1e", "name": "南臺科技大學", "general": false, "tech": true, "national": false, "north": false, "central": false, "south": true, "east": false}, {"id": "4c61d22e", "name": "臺北城市科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "2f70090c", "name": "德明財經科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "8a3a6660", "name": "康寧大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "b7f6c222", "name": "致理科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "3e3e2056", "name": "德育護理健康學院", "general": false, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "f04c461c", "name": "健行科技大學 ", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "8628e8ee", "name": "淡江大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "55ab6e33", "name": "佛光大學", "general": true, "tech": false, "national": false, "north": false, "central": false, "south": false, "east": true}, {"id": "d86d5643", "name": "朝陽科技大學", "general": false, "tech": true, "national": false, "north": false, "central": true, "south": false, "east": false}, {"id": "ffe20381", "name": "元培醫事科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "e27a3b87", "name": "東南科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "509ce0aa", "name": "大葉大學", "general": true, "tech": false, "national": false, "north": false, "central": true, "south": false, "east": false}, {"id": "e1208aa3", "name": "東吳大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "fde60005", "name": "北部地區人才招募中心", "general": false, "tech": false, "national": false, "north": false, "central": false, "south": false, "east": false}, {"id": "a4d227d6", "name": "真理大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "552ba991", "name": "玄奘大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "5d1e6ee4", "name": "銘傳大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "92185703", "name": "聖約翰科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "33084931", "name": "義守大學", "general": true, "tech": false, "national": false, "north": false, "central": false, "south": true, "east": false}, {"id": "f76d29e0", "name": "萬能科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "2c802e3a", "name": "實踐大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "e23b8f6f", "name": "台北海洋科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "c7333d0a", "name": "景文科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "85b2063b", "name": "弘光科技大學", "general": false, "tech": true, "national": false, "north": false, "central": true, "south": false, "east": false}, {"id": "1c96d8a3", "name": "中國科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "3e5e4e71", "name": "嶺東科技大學", "general": false, "tech": true, "national": false, "north": false, "central": true, "south": false, "east": false}, {"id": "9e67a1c6", "name": "輔仁大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "d7879e96", "name": "開南大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "4772af1c", "name": "中國文化大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "a0e2513c", "name": "文藻外語大學", "general": true, "tech": false, "national": false, "north": false, "central": false, "south": true, "east": false}, {"id": "e08cbeef", "name": "國立東華大學", "general": true, "tech": false, "national": true, "north": false, "central": false, "south": false, "east": true}, {"id": "21cb0637", "name": "台南應用科技大學", "general": false, "tech": true, "national": false, "north": false, "central": false, "south": true, "east": false}, {"id": "7903f6ba", "name": "慈濟大學", "general": true, "tech": false, "national": false, "north": false, "central": false, "south": false, "east": true}, {"id": "9cc53eff", "name": "國立澎湖科技大學", "general": false, "tech": true, "national": true, "north": false, "central": false, "south": true, "east": false}, {"id": "64c46e3f", "name": "崇右影藝科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "b5676b19", "name": "長庚科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "2b269c61", "name": "世新大學", "general": true, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "4698ce20", "name": "南華大學", "general": true, "tech": false, "national": false, "north": false, "central": false, "south": true, "east": false}, {"id": "bfcbcc06", "name": "亞東科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "b9cfd9cc", "name": "宏國德霖科技大學", "general": false, "tech": true, "national": false, "north": true, "central": false, "south": false, "east": false}, {"id": "b3b1b712", "name": "黎明技術學院", "general": false, "tech": false, "national": false, "north": true, "central": false, "south": false, "east": false}];
 
-        // 在這裡修改您準備好的黯淡圖 (dimImg) 與彩色圖 (colorImg) 的路徑
         const defaultStamps = [
             { title: "一般大學", req: "general", collected: false, schoolName: "", dimImg: "stamp/一般大學_暗.png", colorImg: "stamp/一般大學.png" },
             { title: "科技大學", req: "tech", collected: false, schoolName: "", dimImg: "stamp/科技大學_暗.png", colorImg: "stamp/科技大學.png" },
@@ -146,26 +156,27 @@
         let scanRequested = false;
         let scanTimeout = null;
 
-        // 讀取暫存資料
-        try {
-            const savedStamps = localStorage.getItem('expoStamps');
-            if (savedStamps) stamps = JSON.parse(savedStamps);
-            const savedUser = localStorage.getItem('expoUser');
-            if (savedUser) studentData = JSON.parse(savedUser);
-        } catch (e) {
-            console.error("暫存解析失敗，重置資料", e);
-            localStorage.removeItem('expoStamps');
-            localStorage.removeItem('expoUser');
-        }
-
         window.onload = () => {
+            // 先檢查是否為社群內建瀏覽器，若是則中斷後續載入並阻擋
+            if (checkInAppBrowser()) return;
+
+            try {
+                const savedStamps = localStorage.getItem('expoStamps');
+                if (savedStamps) stamps = JSON.parse(savedStamps);
+                const savedUser = localStorage.getItem('expoUser');
+                if (savedUser) studentData = JSON.parse(savedUser);
+            } catch (e) {
+                console.error("暫存解析失敗，重置資料", e);
+                localStorage.removeItem('expoStamps');
+                localStorage.removeItem('expoUser');
+            }
+
             if (studentData) {
                 document.getElementById('loginSection').style.display = 'none';
                 showStampSection();
             }
         };
 
-        // 自訂提示視窗
         function showMessage(title, text) {
             document.getElementById('msgTitle').innerText = title;
             document.getElementById('msgBody').innerText = text;
@@ -220,10 +231,10 @@
                     box.appendChild(schoolInfo);
                 } else {
                     allCompleted = false;
-                    box.onclick = () => showTaskModal(index);
+                    // 直接綁定開啟掃描，略過說明視窗
+                    box.onclick = () => openScanner(index);
                 }
                 
-                // 置入圖片 (依照收集狀態判斷要顯示黯淡圖還是彩色圖)
                 const img = document.createElement('img');
                 img.src = stamp.collected ? stamp.colorImg : stamp.dimImg;
                 img.className = 'stamp-img';
@@ -234,7 +245,6 @@
 
             if (allCompleted) {
                 document.getElementById('submitSection').style.display = 'block';
-                // 檢查是否已送出過
                 if (localStorage.getItem('expoSubmitted') === 'true') {
                     document.getElementById('reflection').disabled = true;
                     document.getElementById('submitBtn').style.display = 'none';
@@ -243,43 +253,36 @@
             }
         }
 
-        function showTaskModal(index) {
+        function openScanner(index) {
             currentTargetIndex = index;
-            document.getElementById('taskTitle').innerText = stamps[index].title;
+            
             const descMap = {
-                "general": "請掃描一所【一般大學】的 QR Code",
-                "tech": "請掃描一所【科技大學】的 QR Code",
-                "national": "請掃描一所【國立大學】的 QR Code",
-                "north": "請掃描一所【北部大學】的 QR Code",
-                "central": "請掃描一所【中部大學】的 QR Code",
-                "south": "請掃描一所【南部大學】的 QR Code",
-                "east": "請掃描一所【東部大學】的 QR Code",
+                "general": "請尋找並掃描符合【一般大學】的攤位條碼",
+                "tech": "請尋找並掃描符合【科技大學】的攤位條碼",
+                "national": "請尋找並掃描符合【國立大學】的攤位條碼",
+                "north": "請尋找並掃描符合【北部大學】的攤位條碼",
+                "central": "請尋找並掃描符合【中部大學】的攤位條碼",
+                "south": "請尋找並掃描符合【南部大學】的攤位條碼",
+                "east": "請尋找並掃描符合【東部大學】的攤位條碼",
                 "any": "自由選擇一所您【最感興趣的大學】進行掃描"
             };
-            document.getElementById('taskDesc').innerText = descMap[stamps[index].req];
-            document.getElementById('taskModal').style.display = 'flex';
-        }
-
-        function openScanner() {
-            closeModal('taskModal');
             
-            // 設定掃描目標提示文字
-            const targetReq = stamps[currentTargetIndex].title;
-            document.getElementById('scannerTargetText').innerText = `請尋找並掃描符合【${targetReq}】的攤位條碼`;
+            document.getElementById('scannerTargetText').innerText = descMap[stamps[index].req];
             
-            // 重置掃描按鈕狀態
+            const btn = document.getElementById('captureBtn');
             scanRequested = false;
-            document.getElementById('captureBtn').innerText = '進行掃描';
-            document.getElementById('captureBtn').disabled = false;
+            // 預設鎖定按鈕，等相機啟動成功才解鎖
+            btn.innerText = '相機啟動中...';
+            btn.disabled = true;
             
             document.getElementById('scannerModal').style.display = 'flex';
             
             html5QrCode = new Html5Qrcode("reader");
+            
             html5QrCode.start(
                 { facingMode: "environment" },
                 { fps: 10, qrbox: { width: 250, height: 250 } },
                 (decodedText) => {
-                    // 只有當使用者按下「進行掃描」時，才處理掃描結果
                     if (scanRequested) {
                         scanRequested = false;
                         clearTimeout(scanTimeout);
@@ -288,20 +291,24 @@
                     }
                 },
                 (errorMessage) => { }
-            ).catch((err) => {
+            ).then(() => {
+                // 相機啟動成功，解鎖按鈕
+                btn.innerText = '進行掃描';
+                btn.disabled = false;
+                // 綁定手動掃描事件
+                btn.onclick = () => requestScan();
+            }).catch((err) => {
                 showMessage("相機錯誤", "無法開啟相機！請確認已允許瀏覽器使用相機權限。");
                 closeScanner(true);
             });
         }
 
-        // 學生點擊手動掃描按鈕
         function requestScan() {
             scanRequested = true;
             const btn = document.getElementById('captureBtn');
             btn.innerText = '掃描分析中，請保持穩定...';
             btn.disabled = true;
 
-            // 給予 2.5 秒的掃描緩衝期，若沒掃到則重置
             scanTimeout = setTimeout(() => {
                 if (scanRequested) {
                     scanRequested = false;
@@ -371,10 +378,9 @@
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: formData.toString()
             }).then(() => {
-                // 送出成功後，鎖定畫面狀態
                 localStorage.setItem('expoSubmitted', 'true');
                 showMessage('傳送成功', '心得與集章紀錄已成功送出！感謝您的參與。');
-                renderStamps(); // 重新渲染以隱藏送出按鈕
+                renderStamps();
             }).catch(err => {
                 console.error(err);
                 showMessage('傳送失敗', '請檢查網路連線狀態後重試。');

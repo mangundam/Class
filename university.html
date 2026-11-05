@@ -156,106 +156,9 @@
         let html5QrCode = null;
         let scanRequested = false;
         let scanTimeout = null;
-		let availableCameras = [];
+        let availableCameras = [];
         let currentCameraIndex = 0;
-
-        window.onload = () => {
-            // 先檢查是否為社群內建瀏覽器，若是則中斷後續載入並阻擋
-            if (checkInAppBrowser()) return;
-
-            try {
-                const savedStamps = localStorage.getItem('expoStamps');
-                if (savedStamps) stamps = JSON.parse(savedStamps);
-                const savedUser = localStorage.getItem('expoUser');
-                if (savedUser) studentData = JSON.parse(savedUser);
-            } catch (e) {
-                console.error("暫存解析失敗，重置資料", e);
-                localStorage.removeItem('expoStamps');
-                localStorage.removeItem('expoUser');
-            }
-
-            if (studentData) {
-                document.getElementById('loginSection').style.display = 'none';
-                showStampSection();
-            }
-        };
-
-        function showMessage(title, text) {
-            document.getElementById('msgTitle').innerText = title;
-            document.getElementById('msgBody').innerText = text;
-            document.getElementById('messageModal').style.display = 'flex';
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-
-        function saveLogin() {
-            const cls = document.getElementById('userClass').value;
-            const num = document.getElementById('userNumber').value;
-            const name = document.getElementById('userName').value.trim();
-            
-            if (!cls || !num || !name) {
-                showMessage('資料不完整', '請完整填寫班級、學號與姓名！');
-                return;
-            }
-            
-            studentData = { class: cls, number: num, name: name };
-            localStorage.setItem('expoUser', JSON.stringify(studentData));
-            
-            document.getElementById('loginSection').style.display = 'none';
-            showStampSection();
-        }
-
-        function showStampSection() {
-            document.getElementById('stampSection').style.display = 'block';
-            document.getElementById('welcomeMsg').innerText = `${studentData.class} ${studentData.name} (${studentData.number})，歡迎開始集章！`;
-            renderStamps();
-        }
-
-        function renderStamps() {
-            const grid = document.getElementById('stampGrid');
-            grid.innerHTML = '';
-            let allCompleted = true;
-
-            stamps.forEach((stamp, index) => {
-                const box = document.createElement('div');
-                box.className = `stamp-box ${stamp.collected ? 'completed' : ''}`;
-                
-                const title = document.createElement('div');
-                title.className = 'stamp-title';
-                title.innerText = stamp.title;
-                box.appendChild(title);
-                
-                if (stamp.collected) {
-                    const schoolInfo = document.createElement('div');
-                    schoolInfo.className = 'school-name';
-                    schoolInfo.innerText = stamp.schoolName;
-                    box.appendChild(schoolInfo);
-                } else {
-                    allCompleted = false;
-                    // 直接綁定開啟掃描，略過說明視窗
-                    box.onclick = () => openScanner(index);
-                }
-                
-                const img = document.createElement('img');
-                img.src = stamp.collected ? stamp.colorImg : stamp.dimImg;
-                img.className = 'stamp-img';
-                box.appendChild(img);
-
-                grid.appendChild(box);
-            });
-
-            if (allCompleted) {
-                document.getElementById('submitSection').style.display = 'block';
-                if (localStorage.getItem('expoSubmitted') === 'true') {
-					document.getElementById('reflection').value = localStorage.getItem('expoReflection') || "";
-                    document.getElementById('reflection').disabled = true;
-                    document.getElementById('submitBtn').style.display = 'none';
-                    document.getElementById('submittedMsg').style.display = 'block';
-                }
-            }
-        }
+        let isCameraRunning = false; // 新增：強制追蹤相機狀態
 
         function openScanner(index) {
             currentTargetIndex = index;
@@ -286,20 +189,32 @@
                 html5QrCode = new Html5Qrcode("reader");
             }
 
-            // 抓取設備上所有的鏡頭清單
+            // 安全啟動機制：如果相機還在背景跑，先強制關閉它再啟動
+            if (isCameraRunning) {
+                html5QrCode.stop().then(() => {
+                    isCameraRunning = false;
+                    initCameraAndStart();
+                }).catch(e => {
+                    isCameraRunning = false;
+                    initCameraAndStart();
+                });
+            } else {
+                initCameraAndStart();
+            }
+        }
+
+        // 負責抓取設備鏡頭清單並啟動
+        function initCameraAndStart() {
             Html5Qrcode.getCameras().then(devices => {
                 if (devices && devices.length > 0) {
-                    // 過濾出有標示為「後置 (back / 後)」的鏡頭
                     availableCameras = devices.filter(c => c.label.toLowerCase().includes('back') || c.label.toLowerCase().includes('後'));
                     
-                    // 如果都沒寫 back，通常手機陣列的第0個是前鏡頭，所以把後面的當作後鏡頭
                     if (availableCameras.length === 0 && devices.length > 1) {
                         availableCameras = devices.slice(1);
                     } else if (availableCameras.length === 0) {
                         availableCameras = devices;
                     }
                     
-                    // 預設先選陣列第 0 個，但如果名稱裡有「超廣角、微距」等字眼就跳過，尋找標準鏡頭
                     currentCameraIndex = 0;
                     for (let i = 0; i < availableCameras.length; i++) {
                         let lbl = availableCameras[i].label.toLowerCase();
@@ -309,37 +224,23 @@
                         }
                     }
                     
-                    // 如果手機有兩顆以上的可用(後)鏡頭，就顯示「切換按鈕」讓學生可以自救
                     if (availableCameras.length > 1) {
-                        switchBtn.style.display = 'block';
+                        document.getElementById('switchCameraBtn').style.display = 'block';
                     }
                     
                     startSpecificCamera(availableCameras[currentCameraIndex].id);
                 } else {
-                    // 找不到清單就退回預設盲抓
                     startSpecificCamera({ facingMode: "environment" });
                 }
             }).catch(err => {
+                // 如果抓取清單失敗（例如權限還沒給），直接退回預設啟動模式
                 startSpecificCamera({ facingMode: "environment" });
             });
         }
 
-        // 啟動指定的鏡頭
         function startSpecificCamera(cameraIdOrConfig) {
             const config = typeof cameraIdOrConfig === 'string' ? { deviceId: { exact: cameraIdOrConfig } } : cameraIdOrConfig;
             
-            // 如果上一個鏡頭還在跑，要先停掉才能開新的
-            if (html5QrCode.isScanning) {
-                html5QrCode.stop().then(() => {
-                    _startCamera(config);
-                }).catch(e => console.log(e));
-            } else {
-                _startCamera(config);
-            }
-        }
-
-        // 實際執行相機串流
-        function _startCamera(config) {
             const btn = document.getElementById('captureBtn');
             html5QrCode.start(
                 config,
@@ -354,15 +255,16 @@
                 },
                 (errorMessage) => { }
             ).then(() => {
+                isCameraRunning = true; // 標記為成功啟動
                 btn.innerText = '進行掃描';
                 btn.disabled = false;
             }).catch((err) => {
+                console.error(err);
                 showMessage("相機錯誤", "無法開啟相機！請確認已允許瀏覽器使用相機權限。");
                 closeScanner(true);
             });
         }
 
-        // 手動切換下一顆鏡頭
         function switchCamera() {
             if (availableCameras.length < 2) return;
             
@@ -372,7 +274,14 @@
             btn.innerText = '切換中...';
             btn.disabled = true;
             
-            startSpecificCamera(availableCameras[currentCameraIndex].id);
+            if (isCameraRunning) {
+                html5QrCode.stop().then(() => {
+                    isCameraRunning = false;
+                    startSpecificCamera(availableCameras[currentCameraIndex].id);
+                }).catch(e => console.error(e));
+            } else {
+                startSpecificCamera(availableCameras[currentCameraIndex].id);
+            }
         }
 
         function requestScan() {
@@ -393,9 +302,11 @@
 
         function closeScanner(skipStop = false) {
             document.getElementById('scannerModal').style.display = 'none';
-            // 多加了一個 isScanning 的判斷，避免在切換鏡頭時關閉導致錯誤
-            if (!skipStop && html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().catch(err => console.log(err));
+            // 確實關閉相機，並將狀態重置為 false
+            if (!skipStop && html5QrCode && isCameraRunning) {
+                html5QrCode.stop().then(() => {
+                    isCameraRunning = false;
+                }).catch(err => console.log(err));
             }
         }
 

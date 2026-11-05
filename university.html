@@ -272,55 +272,31 @@
             
             const btn = document.getElementById('captureBtn');
             scanRequested = false;
+            // 預設鎖定按鈕，等相機啟動成功才解鎖
             btn.innerText = '相機啟動中...';
             btn.disabled = true;
             
             document.getElementById('scannerModal').style.display = 'flex';
             
             html5QrCode = new Html5Qrcode("reader");
-
-            // 先向設備請求所有的相機清單
-            Html5Qrcode.getCameras().then(devices => {
-                let selectedCameraId = null;
-                
-                if (devices && devices.length > 0) {
-                    // 預設先拿最後一個鏡頭（通常後置鏡頭排在後面）
-                    selectedCameraId = devices[devices.length - 1].id;
-                    
-                    // 迴圈尋找：優先尋找名稱包含 "back" 或 "後" 的鏡頭，且「避開」超廣角 (ultra / wide)
-                    for (let i = 0; i < devices.length; i++) {
-                        let label = devices[i].label.toLowerCase();
-                        if (label.includes("back") || label.includes("後")) {
-                            if (!label.includes("ultra") && !label.includes("廣角") && !label.includes("wide")) {
-                                selectedCameraId = devices[i].id;
-                                break; // 找到理想的主鏡頭就提早結束
-                            }
-                        }
+            
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => {
+                    if (scanRequested) {
+                        scanRequested = false;
+                        clearTimeout(scanTimeout);
+                        closeScanner(false);
+                        verifyScan(decodedText);
                     }
-                }
-
-                // 設定相機參數：如果找不到特定 ID，就退回原本的 environment 自動模式
-                const cameraConfig = selectedCameraId 
-                    ? { deviceId: { exact: selectedCameraId } } 
-                    : { facingMode: "environment" };
-
-                // 啟動相機
-                return html5QrCode.start(
-                    cameraConfig,
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
-                    (decodedText) => {
-                        if (scanRequested) {
-                            scanRequested = false;
-                            clearTimeout(scanTimeout);
-                            closeScanner(false);
-                            verifyScan(decodedText);
-                        }
-                    },
-                    (errorMessage) => { }
-                );
-            }).then(() => {
+                },
+                (errorMessage) => { }
+            ).then(() => {
+                // 相機啟動成功，解鎖按鈕
                 btn.innerText = '進行掃描';
                 btn.disabled = false;
+                // 綁定手動掃描事件
                 btn.onclick = () => requestScan();
             }).catch((err) => {
                 showMessage("相機錯誤", "無法開啟相機！請確認已允許瀏覽器使用相機權限。");

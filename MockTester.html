@@ -104,10 +104,12 @@
             font-size: 1.1em;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.2s;
             margin-top: 10px;
             text-align: center;
             box-sizing: border-box;
+            touch-action: manipulation; /* 取消手機 300ms 點擊延遲 */
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn:hover {
@@ -182,25 +184,32 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 1em;
-            transition: all 0.2s;
             line-height: 1.5;
+            touch-action: manipulation; /* 取消手機 300ms 點擊延遲 */
+            -webkit-tap-highlight-color: transparent; /* 取消手機點擊高光 */
         }
 
-        .option-btn:hover:not(.disabled) {
-            background-color: #e9ecef;
-            border-color: #ced4da;
+        /* 只有在支援滑鼠的設備才啟用 Hover 效果，避免手機點擊後卡灰色 */
+        @media (hover: hover) {
+            .option-btn:hover:not(.wrong):not(.correct) {
+                background-color: #e9ecef;
+                border-color: #ced4da;
+            }
         }
 
+        /* 答錯與答對狀態 (加入 !important 與取消動畫，達到瞬間切換) */
         .option-btn.wrong {
-            background-color: #f8d7da;
-            border-color: var(--error-color);
-            color: #721c24;
+            background-color: #f8d7da !important;
+            border-color: var(--error-color) !important;
+            color: #721c24 !important;
+            transition: none !important;
         }
 
         .option-btn.correct {
-            background-color: #d4edda;
-            border-color: var(--success-color);
-            color: #155724;
+            background-color: #d4edda !important;
+            border-color: var(--success-color) !important;
+            color: #155724 !important;
+            transition: none !important;
         }
 
         .question-solved .option-btn {
@@ -322,7 +331,7 @@
     
     // 測驗狀態記錄
     let currentExamQuestions = [];
-    let mistakesRecord = {}; // 記錄題號是否有答錯過
+    let mistakesRecord = {}; 
     let correctCount = 0;
     let startTime = 0;
     let currentExamName = '';
@@ -419,7 +428,6 @@
         const yearSelect = document.getElementById('yearSelect');
         yearSelect.innerHTML = '';
         
-        // 年份排序：最新在上 (降冪)
         let sortedYears = Object.keys(yearMap).sort((a, b) => parseInt(b) - parseInt(a));
         
         if (sortedYears.length === 0) {
@@ -444,7 +452,6 @@
 
         if (!yearMap[year]) return;
 
-        // 模考次數排序：1在最上面 (升冪)
         let sortedExams = Array.from(yearMap[year]).sort((a, b) => parseInt(a) - parseInt(b));
         
         sortedExams.forEach(exam => {
@@ -487,7 +494,6 @@
             return;
         }
 
-        // 初始化狀態
         mistakesRecord = {};
         correctCount = 0;
         startTime = Date.now();
@@ -513,7 +519,6 @@
 
             const parsedTitle = parseImages(escapeHTML(q.題目));
             
-            // 整理原本的選項
             let rawOpts = [
                 { originalLetter: 'A', text: q.選項A },
                 { originalLetter: 'B', text: q.選項B },
@@ -521,7 +526,7 @@
                 { originalLetter: 'D', text: q.選項D }
             ].filter(opt => opt.text && opt.text.trim() !== '');
 
-            // 隨機打亂選項 (Fisher-Yates Shuffle)
+            // 隨機打亂選項
             for (let i = rawOpts.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [rawOpts[i], rawOpts[j]] = [rawOpts[j], rawOpts[i]];
@@ -530,18 +535,15 @@
             const newLetters = ['A', 'B', 'C', 'D'];
             let newCorrectOpt = '';
 
-            // 找出打亂後，原本正確答案的新字母
             rawOpts.forEach((opt, idx) => {
                 if (opt.originalLetter === q.答案) {
                     newCorrectOpt = newLetters[idx];
                 }
             });
 
-            // 組合新的選項 HTML
             let optionsHTML = '';
             rawOpts.forEach((opt, idx) => {
                 const currentNewLetter = newLetters[idx];
-                // 移除原題庫文字開頭的 (A)、(B)、(C)、(D) 以免重複顯示
                 let cleanedText = opt.text.replace(/^\s*\([A-D]\)\s*/, '');
                 const parsedOptText = parseImages(escapeHTML(cleanedText));
                 
@@ -562,22 +564,18 @@
     function checkAnswer(btnElement, qIndex, selectedOpt, correctOpt) {
         const card = document.getElementById(`qcard-${qIndex}`);
         
-        // 若該題已答對，則不予理會
         if (card.classList.contains('question-solved')) return;
 
         if (selectedOpt === correctOpt) {
-            // 答對處理
             btnElement.classList.add('correct');
             card.classList.add('question-solved');
             correctCount++;
             updateProgress();
             
-            // 檢查是否全部完成
             if (correctCount === currentExamQuestions.length) {
-                setTimeout(showResult, 500); // 稍微延遲讓學生看到最後一題綠色
+                setTimeout(showResult, 500); 
             }
         } else {
-            // 答錯處理
             btnElement.classList.add('wrong');
             mistakesRecord[qIndex] = true;
         }

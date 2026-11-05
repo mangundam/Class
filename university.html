@@ -6,7 +6,7 @@
     <title>大學博覽會 - 集章活動</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
-		body { font-family: "微軟正黑體", sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
+        body { font-family: "微軟正黑體", sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
         .container { max-width: 500px; margin: 0 auto; background: #fff; min-height: 100vh; padding: 20px; box-sizing: border-box; }
         h1, h2 { text-align: center; color: #333; }
         .form-group { margin-bottom: 15px; }
@@ -23,7 +23,8 @@
         .stamp-img { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85px; height: 85px; object-fit: contain; z-index: 1; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; }
-        .modal-content { background: #fff; padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; text-align: center; }
+        /* 新增：為了讓右上角的按鈕能相對定位，將 modal-content 設為 relative */
+        .modal-content { position: relative; background: #fff; padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; text-align: center; }
         .modal-content h3 { margin-top: 0; }
         .btn-cancel { background: #f44336; margin-top: 10px; }
         .btn-primary { background: #2196F3; margin-top: 10px; }
@@ -36,6 +37,9 @@
         #inAppBrowserBlocker { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #333; color: white; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-sizing: border-box; text-align: center; }
         #inAppBrowserBlocker h2 { color: #ffeb3b; }
         #inAppBrowserBlocker p { font-size: 18px; line-height: 1.5; margin-bottom: 20px; }
+        
+        /* 新增：右上角切換鏡頭按鈕的樣式 */
+        #switchCameraTopRight { position: absolute; top: 15px; right: 15px; background: #607D8B; color: white; border: none; border-radius: 5px; padding: 8px 12px; font-size: 14px; cursor: pointer; display: none; z-index: 10; }
     </style>
 </head>
 <body>
@@ -101,6 +105,9 @@
     <!-- 相機掃描 Modal -->
     <div class="modal" id="scannerModal">
         <div class="modal-content">
+            <!-- 新增：右上角切換鏡頭按鈕 -->
+            <button id="switchCameraTopRight" onclick="switchCamera()">🔄 切換鏡頭</button>
+            
             <h3>掃描 QR Code</h3>
             <p id="scannerTargetText" style="font-weight: bold; color: #1976d2; margin-bottom: 5px;"></p>
             <p style="font-size:12px; color:red; margin-top: 0;">限現場親自拍照掃描，無法上傳照片</p>
@@ -155,6 +162,10 @@
         let html5QrCode = null;
         let scanRequested = false;
         let scanTimeout = null;
+        
+        // 新增相機追蹤變數
+        let availableCameras = [];
+        let isCameraRunning = false;
 
         window.onload = () => {
             // 先檢查是否為社群內建瀏覽器，若是則中斷後續載入並阻擋
@@ -246,7 +257,7 @@
             if (allCompleted) {
                 document.getElementById('submitSection').style.display = 'block';
                 if (localStorage.getItem('expoSubmitted') === 'true') {
-					document.getElementById('reflection').value = localStorage.getItem('expoReflection') || "";
+                    document.getElementById('reflection').value = localStorage.getItem('expoReflection') || "";
                     document.getElementById('reflection').disabled = true;
                     document.getElementById('submitBtn').style.display = 'none';
                     document.getElementById('submittedMsg').style.display = 'block';
@@ -254,6 +265,7 @@
             }
         }
 
+        // 修改：啟動相機並加入取得鏡頭清單的功能
         function openScanner(index) {
             currentTargetIndex = index;
             
@@ -271,17 +283,74 @@
             document.getElementById('scannerTargetText').innerText = descMap[stamps[index].req];
             
             const btn = document.getElementById('captureBtn');
+            const switchBtn = document.getElementById('switchCameraTopRight');
             scanRequested = false;
             // 預設鎖定按鈕，等相機啟動成功才解鎖
             btn.innerText = '相機啟動中...';
             btn.disabled = true;
+            switchBtn.style.display = 'none'; // 預設隱藏切換按鈕
             
             document.getElementById('scannerModal').style.display = 'flex';
             
-            html5QrCode = new Html5Qrcode("reader");
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            
+            // 安全機制，確保前一次相機被正確關閉
+            if (isCameraRunning) {
+                html5QrCode.stop().then(() => {
+                    isCameraRunning = false;
+                    initCamera();
+                }).catch(e => {
+                    isCameraRunning = false;
+                    initCamera();
+                });
+            } else {
+                initCamera();
+            }
+        }
+
+        // 取得相機清單並啟動
+        function initCamera() {
+            Html5Qrcode.getCameras().then(devices => {
+                if (devices && devices.length > 0) {
+                    availableCameras = devices; // 儲存所有鏡頭清單
+                    
+                    // 若有多個鏡頭，顯示切換按鈕
+                    if (availableCameras.length > 1) {
+                        document.getElementById('switchCameraTopRight').style.display = 'block';
+                    }
+                    
+                    // 檢查是否有儲存過鏡頭 ID
+                    let savedCameraId = localStorage.getItem('expoCameraId');
+                    let targetCameraId = null;
+                    
+                    if (savedCameraId && availableCameras.find(c => c.id === savedCameraId)) {
+                        targetCameraId = savedCameraId; // 優先使用上次存的
+                    } else {
+                        // 否則預設找後置鏡頭，沒找到就拿最後一個
+                        const backCameras = availableCameras.filter(c => c.label.toLowerCase().includes('back') || c.label.toLowerCase().includes('後'));
+                        targetCameraId = backCameras.length > 0 ? backCameras[0].id : availableCameras[availableCameras.length - 1].id;
+                    }
+                    
+                    startSpecificCamera(targetCameraId);
+                } else {
+                    // 若無法取得清單，退回預設環境鏡頭
+                    startSpecificCamera({ facingMode: "environment" });
+                }
+            }).catch(err => {
+                // 若沒有權限，直接退回預設環境鏡頭
+                startSpecificCamera({ facingMode: "environment" });
+            });
+        }
+
+        // 啟動指定設定的相機
+        function startSpecificCamera(cameraIdOrConfig) {
+            const config = typeof cameraIdOrConfig === 'string' ? { deviceId: { exact: cameraIdOrConfig } } : cameraIdOrConfig;
+            const btn = document.getElementById('captureBtn');
             
             html5QrCode.start(
-                { facingMode: "environment" },
+                config,
                 { fps: 10, qrbox: { width: 250, height: 250 } },
                 (decodedText) => {
                     if (scanRequested) {
@@ -293,6 +362,7 @@
                 },
                 (errorMessage) => { }
             ).then(() => {
+                isCameraRunning = true;
                 // 相機啟動成功，解鎖按鈕
                 btn.innerText = '進行掃描';
                 btn.disabled = false;
@@ -302,6 +372,36 @@
                 showMessage("相機錯誤", "無法開啟相機！請確認已允許瀏覽器使用相機權限。");
                 closeScanner(true);
             });
+        }
+
+        // 切換鏡頭功能
+        function switchCamera() {
+            if (availableCameras.length < 2) return;
+            
+            // 找出目前使用中鏡頭的 Index (如果有存起來的話)
+            let currentId = localStorage.getItem('expoCameraId');
+            let currentIndex = availableCameras.findIndex(c => c.id === currentId);
+            if (currentIndex === -1) currentIndex = 0;
+            
+            // 切換到下一個
+            let nextIndex = (currentIndex + 1) % availableCameras.length;
+            let nextCameraId = availableCameras[nextIndex].id;
+            
+            // 存起來
+            localStorage.setItem('expoCameraId', nextCameraId);
+            
+            const btn = document.getElementById('captureBtn');
+            btn.innerText = '切換中...';
+            btn.disabled = true;
+            
+            if (isCameraRunning) {
+                html5QrCode.stop().then(() => {
+                    isCameraRunning = false;
+                    startSpecificCamera(nextCameraId);
+                }).catch(e => console.error(e));
+            } else {
+                startSpecificCamera(nextCameraId);
+            }
         }
 
         function requestScan() {
@@ -322,8 +422,10 @@
 
         function closeScanner(skipStop = false) {
             document.getElementById('scannerModal').style.display = 'none';
-            if (!skipStop && html5QrCode) {
-                html5QrCode.stop().catch(err => console.log(err));
+            if (!skipStop && html5QrCode && isCameraRunning) {
+                html5QrCode.stop().then(() => {
+                    isCameraRunning = false;
+                }).catch(err => console.log(err));
             }
         }
 
@@ -380,7 +482,7 @@
                 body: formData.toString()
             }).then(() => {
                 localStorage.setItem('expoSubmitted', 'true');
-				localStorage.setItem('expoReflection', ref);
+                localStorage.setItem('expoReflection', ref);
                 showMessage('傳送成功', '心得與集章紀錄已成功送出！感謝您的參與。');
                 renderStamps();
             }).catch(err => {

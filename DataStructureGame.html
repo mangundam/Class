@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資料結構生活場景</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pixel-bg: #070b14;
+            --pixel-panel: #111827;
+            --pixel-border: #38bdf8;
+        }
+        body {
+            background-color: var(--pixel-bg);
+            background-image: 
+                radial-gradient(circle at 50% 20%, rgba(56, 189, 248, 0.12) 0%, transparent 60%),
+                linear-gradient(rgba(17, 24, 39, 0.9) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(17, 24, 39, 0.9) 1px, transparent 1px);
+            background-size: 100% 100%, 24px 24px, 24px 24px;
+            font-family: 'Noto Sans TC', sans-serif;
+            color: #f8fafc;
+            user-select: none;
+        }
+        .font-pixel-en {
+            font-family: 'Press Start 2P', monospace;
+        }
+        .pixel-box {
+            background: #0f172a;
+            border: 3px solid #38bdf8;
+            box-shadow: 0 8px 0 #0284c7, 0 12px 24px rgba(0, 0, 0, 0.7);
+        }
+        .pixel-screen-frame {
+            background: #020617;
+            border: 4px solid #475569;
+            box-shadow: inset 0 0 24px rgba(0,0,0,0.9), 0 4px 0 #1e293b;
+            position: relative;
+        }
+        /* CRT 掃描線效果 */
+        .crt-overlay {
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+        canvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            display: block;
+        }
+        .pixel-btn {
+            background: #1e293b;
+            border: 3px solid #64748b;
+            box-shadow: 0 5px 0 #0f172a;
+            transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease, border-color 0.15s ease;
+        }
+        .pixel-btn:hover:not(:disabled) {
+            background: #334155;
+            border-color: #94a3b8;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 #0f172a;
+        }
+        .pixel-btn:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #0f172a;
+        }
+        /* 答對綠色發光樣式 */
+        .btn-correct {
+            background: #059669 !important;
+            border-color: #34d399 !important;
+            color: #ffffff !important;
+            box-shadow: 0 5px 0 #065f46, 0 0 18px rgba(52, 211, 153, 0.65) !important;
+            animation: pulse-green 1s infinite alternate;
+        }
+        /* 答錯紅色搖晃樣式 */
+        .btn-wrong {
+            background: #dc2626 !important;
+            border-color: #f87171 !important;
+            color: #ffffff !important;
+            box-shadow: 0 5px 0 #7f1d1d, 0 0 18px rgba(248, 113, 113, 0.65) !important;
+            animation: shake-red 0.4s ease-in-out;
+        }
+        @keyframes shake-red {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+        @keyframes pulse-green {
+            from { filter: brightness(1); }
+            to { filter: brightness(1.15); }
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #38bdf8;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-center items-center p-2 sm:p-4">
+
+    <!-- 主遊戲機台容器 (放大寬度至 max-w-4xl 讓整體畫面更大) -->
+    <main class="max-w-4xl w-full mx-auto flex flex-col gap-3 sm:gap-4">
+        
+        <!-- 遊戲測驗畫面 -->
+        <div id="quizView" class="pixel-box rounded-xl p-4 sm:p-6 flex flex-col gap-3.5 sm:gap-4">
+            
+            <!-- 1. 放大後的點陣圖 Canvas 舞台區 (使用 max-w-3xl 讓舞台畫面更清晰寬敞) -->
+            <div class="pixel-screen-frame rounded-lg overflow-hidden w-full max-w-3xl mx-auto">
+                <!-- 內部解析度 320x180 放大顯示，確保濃厚復古點陣顆粒感 -->
+                <canvas id="pixelCanvas" width="320" height="180"></canvas>
+                <div class="crt-overlay absolute inset-0"></div>
+                
+                <!-- 畫面左上角題號與場景名稱標記 -->
+                <div class="absolute top-2.5 left-2.5 bg-slate-950/85 border border-sky-500/60 px-3 py-1 rounded text-xs sm:text-sm text-sky-300 flex items-center gap-2 pointer-events-none shadow-lg">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="sceneNumberBadge" class="font-pixel-en text-amber-400 text-xs sm:text-sm">Q01/18</span>
+                    <span id="sceneTitle" class="font-bold text-white tracking-wide text-sm sm:text-base">載入中...</span>
+                </div>
+
+                <!-- 畫面右上角原始題號標記 -->
+                <div class="absolute top-2.5 right-2.5 bg-slate-950/85 border border-slate-600 px-2.5 py-1 rounded text-xs text-slate-300 font-pixel-en pointer-events-none">
+                    <span id="sceneCodeBadge">#01</span>
+                </div>
+            </div>
+
+            <!-- 2. 舞台正下方：放大文字與適當高度的情境描述對話框 (防止過度推擠並提升閱讀清晰度) -->
+            <div id="feedbackBox" class="bg-slate-950/95 border-2 border-slate-700 rounded-lg p-3.5 sm:p-4.5 h-[146px] sm:h-[156px] overflow-y-auto flex flex-col justify-between transition-colors shadow-inner">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div id="feedbackHeader" class="text-xs sm:text-sm font-bold text-amber-300 flex items-center gap-1.5">
+                        <span>💬</span> <span>現場情境與題目</span>
+                    </div>
+                    <span id="feedbackConceptBadge" class="hidden text-xs sm:text-sm px-2.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-700 font-bold"></span>
+                </div>
+                <p id="feedbackDesc" class="text-base sm:text-lg text-white font-bold leading-relaxed my-auto pt-1">
+                    載入中...
+                </p>
+            </div>
+
+            <!-- 3. 資料結構選項按鈕區 (字體與空間配合放大) -->
+            <div>
+                <div id="optionsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
+                    <!-- 由 JS 動態生成按鈕 -->
+                </div>
+            </div>
+
+            <!-- 4. 最下方：一長條形「下一關」大按鈕 -->
+            <button id="nextStageBarBtn" onclick="nextScene()" class="pixel-btn w-full py-3.5 sm:py-4 rounded-lg text-base sm:text-lg font-bold tracking-widest flex items-center justify-center gap-2 bg-sky-900/80 border-sky-400 text-sky-100 hover:bg-sky-800 transition shadow-lg">
+                <span id="nextStageBtnText">下一題 (NEXT STAGE)</span>
+                <span>➔</span>
+            </button>
+
+        </div>
+
+        <!-- 測驗結束：輸入學號與姓名畫面 -->
+        <div id="studentFormView" class="hidden pixel-box rounded-xl p-6 sm:p-10 flex-col items-center gap-6 text-center max-w-2xl mx-auto w-full">
+            <h2 class="text-2xl sm:text-3xl font-black text-amber-300 tracking-wide">18 題挑戰完成！</h2>
+            <p class="text-slate-300 text-base sm:text-lg max-w-md">
+                請輸入您的學號與姓名。
+            </p>
+            <div class="w-full max-w-md flex flex-col gap-4 text-left mt-1">
+                <div>
+                    <label class="block text-sm font-bold text-sky-300 mb-1.5">學號 (Student ID)</label>
+                    <input id="studentIdInput" type="text" placeholder="請輸入學號，例如：112001" class="w-full px-4 py-3 rounded-lg bg-slate-950 border-2 border-slate-600 text-white font-bold focus:outline-none focus:border-sky-400 text-base">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-sky-300 mb-1.5">姓名 (Student Name)</label>
+                    <input id="studentNameInput" type="text" placeholder="請輸入您的姓名" class="w-full px-4 py-3 rounded-lg bg-slate-950 border-2 border-slate-600 text-white font-bold focus:outline-none focus:border-sky-400 text-base">
+                </div>
+                <p id="formErrorMsg" class="hidden text-rose-400 text-sm font-bold text-center">請完整填寫學號與姓名後再送出喔！</p>
+                <button onclick="generateScoreImage()" class="pixel-btn w-full py-3.5 rounded-lg text-lg font-bold bg-emerald-600 border-emerald-300 text-white hover:bg-emerald-500 mt-1">
+                    送出並產生成績圖檔
+                </button>
+            </div>
+        </div>
+
+        <!-- 測驗結果：顯示得分圖檔與下載畫面 -->
+        <div id="resultCardView" class="hidden pixel-box rounded-xl p-5 sm:p-8 flex-col items-center gap-5 text-center max-w-2xl mx-auto w-full">
+            <h2 class="text-xl sm:text-2xl font-black text-sky-300 tracking-wide">成績證明</h2>
+            <div class="w-full rounded-lg overflow-hidden border-2 border-sky-400 shadow-2xl bg-slate-950">
+                <img id="scoreResultImg" alt="學生成績單圖檔" class="w-full h-auto block" />
+                <canvas id="scoreCardCanvas" width="720" height="540" class="hidden"></canvas>
+            </div>
+            <div class="w-full flex flex-col sm:flex-row gap-3 mt-1">
+                <button onclick="downloadScoreImage()" class="pixel-btn flex-1 py-3.5 rounded-lg text-base sm:text-lg font-bold bg-amber-400 border-amber-200 text-slate-950 hover:bg-amber-300 flex items-center justify-center gap-2">
+                    <span>下載成績圖片</span>
+                </button>
+                <button onclick="startNewQuiz()" class="pixel-btn sm:w-48 py-3.5 rounded-lg text-base font-bold bg-slate-800 border-slate-500 text-slate-200 hover:bg-slate-700">
+                    重新抽 18 題
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        /**************************************************************
+         * 1. 六大資料結構定義與說明
+         **************************************************************/
+        const CATEGORIES = [
+            { id: 'array', name: '陣列', en: 'Array', icon: '📏', shortDesc: '一維線性排列，用單一索引定位' },
+            { id: 'array2d', name: '二維陣列', en: '2D Array', icon: '🎛️', shortDesc: '行列網格結構，用 (Row, Col) 雙座標定位' },
+            { id: 'queue', name: '佇列', en: 'Queue', icon: '🚶‍♂️', shortDesc: '先進先出 (FIFO)，先排隊的人先處理' },
+            { id: 'stack', name: '堆疊', en: 'Stack', icon: '🥞', shortDesc: '後進先出 (LIFO)，最後放進去的先拿出來' },
+            { id: 'tree', name: '樹', en: 'Tree', icon: '🌳', shortDesc: '階層與分支關係，從根節點向下延伸' },
+            { id: 'graph', name: '圖', en: 'Graph', icon: '🕸️', shortDesc: '節點與邊交織的複雜網狀連結' }
+        ];
+
+        /**************************************************************
+         * 2. 60個不重複的生活場景資料庫
+         **************************************************************/
+        const SCENES = [
+            // === 1~10 陣列 (Array) ===
+            { id: 1, type: 'array', title: '一週藥盒', quote: '「今天是星期三，直接打開標示『WED (索引2)』的那一格吃藥！」', explain: '一排7格的藥盒依序排列，直接用星期幾當作「索引 (Index)」就能找到對應位置的藥丸。' },
+            { id: 2, type: 'array', title: '糖葫蘆串', quote: '「竹籤上串著一排山楂，從竹籤頭算起第 3 顆最大顆！」', explain: '相同類型的山楂在竹籤上一字排開，以線性順序編號存取。' },
+            { id: 3, type: 'array', title: '火車車廂', quote: '「我的車票寫著『第 4 車廂』，沿著月台找到編號 04 的車廂上車！」', explain: '火車車廂一節接一節排成一列，每節車廂都有唯一且連續的編號。' },
+            { id: 4, type: 'array', title: '尺上的刻度', quote: '「鉛筆的長度剛好對齊直尺上刻度『7 公分』的位置！」', explain: '尺上的刻度呈一維線性等距排列，每個刻度就像陣列中固定的記憶體位置。' },
+            { id: 5, type: 'array', title: '書架上的一排書', quote: '「我要拿書架上從左邊算來的第 3 本書！」', explain: '單層書架上的書本由左至右整齊排列，可直接指定「第幾個位置」來取書。' },
+            { id: 6, type: 'array', title: '公車的單排座位', quote: '「靠窗那排單人座，請坐到第 2 個座位！」', explain: '單排座位依序編號，乘客可透過座位號碼直接入座。' },
+            { id: 7, type: 'array', title: '地板等候腳印標示', quote: '「請站在地面上標示『第 2 格』的黃色腳印位置等候！」', explain: '地板上畫好一排固定間距的格子，每個格子對應一個明確的索引編號。' },
+            { id: 8, type: 'array', title: '溫度計的度數標示', quote: '「紅色水銀柱指在一維刻度表上的『25°C』位置！」', explain: '溫度計的刻度由低到高線性排列，透過單一數值位置表示狀態。' },
+            { id: 9, type: 'array', title: '直尺型路邊停車格', quote: '「我的紅車停在路邊一字排開的『03 號』收費停車格裡！」', explain: '路邊車格沿著馬路排成單一直線，每格都有編號可供定位。' },
+            { id: 10, type: 'array', title: '自動販賣機的單一軌道', quote: '「同一個軌道裡排著一列相同的綠茶罐，佔據連續的位置 [0]~[5]！」', explain: '單一軌道儲存相同型態的飲料並連續排列，是標準的一維陣列結構。' },
+
+            // === 11~20 二維陣列 (2D Array) ===
+            { id: 11, type: 'array2d', title: '電影院座位表', quote: '「我們的電影票在『C 排 4 號』，先找第 C 排、再數第 4 個位置！」', explain: '需要「第幾排 (Row)」與「第幾號 (Column)」兩個座標才能定位，是典型的二維陣列。' },
+            { id: 12, type: 'array2d', title: '棋盤網格', quote: '「黑子下在棋盤座標 (3, 4) 的交叉網格點上！」', explain: '棋盤由橫線與直線交織成二維網格，每一步棋都用 (X, Y) 雙座標記錄。' },
+            { id: 13, type: 'array2d', title: 'Excel 試算表', quote: '「請把成績輸入在『C 欄第 3 列 (C3)』的那個儲存格裡！」', explain: '試算表以欄(Column)與列(Row)構成二維表格，是二維陣列最直觀的代表。' },
+            { id: 14, type: 'array2d', title: '教室的課桌椅排列', quote: '「老師點名：『請第 3 排、第 4 個座位的同學起來回答問題！』」', explain: '教室座位排成幾排幾列的矩陣，用「排」與「列」兩個數字鎖定學生位置。' },
+            { id: 15, type: 'array2d', title: '捷運站的置物櫃牆', quote: '「我的背包鎖在置物櫃牆『第 2 層、左起第 3 格』！」', explain: '整面寄物櫃牆由水平層數與垂直格數組成一個二維矩陣。' },
+            { id: 16, type: 'array2d', title: '賓果遊戲卡 (Bingo)', quote: '「抽中號碼了！把 5x5 賓果卡上『第 2 列、第 4 行』的格子圈起來！」', explain: '5x5 方格卡具備明確的列(Row)與行(Col)，屬於固定大小的二維陣列。' },
+            { id: 17, type: 'array2d', title: '月曆 / 日曆表格', quote: '「這個月的『第 3 週、星期五』是校外教學的日子！」', explain: '月曆橫向是星期日到六、縱向是第1~5週，構成二維網格結構。' },
+            { id: 18, type: 'array2d', title: '魔術方塊的單一面', quote: '「魔術方塊這一面的 3x3 九宮格中，右上角 [0][2] 是黃色色塊！」', explain: '單一面由 3 列 × 3 行的色塊組成，可用 matrix[row][col] 表示。' },
+            { id: 19, type: 'array2d', title: '大型停車場的平面車位', quote: '「車子停在地下室『B 區、第 3 車道』的格子裡！」', explain: '將平面車位劃分為橫向分區與縱向車道編號，透過雙重索引快速找車。' },
+            { id: 20, type: 'array2d', title: '九宮格戳戳樂', quote: '「我要戳正中間『第 2 排、第 2 個』的那一格試試手氣！」', explain: '童玩戳戳樂紙盒以整齊的橫列與直行隔間組成二維方陣。' },
+
+            // === 21~30 佇列 (Queue) ===
+            { id: 21, type: 'queue', title: '超市結帳人潮', quote: '「先排到收銀台前面的顧客先結帳離開，新來的客人請排到隊伍最後面！」', explain: '遵循「先進先出 (FIFO)」原則，最先排隊的人最先完成結帳。' },
+            { id: 22, type: 'queue', title: '洗車機的車輛等待線', quote: '「第 1 台紅車最先開進洗車隧道，洗完也是第 1 台先開出來！」', explain: '洗車隧道單向通行，先進入的車輛必定先洗好離開 (First-In, First-Out)。' },
+            { id: 23, type: 'queue', title: '銀行抽號碼牌', quote: '「叮咚！請 025 號到櫃檯辦理，後面抽 026、027 號的客人請依序等候！」', explain: '抽號碼牌系統將客人依到達先後順序排入等候佇列，依序叫號服務。' },
+            { id: 24, type: 'queue', title: '得來速車道 (Drive-Thru)', quote: '「單線車道無法超車，先點餐的車子會先在窗口拿到漢堡開走！」', explain: '車道限制了車輛只能從尾端進入、前端離開，標準的先進先出佇列。' },
+            { id: 25, type: 'queue', title: '遊樂園排隊動線', quote: '「排在最前面的遊客先搭上雲霄飛車出發，後面的遊客依序往前遞補！」', explain: '排隊欄杆確保遊客按照先來後到的順序搭乘設施。' },
+            { id: 26, type: 'queue', title: '客服電話的等待接聽', quote: '「『您的電話正在排隊中...』系統會優先幫最先打進來的顧客接通專員！」', explain: '電話客服系統使用佇列管理來電，先撥入的電話先被處理。' },
+            { id: 27, type: 'queue', title: '印表機的列印任務', quote: '「三個人同時按列印，印表機會照傳送先後順序：先印 Doc1、再印 Doc2！」', explain: '列印工作佇列 (Print Spooler) 會把先收到的文件排在前面優先印出。' },
+            { id: 28, type: 'queue', title: '機場行李安檢 X 光機', quote: '「先放上輸送帶的紅色行李箱，會最先通過 X 光機從另一頭出來！」', explain: '輸送帶將行李由入口端依序推進、出口端依序送出，符合 FIFO 特性。' },
+            { id: 29, type: 'queue', title: '手搖飲叫號螢幕', quote: '「店員依照點單順序搖飲料，先點餐的 101 號客人先拿走珍珠奶茶！」', explain: '訂單依成立時間進入製作佇列，先點單的人先取餐。' },
+            { id: 30, type: 'queue', title: '高速公路匝道儀控', quote: '「匝道紅綠燈每次變綠燈，就讓排在最前面的第 1 台車先上高速公路！」', explain: '匝道車流依排隊先後順序一台接一台放行，屬於先進先出佇列。' },
+
+            // === 31~40 堆疊 (Stack) ===
+            { id: 31, type: 'stack', title: '品客洋芋片罐', quote: '「圓筒罐只有上面一個開口，最後放進去最頂端的那片洋芋片會最先被拿出來吃！」', explain: '單一開口的圓筒容器，最後放進去的在最上面，最先被取出 (後進先出 LIFO)。' },
+            { id: 32, type: 'stack', title: '自助餐的盤子塔', quote: '「阿姨剛洗好放上最頂端的溫熱盤子，馬上被下一位客人第一個拿走！」', explain: '盤子由下往上疊，取用時從最頂端(最後放上去的)開始拿，是經典的堆疊。' },
+            { id: 33, type: 'stack', title: '羽毛球筒 (單側開口)', quote: '「把羽毛球一顆顆塞進球筒，要打球時只能從最上面（最後塞入的那顆）先拿出來！」', explain: '先進去的球被壓在筒底，最後放進去的球在頂端最先被拿出 (LIFO)。' },
+            { id: 34, type: 'stack', title: '瀏覽器的「上一頁」功能', quote: '「依序逛了 A ➔ B ➔ C 網頁，按下『上一頁』會先退回剛剛最後造訪的網頁！」', explain: '瀏覽紀錄會一層層壓入堆疊 (Push)，按上一頁時從最新紀錄開始彈出 (Pop)。' },
+            { id: 35, type: 'stack', title: '洗水槽裡疊放的碗盤', quote: '「吃完飯把髒碗盤一層層往上疊，洗碗時一定從最上面最後放的那個碗開始洗！」', explain: '碗盤越疊越高，最晚疊上去的在最頂層，必須最先拿起來清洗。' },
+            { id: 36, type: 'stack', title: '貨車卸貨', quote: '「搬家時最後搬上卡車尾端的 3 號紙箱擋在門口，到了新家必須最先搬下來！」', explain: '貨櫃只有後方一個開口，最晚裝車的貨物在最外側，卸貨時最先下車の後進先出。' },
+            { id: 37, type: 'stack', title: '衣服摺好疊在衣櫃', quote: '「媽媽剛摺好放最上面的那件紅衣服，我出門時順手從最上面第一件拿來穿！」', explain: '衣服由下往上堆疊，直接拿取最頂端最後放上去的那一件。' },
+            { id: 38, type: 'stack', title: '桌上的作業收件匣', quote: '「同學把作業一本本往老師桌上疊，最晚交、壓在最上面的作業被老師第一個批改！」', explain: '作業往上堆疊，從頂端開始取件批改，最後交的人最先被改到 (LIFO)。' },
+            { id: 39, type: 'stack', title: '單口管狀硬幣盒', quote: '「把 10 元硬幣一枚枚壓進管狀零錢盒，付錢時最上面最後塞入的那枚硬幣先推播出來！」', explain: '管狀零錢盒從頂端壓入硬幣 (Push)，取用時也是從頂端彈出 (Pop)。' },
+            { id: 40, type: 'stack', title: '鬆餅塔 (Pancake)', quote: '「剛煎好疊在最頂層的第 4 片熱騰騰鬆餅，淋上蜂蜜後最先從最上面切來吃！」', explain: '鬆餅一片片往上疊高，由最頂層（最後放上去的）開始往下享用。' },
+
+            // === 41~50 樹 (Tree) ===
+            { id: 41, type: 'tree', title: '家族族譜', quote: '「從阿公阿嬤（根節點）往下分支出爸爸與叔叔，再往下分支出我跟堂弟妹！」', explain: '具備明顯的上下輩分階層與一對多分支關係，是典型的樹狀結構。' },
+            { id: 42, type: 'tree', title: '學校行政體系', quote: '「校長在最頂端，底下分為教務處、學務處，各處室底下再細分各個組長！」', explain: '由單一最高首長向下層層管轄與分支，沒有迴圈，屬於樹狀結構。' },
+            { id: 43, type: 'tree', title: '淘汰賽賽程表', quote: '「總冠軍在最頂點，往下展開四強賽、八強賽的晉級分支樹！」', explain: '單淘汰賽程圖呈現完美的二元樹 (Binary Tree) 階層結構。' },
+            { id: 44, type: 'tree', title: '電腦的資料夾與檔案系統', quote: '「C 槽根目錄底下有『照片』與『遊戲』資料夾，點進資料夾裡又有子資料夾！」', explain: '作業系統的目錄結構從根目錄 (Root) 不斷向下分支出子目錄與檔案葉節點。' },
+            { id: 45, type: 'tree', title: '書本的目錄架構', quote: '「全書分為『第一章、第二章』，第一章底下又細分為『1-1 節、1-2 節』！」', explain: '章、節、小節具有嚴格的從屬階層關係，構成一棵知識分類樹。' },
+            { id: 46, type: 'tree', title: '生物分類學', quote: '「從『動物界』往下分支為『脊索動物門』，再往下細分為綱、目、科、屬、種！」', explain: '生物分類學以樹狀階層將物種由大範圍逐步向下細分。' },
+            { id: 47, type: 'tree', title: '公司的組織架構圖', quote: '「CEO 董事長領導各部門副總，副總底下再帶領各個專案小隊！」', explain: '企業組織圖以樹狀呈現管理階層與部門分支。' },
+            { id: 48, type: 'tree', title: '心智圖 (Mind Map)', quote: '「從正中央的核心主題『旅遊計畫』，向外一層層發散出交通、住宿、美食等子分支！」', explain: '心智圖由單一中心根節點向外作放射狀階層分支，本質上是一棵樹。' },
+            { id: 49, type: 'tree', title: '電話客服的語音選項', quote: '「中文請按 1 ➔ 進入下一層：查詢帳單請按 1、辦理掛失請按 2...」', explain: '每按一個鍵就往下一層分支走，這種層層引導的結構稱為「決策樹」。' },
+            { id: 50, type: 'tree', title: '網頁的 DOM 結構', quote: '「最外層是 <html> 根標籤，裡面分支出 <head> 與 <body>，再往下包覆 <div> 與 <p>！」', explain: 'HTML 網頁標籤層層嵌套，在瀏覽器中被解析為一棵 DOM Tree。' },
+
+            // === 51~60 圖 (Graph) ===
+            { id: 51, type: 'graph', title: '台北捷運路線圖', quote: '「各個捷運站是節點，紅線、藍線、綠線軌道交錯相連，還能透過轉乘站換線！」', explain: '車站與軌道構成多對多、帶有環路(Cycle)的複雜路網，是標準的「圖 (Graph)」。' },
+            { id: 52, type: 'graph', title: 'Google Maps 道路導航', quote: '「系統正在計算網狀道路與各個十字路口之間，從起點到終點的『最短路徑』！」', explain: '路口是節點(Node)、道路是帶有距離權重的邊(Edge)，導航即是圖論的最短路徑演算法。' },
+            { id: 53, type: 'graph', title: 'FB / IG 社交關係網', quote: '「阿明認識小美、小美認識阿華、阿華也認識阿明，大家互相加好友交織成複雜人脈網！」', explain: '每個人是節點，朋友關係是連線，彼此可形成三角或網狀迴圈，屬於圖結構。' },
+            { id: 54, type: 'graph', title: '航空公司的全球航線網', quote: '「全球各大機場透過直飛與轉機航線彼此串連，形成四通八達的飛行網路！」', explain: '機場為頂點、航線為邊，可從任一城市經由不同轉機路徑飛往目的地。' },
+            { id: 55, type: 'graph', title: '電力公司的輸電網路', quote: '「發電廠、多個變電所與社區之間以網狀電纜互相連通，一條線路故障還能改走備援迴路！」', explain: '電網具備多條環狀與網狀互連路徑以確保供電穩定，是典型的圖結構。' },
+            { id: 56, type: 'graph', title: '網狀前置技能圖', quote: '「想學習『終極魔劍斬』，必須先同時點亮左線的『火球術』與右線的『重擊』兩條路線！」', explain: '當技能節點可以匯合、互相依賴甚至跨線連結時，它就從單純的樹變成了有向圖 (DAG)。' },
+            { id: 57, type: 'graph', title: '人體的血液循環系統', quote: '「心臟、動脈、微血管網與靜脈在全身交織成密密麻麻且循環相通的血管網路！」', explain: '血管系統包含無數交匯點與循環迴路，屬於網狀的圖結構。' },
+            { id: 58, type: 'graph', title: '城市公車路線與站牌網', quote: '「不同號次的公車路線在城市各個站牌交會重疊，乘客可以在任意交會站自由轉車！」', explain: '多個站牌與多條公車路線交織成網狀拓樸。' },
+            { id: 59, type: 'graph', title: '網際網路的路由器拓樸', quote: '「網路封包從你的電腦出發，經過全球無數台互相連結的路由器節點接力傳送到伺服器！」', explain: 'Internet 顧名思義就是網際網路，路由器彼此呈網狀連接以分散流量。' },
+            { id: 60, type: 'graph', title: '犯罪偵查的關係連線板', quote: '「警探在白板上釘滿嫌疑犯、證物與地點的照片，並用紅線把所有複雜的關聯交叉連起來！」', explain: '人物、證物、地點作為節點，紅線代表關聯邊，交織成非階層式的關係圖 (Graph)。' }
+        ];
+
+        /**************************************************************
+         * 3. 遊戲狀態與音效合成器 (Web Audio 8-bit 音效)
+         **************************************************************/
+        const TOTAL_QUIZ_COUNT = 18;
+        // 答對題數 (0 ~ 18 題) 對應分數表 (70 ~ 100 分)
+        const SCORE_LOOKUP_TABLE = [
+            70, // 0 題
+            72, // 1 題
+            73, // 2 題
+            75, // 3 題
+            77, // 4 題
+            78, // 5 題
+            80, // 6 題
+            82, // 7 題
+            83, // 8 題
+            85, // 9 題
+            87, // 10 題
+            88, // 11 題
+            90, // 12 題
+            92, // 13 題
+            93, // 14 題
+            95, // 15 題
+            97, // 16 題
+            98, // 17 題
+            100 // 18 題
+        ];
+
+        let quizScenes = []; // 每次隨機抽取的 18 題 (保證每種資料結構至少出現 2 題)
+        let currentQuizIndex = 0; // 0 ~ 17
+        let currentSceneIndex = 0; // 對應 SCENES 的索引 (0 ~ 59)
+        let soundEnabled = true;
+        let currentOptions = [...CATEGORIES]; // 顯示完整選項
+        let answeredHistory = {}; // { sceneId: { selected: 'array', isCorrect: true } }
+        let animTick = 0; // 放慢後的動畫計時器
+        let generatedDataUrl = '';
+        let currentStudentName = '';
+
+        let audioCtx = null;
+        function play8BitSound(type) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                    osc.frequency.setValueAtTime(1046.50, now + 0.24); // C6
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
+                    osc.start(now);
+                    osc.stop(now + 0.42);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.setValueAtTime(150, now + 0.14);
+                    gain.gain.setValueAtTime(0.14, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'switch') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, now);
+                    gain.gain.setValueAtTime(0.06, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+                    osc.start(now);
+                    osc.stop(now + 0.07);
+                }
+            } catch (e) {}
+        }
+
+        /**************************************************************
+         * 4. 介面更新與作答邏輯 (隨機抽 18 題 + 成績結算圖檔)
+         **************************************************************/
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function startNewQuiz() {
+            // 確保 6 種資料結構每一種至少出現 2 題 (共先保底 12 題)，剩下的 6 題再從剩餘的 48 題隨機抽出
+            let guaranteed = [];
+            let remainingPool = [];
+
+            CATEGORIES.forEach(cat => {
+                const catScenes = shuffleArray(SCENES.filter(s => s.type === cat.id));
+                guaranteed.push(...catScenes.slice(0, 2)); // 每種至少抽 2 題
+                remainingPool.push(...catScenes.slice(2));
+            });
+
+            const extraSix = shuffleArray(remainingPool).slice(0, TOTAL_QUIZ_COUNT - guaranteed.length);
+            quizScenes = shuffleArray([...guaranteed, ...extraSix]);
+
+            answeredHistory = {};
+            currentQuizIndex = 0;
+
+            document.getElementById('quizView').classList.remove('hidden');
+            document.getElementById('quizView').classList.add('flex');
+            document.getElementById('studentFormView').classList.add('hidden');
+            document.getElementById('studentFormView').classList.remove('flex');
+            document.getElementById('resultCardView').classList.add('hidden');
+            document.getElementById('resultCardView').classList.remove('flex');
+
+            loadScene(0);
+        }
+
+        function loadScene(quizIdx) {
+            if (quizIdx < 0) quizIdx = 0;
+            if (quizIdx >= quizScenes.length) {
+                showStudentForm();
+                return;
+            }
+            currentQuizIndex = quizIdx;
+            const scene = quizScenes[currentQuizIndex];
+            currentSceneIndex = SCENES.findIndex(s => s.id === scene.id);
+            animTick = 0; // 切換關卡時從頭開始播放慢速動畫
+
+            const qNumStr = String(currentQuizIndex + 1).padStart(2, '0');
+            const codeStr = String(scene.id).padStart(2, '0');
+
+            document.getElementById('sceneNumberBadge').textContent = `Q${qNumStr}/${TOTAL_QUIZ_COUNT}`;
+            document.getElementById('sceneTitle').textContent = `${scene.title}`;
+            document.getElementById('sceneCodeBadge').textContent = `題庫#${codeStr}`;
+
+            renderOptionButtons();
+            updateFeedbackPanel();
+        }
+
+        function renderOptionButtons() {
+            const container = document.getElementById('optionsContainer');
+            const scene = quizScenes[currentQuizIndex];
+            const record = answeredHistory[scene.id];
+
+            container.innerHTML = '';
+
+            currentOptions.forEach((cat, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'pixel-btn rounded-lg p-3 sm:p-3.5 flex flex-col items-center justify-center gap-1 text-center relative group';
+
+                // 如果這題已經作答過，套用紅綠標示並鎖定重複點擊
+                if (record) {
+                    btn.disabled = true;
+                    if (cat.id === scene.type) {
+                        btn.classList.add('btn-correct');
+                    } else if (cat.id === record.selected && !record.isCorrect) {
+                        btn.classList.add('btn-wrong');
+                    } else {
+                        btn.classList.add('opacity-50');
+                    }
+                }
+
+                btn.onclick = () => submitAnswer(cat.id);
+
+                // 右上角狀態圖示
+                let statusBadge = `<span class="absolute top-1.5 left-2 font-pixel-en text-[10px] text-slate-400 group-hover:text-sky-300">[${idx + 1}]</span>`;
+                if (record) {
+                    if (cat.id === scene.type) {
+                        statusBadge += `<span class="absolute top-1.5 right-2 text-xs sm:text-sm">✅</span>`;
+                    } else if (cat.id === record.selected && !record.isCorrect) {
+                        statusBadge += `<span class="absolute top-1.5 right-2 text-xs sm:text-sm">❌</span>`;
+                    }
+                }
+
+                btn.innerHTML = `
+                    ${statusBadge}
+                    <div class="text-2xl sm:text-3xl mb-0.5 transform group-hover:scale-110 transition">${cat.icon}</div>
+                    <div class="text-base sm:text-lg font-bold tracking-wide text-white">${cat.name}</div>
+                    <div class="font-pixel-en text-[9px] sm:text-[10px] text-sky-300/90">${cat.en}</div>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function submitAnswer(selectedTypeId) {
+            const scene = quizScenes[currentQuizIndex];
+            // 已作答過不重複計分
+            if (answeredHistory[scene.id]) return;
+
+            const isCorrect = (selectedTypeId === scene.type);
+
+            answeredHistory[scene.id] = {
+                selected: selectedTypeId,
+                isCorrect: isCorrect
+            };
+
+            play8BitSound(isCorrect ? 'correct' : 'wrong');
+            renderOptionButtons();
+            updateFeedbackPanel();
+        }
+
+        function updateFeedbackPanel() {
+            const scene = quizScenes[currentQuizIndex];
+            const record = answeredHistory[scene.id];
+            const box = document.getElementById('feedbackBox');
+            const header = document.getElementById('feedbackHeader');
+            const desc = document.getElementById('feedbackDesc');
+            const badge = document.getElementById('feedbackConceptBadge');
+            const nextBtn = document.getElementById('nextStageBarBtn');
+            const nextBtnText = document.getElementById('nextStageBtnText');
+
+            const isLastQuestion = (currentQuizIndex === TOTAL_QUIZ_COUNT - 1);
+            nextBtnText.textContent = isLastQuestion ? '完成測驗，前往結算成績 (FINISH)' : `下一題 (${currentQuizIndex + 1}/${TOTAL_QUIZ_COUNT})`;
+
+            const correctCat = CATEGORIES.find(c => c.id === scene.type);
+
+            if (!record) {
+                box.className = 'bg-slate-950/95 border-2 border-amber-400/80 rounded-lg p-3.5 sm:p-4.5 h-[146px] sm:h-[156px] overflow-y-auto flex flex-col justify-between shadow-inner';
+                header.className = 'text-xs sm:text-sm font-bold text-amber-400 flex items-center gap-1.5';
+                header.innerHTML = `<span>💬 現場情境描述（請觀察上方動畫並選擇對應的資料結構）：</span>`;
+                desc.className = 'text-base sm:text-lg text-white font-bold my-auto pt-1 leading-relaxed';
+                desc.textContent = scene.quote;
+                badge.classList.add('hidden');
+                nextBtn.disabled = true;
+                nextBtn.className = 'pixel-btn w-full py-3.5 sm:py-4 rounded-lg text-base sm:text-lg font-bold tracking-widest flex items-center justify-center gap-2 bg-slate-800/70 border-slate-700 text-slate-500 cursor-not-allowed';
+                nextBtnText.textContent = '請先選擇上方一個資料結構選項作答';
+                return;
+            }
+
+            const selectedCat = CATEGORIES.find(c => c.id === record.selected);
+            badge.classList.remove('hidden');
+            badge.textContent = `${correctCat.icon} ${correctCat.name}：${correctCat.shortDesc}`;
+            nextBtn.disabled = false;
+            nextBtn.className = 'pixel-btn w-full py-3.5 sm:py-4 rounded-lg text-base sm:text-lg font-bold tracking-widest flex items-center justify-center gap-2 bg-amber-400 border-amber-200 text-slate-950 hover:bg-amber-300 transition shadow-lg';
+
+            if (record.isCorrect) {
+                box.className = 'bg-emerald-950/60 border-2 border-emerald-400 rounded-lg p-3.5 sm:p-4.5 h-[146px] sm:h-[156px] overflow-y-auto flex flex-col justify-between shadow-lg shadow-emerald-950/50';
+                header.className = 'text-xs sm:text-sm font-bold text-emerald-300 flex items-center gap-1.5';
+                header.innerHTML = `<span>✅ 答對了！這正是【${correctCat.name} (${correctCat.en})】！</span>`;
+                desc.className = 'text-sm sm:text-base text-emerald-100 my-auto pt-1 leading-relaxed font-normal';
+                desc.textContent = `${scene.quote} ➔ ${scene.explain}`;
+            } else {
+                box.className = 'bg-rose-950/60 border-2 border-rose-400 rounded-lg p-3.5 sm:p-4.5 h-[146px] sm:h-[156px] overflow-y-auto flex flex-col justify-between shadow-lg shadow-rose-950/50';
+                header.className = 'text-xs sm:text-sm font-bold text-rose-300 flex items-center gap-1.5';
+                header.innerHTML = `<span>❌ 猜錯囉！您選了「${selectedCat ? selectedCat.name : ''}」，正確答案是綠色的【${correctCat.name}】！</span>`;
+                desc.className = 'text-sm sm:text-base text-rose-100 my-auto pt-1 leading-relaxed font-normal';
+                desc.textContent = `${scene.quote} ➔ ${scene.explain}`;
+            }
+        }
+
+        function nextScene() {
+            const scene = quizScenes[currentQuizIndex];
+            if (!answeredHistory[scene.id]) return; // 尚未作答不可跳下一題
+            play8BitSound('switch');
+            if (currentQuizIndex + 1 >= TOTAL_QUIZ_COUNT) {
+                showStudentForm();
+            } else {
+                loadScene(currentQuizIndex + 1);
+            }
+        }
+
+        function showStudentForm() {
+            document.getElementById('quizView').classList.add('hidden');
+            document.getElementById('quizView').classList.remove('flex');
+            document.getElementById('studentFormView').classList.remove('hidden');
+            document.getElementById('studentFormView').classList.add('flex');
+            document.getElementById('studentIdInput').focus();
+        }
+
+        function generateScoreImage() {
+            const studentId = document.getElementById('studentIdInput').value.trim();
+            const studentName = document.getElementById('studentNameInput').value.trim();
+            const errEl = document.getElementById('formErrorMsg');
+
+            if (!studentId || !studentName) {
+                errEl.classList.remove('hidden');
+                play8BitSound('wrong');
+                return;
+            }
+            errEl.classList.add('hidden');
+            currentStudentName = studentName;
+            play8BitSound('correct');
+
+            // 計算答對題數並查表取得對應分數 (0~18 題對應 70~100 分)
+            let correctCount = 0;
+            quizScenes.forEach(s => {
+                if (answeredHistory[s.id] && answeredHistory[s.id].isCorrect) {
+                    correctCount++;
+                }
+            });
+            const finalScore = SCORE_LOOKUP_TABLE[correctCount] ?? 70;
+
+            // 繪製專屬成績單 Canvas (720 x 540)
+            const sCanvas = document.getElementById('scoreCardCanvas');
+            const sCtx = sCanvas.getContext('2d');
+            const W = sCanvas.width;
+            const H = sCanvas.height;
+
+            // 背景漸層與復古格線
+            const grad = sCtx.createLinearGradient(0, 0, 0, H);
+            grad.addColorStop(0, '#070b14');
+            grad.addColorStop(1, '#111827');
+            sCtx.fillStyle = grad;
+            sCtx.fillRect(0, 0, W, H);
+
+            sCtx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
+            sCtx.lineWidth = 1;
+            for (let x = 0; x < W; x += 24) {
+                sCtx.beginPath(); sCtx.moveTo(x, 0); sCtx.lineTo(x, H); sCtx.stroke();
+            }
+            for (let y = 0; y < H; y += 24) {
+                sCtx.beginPath(); sCtx.moveTo(0, y); sCtx.lineTo(W, y); sCtx.stroke();
+            }
+
+            // 外框裝飾
+            sCtx.strokeStyle = '#38bdf8';
+            sCtx.lineWidth = 6;
+            sCtx.strokeRect(16, 16, W - 32, H - 32);
+            sCtx.strokeStyle = '#0284c7';
+            sCtx.lineWidth = 2;
+            sCtx.strokeRect(24, 24, W - 48, H - 48);
+
+            // 學生學號與姓名區塊
+            sCtx.fillStyle = '#1e293b';
+            sCtx.fillRect(60, 100, W - 120, 74);
+            sCtx.strokeStyle = '#64748b';
+            sCtx.lineWidth = 2;
+            sCtx.strokeRect(60, 100, W - 120, 74);
+
+            sCtx.fillStyle = '#f8fafc';
+            sCtx.font = 'bold 26px "Noto Sans TC", sans-serif';
+            sCtx.textAlign = 'center';
+            sCtx.fillText(`學號：${studentId}　｜　姓名：${studentName}`, W / 2, 146);
+
+            // 分數大字展示區塊
+            sCtx.fillStyle = '#94a3b8';
+            sCtx.font = 'bold 18px "Noto Sans TC", sans-serif';
+            sCtx.fillText(`答對題數：${correctCount} / ${TOTAL_QUIZ_COUNT} 題`, W / 2, 214);
+
+            // 得分光暈與巨大數字
+            sCtx.fillStyle = finalScore >= 90 ? '#4ade80' : finalScore >= 80 ? '#facc15' : '#38bdf8';
+            sCtx.font = '900 96px "Noto Sans TC", monospace';
+            sCtx.fillText(`${finalScore}`, W / 2 - 18, 315);
+
+            sCtx.fillStyle = '#e2e8f0';
+            sCtx.font = 'bold 30px "Noto Sans TC", sans-serif';
+            sCtx.fillText('分', W / 2 + 88, 310);
+
+            // 底部：抽到的 18 題代碼明細區 (標示題號代碼與答對/答錯顏色)
+            sCtx.fillStyle = '#0f172a';
+            sCtx.fillRect(50, 358, W - 100, 136);
+            sCtx.strokeStyle = '#334155';
+            sCtx.lineWidth = 2;
+            sCtx.strokeRect(50, 358, W - 100, 136);
+
+            const codeListStr = quizScenes.map(s => '#' + String(s.id).padStart(2, '0')).join(' ');
+            sCtx.fillStyle = '#cbd5e1';
+            sCtx.font = 'bold 12px "Noto Sans TC", monospace';
+            sCtx.fillText(`本次隨機抽取 18 題代碼：${codeListStr}`, W / 2, 382);
+
+            // 繪製 18 個小標籤 (2列: 上9題、下9題)，清楚呈現每題代碼與正誤
+            quizScenes.forEach((s, idx) => {
+                const isCorrect = answeredHistory[s.id]?.isCorrect;
+                const row = idx < 9 ? 0 : 1;
+                const col = idx < 9 ? idx : idx - 9;
+                const totalInRow = 9;
+                const boxW = 60;
+                const boxH = 30;
+                const gap = 7;
+                const rowWidth = totalInRow * boxW + (totalInRow - 1) * gap;
+                const startX = (W - rowWidth) / 2;
+                const bx = startX + col * (boxW + gap);
+                const by = 400 + row * 40;
+
+                sCtx.fillStyle = isCorrect ? '#065f46' : '#7f1d1d';
+                sCtx.fillRect(bx, by, boxW, boxH);
+                sCtx.strokeStyle = isCorrect ? '#34d399' : '#f87171';
+                sCtx.lineWidth = 1.5;
+                sCtx.strokeRect(bx, by, boxW, boxH);
+
+                sCtx.fillStyle = '#ffffff';
+                sCtx.font = 'bold 12px monospace';
+                sCtx.fillText(`#${String(s.id).padStart(2, '0')}${isCorrect ? '✓' : '✗'}`, bx + boxW / 2, by + 19);
+            });
+
+            // 時間戳記
+            const nowStr = new Date().toLocaleString('zh-TW', { hour12: false });
+            sCtx.fillStyle = '#64748b';
+            sCtx.font = '11px "Noto Sans TC", monospace';
+            sCtx.fillText(`測驗完成時間：${nowStr}`, W / 2, 512);
+
+            generatedDataUrl = sCanvas.toDataURL('image/png');
+            document.getElementById('scoreResultImg').src = generatedDataUrl;
+
+            document.getElementById('studentFormView').classList.add('hidden');
+            document.getElementById('studentFormView').classList.remove('flex');
+            document.getElementById('resultCardView').classList.remove('hidden');
+            document.getElementById('resultCardView').classList.add('flex');
+        }
+
+        function downloadScoreImage() {
+            if (!generatedDataUrl) return;
+            const link = document.createElement('a');
+            const safeName = (currentStudentName || '學生').replace(/[\\/:*?"<>|]/g, '_');
+            link.download = `${safeName}.png`;
+            link.href = generatedDataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 鍵盤數字鍵 1~6 快速作答支援
+        window.addEventListener('keydown', (e) => {
+            const quizVisible = !document.getElementById('quizView').classList.contains('hidden');
+            if (!quizVisible) return;
+
+            if (['1', '2', '3', '4', '5', '6'].includes(e.key)) {
+                const idx = parseInt(e.key, 10) - 1;
+                if (currentOptions[idx]) {
+                    submitAnswer(currentOptions[idx].id);
+                }
+            } else if (e.key === 'Enter') {
+                nextScene();
+            }
+        });
+
+        /**************************************************************
+         * 5. 點陣圖 Canvas 60 個場景專屬動畫渲染引擎 (320 x 180)
+         **************************************************************/
+        const canvas = document.getElementById('pixelCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+
+        // 基礎像素繪圖輔助函式
+        function pxRect(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+        }
+
+        function pxBorder(x, y, w, h, color, thickness = 2) {
+            ctx.fillStyle = color;
+            const rx = Math.round(x), ry = Math.round(y), rw = Math.round(w), rh = Math.round(h);
+            ctx.fillRect(rx, ry, rw, thickness);
+            ctx.fillRect(rx, ry + rh - thickness, rw, thickness);
+            ctx.fillRect(rx, ry, thickness, rh);
+            ctx.fillRect(rx + rw - thickness, ry, thickness, rh);
+        }
+
+        function pxText(text, x, y, color = '#ffffff', size = 10, align = 'center') {
+            ctx.fillStyle = color;
+            ctx.font = `bold ${size}px "Noto Sans TC", monospace`;
+            ctx.textAlign = align;
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, Math.round(x), Math.round(y));
+        }
+
+        function pxLine(x1, y1, x2, y2, color = '#64748b', width = 2) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.beginPath();
+            ctx.moveTo(Math.round(x1), Math.round(y1));
+            ctx.lineTo(Math.round(x2), Math.round(y2));
+            ctx.stroke();
+        }
+
+        // 繪製像素小人
+        function drawPixelPerson(x, y, shirtColor = '#38bdf8', scale = 2) {
+            // 頭
+            pxRect(x - 2 * scale, y - 7 * scale, 4 * scale, 4 * scale, '#fcd34d');
+            // 身體
+            pxRect(x - 3 * scale, y - 3 * scale, 6 * scale, 5 * scale, shirtColor);
+            // 腳
+            pxRect(x - 2 * scale, y + 2 * scale, 2 * scale, 3 * scale, '#1e293b');
+            pxRect(x + 0.5 * scale, y + 2 * scale, 2 * scale, 3 * scale, '#1e293b');
+        }
+
+        // 繪製像素小汽車
+        function drawPixelCar(x, y, bodyColor = '#ef4444') {
+            pxRect(x + 4, y, 20, 7, bodyColor); // 車頂
+            pxRect(x + 6, y + 2, 16, 5, '#bae6fd'); // 車窗
+            pxRect(x, y + 7, 28, 9, bodyColor); // 車身
+            pxRect(x + 4, y + 14, 6, 5, '#0f172a'); // 左輪
+            pxRect(x + 18, y + 14, 6, 5, '#0f172a'); // 右輪
+            pxRect(x + 25, y + 9, 3, 3, '#fde047'); // 車頭燈
+        }
+
+        // 繪製閃爍像素指標箭頭
+        function drawPointerArrow(x, y, dir = 'down', color = '#facc15') {
+            const bounce = Math.sin(animTick * 0.12) * 3;
+            const ay = Math.round(y + bounce);
+            ctx.fillStyle = color;
+            if (dir === 'down') {
+                pxRect(x - 2, ay - 12, 4, 6, color);
+                pxRect(x - 6, ay - 6, 12, 2, color);
+                pxRect(x - 4, ay - 4, 8, 2, color);
+                pxRect(x - 2, ay - 2, 4, 2, color);
+            } else if (dir === 'up') {
+                pxRect(x - 2, ay, 4, 2, color);
+                pxRect(x - 4, ay + 2, 8, 2, color);
+                pxRect(x - 6, ay + 4, 12, 2, color);
+                pxRect(x - 2, ay + 6, 4, 6, color);
+            }
+        }
+
+        // 繪製星空與地板背景 (移除底部文字遮罩，讓舞台乾淨無遮擋)
+        function drawRetroBackground(bgType) {
+            pxRect(0, 0, 320, 180, '#0b101e');
+            // 背景像素網格點綴
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.06)';
+            for (let x = 0; x < 320; x += 16) {
+                ctx.fillRect(x, 0, 1, 180);
+            }
+            for (let y = 0; y < 180; y += 16) {
+                ctx.fillRect(0, y, 320, 1);
+            }
+            // 底部舞台地板裝飾線
+            pxRect(0, 166, 320, 14, '#131c31');
+            pxRect(0, 166, 320, 2, '#1e293b');
+        }
+
+        /**************************************************************
+         * 60 個場景的獨立繪製邏輯 (放慢動畫推進速度 3 倍，拉長演示週期)
+         **************************************************************/
+        function renderSceneCanvas() {
+            // 將動畫計時器步進放慢至 0.32 (約原本速度的 1/3)，讓每個動作細節清楚呈現
+            animTick += 0.32;
+            const scene = SCENES[currentSceneIndex];
+            drawRetroBackground(scene.type);
+
+            const t = animTick;
+            const pulse = Math.floor(t / 18) % 2 === 0;
+
+            switch (scene.id) {
+                // ================= 陣列 1~10 =================
+                case 1: { // 一週藥盒
+                    const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+                    pxText('WEEKLY PILL BOX', 160, 34, '#94a3b8', 10);
+                    for (let i = 0; i < 7; i++) {
+                        const bx = 24 + i * 39;
+                        const by = 78;
+                        const isTarget = (i === 2);
+                        pxRect(bx, by, 35, 42, isTarget ? '#1e3a8a' : '#1e293b');
+                        pxBorder(bx, by, 35, 42, isTarget && pulse ? '#facc15' : '#64748b', 2);
+                        // 蓋子打開效果
+                        if (isTarget) {
+                            pxRect(bx, by - 16, 35, 12, '#38bdf8');
+                        }
+                        pxText(days[i], bx + 17, by + 12, isTarget ? '#facc15' : '#cbd5e1', 9);
+                        // 藥丸慢速升起展示
+                        const pillY = isTarget ? by + 26 - Math.abs(Math.sin(t * 0.06) * 10) : by + 28;
+                        pxRect(bx + 11, pillY, 7, 6, '#f43f5e');
+                        pxRect(bx + 18, pillY, 7, 6, '#ffffff');
+                        pxText(`[${i}]`, bx + 17, by + 54, '#64748b', 9);
+                    }
+                    drawPointerArrow(24 + 2 * 39 + 17, 56, 'down', '#facc15');
+                    break;
+                }
+                case 2: { // 糖葫蘆
+                    pxRect(45, 96, 230, 4, '#d97706'); // 竹籤
+                    // 放慢數糖葫蘆的步驟並加長在目標第 3 顆的停留時間
+                    const scanIdx = Math.min(2, Math.floor((t % 120) / 28));
+                    for (let i = 0; i < 5; i++) {
+                        const cx = 80 + i * 38;
+                        const cy = 98;
+                        const isHit = (i === 2 && scanIdx === 2);
+                        const isScanning = (i === scanIdx);
+                        pxRect(cx - 13, cy - 13, 26, 26, isHit ? '#fb7185' : '#e11d48');
+                        pxBorder(cx - 13, cy - 13, 26, 26, isScanning ? '#facc15' : '#881337', 2);
+                        pxRect(cx - 7, cy - 8, 5, 5, '#fecdd3'); // 高光
+                        pxText(`#${i + 1}`, cx, cy + 26, isHit ? '#facc15' : '#94a3b8', 10);
+                    }
+                    drawPointerArrow(80 + scanIdx * 38, 74, 'down', '#facc15');
+                    break;
+                }
+                case 3: { // 火車車廂
+                    // 鐵軌
+                    pxRect(10, 126, 300, 3, '#64748b');
+                    for (let x = 15; x < 305; x += 14) pxRect(x, 129, 6, 4, '#78350f');
+                    // 火車頭 + 6節車廂
+                    const offset = Math.sin(t * 0.04) * 5;
+                    pxRect(14 + offset, 92, 30, 32, '#475569');
+                    pxRect(18 + offset, 80, 10, 12, '#334155');
+                    for (let i = 0; i < 6; i++) {
+                        const cx = 48 + i * 42 + offset;
+                        const isCar4 = (i === 3);
+                        pxRect(cx, 96, 38, 28, isCar4 ? '#0284c7' : '#1e293b');
+                        pxBorder(cx, 96, 38, 28, isCar4 && pulse ? '#facc15' : '#94a3b8', 2);
+                        pxText(`0${i + 1}`, cx + 19, 110, isCar4 ? '#facc15' : '#e2e8f0', 10);
+                        pxRect(cx + 6, 122, 8, 5, '#0f172a');
+                        pxRect(cx + 24, 122, 8, 5, '#0f172a');
+                        if (isCar4) drawPointerArrow(cx + 19, 84, 'down', '#facc15');
+                    }
+                    break;
+                }
+                case 4: { // 尺上的刻度
+                    pxRect(25, 88, 270, 38, '#fde047');
+                    pxBorder(25, 88, 270, 38, '#ca8a04', 2);
+                    for (let i = 0; i <= 10; i++) {
+                        const rx = 40 + i * 24;
+                        const is7 = (i === 7);
+                        pxRect(rx, 88, 2, is7 ? 18 : 12, is7 ? '#dc2626' : '#422006');
+                        pxText(`${i}`, rx, 114, is7 ? '#dc2626' : '#422006', 9);
+                        if (is7) {
+                            drawPointerArrow(rx, 80, 'down', '#ef4444');
+                            pxBorder(rx - 9, 104, 18, 18, '#ef4444', 2);
+                        }
+                    }
+                    break;
+                }
+                case 5: { // 書架上的一排書
+                    pxRect(35, 130, 250, 8, '#78350f'); // 木書架
+                    const colors = ['#ef4444', '#3b82f6', '#eab308', '#10b981', '#a855f7', '#f97316', '#ec4899'];
+                    for (let i = 0; i < 7; i++) {
+                        const bx = 52 + i * 31;
+                        const isThird = (i === 2);
+                        const lift = isThird ? Math.abs(Math.sin(t * 0.05)) * 20 : 0;
+                        pxRect(bx, 72 - lift, 26, 58, colors[i]);
+                        pxBorder(bx, 72 - lift, 26, 58, isThird ? '#ffffff' : '#1e293b', 2);
+                        pxRect(bx + 4, 82 - lift, 18, 4, 'rgba(255,255,255,0.6)');
+                        pxText(`${i + 1}`, bx + 13, 110 - lift, '#ffffff', 10);
+                        if (isThird) drawPointerArrow(bx + 13, 60 - lift, 'down', '#facc15');
+                    }
+                    break;
+                }
+                case 6: { // 公車的單排座位
+                    pxBorder(30, 50, 260, 90, '#64748b', 3); // 公車車窗框
+                    pxText('SEAT 1 ~ 5', 160, 36, '#94a3b8', 10);
+                    for (let i = 0; i < 5; i++) {
+                        const sx = 48 + i * 46;
+                        const isSeat2 = (i === 1);
+                        pxRect(sx, 58, 36, 26, '#0ea5e9'); // 窗戶
+                        pxRect(sx + 4, 96, 28, 32, isSeat2 ? '#f59e0b' : '#334155'); // 椅背
+                        pxBorder(sx + 4, 96, 28, 32, isSeat2 && pulse ? '#ffffff' : '#94a3b8', 2);
+                        pxText(`${i + 1}號`, sx + 18, 114, '#ffffff', 10);
+                        if (isSeat2) {
+                            drawPixelPerson(sx + 18, 90, '#22c55e', 2);
+                            drawPointerArrow(sx + 18, 68, 'down', '#facc15');
+                        }
+                    }
+                    break;
+                }
+                case 7: { // 排隊結帳地上的等候腳印標示
+                    pxRect(20, 122, 280, 6, '#334155');
+                    for (let i = 0; i < 5; i++) {
+                        const fx = 38 + i * 52;
+                        const isSecond = (i === 1);
+                        pxRect(fx, 106, 38, 22, isSecond ? '#eab308' : '#1e293b');
+                        pxBorder(fx, 106, 38, 22, '#facc15', 2);
+                        pxText(`👣格${i + 1}`, fx + 19, 117, isSecond ? '#0f172a' : '#facc15', 9);
+                        if (isSecond) {
+                            drawPixelPerson(fx + 19, 90, '#38bdf8', 2.4);
+                            drawPointerArrow(fx + 19, 60, 'down', '#facc15');
+                        }
+                    }
+                    break;
+                }
+                case 8: { // 溫度計的度數標示
+                    pxRect(40, 82, 240, 26, '#f8fafc');
+                    pxBorder(40, 82, 240, 26, '#64748b', 2);
+                    pxRect(28, 76, 24, 38, '#ef4444'); // 紅色水銀球
+                    const degs = [0, 5, 10, 15, 20, 25, 30, 35];
+                    pxRect(52, 91, 5 * 28 + 4, 8, '#ef4444'); // 水銀停在 25度 (index 5)
+                    for (let i = 0; i < degs.length; i++) {
+                        const dx = 52 + i * 28;
+                        const is25 = (degs[i] === 25);
+                        pxRect(dx, 82, 2, 9, '#0f172a');
+                        pxText(`${degs[i]}°`, dx, 122, is25 ? '#facc15' : '#94a3b8', 9);
+                        if (is25) drawPointerArrow(dx, 74, 'down', '#facc15');
+                    }
+                    break;
+                }
+                case 9: { // 直尺型的路邊停車格
+                    pxRect(15, 66, 290, 4, '#94a3b8'); // 人行道邊界
+                    for (let i = 0; i < 5; i++) {
+                        const px = 25 + i * 54;
+                        const is03 = (i === 2);
+                        pxBorder(px, 76, 48, 38, is03 && pulse ? '#facc15' : '#cbd5e1', 2);
+                        pxText(`0${i + 1}`, px + 24, 124, is03 ? '#facc15' : '#94a3b8', 10);
+                        if (is03) {
+                            drawPixelCar(px + 10, 85, '#ef4444');
+                            drawPointerArrow(px + 24, 62, 'down', '#facc15');
+                        }
+                    }
+                    break;
+                }
+                case 10: { // 自動販賣機的單一軌道
+                    pxRect(45, 58, 230, 68, '#1e293b');
+                    pxBorder(45, 58, 230, 68, '#38bdf8', 2);
+                    for (let i = 0; i < 6; i++) {
+                        const dx = 58 + i * 35;
+                        pxRect(dx, 70, 26, 42, '#dc2626');
+                        pxBorder(dx, 70, 26, 42, '#fde047', 2);
+                        pxText('茶', dx + 13, 91, '#ffffff', 11);
+                        pxText(`[${i}]`, dx + 13, 138, '#38bdf8', 9);
+                    }
+                    break;
+                }
+
+                // ================= 二維陣列 11~20 =================
+                case 11: { // 電影院座位表
+                    pxRect(80, 26, 160, 10, '#38bdf8');
+                    pxText('SCREEN', 160, 31, '#0f172a', 8);
+                    const rows = ['A', 'B', 'C', 'D'];
+                    for (let r = 0; r < 4; r++) {
+                        pxText(`${rows[r]}排`, 48, 56 + r * 25, '#94a3b8', 9);
+                        for (let c = 0; c < 6; c++) {
+                            const sx = 72 + c * 32;
+                            const sy = 46 + r * 25;
+                            const isTarget = (r === 2 && c === 3); // C排4號
+                            pxRect(sx, sy, 24, 18, isTarget ? (pulse ? '#facc15' : '#eab308') : '#334155');
+                            pxText(`${c + 1}`, sx + 12, sy + 9, isTarget ? '#0f172a' : '#cbd5e1', 8);
+                        }
+                    }
+                    break;
+                }
+                case 12: { // 棋盤
+                    const gx = 95, gy = 32, step = 22;
+                    pxRect(gx - 10, gy - 8, 148, 126, '#d97706');
+                    for (let i = 0; i < 6; i++) {
+                        pxLine(gx, gy + i * step, gx + 5 * step, gy + i * step, '#451a03', 1);
+                        pxLine(gx + i * step, gy, gx + i * step, gy + 5 * step, '#451a03', 1);
+                        pxText(`${i}`, gx + i * step, gy - 3, '#fef08a', 8);
+                        pxText(`${i}`, gx - 6, gy + i * step, '#fef08a', 8);
+                    }
+                    // 黑子落在 (3, 4)
+                    const cx = gx + 3 * step, cy = gy + 4 * step;
+                    pxRect(cx - 7, cy - 7, 14, 14, '#0f172a');
+                    if (pulse) pxBorder(cx - 9, cy - 9, 18, 18, '#facc15', 2);
+                    break;
+                }
+                case 13: { // Excel 試算表
+                    const cols = ['A', 'B', 'C', 'D', 'E'];
+                    const ox = 62, oy = 34, cw = 42, ch = 23;
+                    for (let c = 0; c < 5; c++) {
+                        pxRect(ox + c * cw, oy, cw - 2, ch - 2, '#166534');
+                        pxText(cols[c], ox + c * cw + 20, oy + 10, '#ffffff', 9);
+                    }
+                    for (let r = 0; r < 4; r++) {
+                        pxRect(ox - 26, oy + (r + 1) * ch, 24, ch - 2, '#166534');
+                        pxText(`${r + 1}`, ox - 14, oy + (r + 1) * ch + 10, '#ffffff', 9);
+                        for (let c = 0; c < 5; c++) {
+                            const isC3 = (c === 2 && r === 2);
+                            pxRect(ox + c * cw, oy + (r + 1) * ch, cw - 2, ch - 2, isC3 ? '#fef08a' : '#1e293b');
+                            if (isC3) {
+                                pxBorder(ox + c * cw, oy + (r + 1) * ch, cw - 2, ch - 2, '#22c55e', 2);
+                                pxText('C3', ox + c * cw + 20, oy + (r + 1) * ch + 10, '#0f172a', 10);
+                            }
+                        }
+                    }
+                    break;
+                }
+                case 14: { // 教室的課桌椅排列
+                    pxRect(110, 24, 100, 14, '#14532d');
+                    pxText('講台黑板', 160, 31, '#ffffff', 9);
+                    for (let r = 0; r < 4; r++) {
+                        pxText(`${r + 1}排`, 44, 56 + r * 24, '#94a3b8', 9);
+                        for (let c = 0; c < 5; c++) {
+                            const dx = 68 + c * 40, dy = 46 + r * 24;
+                            const isHit = (r === 2 && c === 3); // 第3排第4個
+                            pxRect(dx, dy, 28, 16, isHit ? '#facc15' : '#78350f');
+                            pxText(`${c + 1}`, dx + 14, dy + 8, isHit ? '#0f172a' : '#fde68a', 8);
+                            if (isHit) drawPointerArrow(dx + 14, dy - 2, 'down', '#38bdf8');
+                        }
+                    }
+                    break;
+                }
+                case 15: { // 捷運站的置物櫃牆
+                    for (let r = 0; r < 3; r++) {
+                        pxText(`${r + 1}層`, 45, 56 + r * 34, '#94a3b8', 9);
+                        for (let c = 0; c < 4; c++) {
+                            const lx = 68 + c * 50, ly = 40 + r * 34;
+                            const isOpen = (r === 1 && c === 2); // 第2層第3格
+                            pxRect(lx, ly, 44, 28, isOpen ? '#0f172a' : '#eab308');
+                            pxBorder(lx, ly, 44, 28, isOpen ? '#38bdf8' : '#a16207', 2);
+                            if (isOpen) {
+                                pxRect(lx + 12, ly + 8, 20, 14, '#ef4444'); // 背包
+                                pxText('🎒', lx + 22, ly + 15, '#fff', 11);
+                            } else {
+                                pxText(`${r + 1}-${c + 1}`, lx + 22, ly + 14, '#422006', 9);
+                            }
+                        }
+                    }
+                    break;
+                }
+                case 16: { // 賓果遊戲卡
+                    const ox = 95, oy = 28, sz = 25;
+                    for (let r = 0; r < 5; r++) {
+                        for (let c = 0; c < 5; c++) {
+                            const isHit = (r === 1 && c === 3);
+                            const bx = ox + c * sz, by = oy + r * sz;
+                            pxRect(bx, by, sz - 2, sz - 2, isHit ? '#ef4444' : '#1e293b');
+                            pxBorder(bx, by, sz - 2, sz - 2, isHit && pulse ? '#facc15' : '#475569', 1);
+                            pxText(`${r * 5 + c + 1}`, bx + 11, by + 11, '#ffffff', 8);
+                        }
+                    }
+                    break;
+                }
+                case 17: { // 月曆/日曆
+                    const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+                    const ox = 58, oy = 30, cw = 31, ch = 21;
+                    for (let d = 0; d < 7; d++) {
+                        pxText(days[d], ox + d * cw + 14, oy + 8, '#38bdf8', 9);
+                    }
+                    for (let w = 0; w < 5; w++) {
+                        pxText(`W${w + 1}`, ox - 16, oy + (w + 1) * ch + 9, '#64748b', 8);
+                        for (let d = 0; d < 7; d++) {
+                            const isTarget = (w === 2 && d === 5); // 第3週週五
+                            const cx = ox + d * cw, cy = oy + (w + 1) * ch;
+                            pxRect(cx, cy, cw - 3, ch - 3, isTarget ? '#facc15' : '#1e293b');
+                            pxText(`${w * 7 + d + 1}`, cx + 14, cy + 9, isTarget ? '#0f172a' : '#cbd5e1', 8);
+                        }
+                    }
+                    break;
+                }
+                case 18: { // 魔術方塊的單一面
+                    const colors = [
+                        ['#ef4444', '#3b82f6', '#eab308'],
+                        ['#22c55e', '#f8fafc', '#f97316'],
+                        ['#3b82f6', '#ef4444', '#22c55e']
+                    ];
+                    const ox = 106, oy = 34, sz = 36;
+                    for (let r = 0; r < 3; r++) {
+                        for (let c = 0; c < 3; c++) {
+                            const bx = ox + c * sz, by = oy + r * sz;
+                            pxRect(bx, by, sz - 4, sz - 4, colors[r][c]);
+                            if (r === 0 && c === 2 && pulse) {
+                                pxBorder(bx - 2, by - 2, sz, sz, '#ffffff', 3);
+                            }
+                        }
+                    }
+                    break;
+                }
+                case 19: { // 大型停車場的平面車位
+                    const zones = ['A', 'B', 'C'];
+                    for (let r = 0; r < 3; r++) {
+                        pxText(`${zones[r]}區`, 42, 56 + r * 34, '#38bdf8', 10);
+                        for (let c = 0; c < 5; c++) {
+                            const px = 65 + c * 44, py = 42 + r * 34;
+                            const isB3 = (r === 1 && c === 2);
+                            pxBorder(px, py, 38, 24, isB3 ? '#facc15' : '#475569', 2);
+                            if (isB3) {
+                                drawPixelCar(px + 5, py + 3, '#ef4444');
+                            } else {
+                                pxText(`${zones[r]}-${c + 1}`, px + 19, py + 12, '#64748b', 8);
+                            }
+                        }
+                    }
+                    break;
+                }
+                case 20: { // 九宮格戳戳樂
+                    const ox = 104, oy = 34, sz = 38;
+                    for (let r = 0; r < 3; r++) {
+                        for (let c = 0; c < 3; c++) {
+                            const bx = ox + c * sz, by = oy + r * sz;
+                            const isCenter = (r === 1 && c === 1);
+                            pxRect(bx, by, sz - 4, sz - 4, isCenter ? '#7f1d1d' : '#f43f5e');
+                            pxBorder(bx, by, sz - 4, sz - 4, '#fde047', 2);
+                            pxText(isCenter ? '💥' : '福', bx + 17, by + 17, '#fde047', 12);
+                        }
+                    }
+                    break;
+                }
+
+                // ================= 佇列 21~30 =================
+                case 21: { // 超市結帳人潮
+                    pxRect(36, 74, 38, 46, '#0284c7'); // 收銀台
+                    pxText('結帳櫃檯', 55, 62, '#38bdf8', 9);
+                    const shift = (t % 120) * 0.35;
+                    const colors = ['#22c55e', '#eab308', '#ec4899', '#a855f7'];
+                    for (let i = 0; i < 4; i++) {
+                        const px = 105 + i * 45 - shift;
+                        drawPixelPerson(px, 103, colors[i], 2.2);
+                        pxText(`#${i + 1}`, px, 74, '#facc15', 9);
+                    }
+                    break;
+                }
+                case 22: { // 洗車機的車輛等待線
+                    // 洗車隧道
+                    pxRect(120, 56, 76, 62, '#0ea5e9');
+                    pxBorder(120, 56, 76, 62, '#bae6fd', 3);
+                    pxText('🫧 洗車隧道 🫧', 158, 44, '#38bdf8', 10);
+                    const move = (t % 140) * 0.3;
+                    drawPixelCar(48 - move, 92, '#ef4444'); // 1號紅車先出
+                    drawPixelCar(142 - move * 0.45, 92, '#3b82f6'); // 2號藍車洗車中
+                    drawPixelCar(232 - move * 0.45, 92, '#eab308'); // 3號黃車排隊進
+                    break;
+                }
+                case 23: { // 銀行抽號碼牌
+                    pxRect(40, 46, 70, 42, '#0f172a');
+                    pxBorder(40, 46, 70, 42, '#facc15', 2);
+                    const num = 25 + (Math.floor(t / 90) % 3);
+                    pxText(`叫號 0${num}`, 75, 67, '#22c55e', 11);
+                    for (let i = 0; i < 3; i++) {
+                        const px = 140 + i * 52;
+                        drawPixelPerson(px, 104, i === 0 ? '#facc15' : '#64748b', 2.2);
+                        pxText(`0${num + i}`, px, 74, i === 0 ? '#facc15' : '#cbd5e1', 10);
+                    }
+                    break;
+                }
+                case 24: { // 得來速車道
+                    pxRect(35, 60, 46, 40, '#dc2626');
+                    pxText('🍔取餐窗', 58, 80, '#ffffff', 9);
+                    pxRect(20, 116, 280, 4, '#475569');
+                    const shift = (t % 120) * 0.25;
+                    drawPixelCar(85 - shift, 96, '#22c55e');
+                    drawPixelCar(155 - shift, 96, '#f59e0b');
+                    drawPixelCar(225 - shift, 96, '#38bdf8');
+                    break;
+                }
+                case 25: { // 遊樂園排隊動線
+                    pxRect(34, 76, 72, 34, '#ef4444');
+                    pxBorder(34, 76, 72, 34, '#facc15', 2);
+                    pxText('🎢 雲霄飛車', 70, 93, '#ffffff', 9);
+                    for (let i = 0; i < 4; i++) {
+                        drawPixelPerson(135 + i * 40 - (t % 90) * 0.22, 98, i === 0 ? '#22c55e' : '#38bdf8', 2);
+                    }
+                    break;
+                }
+                case 26: { // 客服電話的等待接聽
+                    pxRect(40, 64, 56, 50, '#1e293b');
+                    pxBorder(40, 64, 56, 50, '#22c55e', 2);
+                    pxText('🎧客服', 68, 89, '#4ade80', 10);
+                    for (let i = 0; i < 3; i++) {
+                        const cx = 135 + i * 55 - (t % 100) * 0.22;
+                        pxRect(cx, 74, 40, 30, i === 0 ? '#0284c7' : '#334155');
+                        pxBorder(cx, 74, 40, 30, '#38bdf8', 2);
+                        pxText(`📞#${i + 1}`, cx + 20, 89, '#ffffff', 9);
+                    }
+                    break;
+                }
+                case 27: { // 印表機的列印任務
+                    pxRect(125, 66, 70, 48, '#475569');
+                    pxBorder(125, 66, 70, 48, '#cbd5e1', 2);
+                    pxText('🖨️ PRINTER', 160, 90, '#ffffff', 9);
+                    // 右進左出
+                    const shift = (t % 110) * 0.24;
+                    pxRect(55 - shift, 74, 34, 32, '#f8fafc');
+                    pxText('Doc1', 72 - shift, 90, '#0f172a', 9);
+                    pxRect(215 - shift * 0.4, 74, 34, 32, '#cbd5e1');
+                    pxText('Doc2', 232 - shift * 0.4, 90, '#0f172a', 9);
+                    pxRect(260 - shift * 0.4, 74, 34, 32, '#94a3b8');
+                    pxText('Doc3', 277 - shift * 0.4, 90, '#0f172a', 9);
+                    break;
+                }
+                case 28: { // 機場行李安檢 X 光機
+                    pxRect(20, 114, 280, 8, '#334155'); // 輸送帶
+                    pxRect(122, 56, 76, 58, '#1e293b');
+                    pxBorder(122, 56, 76, 58, '#facc15', 2);
+                    pxText('☢️ X-RAY', 160, 84, '#facc15', 10);
+                    const s = (t % 120) * 0.3;
+                    pxRect(65 - s, 86, 28, 26, '#ef4444'); // 紅箱先出
+                    pxText('1', 79 - s, 99, '#fff', 10);
+                    pxRect(150 - s * 0.4, 86, 28, 26, '#22c55e');
+                    pxRect(230 - s * 0.4, 86, 28, 26, '#3b82f6');
+                    break;
+                }
+                case 29: { // 手搖飲叫號螢幕
+                    pxRect(42, 56, 66, 58, '#78350f');
+                    pxBorder(42, 56, 66, 58, '#facc15', 2);
+                    pxText('🧋 出餐口', 75, 76, '#fde047', 9);
+                    pxText('#101 完成', 75, 96, '#4ade80', 9);
+                    for (let i = 0; i < 3; i++) {
+                        const bx = 135 + i * 52;
+                        pxRect(bx, 70, 42, 34, i === 0 ? '#166534' : '#1e293b');
+                        pxBorder(bx, 70, 42, 34, '#38bdf8', 2);
+                        pxText(`單#${101 + i}`, bx + 21, 87, '#ffffff', 9);
+                    }
+                    break;
+                }
+                case 30: { // 高速公路匝道儀控
+                    pxRect(85, 44, 18, 42, '#1e293b');
+                    pxRect(89, 48, 10, 10, pulse ? '#450a0a' : '#ef4444');
+                    pxRect(89, 70, 10, 10, pulse ? '#22c55e' : '#052e16');
+                    const s = pulse ? (t % 54) * 0.45 : 0;
+                    drawPixelCar(50 - s, 96, '#ef4444');
+                    drawPixelCar(130, 96, '#38bdf8');
+                    drawPixelCar(195, 96, '#eab308');
+                    break;
+                }
+
+                // ================= 堆疊 31~40 =================
+                case 31: { // 品客洋芋片罐
+                    pxRect(130, 42, 60, 102, '#b91c1c');
+                    pxBorder(130, 42, 60, 102, '#fca5a5', 2);
+                    for (let i = 0; i < 4; i++) {
+                        pxRect(138, 122 - i * 16, 44, 10, '#fde047');
+                    }
+                    // 最上面那片慢速浮起 (LIFO)
+                    const lift = Math.abs(Math.sin(t * 0.05)) * 24;
+                    pxRect(138, 58 - lift, 44, 10, '#facc15');
+                    pxBorder(138, 58 - lift, 44, 10, '#ffffff', 1);
+                    break;
+                }
+                case 32: { // 自助餐的盤子塔
+                    for (let i = 0; i < 5; i++) {
+                        const isTop = (i === 4);
+                        const lift = isTop ? Math.abs(Math.sin(t * 0.05)) * 20 : 0;
+                        const py = 126 - i * 14 - lift;
+                        pxRect(115, py, 90, 10, isTop ? '#38bdf8' : '#e2e8f0');
+                        pxBorder(115, py, 90, 10, '#475569', 1);
+                    }
+                    break;
+                }
+                case 33: { // 羽毛球筒
+                    pxBorder(136, 36, 48, 108, '#38bdf8', 2);
+                    for (let i = 0; i < 3; i++) {
+                        const isTop = (i === 2);
+                        const lift = isTop ? Math.abs(Math.sin(t * 0.05)) * 22 : 0;
+                        const by = 114 - i * 28 - lift;
+                        pxRect(148, by, 24, 16, '#f8fafc');
+                        pxRect(154, by + 16, 12, 6, '#facc15');
+                    }
+                    break;
+                }
+                case 34: { // 瀏覽器的「上一頁」功能
+                    const pages = ['Page A (首頁)', 'Page B (商品)', 'Page C (結帳)'];
+                    for (let i = 0; i < 3; i++) {
+                        const isTop = (i === 2);
+                        const shift = isTop ? Math.abs(Math.sin(t * 0.05)) * 18 : 0;
+                        const py = 110 - i * 26 - shift;
+                        pxRect(100, py, 120, 22, isTop ? '#0284c7' : '#1e293b');
+                        pxBorder(100, py, 120, 22, isTop ? '#facc15' : '#64748b', 2);
+                        pxText(pages[i], 160, py + 11, '#ffffff', 9);
+                    }
+                    break;
+                }
+                case 35: { // 洗水槽裡疊放的碗盤
+                    pxRect(95, 128, 130, 14, '#475569'); // 水槽底
+                    for (let i = 0; i < 4; i++) {
+                        const isTop = (i === 3);
+                        const lift = isTop ? Math.abs(Math.sin(t * 0.05)) * 16 : 0;
+                        const wy = 110 - i * 16 - lift;
+                        pxRect(120, wy, 80, 14, isTop ? '#fb7185' : '#cbd5e1');
+                        pxBorder(120, wy, 80, 14, '#334155', 2);
+                        if (isTop) pxText('🧽先洗我', 160, wy - 10, '#facc15', 9);
+                    }
+                    break;
+                }
+                case 36: { // 貨車卸貨
+                    pxRect(45, 54, 165, 76, '#334155');
+                    pxBorder(45, 54, 165, 76, '#94a3b8', 3); // 右側單一開口
+                    for (let i = 0; i < 3; i++) {
+                        const isLast = (i === 2);
+                        const moveOut = isLast ? Math.abs(Math.sin(t * 0.05)) * 42 : 0;
+                        const bx = 58 + i * 48 + moveOut;
+                        pxRect(bx, 72, 42, 50, isLast ? '#f59e0b' : '#78350f');
+                        pxBorder(bx, 72, 42, 50, '#fde047', 2);
+                        pxText(`箱#${i + 1}`, bx + 21, 97, '#ffffff', 10);
+                    }
+                    break;
+                }
+                case 37: { // 衣服摺好疊在衣櫃
+                    const shirts = ['#3b82f6', '#10b981', '#a855f7', '#ef4444'];
+                    for (let i = 0; i < 4; i++) {
+                        const isTop = (i === 3);
+                        const lift = isTop ? Math.abs(Math.sin(t * 0.05)) * 20 : 0;
+                        const sy = 118 - i * 16 - lift;
+                        pxRect(110, sy, 100, 14, shirts[i]);
+                        pxBorder(110, sy, 100, 14, '#ffffff', 1);
+                    }
+                    break;
+                }
+                case 38: { // 桌上的作業收件匣
+                    pxRect(85, 132, 150, 8, '#78350f');
+                    for (let i = 0; i < 4; i++) {
+                        const isTop = (i === 3);
+                        const lift = isTop ? Math.abs(Math.sin(t * 0.05)) * 20 : 0;
+                        const by = 114 - i * 16 - lift;
+                        pxRect(110, by, 100, 14, isTop ? '#facc15' : '#38bdf8');
+                        pxBorder(110, by, 100, 14, '#0f172a', 1);
+                        pxText(`作業 #${i + 1}`, 160, by + 7, '#0f172a', 9);
+                    }
+                    break;
+                }
+                case 39: { // 單口管狀硬幣盒
+                    pxBorder(132, 44, 56, 100, '#94a3b8', 3);
+                    for (let i = 0; i < 4; i++) {
+                        const isTop = (i === 3);
+                        const lift = isTop ? Math.abs(Math.sin(t * 0.05)) * 22 : 0;
+                        const cy = 118 - i * 16 - lift;
+                        pxRect(140, cy, 40, 12, '#eab308');
+                        pxBorder(140, cy, 40, 12, '#fef08a', 1);
+                        pxText('$10', 160, cy + 6, '#422006', 8);
+                    }
+                    break;
+                }
+                case 40: { // 鬆餅塔
+                    pxRect(95, 130, 130, 8, '#e2e8f0'); // 盤子
+                    for (let i = 0; i < 4; i++) {
+                        const isTop = (i === 3);
+                        const lift = isTop ? Math.abs(Math.sin(t * 0.05)) * 18 : 0;
+                        const py = 112 - i * 16 - lift;
+                        pxRect(112, py, 96, 14, '#d97706');
+                        pxBorder(112, py, 96, 14, '#fde047', 1);
+                        if (isTop) pxRect(152, py - 5, 16, 6, '#fef08a'); // 奶油塊
+                    }
+                    break;
+                }
+
+                // ================= 樹 41~50 =================
+                case 41: // 家族族譜
+                case 42: // 學校行政體系
+                case 47: { // 公司的組織架構圖
+                    const labels = scene.id === 41 
+                        ? ['阿公阿嬤', '爸爸', '叔叔', '我', '妹妹', '堂弟', '堂妹']
+                        : scene.id === 42
+                        ? ['校長', '教務處', '學務處', '教學組', '註冊組', '訓育組', '體育組']
+                        : ['CEO 董事長', '研發部', '業務部', '工程A', '工程B', '業務A', '業務B'];
+                    // 連線
+                    pxLine(160, 44, 95, 86, '#38bdf8', 2);
+                    pxLine(160, 44, 225, 86, '#38bdf8', 2);
+                    pxLine(95, 86, 60, 130, '#38bdf8', 2);
+                    pxLine(95, 86, 130, 130, '#38bdf8', 2);
+                    pxLine(225, 86, 190, 130, '#38bdf8', 2);
+                    pxLine(225, 86, 260, 130, '#38bdf8', 2);
+                    // 節點
+                    const nodes = [
+                        { x: 160, y: 40, w: 68, text: labels[0], c: '#f59e0b' },
+                        { x: 95, y: 86, w: 56, text: labels[1], c: '#0284c7' },
+                        { x: 225, y: 86, w: 56, text: labels[2], c: '#0284c7' },
+                        { x: 60, y: 130, w: 50, text: labels[3], c: '#1e293b' },
+                        { x: 130, y: 130, w: 50, text: labels[4], c: '#1e293b' },
+                        { x: 190, y: 130, w: 50, text: labels[5], c: '#1e293b' },
+                        { x: 260, y: 130, w: 50, text: labels[6], c: '#1e293b' }
+                    ];
+                    nodes.forEach((n, idx) => {
+                        pxRect(n.x - n.w / 2, n.y - 11, n.w, 22, n.c);
+                        pxBorder(n.x - n.w / 2, n.y - 11, n.w, 22, idx === 0 && pulse ? '#ffffff' : '#7dd3fc', 2);
+                        pxText(n.text, n.x, n.y, '#ffffff', 9);
+                    });
+                    break;
+                }
+                case 43: { // 淘汰賽賽程表
+                    pxLine(160, 42, 100, 86, '#facc15', 2);
+                    pxLine(160, 42, 220, 86, '#facc15', 2);
+                    pxLine(100, 86, 70, 130, '#94a3b8', 2);
+                    pxLine(100, 86, 130, 130, '#94a3b8', 2);
+                    pxLine(220, 86, 190, 130, '#94a3b8', 2);
+                    pxLine(220, 86, 250, 130, '#94a3b8', 2);
+                    pxRect(126, 28, 68, 24, '#eab308');
+                    pxText('🏆 總冠軍', 160, 40, '#0f172a', 10);
+                    pxRect(75, 76, 50, 20, '#0284c7'); pxText('四強A', 100, 86, '#fff', 9);
+                    pxRect(195, 76, 50, 20, '#0284c7'); pxText('四強B', 220, 86, '#fff', 9);
+                    [70, 130, 190, 250].forEach((x, i) => {
+                        pxRect(x - 22, 120, 44, 18, '#334155');
+                        pxText(`隊伍${i + 1}`, x, 129, '#cbd5e1', 8);
+                    });
+                    break;
+                }
+                case 44: // 電腦的資料夾與檔案系統
+                case 45: // 書本的目錄架構
+                case 46: // 生物分類學
+                case 49: // 電話客服的語音選項
+                case 50: { // 網頁的 DOM 結構
+                    const treeData = {
+                        44: ['📁 C:\\ (根目錄)', '📁 Photos', '📁 Games', '🖼️ a.jpg', '🖼️ b.png', '🎮 rpg.exe', '🎮 map.dat'],
+                        45: ['📖 課本總目錄', '第 1 章', '第 2 章', '1-1 節', '1-2 節', '2-1 節', '2-2 節'],
+                        46: ['🐾 動物界', '脊索動物門', '節肢動物門', '哺乳綱', '鳥綱', '昆蟲綱', '甲殼綱'],
+                        49: ['📞 語音總機', '按1:中文', '按2:英文', '1:查帳單', '2:辦掛失', '1:Bill', '2:Lost'],
+                        50: ['<html> 根標籤', '<head>', '<body>', '<title>', '<meta>', '<div>', '<p>']
+                    }[scene.id];
+                    const activeLvl = Math.floor(t / 35) % 3;
+                    pxLine(160, 40, 95, 86, activeLvl >= 1 ? '#4ade80' : '#475569', 2);
+                    pxLine(160, 40, 225, 86, activeLvl >= 1 ? '#4ade80' : '#475569', 2);
+                    pxLine(95, 86, 60, 130, activeLvl === 2 ? '#4ade80' : '#475569', 2);
+                    pxLine(95, 86, 130, 130, activeLvl === 2 ? '#4ade80' : '#475569', 2);
+                    pxLine(225, 86, 190, 130, activeLvl === 2 ? '#4ade80' : '#475569', 2);
+                    pxLine(225, 86, 260, 130, activeLvl === 2 ? '#4ade80' : '#475569', 2);
+
+                    const pts = [
+                        { x: 160, y: 40, w: 88, l: 0 },
+                        { x: 95, y: 86, w: 66, l: 1 },
+                        { x: 225, y: 86, w: 66, l: 1 },
+                        { x: 60, y: 130, w: 54, l: 2 },
+                        { x: 130, y: 130, w: 54, l: 2 },
+                        { x: 190, y: 130, w: 54, l: 2 },
+                        { x: 260, y: 130, w: 54, l: 2 }
+                    ];
+                    pts.forEach((p, i) => {
+                        const hl = (p.l === activeLvl);
+                        pxRect(p.x - p.w / 2, p.y - 11, p.w, 22, hl ? '#166534' : '#1e293b');
+                        pxBorder(p.x - p.w / 2, p.y - 11, p.w, 22, hl ? '#4ade80' : '#64748b', 2);
+                        pxText(treeData[i], p.x, p.y, '#ffffff', 8);
+                    });
+                    break;
+                }
+                case 48: { // 心智圖
+                    const subs = [
+                        { x: 68, y: 54, t: '✈️ 交通', c1: { x: 26, y: 38, t: '高鐵' }, c2: { x: 26, y: 70, t: '租車' } },
+                        { x: 252, y: 54, t: '🏨 住宿', c1: { x: 294, y: 38, t: '飯店' }, c2: { x: 294, y: 70, t: '民宿' } },
+                        { x: 68, y: 124, t: '🍜 美食', c1: { x: 26, y: 108, t: '夜市' }, c2: { x: 26, y: 138, t: '甜點' } },
+                        { x: 252, y: 124, t: '🎡 景點', c1: { x: 294, y: 108, t: '古蹟' }, c2: { x: 294, y: 138, t: '海邊' } }
+                    ];
+                    subs.forEach(s => {
+                        pxLine(160, 89, s.x, s.y, '#38bdf8', 2);
+                        pxLine(s.x, s.y, s.c1.x, s.c1.y, '#64748b', 2);
+                        pxLine(s.x, s.y, s.c2.x, s.c2.y, '#64748b', 2);
+                        pxRect(s.x - 26, s.y - 10, 52, 20, '#0284c7');
+                        pxText(s.t, s.x, s.y, '#fff', 8);
+                        pxRect(s.c1.x - 18, s.c1.y - 8, 36, 16, '#1e293b');
+                        pxText(s.c1.t, s.c1.x, s.c1.y, '#cbd5e1', 8);
+                        pxRect(s.c2.x - 18, s.c2.y - 8, 36, 16, '#1e293b');
+                        pxText(s.c2.t, s.c2.x, s.c2.y, '#cbd5e1', 8);
+                    });
+                    pxRect(122, 74, 76, 30, '#eab308');
+                    pxBorder(122, 74, 76, 30, '#ffffff', 2);
+                    pxText('🎯 旅遊心智圖', 160, 89, '#0f172a', 9);
+                    break;
+                }
+
+                // ================= 圖 51~60 =================
+                default: {
+                    // 51~60 圖 (Graph) 網狀節點與交錯邊
+                    const graphNodes = [
+                        { x: 64, y: 50 }, { x: 160, y: 38 }, { x: 256, y: 52 },
+                        { x: 52, y: 122 }, { x: 160, y: 102 }, { x: 266, y: 122 }
+                    ];
+                    const edges = [
+                        [0, 1], [1, 2], [0, 3], [0, 4], [1, 4], [2, 4], [2, 5], [3, 4], [4, 5], [3, 5]
+                    ];
+                    const isShortestPathScene = (scene.id === 52);
+                    const highlightEdges = [[0, 4], [4, 5]]; // 最短路徑或高亮迴路
+
+                    edges.forEach(([a, b]) => {
+                        const n1 = graphNodes[a], n2 = graphNodes[b];
+                        const isHL = highlightEdges.some(([ha, hb]) => (ha === a && hb === b));
+                        let lineColor = '#475569';
+                        if (scene.id === 51) lineColor = (a + b) % 2 === 0 ? '#ef4444' : '#3b82f6';
+                        if (scene.id === 60) lineColor = '#ef4444';
+                        if (isShortestPathScene && isHL) lineColor = '#facc15';
+                        pxLine(n1.x, n1.y, n2.x, n2.y, lineColor, isHL && pulse ? 3 : 2);
+                    });
+
+                    // 放慢動態脈衝點在網狀圖中穿梭的速度
+                    const edgeIdx = Math.floor(t / 45) % edges.length;
+                    const [ea, eb] = edges[edgeIdx];
+                    const prog = (t % 45) / 45;
+                    const px = graphNodes[ea].x + (graphNodes[eb].x - graphNodes[ea].x) * prog;
+                    const py = graphNodes[ea].y + (graphNodes[eb].y - graphNodes[ea].y) * prog;
+                    pxRect(px - 4, py - 4, 8, 8, '#facc15');
+
+                    const nodeLabels = {
+                        51: ['台北站', '中山站', '忠孝站', '西門站', '東門站', '古亭站'],
+                        52: ['起點A', '路口1', '路口2', '路口3', '轉折點', '終點B'],
+                        53: ['👦阿明', '👧小美', '🧑阿華', '👩小珍', '🧔大雄', '👱‍♀️靜香'],
+                        54: ['✈️TPE', '✈️NRT', '✈️LAX', '✈️BKK', '✈️SIN', '✈️LHR'],
+                        55: ['⚡電廠', '變電A', '變電B', '社區1', '樞紐站', '工廠區'],
+                        56: ['⚔️斬擊', '🔥火球', '❄️冰凍', '🛡️格擋', '✨魔劍', '💥奧義'],
+                        57: ['❤️心臟', '肺循環', '腦血管', '肝門脈', '主動脈', '微血管'],
+                        58: ['🚏站牌1', '🚏站牌2', '🚏站牌3', '🚏站牌4', '🚏總站', '🚏站牌6'],
+                        59: ['🌐R1', '🌐R2', '🌐R3', '🌐R4', '🌐Core', '🌐R6'],
+                        60: ['🕵️嫌犯A', '📄證物1', '🕵️嫌犯B', '📍現場', '🔑關鍵', '🕵️共犯C']
+                    }[scene.id];
+
+                    graphNodes.forEach((n, idx) => {
+                        pxRect(n.x - 24, n.y - 11, 48, 22, idx === 4 ? '#0284c7' : '#1e293b');
+                        pxBorder(n.x - 24, n.y - 11, 48, 22, '#38bdf8', 2);
+                        pxText(nodeLabels[idx], n.x, n.y, '#ffffff', 8);
+                    });
+                    break;
+                }
+            }
+
+            requestAnimationFrame(renderSceneCanvas);
+        }
+
+        // 啟動遊戲與動畫迴圈
+        window.onload = function () {
+            startNewQuiz();
+            renderSceneCanvas();
+        };
+    </script>
+</body>
+</html>

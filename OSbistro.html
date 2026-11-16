@@ -1,0 +1,2581 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>作業系統排程餐廳 - OS Scheduling Bistro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #14121d;
+      --panel-bg: #1f1c2e;
+      --panel-border: #4a4468;
+      --accent-gold: #f5b727;
+      --accent-cyan: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-red: #f87171;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-dark);
+      color: #f1f5f9;
+      font-family: 'DotGothic16', 'Noto Sans TC', monospace, sans-serif;
+    }
+
+    /* Retro Pixel Box Borders */
+    .pixel-box {
+      background-color: var(--panel-bg);
+      border: 3px solid #5c547d;
+      box-shadow: 
+        inset -3px -3px 0px 0px #120f1c,
+        inset 3px 3px 0px 0px #786fa1,
+        4px 4px 0px 0px #09080f;
+    }
+
+    /* Floating HUD Semi-transparent Pixel Panel */
+    .pixel-hud {
+      background-color: rgba(24, 21, 38, 0.86);
+      backdrop-filter: blur(4px);
+      border: 2px solid #635a87;
+      box-shadow:
+        inset -2px -2px 0px 0px #120f1c,
+        inset 2px 2px 0px 0px #8278ab,
+        3px 3px 0px 0px rgba(0, 0, 0, 0.65);
+    }
+
+    .pixel-btn {
+      position: relative;
+      border: 2px solid #6d6494;
+      background-color: rgba(45, 40, 68, 0.92);
+      box-shadow:
+        inset -2px -2px 0px 0px #161324,
+        inset 2px 2px 0px 0px #8c82b5,
+        2px 2px 0px 0px #09080f;
+      transition: transform 0.06s ease, background-color 0.1s ease;
+      cursor: pointer;
+    }
+
+    .pixel-btn:hover:not(:disabled) {
+      background-color: #3b3559;
+      border-color: #9389bd;
+    }
+
+    .pixel-btn:active:not(:disabled) {
+      transform: translate(1px, 1px);
+      box-shadow:
+        inset 2px 2px 0px 0px #161324,
+        1px 1px 0px 0px #09080f;
+    }
+
+    .pixel-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pixel-btn-gold {
+      background-color: #92400e;
+      border-color: #fbbf24;
+      box-shadow:
+        inset -2px -2px 0px 0px #451a03,
+        inset 2px 2px 0px 0px #fde68a,
+        3px 3px 0px 0px #09080f;
+    }
+    .pixel-btn-gold:hover:not(:disabled) {
+      background-color: #b45309;
+      border-color: #fde047;
+    }
+
+    canvas {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background-color: #231f33;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #14121d;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4a4468;
+      border: 1px solid #786fa1;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #655d8c;
+    }
+
+    /* Pure CSS Pixel Star */
+    .css-star {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      background-color: #f5b727;
+      clip-path: polygon(50% 0%, 63% 35%, 100% 38%, 71% 60%, 82% 96%, 50% 75%, 18% 96%, 29% 60%, 0% 38%, 37% 35%);
+    }
+    .css-star.empty {
+      background-color: #3f3a54;
+    }
+
+    /* Flashing animation for alerts */
+    @keyframes pulseBorder {
+      0%, 100% { border-color: #f5b727; }
+      50% { border-color: #ef4444; }
+    }
+    .event-alert-border {
+      animation: pulseBorder 1.2s infinite;
+    }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden relative bg-[#14121d] select-none">
+
+  <!-- FULLSCREEN MAIN WORKSPACE -->
+  <div class="relative w-full h-full flex overflow-hidden">
+    
+    <!-- ENLARGED GAME CANVAS AREA (Occupies all space left of narrow sidebar) -->
+    <div id="canvas-container" class="relative flex-1 h-full flex items-center justify-center bg-[#191626] overflow-hidden p-1 pt-12 pb-8">
+      <canvas id="gameCanvas" width="900" height="540"></canvas>
+
+      <!-- FLOATING TOP HUD OVERLAY (進度、排程、營收、評價、速度、重新開始) -->
+      <div class="absolute top-2 left-2 right-2 z-20 flex flex-wrap items-center justify-between gap-1.5 pointer-events-none">
+        
+        <!-- Left HUD Group: Progress, Algorithm, Revenue, Rating -->
+        <div class="flex flex-wrap items-center gap-1.5 pointer-events-auto">
+          <!-- 進度 -->
+          <div class="pixel-hud px-2.5 py-1 flex items-center gap-1.5 text-xs">
+            <span class="text-slate-400">進度:</span>
+            <span id="ui-event-progress" class="font-bold text-cyan-300">暖身 (0/6)</span>
+            <span class="text-slate-600">|</span>
+            <span id="banner-remaining" class="font-bold text-amber-300">剩 3 人</span>
+          </div>
+
+          <!-- 排程 -->
+          <div class="pixel-hud px-2.5 py-1 flex items-center gap-1.5 text-xs">
+            <span class="text-slate-400">排程:</span>
+            <span id="ui-current-algo" class="font-bold text-indigo-200 bg-indigo-950/90 px-1.5 py-0.2 border border-indigo-500">FCFS 先到先服務</span>
+          </div>
+
+          <!-- 營收 -->
+          <div class="pixel-hud px-2.5 py-1 flex items-center gap-1.5 text-xs">
+            <span class="text-slate-400">營收:</span>
+            <span id="ui-revenue" class="font-bold text-emerald-400 text-sm">$0</span>
+          </div>
+
+          <!-- 評價 -->
+          <div class="pixel-hud px-2.5 py-1 flex items-center gap-1.5 text-xs">
+            <span class="text-slate-400">評價:</span>
+            <div id="ui-stars-container" class="flex items-center gap-0.5"></div>
+            <span id="ui-rating-num" class="font-bold text-amber-300">5.0</span>
+          </div>
+        </div>
+
+        <!-- Right HUD Group: Speed & Restart Buttons -->
+        <div class="flex items-center gap-1.5 pointer-events-auto">
+          <button id="btn-speed" class="pixel-btn px-2.5 py-1 text-xs font-bold text-cyan-300">
+            速度: 1x
+          </button>
+          <button id="btn-settle-now" class="pixel-btn px-2.5 py-1 text-xs font-bold text-emerald-300">
+            結算
+          </button>
+          <button id="btn-restart" class="pixel-btn px-2.5 py-1 text-xs font-bold text-rose-300">
+            重新開始
+          </button>
+        </div>
+
+      </div>
+
+      <!-- FLOATING BOTTOM HUD OVERLAY (Active Event Info & Menu Quick Bar) -->
+      <div class="absolute bottom-1.5 left-2 right-2 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none text-[11px]">
+        <!-- Current Event Compact Strip -->
+        <div class="pixel-hud px-2.5 py-1 flex items-center gap-2 max-w-2xl truncate pointer-events-auto">
+          <span id="banner-tag" class="px-1.5 py-0.2 text-[10px] font-bold bg-emerald-800 text-emerald-200 border border-emerald-500 shrink-0">
+            預設模式
+          </span>
+          <span id="banner-title" class="font-bold text-amber-200 shrink-0">
+            開店暖身時段
+          </span>
+          <span id="banner-desc" class="text-slate-300 truncate hidden sm:inline">
+            接待前 3 位客人後，即將迎來今日第 1 波排程事件挑戰！
+          </span>
+        </div>
+
+        <!-- Compact Menu Legend -->
+        <div class="pixel-hud px-2.5 py-1 hidden xl:flex items-center gap-2 text-[11px] pointer-events-auto">
+          <span class="text-amber-300 font-bold">價目:</span>
+          <span>☕2s/$50</span>
+          <span>🍔5s/$120</span>
+          <span>🍝9s/$250</span>
+          <span>🥩15s/$450</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- NARROW RIGHT SIDEBAR (Width 215px - Status, Ready Queue & Live Reviews) -->
+    <aside class="w-[215px] shrink-0 h-full bg-[#181526]/95 border-l-2 border-[#5c547d] p-1.5 flex flex-col gap-1.5 z-20 overflow-hidden">
+      
+      <!-- Compact CPU & Stove Status -->
+      <div class="pixel-hud p-2 flex flex-col gap-1 shrink-0">
+        <div class="flex items-center justify-between border-b border-slate-700/80 pb-1">
+          <span class="font-bold text-amber-300 text-[11px]">CPU 與爐台狀態</span>
+          <span id="cpu-state-badge" class="text-[10px] px-1 py-0.2 bg-cyan-900 text-cyan-200 border border-cyan-500">待機中</span>
+        </div>
+        <div class="text-[11px] text-slate-300 space-y-0.5">
+          <div class="truncate">
+            <span class="text-slate-400">任務: </span>
+            <span id="cpu-task-text" class="font-bold text-white">巡視餐廳中</span>
+          </div>
+          <div class="truncate">
+            <span id="cpu-algo-rule" class="text-indigo-300 text-[10px]">單鍋專注依序製作</span>
+          </div>
+          <div id="rr-quantum-box" class="hidden pt-0.5">
+            <div class="flex justify-between text-[10px] text-cyan-300 mb-0.5">
+              <span>RR 配額</span>
+              <span id="rr-quantum-val">0.0s / 3.0s</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-950 border border-slate-700">
+              <div id="rr-quantum-bar" class="h-full bg-cyan-400 transition-all duration-75" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compact Ready Queue (Kitchen Order Tickets) -->
+      <div class="pixel-hud p-2 flex flex-col gap-1 flex-1 min-h-0 overflow-hidden">
+        <div class="flex items-center justify-between border-b border-slate-700/80 pb-1 shrink-0">
+          <span class="font-bold text-amber-300 text-[11px]">廚房佇列 (Queue)</span>
+          <span id="queue-count-badge" class="text-[10px] px-1 py-0.2 bg-slate-800 text-slate-300 border border-slate-600">0 單</span>
+        </div>
+        <div id="ready-queue-list" class="flex flex-col gap-1 overflow-y-auto flex-1 min-h-0 pr-0.5 text-[11px]">
+          <div class="text-slate-500 text-center py-4">尚無已點餐訂單</div>
+        </div>
+      </div>
+
+      <!-- Compact Real-time Customer Reviews Log -->
+      <div class="pixel-hud p-2 flex flex-col gap-1 flex-1 min-h-0 overflow-hidden">
+        <div class="flex items-center justify-between border-b border-slate-700/80 pb-1 shrink-0">
+          <span class="font-bold text-amber-300 text-[11px]">顧客留言板</span>
+          <span id="served-stats-badge" class="text-[10px] text-slate-400">完:0/氣:0</span>
+        </div>
+        <div id="live-reviews-list" class="flex flex-col gap-1 overflow-y-auto flex-1 min-h-0 pr-0.5 text-[11px]">
+          <div class="text-slate-500 text-center py-4">等待結帳評價...</div>
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 1: EVENT TRIGGER & SCHEDULING SELECTION (PAUSES GAME)               -->
+  <!-- ========================================================================= -->
+  <div id="event-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-3">
+    <div class="pixel-box event-alert-border max-w-3xl w-full max-h-[90vh] overflow-y-auto p-4 md:p-5 bg-slate-900 flex flex-col gap-3">
+      
+      <div class="flex items-center justify-between border-b-2 border-slate-700 pb-2.5">
+        <div class="flex items-center gap-3">
+          <span id="modal-event-num" class="bg-rose-600 text-white font-black px-2.5 py-0.5 text-xs md:text-sm border-2 border-rose-300">
+            突發事件 1 / 6
+          </span>
+          <h2 id="modal-event-title" class="text-lg md:text-xl font-bold text-amber-300">
+            事件標題
+          </h2>
+        </div>
+        <span class="text-xs text-slate-400 bg-slate-950 px-2 py-0.5 border border-slate-700">
+          遊戲已暫停 — 請下達排程指令
+        </span>
+      </div>
+
+      <!-- Scenario Description Box -->
+      <div class="bg-slate-950 border-2 border-slate-700 p-3 space-y-2">
+        <div class="text-xs font-bold text-cyan-400 uppercase tracking-wider">【現場狀況報告】</div>
+        <p id="modal-event-desc" class="text-xs md:text-sm text-slate-100 leading-relaxed"></p>
+        <div class="pt-1 flex flex-wrap gap-1.5" id="modal-event-traits"></div>
+      </div>
+
+      <div class="text-xs text-amber-200 font-bold">
+        請選擇接下來面對這波客人要使用的「作業系統排程演算法」（選錯將導致嚴重負評或客人憤怒離場）：
+      </div>
+
+      <!-- 4 Algorithm Selection Buttons -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        
+        <button onclick="selectEventAlgorithm('FCFS')" class="pixel-btn p-3 text-left flex flex-col gap-1 group">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-amber-300 text-sm md:text-base group-hover:text-white">1. 先到先服務 (FCFS)</span>
+            <span class="text-[10px] px-1.5 py-0.5 bg-slate-900 text-slate-300 border border-slate-600">單鍋專注 / 零切換</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-snug">
+            使用 1 號主爐台，嚴格依照點餐先後順序一口氣做完，絕不插隊、絕不換鍋。適合重視公平先後順序、討厭料理中斷的客群。
+          </p>
+        </button>
+
+        <button onclick="selectEventAlgorithm('SJF')" class="pixel-btn p-3 text-left flex flex-col gap-1 group">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-emerald-300 text-sm md:text-base group-hover:text-white">2. 最短工作優先 (SJF)</span>
+            <span class="text-[10px] px-1.5 py-0.5 bg-slate-900 text-slate-300 border border-slate-600">單鍋秒殺短單</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-snug">
+            永遠優先製作廚房中所需時間最短的餐點（☕ &gt; 🍔 &gt; 🍝 &gt; 🥩）。能避免「護航效應」讓大量短單客人免於被牛排大單卡死。
+          </p>
+        </button>
+
+        <button onclick="selectEventAlgorithm('RR')" class="pixel-btn p-3 text-left flex flex-col gap-1 group">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-cyan-300 text-sm md:text-base group-hover:text-white">3. 循環排程 (Round Robin)</span>
+            <span class="text-[10px] px-1.5 py-0.5 bg-slate-900 text-cyan-200 border border-cyan-600">同時啟用 3 個鍋子!</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-snug">
+            <b>同時把 3 張訂單放上 3 個鍋子</b>，店員每 <b>3秒 (Time Quantum)</b> 輪流在三個鍋子間切換翻炒（切換耗時 0.6s），讓客人持續看到進度並恢復耐心！
+          </p>
+        </button>
+
+        <button onclick="selectEventAlgorithm('PRIORITY')" class="pixel-btn p-3 text-left flex flex-col gap-1 group">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-purple-300 text-sm md:text-base group-hover:text-white">4. 優先權排程 (Priority)</span>
+            <span class="text-[10px] px-1.5 py-0.5 bg-slate-900 text-purple-300 border border-purple-700">VIP 插隊特權</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-snug">
+            優先鎖定頭頂有特殊標記（皇冠、紅十字、骷髏、警徽、鑽石）的緊急或 VIP 客人插隊製作。若無 VIP 時使用會浪費檢查時間。
+          </p>
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 2: END OF DAY SUMMARY & REVIEW WALL                                 -->
+  <!-- ========================================================================= -->
+  <div id="summary-modal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="pixel-box max-w-4xl w-full p-5 md:p-6 bg-slate-900 flex flex-col gap-4 my-auto max-h-[92vh] overflow-y-auto">
+      
+      <div class="flex flex-wrap items-center justify-between border-b-2 border-slate-700 pb-3 gap-2">
+        <div>
+          <span class="text-xs font-bold text-amber-400">DAILY REPORT</span>
+          <h2 class="text-2xl font-bold text-white">作業系統排程餐廳 — 今日營業結算單</h2>
+        </div>
+        <div id="summary-grade-badge" class="px-4 py-1.5 text-lg font-black bg-amber-500 text-slate-950 border-2 border-amber-200">
+          S 級排程大師
+        </div>
+      </div>
+
+      <!-- Top Score Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="bg-slate-950 border-2 border-slate-700 p-3">
+          <div class="text-xs text-slate-400">今日總營收</div>
+          <div id="sum-revenue" class="text-2xl font-black text-emerald-400 mt-1">$0</div>
+        </div>
+        <div class="bg-slate-950 border-2 border-slate-700 p-3">
+          <div class="text-xs text-slate-400">顧客平均星級</div>
+          <div class="flex items-center gap-2 mt-1">
+            <span id="sum-rating" class="text-2xl font-black text-amber-300">5.0</span>
+            <div id="sum-stars" class="flex gap-0.5"></div>
+          </div>
+        </div>
+        <div class="bg-slate-950 border-2 border-slate-700 p-3">
+          <div class="text-xs text-slate-400">成功完餐 / 氣走人數</div>
+          <div id="sum-served" class="text-xl font-bold text-cyan-300 mt-1">0 人 / 0 人</div>
+        </div>
+        <div class="bg-slate-950 border-2 border-slate-700 p-3">
+          <div class="text-xs text-slate-400">排程決策正確率</div>
+          <div id="sum-accuracy" class="text-xl font-bold text-purple-300 mt-1">6 / 6 正確</div>
+        </div>
+      </div>
+
+      <!-- Event Decisions Breakdown & Review Wall -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Left: 6 Events Decision Review -->
+        <div class="bg-slate-950 border-2 border-slate-700 p-3 flex flex-col gap-2">
+          <div class="font-bold text-amber-300 text-sm border-b border-slate-800 pb-1">
+            今日事件排程決策檢討
+          </div>
+          <div id="sum-event-breakdown" class="flex flex-col gap-2 max-h-[260px] overflow-y-auto pr-1 text-xs"></div>
+        </div>
+
+        <!-- Right: Customer Review Board -->
+        <div class="bg-slate-950 border-2 border-slate-700 p-3 flex flex-col gap-2">
+          <div class="font-bold text-amber-300 text-sm border-b border-slate-800 pb-1">
+            顧客精選評論牆 (作業系統痛點診斷)
+          </div>
+          <div id="sum-reviews-wall" class="flex flex-col gap-2 max-h-[260px] overflow-y-auto pr-1 text-xs"></div>
+        </div>
+
+      </div>
+
+      <div class="flex flex-wrap items-center justify-end gap-3 pt-2 border-t-2 border-slate-700">
+        <button onclick="startNewDay()" class="pixel-btn pixel-btn-gold px-5 py-2 text-sm font-bold text-white">
+          再玩一天 (隨機抽取 6 個事件)
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    /***************************************************************************
+     * 1. MENU & ALGORITHM DEFINITIONS
+     * Note: ONLY ☕, 🍔, 🍝, 🥩 emojis are used anywhere in the entire file!
+     ***************************************************************************/
+    const MENU = {
+      COFFEE: { id: 'COFFEE', name: '美式咖啡', emoji: '☕', burst: 2.0, price: 50, color: '#38bdf8' },
+      BURGER: { id: 'BURGER', name: '美味漢堡', emoji: '🍔', burst: 5.0, price: 120, color: '#f59e0b' },
+      PASTA:  { id: 'PASTA',  name: '義大利麵', emoji: '🍝', burst: 9.0, price: 250, color: '#fb7185' },
+      STEAK:  { id: 'STEAK',  name: '豪華牛排', emoji: '🥩', burst: 15.0, price: 450, color: '#e879f9' }
+    };
+
+    const ALGO_INFO = {
+      FCFS: {
+        code: 'FCFS',
+        name: 'FCFS 先到先服務',
+        rule: '單鍋(#1)依點餐順序一口氣做完，無切換延遲',
+        color: '#fbbf24'
+      },
+      SJF: {
+        code: 'SJF',
+        name: 'SJF 最短工作優先',
+        rule: '單鍋(#1)優先製作時間最短餐點 (☕>🍔>🍝>🥩)',
+        color: '#34d399'
+      },
+      RR: {
+        code: 'RR',
+        name: 'RR 循環排程 (三鍋並行)',
+        rule: '同時開 3 個鍋子，每 3 秒輪流換鍋翻炒 (切換 0.6s)',
+        color: '#38bdf8'
+      },
+      PRIORITY: {
+        code: 'PRIORITY',
+        name: 'Priority 優先權排程',
+        rule: '單鍋(#1)鎖定特殊標記 VIP 訂單無條件插隊',
+        color: '#c084fc'
+      }
+    };
+
+    /***************************************************************************
+     * 2. ALL 20 EVENTS DATABASE
+     ***************************************************************************/
+    const EVENTS_DB = [
+      // ======================== A. FCFS (1 - 5) ========================
+      {
+        id: 1,
+        bestAlgo: 'FCFS',
+        title: '退休長輩早茶團',
+        desc: '一群退休長輩來喝早茶，大家都點一模一樣的 🍔。但長輩們非常計較先來後到，誰慢來卻先拿到餐點，或是店員做一半換鍋子，長輩就會大吵大鬧！',
+        hintTraits: ['重視先來後到 (嚴禁插隊)', '討厭料理中斷換鍋', '全員皆點 🍔 (5秒)'],
+        whyBest: '全員餐點長度相同且極度計較公平與專注，FCFS 零切換成本且保證先到先得。',
+        spawns: [
+          { food: 'BURGER', mode: 'DINE', delay: 0.3, patience: 34, strictOrder: true, noInterrupt: true, label: '長輩' },
+          { food: 'BURGER', mode: 'DINE', delay: 1.5, patience: 35, strictOrder: true, noInterrupt: true, label: '長輩' },
+          { food: 'BURGER', mode: 'DINE', delay: 2.8, patience: 36, strictOrder: true, noInterrupt: true, label: '長輩' },
+          { food: 'BURGER', mode: 'DINE', delay: 4.0, patience: 38, strictOrder: true, noInterrupt: true, label: '長輩' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 5.2, patience: 40, strictOrder: true, noInterrupt: true, label: '長輩' }
+        ]
+      },
+      {
+        id: 2,
+        bestAlgo: 'FCFS',
+        title: '完美主義建築師聚會',
+        desc: '一群建築師來用餐，全部點了 🍝。他們有嚴重的完美主義，要求廚師一旦開始做某個人的餐點，就必須一口氣做完，絕不能做到一半換做別人的！',
+        hintTraits: ['嚴禁料理中斷 (RR 切換直接翻臉)', '重視順序公平', '全員皆點 🍝 (9秒)'],
+        whyBest: '建築師厭惡 RR 的半途切換（Context Switch），且餐點時間一致，FCFS 最穩定。',
+        spawns: [
+          { food: 'PASTA', mode: 'DINE', delay: 0.4, patience: 48, strictOrder: true, noInterrupt: true, label: '建築師' },
+          { food: 'PASTA', mode: 'DINE', delay: 1.8, patience: 50, strictOrder: true, noInterrupt: true, label: '建築師' },
+          { food: 'PASTA', mode: 'DINE', delay: 3.2, patience: 52, strictOrder: true, noInterrupt: true, label: '建築師' },
+          { food: 'PASTA', mode: 'DINE', delay: 4.5, patience: 55, strictOrder: true, noInterrupt: true, label: '建築師' }
+        ]
+      },
+      {
+        id: 3,
+        bestAlgo: 'FCFS',
+        title: '正義感爆棚的排隊糾察隊',
+        desc: '店裡來了一群排隊糾察隊，分別點了 🍝 與 🍔。他們手拿碼錶互相監督，只要發現「晚點餐的人比早點餐的人先拿到餐點」，早到的人就會立刻給一星負評並離場！',
+        hintTraits: ['嚴格監督先來後到 (選 SJF 插隊必死)', '討厭頻繁換鍋', '混合 🍝 與 🍔'],
+        whyBest: '雖然有短單 🍔 在後面，但糾察隊絕不容許 SJF 插隊，必須以 FCFS 依序完成。',
+        spawns: [
+          { food: 'PASTA',  mode: 'DINE', delay: 0.3, patience: 45, strictOrder: true, noInterrupt: true, label: '糾察隊長' },
+          { food: 'BURGER', mode: 'DINE', delay: 1.5, patience: 45, strictOrder: true, noInterrupt: true, label: '糾察隊員' },
+          { food: 'PASTA',  mode: 'DINE', delay: 2.7, patience: 48, strictOrder: true, noInterrupt: true, label: '糾察隊員' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 4.0, patience: 48, strictOrder: true, noInterrupt: true, label: '糾察隊員' }
+        ]
+      },
+      {
+        id: 4,
+        bestAlgo: 'FCFS',
+        title: '尖峰時段的單一特餐日',
+        desc: '現在是商業午餐時段，所有進門的客人全部只點今日特餐 🍔，且大家的耐心時間都算得剛剛好，廚房爐火不能有任何一秒鐘的切換或檢查浪費！',
+        hintTraits: ['時間極緊湊 (零容忍切換延遲)', '全員皆點 🍔 (5秒)', '共 6 位上班族'],
+        whyBest: '所有工作長度相同且時間緊迫，RR 的切換延遲或 SJF/Priority 的比對延遲都會導致後面客人超時。',
+        spawns: [
+          { food: 'BURGER', mode: 'DINE', delay: 0.2, patience: 16, strictOrder: true, noInterrupt: true, label: '上班族' },
+          { food: 'BURGER', mode: 'DINE', delay: 1.0, patience: 21, strictOrder: true, noInterrupt: true, label: '上班族' },
+          { food: 'BURGER', mode: 'DINE', delay: 1.8, patience: 26, strictOrder: true, noInterrupt: true, label: '上班族' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 2.6, patience: 31, strictOrder: true, noInterrupt: true, label: '上班族' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 3.4, patience: 36, strictOrder: true, noInterrupt: true, label: '上班族' },
+          { food: 'BURGER', mode: 'DINE', delay: 4.2, patience: 41, strictOrder: true, noInterrupt: true, label: '上班族' }
+        ]
+      },
+      {
+        id: 5,
+        bestAlgo: 'FCFS',
+        title: '深夜的疲憊下班族',
+        desc: '深夜時段，下班族陸續進門點了 🍔 或 ☕。他們非常討厭店員在廚房裡頻繁換鍋具發出噪音，也很在乎先來後到的秩序。',
+        hintTraits: ['厭惡換鍋噪音 (禁選 RR)', '重視先來後到 (禁選 SJF 插隊)', '深夜療癒客群'],
+        whyBest: 'FCFS 安靜穩定地依序出餐，不會觸發換鍋噪音或被插隊的心態崩潰。',
+        spawns: [
+          { food: 'BURGER', mode: 'DINE', delay: 0.3, patience: 35, strictOrder: true, noInterrupt: true, label: '夜歸人' },
+          { food: 'COFFEE', mode: 'DINE', delay: 1.6, patience: 35, strictOrder: true, noInterrupt: true, label: '夜歸人' },
+          { food: 'BURGER', mode: 'DINE', delay: 3.0, patience: 38, strictOrder: true, noInterrupt: true, label: '夜歸人' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 4.4, patience: 38, strictOrder: true, noInterrupt: true, label: '夜歸人' },
+          { food: 'BURGER', mode: 'DINE', delay: 5.8, patience: 40, strictOrder: true, noInterrupt: true, label: '夜歸人' }
+        ]
+      },
+
+      // ======================== B. SJF (6 - 10) ========================
+      {
+        id: 6,
+        bestAlgo: 'SJF',
+        title: '大胃王與趕火車的旅客',
+        desc: '一位悠閒的大胃王一進門就點了耗時 15 秒的 🥩（但他願意慢慢等），緊接著後面衝進來 6 個趕火車的旅客，全部只點 2 秒的 ☕，沒馬上拿到就會趕不上火車！',
+        hintTraits: ['經典護航效應 (Convoy Effect) 危機', '1位超長單 🥩 + 6位極短單 ☕', '趕火車旅客耐心極低'],
+        whyBest: 'SJF 能優先秒殺 6 杯 2 秒的 ☕，避免所有旅客被 15 秒的 🥩 卡死！',
+        spawns: [
+          { food: 'STEAK',  mode: 'DINE',    delay: 0.2, patience: 75, label: '悠閒大胃王' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.2, patience: 16, convoyVictim: true, label: '趕火車旅客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.7, patience: 17, convoyVictim: true, label: '趕火車旅客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 2.2, patience: 18, convoyVictim: true, label: '趕火車旅客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 2.7, patience: 19, convoyVictim: true, label: '趕火車旅客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 3.2, patience: 20, convoyVictim: true, label: '趕火車旅客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 3.7, patience: 21, convoyVictim: true, label: '趕火車旅客' }
+        ]
+      },
+      {
+        id: 7,
+        bestAlgo: 'SJF',
+        title: '午休最後十分鐘的學生潮',
+        desc: '附近高中的午休快結束了！一位不趕時間的休假老師先點了 🥩，但後面湧入一大群只點 ☕ 和 🍔 的高中生，鐘聲響前沒拿到就會遲到！',
+        hintTraits: ['休假老師有耐心 (🥩)', '高中生趕上課耐心極短 (☕/🍔)', '需最大化平均周轉率'],
+        whyBest: '透過 SJF 先消化完所有學生的 ☕ 與 🍔，最後再幫老師煎 🥩，全員不遲到。',
+        spawns: [
+          { food: 'STEAK',  mode: 'DINE',    delay: 0.2, patience: 80, label: '休假老師' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.2, patience: 16, convoyVictim: true, label: '高中生' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.8, patience: 18, convoyVictim: true, label: '高中生' },
+          { food: 'BURGER', mode: 'DINE',    delay: 2.4, patience: 22, convoyVictim: true, label: '高中生' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 3.0, patience: 19, convoyVictim: true, label: '高中生' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 3.6, patience: 25, convoyVictim: true, label: '高中生' }
+        ]
+      },
+      {
+        id: 8,
+        bestAlgo: 'SJF',
+        title: '內用滿座的翻桌危機',
+        desc: '內用區瞬間坐滿了 6 桌，而且門外候位區還排了 2 位急著入座的客人！場內第 1 桌點了 🥩（很有耐心），其他桌都只點了 ☕。必須立刻騰出內用空位！',
+        hintTraits: ['內用 6 桌全滿 + 門外候位排隊', '先清掉 ☕ 才能翻桌讓候位客入座'],
+        whyBest: 'SJF 先秒出場內的 ☕ 迅速騰出餐桌，門外候位的客人才能及時入座點餐。',
+        spawns: [
+          { food: 'STEAK',  mode: 'DINE', delay: 0.1, patience: 85, label: '慢活食客' },
+          { food: 'COFFEE', mode: 'DINE', delay: 0.8, patience: 18, convoyVictim: true, label: '內用茶客' },
+          { food: 'COFFEE', mode: 'DINE', delay: 1.2, patience: 19, convoyVictim: true, label: '內用茶客' },
+          { food: 'COFFEE', mode: 'DINE', delay: 1.6, patience: 20, convoyVictim: true, label: '內用茶客' },
+          { food: 'COFFEE', mode: 'DINE', delay: 2.0, patience: 21, convoyVictim: true, label: '內用茶客' },
+          { food: 'COFFEE', mode: 'DINE', delay: 2.4, patience: 22, convoyVictim: true, label: '內用茶客' },
+          { food: 'COFFEE', mode: 'DINE', delay: 2.8, patience: 24, convoyVictim: true, label: '候位急客' },
+          { food: 'COFFEE', mode: 'DINE', delay: 3.2, patience: 25, convoyVictim: true, label: '候位急客' }
+        ]
+      },
+      {
+        id: 9,
+        bestAlgo: 'SJF',
+        title: '外帶快閃咖啡團',
+        desc: '內用區有兩位慢活客人點了 🍝 與 🥩，此時外帶區突然出現「快閃咖啡團」共 6 人，每個人都只買一杯 2 秒的 ☕，但只願意等一下下！',
+        hintTraits: ['外帶區大排長龍', '快閃團只點 2 秒 ☕ 但極沒耐心'],
+        whyBest: 'SJF 能瞬間清空外帶區的 2 秒咖啡單，避免外帶隊伍塞車崩潰。',
+        spawns: [
+          { food: 'STEAK',  mode: 'DINE',    delay: 0.2, patience: 85, label: '慢活牛排客' },
+          { food: 'PASTA',  mode: 'DINE',    delay: 0.6, patience: 75, label: '慢活義麵客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.4, patience: 16, convoyVictim: true, label: '快閃咖啡客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.9, patience: 18, convoyVictim: true, label: '快閃咖啡客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 2.4, patience: 20, convoyVictim: true, label: '快閃咖啡客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 3.0, patience: 22, convoyVictim: true, label: '快閃咖啡客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 3.6, patience: 24, convoyVictim: true, label: '快閃咖啡客' }
+        ]
+      },
+      {
+        id: 10,
+        bestAlgo: 'SJF',
+        title: '美食攝影師與一般食客',
+        desc: '一位美食攝影師先點了 🥩 準備慢慢架燈擺拍（完全不在乎等待時間），但同時間店裡湧入 5 位飢腸轆轆的一般食客點了 🍔 與 ☕，這群食客餓到快昏倒了！',
+        hintTraits: ['攝影師點 🥩 耐心無限', '5 位飢餓食客點 ☕/🍔 急需果腹'],
+        whyBest: 'SJF 先餵飽所有短單食客，最後再出攝影師的 🥩，達成最短平均等待時間。',
+        spawns: [
+          { food: 'STEAK',  mode: 'DINE',    delay: 0.2, patience: 90, label: '美食攝影師' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 1.2, patience: 17, convoyVictim: true, label: '飢餓食客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.8, patience: 21, convoyVictim: true, label: '飢餓食客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 2.4, patience: 19, convoyVictim: true, label: '飢餓食客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 3.0, patience: 25, convoyVictim: true, label: '飢餓食客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 3.6, patience: 21, convoyVictim: true, label: '飢餓食客' }
+        ]
+      },
+
+      // ======================== C. RR (11 - 15) ========================
+      {
+        id: 11,
+        bestAlgo: 'RR',
+        title: '手機沒電的焦慮客人們',
+        desc: '店裡 Wi-Fi 斷線，4 位客人同時點了 🍝。因為沒手機滑，他們每隔幾秒就會盯著廚房看，只要超過 11 秒發現店員「完全沒動自己的麵」就會抓狂；但只要每輪有煮 3 秒推進進度，他們的耐心就會補滿！',
+        hintTraits: ['極度重視回應時間 (Response Time)', '每獲得 3 秒料理進度就會恢復耐心', '選 FCFS/SJF 後面客人必焦慮抓狂'],
+        whyBest: 'RR 循環排程每 3 秒輪流炒一盤麵，讓所有客人都看到進度推進並持續恢復耐心！',
+        spawns: [
+          { food: 'PASTA', mode: 'DINE', delay: 0.2, patience: 15, needsResponse: true, label: '焦慮低頭族' },
+          { food: 'PASTA', mode: 'DINE', delay: 0.8, patience: 15, needsResponse: true, label: '焦慮低頭族' },
+          { food: 'PASTA', mode: 'DINE', delay: 1.4, patience: 16, needsResponse: true, label: '焦慮低頭族' },
+          { food: 'PASTA', mode: 'DINE', delay: 2.0, patience: 16, needsResponse: true, label: '焦慮低頭族' }
+        ]
+      },
+      {
+        id: 12,
+        bestAlgo: 'RR',
+        title: '開放式廚房的圍觀群眾',
+        desc: '一群好奇心旺盛的遊客圍在櫃台前，每個人都點了 🍝。他們喜歡看廚師同時展現多工料理秀，如果誰的餐點太久沒有動靜，就會覺得被冷落而給負評！',
+        hintTraits: ['渴望看到多工料理進度', '進度有推進即補滿耐心條'],
+        whyBest: 'RR 讓每張訂單每隔幾秒就推進一次，滿足所有圍觀遊客對即時回應的需求。',
+        spawns: [
+          { food: 'PASTA', mode: 'DINE',    delay: 0.2, patience: 15, needsResponse: true, label: '圍觀遊客' },
+          { food: 'PASTA', mode: 'TAKEOUT', delay: 0.7, patience: 15, needsResponse: true, label: '圍觀遊客' },
+          { food: 'PASTA', mode: 'DINE',    delay: 1.2, patience: 16, needsResponse: true, label: '圍觀遊客' },
+          { food: 'PASTA', mode: 'TAKEOUT', delay: 1.7, patience: 16, needsResponse: true, label: '圍觀遊客' }
+        ]
+      },
+      {
+        id: 13,
+        bestAlgo: 'RR',
+        title: '懷疑論者的試探',
+        desc: '來了 4 位生性多疑的客人，分別點了 🍝 與 🍔。點完餐後只要太久沒看到自己的食材下鍋動工，就會懷疑店員「根本忘記畫單了」而立刻翻桌走人！',
+        hintTraits: ['點餐後需儘快看到動工 (First Response)', '每次輪流料理可消除疑慮'],
+        whyBest: 'RR 確保所有訂單在第一輪都能快速動工 3 秒，消除所有多疑客人的漏單恐懼。',
+        spawns: [
+          { food: 'PASTA',  mode: 'DINE', delay: 0.2, patience: 14, needsResponse: true, label: '多疑食客' },
+          { food: 'PASTA',  mode: 'DINE', delay: 0.7, patience: 14, needsResponse: true, label: '多疑食客' },
+          { food: 'BURGER', mode: 'DINE', delay: 1.2, patience: 15, needsResponse: true, label: '多疑食客' },
+          { food: 'PASTA',  mode: 'DINE', delay: 1.7, patience: 15, needsResponse: true, label: '多疑食客' }
+        ]
+      },
+      {
+        id: 14,
+        bestAlgo: 'RR',
+        title: '帶著哭鬧小孩的家長們',
+        desc: '4 組帶小孩的家長入座，都點了 🍝。小孩非常沒耐心，店員必須每幾秒就推進一點料理進度哄小孩，否則小孩哭鬧超過十幾秒家長就會崩潰離開！',
+        hintTraits: ['小孩哭鬧倒數快', '每次輪流推進 3 秒進度即可安撫小孩'],
+        whyBest: '透過 RR 分時段輪流推進每桌進度，成功安撫所有小孩直到正餐完成。',
+        spawns: [
+          { food: 'PASTA', mode: 'DINE', delay: 0.2, patience: 15, needsResponse: true, label: '崩潰家長' },
+          { food: 'PASTA', mode: 'DINE', delay: 0.8, patience: 15, needsResponse: true, label: '崩潰家長' },
+          { food: 'PASTA', mode: 'DINE', delay: 1.4, patience: 16, needsResponse: true, label: '崩潰家長' },
+          { food: 'PASTA', mode: 'DINE', delay: 2.0, patience: 16, needsResponse: true, label: '崩潰家長' }
+        ]
+      },
+      {
+        id: 15,
+        bestAlgo: 'RR',
+        title: '直播主們的同步開箱',
+        desc: '3 位美食直播主同時進店，都點了耗時 15 秒的 🥩。他們正在開直播，需要每隔幾秒就拍一下「廚師正在煎我的牛排」的畫面。誰太久沒畫面拍，就會在直播痛罵餐廳！',
+        hintTraits: ['3 份 15 秒 🥩 同步直播', '必須輪流給畫面才能維持直播熱度'],
+        whyBest: '一次煎完一塊要 15 秒會讓後面的直播主斷播，RR 輪流煎 3 秒讓每個人都有畫面拍！',
+        spawns: [
+          { food: 'STEAK', mode: 'DINE', delay: 0.2, patience: 15, needsResponse: true, label: '美食直播主' },
+          { food: 'STEAK', mode: 'DINE', delay: 0.8, patience: 15, needsResponse: true, label: '美食直播主' },
+          { food: 'STEAK', mode: 'DINE', delay: 1.4, patience: 16, needsResponse: true, label: '美食直播主' }
+        ]
+      },
+
+      // ======================== D. PRIORITY (16 - 20) ========================
+      {
+        id: 16,
+        bestAlgo: 'PRIORITY',
+        title: '微服出巡的神秘美食評論家',
+        desc: '店裡已有 3 位一般客人在等 ☕ 與 🍔，此時頭戴「黃金皇冠」的美食評論家進門點了 🍝！評論家自視甚高，若不第一時間優先為他下廚，將給出毀滅性負評並扣款！',
+        hintTraits: ['出現皇冠標記 VIP (點 🍝)', '選 SJF 會先做 ☕ 惹怒評論家', 'VIP 準時完餐享 3 倍小費'],
+        whyBest: '評論家點的是 9 秒 🍝，選 FCFS 或 SJF 都會讓他排在一般人後面，唯有 Priority 能讓他插隊！',
+        spawns: [
+          { food: 'BURGER', mode: 'DINE',    delay: 0.2, patience: 48, label: '一般食客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 0.6, patience: 48, label: '一般食客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.0, patience: 48, label: '一般食客' },
+          { food: 'PASTA',  mode: 'DINE',    delay: 2.2, patience: 14, isVIP: true, vipType: 'CROWN', vipMult: 3, label: '美食評論家' }
+        ]
+      },
+      {
+        id: 17,
+        bestAlgo: 'PRIORITY',
+        title: '值勤中的急診室醫師',
+        desc: '幾位悠閒的客人剛點完 ☕ 與 🍔，突然衝進兩位頭頂有「紅十字標記」的急診室醫師，點了補充體力的 🥩 與 🍝 外帶，隨時會被醫院 Call 回去，必須無條件第一順位製作！',
+        hintTraits: ['紅十字標記急診醫師 (點長單 🥩/🍝)', '一般客人很有耐心，但醫師時間極緊迫'],
+        whyBest: '醫師點的是耗時長的 🥩 與 🍝，若選 SJF 會跑去泡咖啡，唯有 Priority 能拯救急診醫師！',
+        spawns: [
+          { food: 'COFFEE', mode: 'DINE',    delay: 0.2, patience: 65, label: '悠閒茶客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 0.6, patience: 65, label: '悠閒食客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 1.0, patience: 65, label: '悠閒茶客' },
+          { food: 'PASTA',  mode: 'TAKEOUT', delay: 2.0, patience: 14, isVIP: true, vipType: 'CROSS', vipMult: 2, label: '急診室主治醫師' },
+          { food: 'STEAK',  mode: 'TAKEOUT', delay: 2.6, patience: 29, isVIP: true, vipType: 'CROSS', vipMult: 2, label: '急診室住院醫師' }
+        ]
+      },
+      {
+        id: 18,
+        bestAlgo: 'PRIORITY',
+        title: '黑道老大的包場宵夜',
+        desc: '店裡正忙著做一般客人的 ☕ 與 🍔，突然走進頭上有「骷髏標記」的黑道老大與二當家，點了 🍝！老大脾氣暴躁，誰敢讓他的餐點排在普通人後面，就會砸店扣錢！',
+        hintTraits: ['骷髏標記黑道老大', '氣走將遭砸店重罰 -$300'],
+        whyBest: 'Priority 排程能立即辨識高優先權標記並插隊製作，確保黑道老大零等待。',
+        spawns: [
+          { food: 'BURGER', mode: 'DINE', delay: 0.2, patience: 55, label: '宵夜路人' },
+          { food: 'COFFEE', mode: 'DINE', delay: 0.6, patience: 55, label: '宵夜路人' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 1.0, patience: 55, label: '宵夜路人' },
+          { food: 'PASTA',  mode: 'DINE', delay: 2.0, patience: 14, isVIP: true, vipType: 'SKULL', vipMult: 2, label: '黑道老大' },
+          { food: 'BURGER', mode: 'DINE', delay: 2.5, patience: 20, isVIP: true, vipType: 'SKULL', vipMult: 2, label: '黑道二當家' }
+        ]
+      },
+      {
+        id: 19,
+        bestAlgo: 'PRIORITY',
+        title: '衛生局突擊檢查員',
+        desc: '店裡有數名客人點了 ☕，此時衛生局檢查員（頭頂「警徽標記」）進店抽查，點了一份 🍝 檢驗熟度。檢查員趕著去下一家，若不優先出餐給他檢驗，將直接開立罰單！',
+        hintTraits: ['警徽標記衛生檢查員 (點 🍝)', '選 SJF 會被 ☕ 吸引而耽誤檢查員'],
+        whyBest: '利用 Priority 忽略短單 ☕ 的誘惑，直接優先完成檢查員的 🍝 通過抽檢。',
+        spawns: [
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 0.2, patience: 50, label: '排隊市民' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 0.6, patience: 50, label: '排隊市民' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.0, patience: 50, label: '排隊市民' },
+          { food: 'PASTA',  mode: 'DINE',    delay: 1.8, patience: 14, isVIP: true, vipType: 'SHIELD', vipMult: 2, label: '衛生局檢查員' }
+        ]
+      },
+      {
+        id: 20,
+        bestAlgo: 'PRIORITY',
+        title: '趕飛機的跨國企業總裁',
+        desc: '店裡前面已經排了 3 張 🍔 的訂單，此時一位頭頂「鑽石標記」的跨國總裁在去機場路上順道來買 🍔，願意支付 5 倍價錢，但要求零等待立刻動工！',
+        hintTraits: ['鑽石標記總裁 (5倍高額獎勵)', '所有人都點 🍔，FCFS 與 SJF 皆無法讓總裁插隊'],
+        whyBest: '因為大家都點 🍔（時間相同），選 FCFS 或 SJF 總裁都會排第 4 個而趕不上飛機，只有 Priority 能插隊！',
+        spawns: [
+          { food: 'BURGER', mode: 'DINE',    delay: 0.2, patience: 50, label: '一般顧客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 0.6, patience: 50, label: '一般顧客' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 1.0, patience: 50, label: '一般顧客' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 2.0, patience: 10, isVIP: true, vipType: 'DIAMOND', vipMult: 5, label: '跨國企業總裁' }
+        ]
+      }
+    ];
+
+    /***************************************************************************
+     * 3. RESTAURANT SPATIAL COORDINATES (900 x 540 Canvas)
+     ***************************************************************************/
+    const POS = {
+      stoves: [
+        { id: 0, label: '鍋子 #1', x: 70,  y: 86, cookX: 70,  cookY: 148 },
+        { id: 1, label: '鍋子 #2', x: 168, y: 86, cookX: 168, cookY: 148 },
+        { id: 2, label: '鍋子 #3', x: 266, y: 86, cookX: 266, cookY: 148 }
+      ],
+      kitchenStove: { x: 168, y: 148 },
+      counterPass:  { x: 355, y: 215 },
+      idleSpot:     { x: 395, y: 265 },
+      entrance:     { x: 855, y: 495 },
+      takeoutEntrance: { x: 40, y: 500 },
+      tables: [
+        { id: 0, x: 525, y: 120, seatX: 525, seatY: 92,  serveX: 480, serveY: 120 },
+        { id: 1, x: 745, y: 120, seatX: 745, seatY: 92,  serveX: 700, serveY: 120 },
+        { id: 2, x: 525, y: 255, seatX: 525, seatY: 227, serveX: 480, serveY: 255 },
+        { id: 3, x: 745, y: 255, seatX: 745, seatY: 227, serveX: 700, serveY: 255 },
+        { id: 4, x: 525, y: 390, seatX: 525, seatY: 362, serveX: 480, serveY: 390 },
+        { id: 5, x: 745, y: 390, seatX: 745, seatY: 362, serveX: 700, serveY: 390 }
+      ],
+      takeoutSlots: [
+        { id: 0, x: 265, y: 445, serveX: 295, serveY: 395 },
+        { id: 1, x: 205, y: 445, serveX: 205, serveY: 395 },
+        { id: 2, x: 145, y: 445, serveX: 145, serveY: 395 },
+        { id: 3, x: 85,  y: 445, serveX: 85,  serveY: 395 }
+      ],
+      dineWaitSlots: [
+        { x: 815, y: 485 },
+        { x: 760, y: 485 },
+        { x: 705, y: 485 },
+        { x: 650, y: 485 }
+      ]
+    };
+
+    /***************************************************************************
+     * 4. GAME STATE
+     ***************************************************************************/
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let game = {
+      paused: false,
+      speed: 1,
+      currentAlgo: 'FCFS',
+      revenue: 0,
+      ratings: [],
+      servedCount: 0,
+      angryCount: 0,
+      nextCustomerId: 1,
+
+      // Day & Event Progression
+      isPracticeMode: false,
+      phase: 'WARMUP', // 'WARMUP', 'EVENT', 'ENDED'
+      eventIndex: 0,   // 0 to 5 (total 6 events)
+      dayEvents: [],   // Array of 6 event objects
+      activeEvent: null,
+      eventHistory: [], // Records student's choices vs optimal
+      spawnQueue: [],
+      phaseTimer: 0,
+      interEventCooldown: 0,
+
+      // Entities
+      customers: [],
+      floatingTexts: [],
+      reviews: [],
+
+      // 3 Kitchen Stoves/Pots State
+      stoveSlots: [null, null, null], // Holds up to 3 customer orders simultaneously in RR mode (or 1 in stoveSlots[0] for single-pot modes)
+
+      // CPU Clerk State
+      cpu: {
+        x: POS.idleSpot.x,
+        y: POS.idleSpot.y,
+        state: 'IDLE', // 'IDLE', 'MOVE_TO_ORDER', 'TAKING_ORDER', 'MOVE_TO_COOK', 'SWITCHING', 'COOKING', 'MOVE_TO_SERVE'
+        activeStoveIndex: 0,
+        targetCustomer: null,
+        activeOrderCustomer: null,
+        lastCookedCustomer: null,
+        actionTimer: 0,
+        actionDuration: 0,
+        rrQuantumUsed: 0,
+        rrQuantumMax: 3.0,
+        animFrame: 0
+      }
+    };
+
+    /***************************************************************************
+     * 5. INITIALIZATION & DAY SCHEDULER
+     ***************************************************************************/
+    function pickRandomDayEvents() {
+      // Pick 6 events ensuring all 4 algorithms are represented (at least 1 each + 2 random)
+      const byAlgo = {
+        FCFS: EVENTS_DB.filter(e => e.bestAlgo === 'FCFS'),
+        SJF: EVENTS_DB.filter(e => e.bestAlgo === 'SJF'),
+        RR: EVENTS_DB.filter(e => e.bestAlgo === 'RR'),
+        PRIORITY: EVENTS_DB.filter(e => e.bestAlgo === 'PRIORITY')
+      };
+
+      const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+      const selected = [
+        shuffle(byAlgo.FCFS)[0],
+        shuffle(byAlgo.SJF)[0],
+        shuffle(byAlgo.RR)[0],
+        shuffle(byAlgo.PRIORITY)[0]
+      ];
+
+      const remaining = EVENTS_DB.filter(e => !selected.some(s => s.id === e.id));
+      const extras = shuffle(remaining).slice(0, 2);
+      return shuffle([...selected, ...extras]);
+    }
+
+    function startNewDay() {
+      document.getElementById('summary-modal').classList.add('hidden');
+      document.getElementById('summary-modal').classList.remove('flex');
+      document.getElementById('event-modal').classList.add('hidden');
+      document.getElementById('event-modal').classList.remove('flex');
+
+      game.paused = false;
+      game.isPracticeMode = false;
+      game.currentAlgo = 'FCFS';
+      game.revenue = 0;
+      game.ratings = [];
+      game.servedCount = 0;
+      game.angryCount = 0;
+      game.nextCustomerId = 1;
+
+      game.phase = 'WARMUP';
+      game.eventIndex = 0;
+      game.dayEvents = pickRandomDayEvents();
+      game.activeEvent = null;
+      game.eventHistory = [];
+      game.customers = [];
+      game.floatingTexts = [];
+      game.reviews = [];
+      resetCPU();
+
+      // Load 3 warmup customers
+      game.spawnQueue = [
+        { food: 'COFFEE', mode: 'DINE',    delay: 0.3, patience: 40, label: '早鳥鄰居' },
+        { food: 'BURGER', mode: 'DINE',    delay: 1.5, patience: 45, label: '常客學生' },
+        { food: 'COFFEE', mode: 'TAKEOUT', delay: 2.8, patience: 40, label: '通勤上班族' }
+      ];
+      game.phaseTimer = 0;
+      game.interEventCooldown = 0;
+
+      updateTopBarUI();
+      updateBannerUI();
+      renderLiveReviews();
+      renderReadyQueue();
+    }
+
+    function startPracticeEvent(eventId) {
+      closeCatalogModal();
+      document.getElementById('summary-modal').classList.add('hidden');
+      document.getElementById('summary-modal').classList.remove('flex');
+
+      const ev = EVENTS_DB.find(e => e.id === eventId);
+      if (!ev) return;
+
+      game.paused = false;
+      game.isPracticeMode = true;
+      game.currentAlgo = 'FCFS';
+      game.revenue = 0;
+      game.ratings = [];
+      game.servedCount = 0;
+      game.angryCount = 0;
+      game.nextCustomerId = 1;
+      game.customers = [];
+      game.floatingTexts = [];
+      game.reviews = [];
+      game.eventHistory = [];
+      resetCPU();
+
+      game.phase = 'EVENT';
+      game.eventIndex = 0;
+      game.dayEvents = [ev];
+      triggerEventModal(ev, 1, 1);
+    }
+
+    function resetCPU() {
+      game.stoveSlots = [null, null, null];
+      game.cpu.x = POS.idleSpot.x;
+      game.cpu.y = POS.idleSpot.y;
+      game.cpu.state = 'IDLE';
+      game.cpu.activeStoveIndex = 0;
+      game.cpu.targetCustomer = null;
+      game.cpu.activeOrderCustomer = null;
+      game.cpu.lastCookedCustomer = null;
+      game.cpu.actionTimer = 0;
+      game.cpu.rrQuantumUsed = 0;
+    }
+
+    /***************************************************************************
+     * 6. EVENT TRIGGER & ALGORITHM SELECTION
+     ***************************************************************************/
+    function triggerEventModal(ev, currentNum, totalNum) {
+      game.paused = true;
+      game.activeEvent = ev;
+
+      document.getElementById('modal-event-num').textContent =
+        game.isPracticeMode ? `單獨演練模式 (#${ev.id})` : `突發事件 ${currentNum} / ${totalNum}`;
+      document.getElementById('modal-event-title').textContent = ev.title;
+      document.getElementById('modal-event-desc').textContent = ev.desc;
+
+      const traitsContainer = document.getElementById('modal-event-traits');
+      traitsContainer.innerHTML = ev.hintTraits.map(t =>
+        `<span class="px-2.5 py-1 text-xs font-bold bg-indigo-950 text-indigo-200 border border-indigo-600">${t}</span>`
+      ).join('');
+
+      const modal = document.getElementById('event-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    window.selectEventAlgorithm = function(algoCode) {
+      const modal = document.getElementById('event-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+
+      game.currentAlgo = algoCode;
+      game.phase = 'EVENT';
+      game.phaseTimer = 0;
+
+      const ev = game.activeEvent;
+      // Clone spawns
+      game.spawnQueue = ev.spawns.map(s => ({ ...s }));
+
+      // Record decision in history
+      game.eventHistory.push({
+        eventId: ev.id,
+        title: ev.title,
+        chosenAlgo: algoCode,
+        bestAlgo: ev.bestAlgo,
+        isCorrect: algoCode === ev.bestAlgo,
+        whyBest: ev.whyBest,
+        servedInEvent: 0,
+        angryInEvent: 0
+      });
+
+      addFloatingText(POS.kitchenStove.x + 60, POS.kitchenStove.y, `啟動 [${ALGO_INFO[algoCode].name}]`, '#38bdf8');
+
+      game.paused = false;
+      syncStoveAssignments();
+      updateTopBarUI();
+      updateBannerUI();
+    };
+
+    /***************************************************************************
+     * 7. CUSTOMER SPAWNING & SEAT ALLOCATION
+     ***************************************************************************/
+    function spawnCustomer(spec) {
+      const foodItem = MENU[spec.food];
+      const id = game.nextCustomerId++;
+
+      // Randomize pixel shirt/hair palette
+      const palettes = [
+        { shirt: '#38bdf8', hair: '#451a03' },
+        { shirt: '#f43f5e', hair: '#1e1b4b' },
+        { shirt: '#a855f7', hair: '#78350f' },
+        { shirt: '#10b981', hair: '#0f172a' },
+        { shirt: '#eab308', hair: '#713f12' },
+        { shirt: '#ec4899', hair: '#31102f' }
+      ];
+      const pal = palettes[id % palettes.length];
+
+      let c = {
+        id,
+        label: spec.label || '顧客',
+        food: foodItem,
+        mode: spec.mode || 'DINE', // 'DINE' or 'TAKEOUT'
+        x: spec.mode === 'TAKEOUT' ? POS.takeoutEntrance.x : POS.entrance.x,
+        y: spec.mode === 'TAKEOUT' ? POS.takeoutEntrance.y : POS.entrance.y,
+        targetX: 0,
+        targetY: 0,
+        serveX: 0,
+        serveY: 0,
+        tableId: null,
+        takeoutSlotId: null,
+
+        state: 'WALKING_IN', // 'WAITING_SEAT', 'WALKING_IN', 'WAIT_ORDER', 'BEING_ORDERED', 'WAIT_FOOD', 'LEAVING_HAPPY', 'LEAVING_ANGRY'
+        orderTime: null,
+        workRemaining: foodItem.burst,
+        workTotal: foodItem.burst,
+        patience: spec.patience || 38,
+        maxPatience: spec.patience || 38,
+
+        // Special Event Traits
+        strictOrder: !!spec.strictOrder,
+        noInterrupt: !!spec.noInterrupt,
+        convoyVictim: !!spec.convoyVictim,
+        needsResponse: !!spec.needsResponse,
+        isVIP: !!spec.isVIP,
+        vipType: spec.vipType || null, // 'CROWN', 'CROSS', 'SKULL', 'SHIELD', 'DIAMOND'
+        vipMult: spec.vipMult || 1,
+        rrSlicesReceived: 0,
+
+        shirtColor: pal.shirt,
+        hairColor: pal.hair
+      };
+
+      // Assign seat or queue slot
+      if (c.mode === 'DINE') {
+        const freeTable = getFreeTable();
+        if (freeTable) {
+          c.tableId = freeTable.id;
+          c.targetX = freeTable.seatX;
+          c.targetY = freeTable.seatY;
+          c.serveX = freeTable.serveX;
+          c.serveY = freeTable.serveY;
+          c.state = 'WALKING_IN';
+        } else {
+          c.state = 'WAITING_SEAT';
+        }
+      } else {
+        const freeSlot = getFreeTakeoutSlot();
+        if (freeSlot) {
+          c.takeoutSlotId = freeSlot.id;
+          c.targetX = freeSlot.x;
+          c.targetY = freeSlot.y;
+          c.serveX = freeSlot.serveX;
+          c.serveY = freeSlot.serveY;
+          c.state = 'WALKING_IN';
+        } else {
+          c.state = 'WAITING_SEAT';
+        }
+      }
+
+      game.customers.push(c);
+      repositionWaitingQueues();
+    }
+
+    function getFreeTable() {
+      const occupiedIds = new Set(
+        game.customers
+          .filter(c => c.tableId !== null && c.state !== 'LEAVING_HAPPY' && c.state !== 'LEAVING_ANGRY')
+          .map(c => c.tableId)
+      );
+      return POS.tables.find(t => !occupiedIds.has(t.id)) || null;
+    }
+
+    function getFreeTakeoutSlot() {
+      const occupiedIds = new Set(
+        game.customers
+          .filter(c => c.takeoutSlotId !== null && c.state !== 'LEAVING_HAPPY' && c.state !== 'LEAVING_ANGRY')
+          .map(c => c.takeoutSlotId)
+      );
+      return POS.takeoutSlots.find(s => !occupiedIds.has(s.id)) || null;
+    }
+
+    function repositionWaitingQueues() {
+      // Promote waiting dine-in customers if a table opened up
+      const waitingDine = game.customers.filter(c => c.mode === 'DINE' && c.state === 'WAITING_SEAT');
+      for (let c of waitingDine) {
+        const freeTable = getFreeTable();
+        if (freeTable) {
+          c.tableId = freeTable.id;
+          c.targetX = freeTable.seatX;
+          c.targetY = freeTable.seatY;
+          c.serveX = freeTable.serveX;
+          c.serveY = freeTable.serveY;
+          c.state = 'WALKING_IN';
+        }
+      }
+
+      // Position remaining dine-in wait queue
+      const stillWaitingDine = game.customers.filter(c => c.mode === 'DINE' && c.state === 'WAITING_SEAT');
+      stillWaitingDine.forEach((c, idx) => {
+        const slot = POS.dineWaitSlots[Math.min(idx, POS.dineWaitSlots.length - 1)];
+        c.targetX = slot.x - (idx >= POS.dineWaitSlots.length ? (idx - 3) * 35 : 0);
+        c.targetY = slot.y;
+      });
+
+      // Promote waiting takeout customers if a slot opened up
+      const waitingTakeout = game.customers.filter(c => c.mode === 'TAKEOUT' && c.state === 'WAITING_SEAT');
+      for (let c of waitingTakeout) {
+        const freeSlot = getFreeTakeoutSlot();
+        if (freeSlot) {
+          c.takeoutSlotId = freeSlot.id;
+          c.targetX = freeSlot.x;
+          c.targetY = freeSlot.y;
+          c.serveX = freeSlot.serveX;
+          c.serveY = freeSlot.serveY;
+          c.state = 'WALKING_IN';
+        }
+      }
+
+      const stillWaitingTakeout = game.customers.filter(c => c.mode === 'TAKEOUT' && c.state === 'WAITING_SEAT');
+      stillWaitingTakeout.forEach((c, idx) => {
+        c.targetX = 50;
+        c.targetY = 485 - idx * 28;
+      });
+    }
+
+    /***************************************************************************
+     * 8. CORE SIMULATION UPDATE LOOP
+     ***************************************************************************/
+    let lastTimestamp = performance.now();
+
+    function gameLoop(now) {
+      const rawDt = Math.min((now - lastTimestamp) / 1000, 0.1);
+      lastTimestamp = now;
+
+      if (!game.paused && game.phase !== 'ENDED') {
+        const dt = rawDt * game.speed;
+        updateSimulation(dt);
+      }
+
+      renderCanvas();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function updateSimulation(dt) {
+      game.phaseTimer += dt;
+      game.cpu.animFrame += dt * 8;
+
+      // 1. Process Spawn Queue
+      for (let i = game.spawnQueue.length - 1; i >= 0; i--) {
+        if (game.phaseTimer >= game.spawnQueue[i].delay) {
+          const spec = game.spawnQueue.splice(i, 1)[0];
+          spawnCustomer(spec);
+          updateBannerUI();
+        }
+      }
+
+      // 2. Update Customers (Movement & Patience)
+      for (let i = game.customers.length - 1; i >= 0; i--) {
+        const c = game.customers[i];
+
+        // Movement towards target
+        const moveSpeed = (c.state === 'LEAVING_HAPPY' || c.state === 'LEAVING_ANGRY') ? 210 : 175;
+        const dx = c.targetX - c.x;
+        const dy = c.targetY - c.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist > 2) {
+          c.x += (dx / dist) * Math.min(dist, moveSpeed * dt);
+          c.y += (dy / dist) * Math.min(dist, moveSpeed * dt);
+        } else {
+          c.x = c.targetX;
+          c.y = c.targetY;
+          if (c.state === 'WALKING_IN') {
+            c.state = 'WAIT_ORDER';
+          } else if (c.state === 'LEAVING_HAPPY' || c.state === 'LEAVING_ANGRY') {
+            game.customers.splice(i, 1);
+            repositionWaitingQueues();
+            updateBannerUI();
+            continue;
+          }
+        }
+
+        // Patience countdown for active waiting customers
+        if (c.state === 'WAITING_SEAT' || c.state === 'WAIT_ORDER' || c.state === 'WAIT_FOOD') {
+          // Pause patience drain slightly while CPU is actively delivering or taking order
+          const isBeingCookedRightNow = (game.cpu.state === 'COOKING' && game.cpu.activeOrderCustomer === c);
+          const drainRate = isBeingCookedRightNow ? 0.35 : 1.0;
+          c.patience -= dt * drainRate;
+
+          if (c.patience <= 0) {
+            triggerCustomerRageQuit(c, 'TIMEOUT');
+          }
+        }
+      }
+
+      // 3. Update CPU Clerk State Machine
+      updateCPU(dt);
+
+      // 4. Check Phase / Event Completion
+      const activeCustomersRemaining = game.customers.some(
+        c => c.state !== 'LEAVING_HAPPY' && c.state !== 'LEAVING_ANGRY'
+      );
+
+      if (game.spawnQueue.length === 0 && !activeCustomersRemaining && game.cpu.state === 'IDLE') {
+        game.interEventCooldown += dt;
+        if (game.interEventCooldown >= 1.0) {
+          game.interEventCooldown = 0;
+          advanceToNextEventOrSummary();
+        }
+      } else {
+        game.interEventCooldown = 0;
+      }
+
+      updateCPUSidebarUI();
+    }
+
+    /***************************************************************************
+     * 9. CPU CLERK AI & SCHEDULING ALGORITHMS (WITH 3-STOVE RR SUPPORT)
+     ***************************************************************************/
+    function getReadyQueue() {
+      const waitingFood = game.customers.filter(c => c.state === 'WAIT_FOOD' && c.workRemaining > 0.001);
+
+      if (game.currentAlgo === 'FCFS') {
+        return waitingFood.sort((a, b) => a.orderTime - b.orderTime);
+      }
+      if (game.currentAlgo === 'SJF') {
+        return waitingFood.sort((a, b) => {
+          if (Math.abs(a.workRemaining - b.workRemaining) > 0.01) {
+            return a.workRemaining - b.workRemaining;
+          }
+          return a.orderTime - b.orderTime;
+        });
+      }
+      if (game.currentAlgo === 'PRIORITY') {
+        return waitingFood.sort((a, b) => {
+          if (a.isVIP !== b.isVIP) return a.isVIP ? -1 : 1;
+          return a.orderTime - b.orderTime;
+        });
+      }
+      if (game.currentAlgo === 'RR') {
+        // Round Robin cycles by order of least recently sliced / round-robin timestamp
+        return waitingFood.sort((a, b) => (a.rrLastQueueTime || a.orderTime) - (b.rrLastQueueTime || b.orderTime));
+      }
+      return waitingFood;
+    }
+
+    /**
+     * Synchronizes the 3 Kitchen Stoves (`game.stoveSlots[0..2]`):
+     * - In FCFS / SJF / PRIORITY: only Stove #1 (`stoveSlots[0]`) is used for the single active job.
+     * - In RR (Round Robin): up to 3 stoves (`stoveSlots[0..2]`) are loaded simultaneously with orders from the Ready Queue!
+     */
+    function syncStoveAssignments() {
+      // Clear invalid or finished orders from stoves
+      for (let i = 0; i < 3; i++) {
+        const c = game.stoveSlots[i];
+        if (c && (c.state !== 'WAIT_FOOD' || c.workRemaining <= 0.001)) {
+          game.stoveSlots[i] = null;
+        }
+      }
+
+      const rq = getReadyQueue();
+
+      if (game.currentAlgo !== 'RR') {
+        // Single-stove algorithms: only use Stove #1 (index 0)
+        game.stoveSlots[1] = null;
+        game.stoveSlots[2] = null;
+        game.stoveSlots[0] = rq.length > 0 ? rq[0] : null;
+        game.cpu.activeStoveIndex = 0;
+      } else {
+        // Round Robin: fill any empty stove slots (0, 1, 2) with waiting orders not yet on a stove
+        for (let i = 0; i < 3; i++) {
+          if (!game.stoveSlots[i]) {
+            const candidate = rq.find(c => !game.stoveSlots.includes(c));
+            if (candidate) {
+              game.stoveSlots[i] = candidate;
+            }
+          }
+        }
+      }
+    }
+
+    /**
+     * Picks which stove (0, 1, or 2) and order the CPU should work on next.
+     */
+    function pickNextStoveAndOrder() {
+      syncStoveAssignments();
+
+      if (game.currentAlgo !== 'RR') {
+        return { stoveIndex: 0, order: game.stoveSlots[0] };
+      }
+
+      // In RR mode: among the occupied stoves [0, 1, 2], pick the one with the oldest rrLastQueueTime
+      let bestIdx = -1;
+      let bestTime = Infinity;
+      for (let i = 0; i < 3; i++) {
+        const c = game.stoveSlots[i];
+        if (c) {
+          const t = c.rrLastQueueTime || c.orderTime || 0;
+          if (t < bestTime) {
+            bestTime = t;
+            bestIdx = i;
+          }
+        }
+      }
+
+      if (bestIdx === -1) {
+        return { stoveIndex: 0, order: null };
+      }
+      return { stoveIndex: bestIdx, order: game.stoveSlots[bestIdx] };
+    }
+
+    function moveCpuTowards(tx, ty, speed, dt) {
+      const dx = tx - game.cpu.x;
+      const dy = ty - game.cpu.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist <= speed * dt) {
+        game.cpu.x = tx;
+        game.cpu.y = ty;
+        return true;
+      }
+      game.cpu.x += (dx / dist) * speed * dt;
+      game.cpu.y += (dy / dist) * speed * dt;
+      return false;
+    }
+
+    function updateCPU(dt) {
+      const cpu = game.cpu;
+      const cpuSpeed = 420; // Fast pixel clerk!
+
+      syncStoveAssignments();
+
+      // Prioritize taking unresolved orders first so students can see the orders in the Ready Queue!
+      const unOrdered = game.customers
+        .filter(c => c.state === 'WAIT_ORDER')
+        .sort((a, b) => a.id - b.id);
+
+      if (cpu.state === 'IDLE') {
+        if (unOrdered.length > 0) {
+          cpu.targetCustomer = unOrdered[0];
+          cpu.state = 'MOVE_TO_ORDER';
+          return;
+        }
+
+        const nextTarget = pickNextStoveAndOrder();
+        if (nextTarget.order) {
+          cpu.activeStoveIndex = nextTarget.stoveIndex;
+          cpu.activeOrderCustomer = nextTarget.order;
+          cpu.state = 'MOVE_TO_COOK';
+          return;
+        }
+
+        // Return to center idle position
+        moveCpuTowards(POS.idleSpot.x, POS.idleSpot.y, cpuSpeed * 0.6, dt);
+      }
+
+      else if (cpu.state === 'MOVE_TO_ORDER') {
+        const target = cpu.targetCustomer;
+        if (!target || target.state !== 'WAIT_ORDER') {
+          cpu.state = 'IDLE';
+          return;
+        }
+        if (moveCpuTowards(target.serveX, target.serveY, cpuSpeed, dt)) {
+          cpu.state = 'TAKING_ORDER';
+          target.state = 'BEING_ORDERED';
+          cpu.actionTimer = 0;
+          cpu.actionDuration = 0.38; // Quick 0.38s order taking
+        }
+      }
+
+      else if (cpu.state === 'TAKING_ORDER') {
+        const target = cpu.targetCustomer;
+        if (!target || target.state !== 'BEING_ORDERED') {
+          cpu.state = 'IDLE';
+          return;
+        }
+        cpu.actionTimer += dt;
+        if (cpu.actionTimer >= cpu.actionDuration) {
+          target.state = 'WAIT_FOOD';
+          target.orderTime = game.phaseTimer;
+          target.rrLastQueueTime = game.phaseTimer;
+          addFloatingText(target.x, target.y - 35, `點餐: ${target.food.emoji}`, '#fbbf24');
+          syncStoveAssignments();
+          renderReadyQueue();
+
+          // Check if another customer also needs ordering right now before running back to kitchen
+          const moreUnordered = game.customers.filter(c => c.state === 'WAIT_ORDER');
+          if (moreUnordered.length > 0) {
+            cpu.targetCustomer = moreUnordered[0];
+            cpu.state = 'MOVE_TO_ORDER';
+          } else {
+            cpu.state = 'IDLE';
+          }
+        }
+      }
+
+      else if (cpu.state === 'MOVE_TO_COOK') {
+        const nextTarget = pickNextStoveAndOrder();
+        if (!nextTarget.order) {
+          cpu.state = 'IDLE';
+          return;
+        }
+        cpu.activeStoveIndex = nextTarget.stoveIndex;
+        cpu.activeOrderCustomer = nextTarget.order;
+
+        const stovePos = POS.stoves[cpu.activeStoveIndex];
+        if (moveCpuTowards(stovePos.cookX, stovePos.cookY, cpuSpeed, dt)) {
+          startCookingOrOverhead(cpu.activeOrderCustomer);
+        }
+      }
+
+      else if (cpu.state === 'SWITCHING') {
+        const ord = cpu.activeOrderCustomer;
+        if (!ord || ord.state !== 'WAIT_FOOD') {
+          cpu.state = 'IDLE';
+          return;
+        }
+        // Move smoothly to the target stove while switching pots!
+        const stovePos = POS.stoves[cpu.activeStoveIndex];
+        moveCpuTowards(stovePos.cookX, stovePos.cookY, cpuSpeed, dt);
+
+        cpu.actionTimer += dt;
+        if (cpu.actionTimer >= cpu.actionDuration) {
+          cpu.state = 'COOKING';
+          cpu.rrQuantumUsed = 0;
+        }
+      }
+
+      else if (cpu.state === 'COOKING') {
+        // If an urgent new customer sat down during VIP/SJF events, check if we need to take their order!
+        const urgentNew = game.customers.find(c => c.state === 'WAIT_ORDER');
+        if (urgentNew && cpu.rrQuantumUsed < 0.2) {
+          cpu.targetCustomer = urgentNew;
+          cpu.state = 'MOVE_TO_ORDER';
+          return;
+        }
+
+        const ord = cpu.activeOrderCustomer;
+        if (!ord || ord.state !== 'WAIT_FOOD') {
+          cpu.state = 'IDLE';
+          return;
+        }
+
+        // Keep CPU positioned at the active stove
+        const stovePos = POS.stoves[cpu.activeStoveIndex];
+        moveCpuTowards(stovePos.cookX, stovePos.cookY, cpuSpeed, dt);
+
+        ord.workRemaining -= dt;
+        cpu.rrQuantumUsed += dt;
+        cpu.lastCookedCustomer = ord;
+
+        // In RR mode, all customers whose orders are currently sitting on ANY of the 3 stoves feel reassured!
+        if (game.currentAlgo === 'RR') {
+          for (let s = 0; s < 3; s++) {
+            const stoveCust = game.stoveSlots[s];
+            if (stoveCust && stoveCust.needsResponse) {
+              // Gentle patience stabilization while their pot is on one of the 3 active stoves
+              stoveCust.patience = Math.min(stoveCust.maxPatience, stoveCust.patience + dt * 0.45);
+            }
+          }
+        }
+
+        // Check if dish is 100% finished
+        if (ord.workRemaining <= 0.001) {
+          ord.workRemaining = 0;
+          game.stoveSlots[cpu.activeStoveIndex] = null;
+          syncStoveAssignments();
+          cpu.state = 'MOVE_TO_SERVE';
+          cpu.targetCustomer = ord;
+          cpu.rrQuantumUsed = 0;
+          renderReadyQueue();
+          return;
+        }
+
+        // Check Round Robin Time Quantum (3.0s)
+        if (game.currentAlgo === 'RR' && cpu.rrQuantumUsed >= cpu.rrQuantumMax) {
+          ord.rrSlicesReceived++;
+          ord.rrLastQueueTime = game.phaseTimer + 0.01;
+
+          // If customer is an anti-interruption customer (Events 1-5), they hate RR interrupting their dish!
+          if (ord.noInterrupt) {
+            ord.patience -= 10;
+            addFloatingText(ord.x, ord.y - 38, '討厭換鍋中斷! 耐心-10s', '#f87171');
+            if (ord.patience <= 0) {
+              triggerCustomerRageQuit(ord, 'NO_INTERRUPT');
+              cpu.state = 'IDLE';
+              return;
+            }
+          }
+
+          // If customer is an RR response-anxious customer (Events 11-15), completing a 3s quantum restores their patience!
+          if (ord.needsResponse) {
+            ord.patience = ord.maxPatience;
+            addFloatingText(ord.x, ord.y - 38, '鍋子翻炒推進! 耐心補滿', '#4ade80');
+          }
+
+          // If there are more than 3 orders waiting in the Ready Queue, swap out this pot with a waiting order not on a stove so all orders get a turn!
+          const rq = getReadyQueue();
+          const waitingOffStove = rq.find(c => !game.stoveSlots.includes(c));
+          if (waitingOffStove) {
+            game.stoveSlots[cpu.activeStoveIndex] = waitingOffStove;
+          }
+
+          // Pick the next stove among the 3 pots
+          const nextTarget = pickNextStoveAndOrder();
+          cpu.rrQuantumUsed = 0;
+
+          if (nextTarget.order && nextTarget.order !== ord) {
+            cpu.activeStoveIndex = nextTarget.stoveIndex;
+            cpu.activeOrderCustomer = nextTarget.order;
+            cpu.state = 'SWITCHING';
+            cpu.actionTimer = 0;
+            cpu.actionDuration = 0.6; // 0.6s Context Switch overhead between pots
+            const targetStove = POS.stoves[cpu.activeStoveIndex];
+            addFloatingText(targetStove.x, targetStove.y - 22, `換炒${targetStove.label} (0.6s)`, '#38bdf8');
+          }
+          renderReadyQueue();
+        }
+      }
+
+      else if (cpu.state === 'MOVE_TO_SERVE') {
+        const target = cpu.targetCustomer;
+        if (!target || target.state !== 'WAIT_FOOD') {
+          cpu.state = 'IDLE';
+          return;
+        }
+        if (moveCpuTowards(target.serveX, target.serveY, cpuSpeed, dt)) {
+          completeCustomerDelivery(target);
+          cpu.state = 'IDLE';
+        }
+      }
+    }
+
+    function startCookingOrOverhead(ord) {
+      const cpu = game.cpu;
+      let overhead = 0;
+      let overheadReason = '';
+
+      // 1. If RR switches from one unfinished dish to another dish -> 0.6s Context Switch
+      if (game.currentAlgo === 'RR' && cpu.lastCookedCustomer && cpu.lastCookedCustomer !== ord && cpu.lastCookedCustomer.workRemaining > 0) {
+        overhead = 0.6;
+        overheadReason = 'Context Switch 換鍋 0.6s';
+      }
+      // 2. If Priority is chosen in an event with NO VIPs -> 0.55s Priority Check Overhead
+      else if (game.currentAlgo === 'PRIORITY' && !ord.isVIP) {
+        overhead = 0.55;
+        overheadReason = '檢查優先權耗時 0.55s';
+      }
+      // 3. If SJF is chosen when all orders have identical burst times (e.g. Event 4) -> 0.45s Length Scan Overhead
+      else if (game.currentAlgo === 'SJF' && ord.strictOrder && ord.noInterrupt) {
+        overhead = 0.45;
+        overheadReason = '比對工時耗時 0.45s';
+      }
+
+      if (overhead > 0) {
+        cpu.state = 'SWITCHING';
+        cpu.actionTimer = 0;
+        cpu.actionDuration = overhead;
+        addFloatingText(POS.kitchenStove.x + 50, POS.kitchenStove.y - 20, overheadReason, '#fb923c');
+      } else {
+        cpu.state = 'COOKING';
+        cpu.rrQuantumUsed = 0;
+      }
+      renderReadyQueue();
+    }
+
+    /***************************************************************************
+     * 10. DELIVERY, RAGE QUIT & CONTEXTUAL OS REVIEWS
+     ***************************************************************************/
+    function completeCustomerDelivery(c) {
+      // Check if any OTHER waiting customer with `strictOrder` ordered earlier than `c`!
+      // (Punishment for choosing SJF or Priority during FCFS fairness events 1, 3, 5)
+      const cutVictims = game.customers.filter(
+        other => other !== c && other.state === 'WAIT_FOOD' && other.strictOrder && other.orderTime < c.orderTime - 0.1
+      );
+      for (let victim of cutVictims) {
+        victim.patience -= 25;
+        addFloatingText(victim.x, victim.y - 40, '抗議被插隊! 憤怒值飆升', '#ef4444');
+        if (victim.patience <= 0) {
+          triggerCustomerRageQuit(victim, 'CUT_IN_LINE');
+        }
+      }
+
+      // Calculate payment & rating
+      const patRatio = c.patience / c.maxPatience;
+      let stars = 5;
+      if (patRatio < 0.25) stars = 3;
+      else if (patRatio < 0.5) stars = 4;
+
+      // If RR was used in a non-RR event and wasted time with context switches, cap rating
+      if (game.currentAlgo === 'RR' && !c.needsResponse && c.rrSlicesReceived > 0) {
+        stars = Math.min(stars, 3);
+      }
+
+      const earned = c.food.price * (c.isVIP ? c.vipMult : 1);
+      game.revenue += earned;
+      game.ratings.push(stars);
+      game.servedCount++;
+
+      if (game.eventHistory.length > 0 && game.phase === 'EVENT') {
+        game.eventHistory[game.eventHistory.length - 1].servedInEvent++;
+      }
+
+      // Generate contextual review comment
+      let comment = getPositiveOrNeutralReview(c, stars);
+      addReviewLog(c.label, c.food.emoji, stars, comment, 'GOOD');
+
+      addFloatingText(c.x, c.y - 35, `+$${earned} (${stars}星)`, '#4ade80');
+
+      c.state = 'LEAVING_HAPPY';
+      c.targetX = c.mode === 'TAKEOUT' ? POS.takeoutEntrance.x : POS.entrance.x;
+      c.targetY = c.mode === 'TAKEOUT' ? POS.takeoutEntrance.y : POS.entrance.y;
+
+      repositionWaitingQueues();
+      updateTopBarUI();
+      renderReadyQueue();
+    }
+
+    function triggerCustomerRageQuit(c, reasonCode) {
+      c.state = 'LEAVING_ANGRY';
+      c.targetX = c.mode === 'TAKEOUT' ? POS.takeoutEntrance.x : POS.entrance.x;
+      c.targetY = c.mode === 'TAKEOUT' ? POS.takeoutEntrance.y : POS.entrance.y;
+
+      game.ratings.push(1);
+      game.angryCount++;
+
+      if (game.eventHistory.length > 0 && game.phase === 'EVENT') {
+        game.eventHistory[game.eventHistory.length - 1].angryInEvent++;
+      }
+
+      // VIP Penalty if VIP walks out!
+      let penaltyText = '氣走! 1星負評';
+      if (c.isVIP) {
+        const fine = 250;
+        game.revenue = Math.max(0, game.revenue - fine);
+        penaltyText = `VIP震怒罰款 -$${fine}!`;
+      }
+
+      const reviewText = getAngryOSReview(c, reasonCode);
+      addReviewLog(c.label, c.food.emoji, 1, reviewText, 'BAD');
+      addFloatingText(c.x, c.y - 40, penaltyText, '#ef4444');
+
+      if (game.cpu.activeOrderCustomer === c) {
+        game.cpu.activeOrderCustomer = null;
+        game.cpu.state = 'IDLE';
+      }
+
+      repositionWaitingQueues();
+      updateTopBarUI();
+      renderReadyQueue();
+    }
+
+    function getPositiveOrNeutralReview(c, stars) {
+      if (stars === 3) {
+        if (game.currentAlgo === 'RR' && !c.needsResponse) {
+          return '【切換成本過高】店員每煮 3 秒就換一個鍋子，光看他換鍋子就浪費一堆時間，大家都被拖慢了！';
+        }
+        return '東西是不錯吃啦，但店員在廚房跑來跑去不知道在忙什麼，等得有點久。';
+      }
+      if (c.isVIP && game.currentAlgo === 'PRIORITY') {
+        return '【Priority 專屬好評】懂得看場合變通！知道我有緊急狀況立刻優先插隊幫我做餐，五顆星推薦！';
+      }
+      if (c.needsResponse && game.currentAlgo === 'RR') {
+        return '【RR 專屬好評】雖然客人很多，但店員每隔幾秒就推進我的餐點進度，高回應性讓人超安心！';
+      }
+      if (c.convoyVictim && game.currentAlgo === 'SJF') {
+        return '【SJF 專屬好評】我只買短單馬上就拿到了，完全沒被前面點牛排的大單卡住，翻桌率太神啦！';
+      }
+      if (c.strictOrder && game.currentAlgo === 'FCFS') {
+        return '【FCFS 專屬好評】這家店非常守規矩，嚴格按照先來後到一口氣出餐，令人尊敬！';
+      }
+      return '店員手腳超快，餐點熱騰騰的，下次還要來！';
+    }
+
+    function getAngryOSReview(c, reasonCode) {
+      if (reasonCode === 'CUT_IN_LINE') {
+        return '【違反公平原則】明明是我先點餐的，居然先做後面客人的餐？最討厭被插隊了，一星負評！';
+      }
+      if (reasonCode === 'NO_INTERRUPT') {
+        return '【Context Switch 干擾】店員有毛病嗎？我的餐點做到一半居然停下來換鍋子做別人的，口感都毀了，拒吃！';
+      }
+      if (c.isVIP) {
+        return '【忽視高優先權 VIP】知道我是誰嗎？居然沒選優先權排程讓我跟一般人一起乾等，扣分罰款！';
+      }
+      if (c.needsResponse) {
+        return '【回應時間過長 Poor Response Time】點完餐過了十幾秒，我的餐點進度還是 0%！店員根本忘記我的單了吧？氣死人了！';
+      }
+      if (c.convoyVictim && game.currentAlgo !== 'SJF') {
+        return '【護航效應 Convoy Effect】太扯了！前面那個人點了超難做的豪華牛排，我只是買個短單居然要陪他乾等？火車都跑了！';
+      }
+      if (c.state === 'WAITING_SEAT') {
+        return '【翻桌率過低】內用區被大單卡死都沒人出來，我們在候位區等到天荒地老，不吃了！';
+      }
+      return '【排程不當超時】出餐順序亂七八糟，等到餓昏還沒拿到餐點，負評離開！';
+    }
+
+    /***************************************************************************
+     * 11. EVENT ADVANCEMENT & END-OF-DAY SUMMARY
+     ***************************************************************************/
+    function advanceToNextEventOrSummary() {
+      if (game.isPracticeMode) {
+        showEndOfDaySummary();
+        return;
+      }
+
+      if (game.eventIndex < game.dayEvents.length) {
+        const nextEv = game.dayEvents[game.eventIndex];
+        game.eventIndex++;
+        triggerEventModal(nextEv, game.eventIndex, game.dayEvents.length);
+      } else {
+        game.phase = 'ENDED';
+        showEndOfDaySummary();
+      }
+    }
+
+    function showEndOfDaySummary() {
+      game.paused = true;
+      const modal = document.getElementById('summary-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      const avgRating = game.ratings.length > 0
+        ? (game.ratings.reduce((a, b) => a + b, 0) / game.ratings.length)
+        : 5.0;
+
+      const correctCount = game.eventHistory.filter(h => h.isCorrect).length;
+      const totalEvents = game.eventHistory.length;
+
+      document.getElementById('sum-revenue').textContent = `$${game.revenue}`;
+      document.getElementById('sum-rating').textContent = avgRating.toFixed(1);
+      document.getElementById('sum-served').textContent = `${game.servedCount} 人 / ${game.angryCount} 人`;
+      document.getElementById('sum-accuracy').textContent = `${correctCount} / ${totalEvents} 正確`;
+
+      // Render pixel stars
+      const starsHtml = [1, 2, 3, 4, 5].map(i =>
+        `<span class="css-star ${i <= Math.round(avgRating) ? '' : 'empty'}"></span>`
+      ).join('');
+      document.getElementById('sum-stars').innerHTML = starsHtml;
+
+      // Grade Badge
+      const gradeBadge = document.getElementById('summary-grade-badge');
+      if (correctCount === totalEvents && game.angryCount === 0) {
+        gradeBadge.textContent = 'S 級 — 作業系統排程宗師';
+        gradeBadge.className = 'px-4 py-1.5 text-lg font-black bg-amber-400 text-slate-950 border-2 border-white';
+      } else if (avgRating >= 4.0) {
+        gradeBadge.textContent = 'A 級 — 資深排程店長';
+        gradeBadge.className = 'px-4 py-1.5 text-lg font-black bg-emerald-500 text-slate-950 border-2 border-emerald-200';
+      } else if (avgRating >= 3.0) {
+        gradeBadge.textContent = 'B 級 — 實習排程店員';
+        gradeBadge.className = 'px-4 py-1.5 text-lg font-black bg-cyan-500 text-slate-950 border-2 border-cyan-200';
+      } else {
+        gradeBadge.textContent = 'C 級 — 系統瀕臨死結 (需重修)';
+        gradeBadge.className = 'px-4 py-1.5 text-lg font-black bg-rose-600 text-white border-2 border-rose-300';
+      }
+
+      // Render Event Breakdown
+      const breakdownEl = document.getElementById('sum-event-breakdown');
+      breakdownEl.innerHTML = game.eventHistory.map((h, idx) => `
+        <div class="p-2.5 bg-slate-900 border ${h.isCorrect ? 'border-emerald-600' : 'border-rose-600'}">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-amber-200">${idx + 1}. ${h.title}</span>
+            <span class="px-1.5 py-0.5 text-[11px] font-bold ${h.isCorrect ? 'bg-emerald-900 text-emerald-200' : 'bg-rose-900 text-rose-200'}">
+              ${h.isCorrect ? '決策正確' : '排程選錯'}
+            </span>
+          </div>
+          <div class="mt-1 text-slate-300 flex flex-wrap gap-3">
+            <span>你的選擇: <b class="text-white">${ALGO_INFO[h.chosenAlgo].name}</b></span>
+            <span>最佳解: <b class="text-cyan-300">${ALGO_INFO[h.bestAlgo].name}</b></span>
+          </div>
+          <div class="mt-1 text-slate-400 text-[11px] leading-snug">
+            解析：${h.whyBest} (完餐 ${h.servedInEvent} / 氣走 ${h.angryInEvent})
+          </div>
+        </div>
+      `).join('');
+
+      // Render Customer Review Wall
+      const wallEl = document.getElementById('sum-reviews-wall');
+      if (game.reviews.length === 0) {
+        wallEl.innerHTML = `<div class="text-slate-500 text-center py-8">無顧客評論紀錄</div>`;
+      } else {
+        wallEl.innerHTML = game.reviews.slice(0, 15).map(r => `
+          <div class="p-2 bg-slate-900 border ${r.type === 'BAD' ? 'border-rose-700/80' : 'border-slate-700'}">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold ${r.type === 'BAD' ? 'text-rose-300' : 'text-amber-200'}">
+                ${r.name} (點餐 ${r.emoji})
+              </span>
+              <span class="font-bold ${r.stars === 1 ? 'text-rose-400' : 'text-amber-400'}">
+                ${r.stars} 星評價
+              </span>
+            </div>
+            <p class="text-slate-300 leading-snug">${r.text}</p>
+          </div>
+        `).join('');
+      }
+    }
+
+    /***************************************************************************
+     * 12. UI HELPERS & CATALOG MODAL
+     ***************************************************************************/
+    function updateTopBarUI() {
+      const progEl = document.getElementById('ui-event-progress');
+      if (game.isPracticeMode && game.activeEvent) {
+        progEl.textContent = `單獨練習 (#${game.activeEvent.id})`;
+      } else if (game.phase === 'WARMUP') {
+        progEl.textContent = '暖身階段 (0/6)';
+      } else {
+        progEl.textContent = `事件 ${game.eventIndex} / 6`;
+      }
+
+      const algoEl = document.getElementById('ui-current-algo');
+      algoEl.textContent = ALGO_INFO[game.currentAlgo].name;
+
+      document.getElementById('ui-revenue').textContent = `$${game.revenue}`;
+
+      const avg = game.ratings.length > 0
+        ? (game.ratings.reduce((a, b) => a + b, 0) / game.ratings.length)
+        : 5.0;
+      document.getElementById('ui-rating-num').textContent = avg.toFixed(1);
+
+      const starsContainer = document.getElementById('ui-stars-container');
+      starsContainer.innerHTML = [1, 2, 3, 4, 5].map(i =>
+        `<span class="css-star ${i <= Math.round(avg) ? '' : 'empty'}"></span>`
+      ).join('');
+
+      document.getElementById('served-stats-badge').textContent =
+        `完:${game.servedCount}/氣:${game.angryCount}`;
+    }
+
+    function updateBannerUI() {
+      const tag = document.getElementById('banner-tag');
+      const title = document.getElementById('banner-title');
+      const desc = document.getElementById('banner-desc');
+      const rem = document.getElementById('banner-remaining');
+
+      const activeCustCount = game.customers.filter(
+        c => c.state !== 'LEAVING_HAPPY' && c.state !== 'LEAVING_ANGRY'
+      ).length + game.spawnQueue.length;
+
+      rem.textContent = `剩 ${activeCustCount} 人`;
+
+      if (game.phase === 'WARMUP') {
+        tag.textContent = '暖身時段';
+        tag.className = 'px-1.5 py-0.2 text-[10px] font-bold bg-emerald-800 text-emerald-200 border border-emerald-500 shrink-0';
+        title.textContent = '開店暖身 (預設 FCFS)';
+        desc.textContent = '完成前 3 位客人後，將正式開始今日 6 波作業系統排程事件！';
+      } else if (game.activeEvent) {
+        tag.textContent = `事件 ${game.eventIndex}/6`;
+        tag.className = 'px-1.5 py-0.2 text-[10px] font-bold bg-amber-700 text-amber-100 border border-amber-400 shrink-0';
+        title.textContent = `${game.activeEvent.title}`;
+        desc.textContent = game.activeEvent.desc;
+      }
+    }
+
+    function updateCPUSidebarUI() {
+      const cpu = game.cpu;
+      const badge = document.getElementById('cpu-state-badge');
+      const taskText = document.getElementById('cpu-task-text');
+      const ruleText = document.getElementById('cpu-algo-rule');
+      const rrBox = document.getElementById('rr-quantum-box');
+
+      ruleText.textContent = ALGO_INFO[game.currentAlgo].rule;
+
+      if (game.currentAlgo === 'RR') {
+        rrBox.classList.remove('hidden');
+        const pct = Math.min(100, (cpu.rrQuantumUsed / cpu.rrQuantumMax) * 100);
+        document.getElementById('rr-quantum-val').textContent = `${cpu.rrQuantumUsed.toFixed(1)}s / 3.0s`;
+        document.getElementById('rr-quantum-bar').style.width = `${pct}%`;
+      } else {
+        rrBox.classList.add('hidden');
+      }
+
+      const stateMap = {
+        IDLE:          { label: '待機巡視', color: 'bg-slate-800 text-slate-300 border-slate-600', desc: '等待新任務中' },
+        MOVE_TO_ORDER: { label: '前往點餐', color: 'bg-amber-900 text-amber-200 border-amber-500', desc: '跑向客人點餐' },
+        TAKING_ORDER:  { label: '點餐中',   color: 'bg-amber-700 text-white border-amber-300',     desc: '讀取餐點需求' },
+        MOVE_TO_COOK:  { label: '返回廚房', color: 'bg-indigo-900 text-indigo-200 border-indigo-500', desc: '準備執行訂單' },
+        SWITCHING:     { label: '切換延遲', color: 'bg-rose-900 text-rose-200 border-rose-500',     desc: '換鍋/檢查耗時中' },
+        COOKING:       { label: '料理執行', color: 'bg-emerald-900 text-emerald-200 border-emerald-500', desc: cpu.activeOrderCustomer ? `煮 ${cpu.activeOrderCustomer.food.emoji} (${cpu.activeOrderCustomer.label})` : '製作餐點中' },
+        MOVE_TO_SERVE: { label: '送餐結帳', color: 'bg-cyan-900 text-cyan-200 border-cyan-400',     desc: '端送完成餐點' }
+      };
+
+      const info = stateMap[cpu.state] || stateMap.IDLE;
+      badge.textContent = info.label;
+      badge.className = `text-[10px] px-1.5 py-0.2 border ${info.color}`;
+      taskText.textContent = info.desc;
+    }
+
+    function renderReadyQueue() {
+      syncStoveAssignments();
+      const rq = getReadyQueue();
+      const listEl = document.getElementById('ready-queue-list');
+      document.getElementById('queue-count-badge').textContent = `${rq.length} 單`;
+
+      if (rq.length === 0) {
+        listEl.innerHTML = `<div class="text-slate-500 text-center py-4">尚無已點餐訂單</div>`;
+        return;
+      }
+
+      listEl.innerHTML = rq.map((c, idx) => {
+        const isCooking = (game.cpu.activeOrderCustomer === c && (game.cpu.state === 'COOKING' || game.cpu.state === 'SWITCHING'));
+        const stoveIdx = game.stoveSlots.indexOf(c);
+        const onStoveBadge = stoveIdx !== -1
+          ? `<span class="px-1 text-[9px] font-bold ${isCooking ? 'bg-emerald-700 text-white' : 'bg-cyan-900 text-cyan-200'} border border-cyan-500">鍋#${stoveIdx + 1}</span>`
+          : '';
+        const pct = Math.max(0, Math.min(100, ((c.workTotal - c.workRemaining) / c.workTotal) * 100));
+        const vipBadge = c.isVIP ? `<span class="px-1 bg-purple-700 text-white text-[9px]">VIP</span>` : '';
+        return `
+          <div class="p-1.5 bg-slate-950/90 border ${isCooking ? 'border-emerald-400' : stoveIdx !== -1 ? 'border-cyan-600' : 'border-slate-700'} flex flex-col gap-0.5">
+            <div class="flex items-center justify-between gap-1">
+              <span class="font-bold text-slate-200 truncate text-[11px]">
+                #${idx + 1} ${c.food.emoji}${c.food.name} ${vipBadge} ${onStoveBadge}
+              </span>
+              <span class="text-[10px] font-bold shrink-0 ${isCooking ? 'text-emerald-400' : 'text-amber-300'}">
+                ${c.workRemaining.toFixed(1)}s
+              </span>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-slate-400">
+              <span class="truncate">${c.label} (${c.mode === 'DINE' ? '內' : '外'})</span>
+              <span class="shrink-0">耐:${Math.ceil(c.patience)}s</span>
+            </div>
+            <div class="w-full h-1 bg-slate-900 border border-slate-800">
+              <div class="h-full ${isCooking ? 'bg-emerald-400' : stoveIdx !== -1 ? 'bg-cyan-400' : 'bg-amber-500'}" style="width:${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addReviewLog(name, emoji, stars, text, type) {
+      game.reviews.unshift({ name, emoji, stars, text, type });
+      renderLiveReviews();
+    }
+
+    function renderLiveReviews() {
+      const listEl = document.getElementById('live-reviews-list');
+      if (game.reviews.length === 0) {
+        listEl.innerHTML = `<div class="text-slate-500 text-center py-4">等待結帳評價...</div>`;
+        return;
+      }
+
+      listEl.innerHTML = game.reviews.slice(0, 6).map(r => `
+        <div class="p-1.5 bg-slate-950/90 border ${r.type === 'BAD' ? 'border-rose-600' : 'border-slate-700'}">
+          <div class="flex justify-between items-center mb-0.5">
+            <span class="font-bold truncate ${r.type === 'BAD' ? 'text-rose-300' : 'text-amber-200'}">${r.name} ${r.emoji}</span>
+            <span class="font-bold shrink-0 ${r.type === 'BAD' ? 'text-rose-400' : 'text-emerald-400'}">${r.stars}星</span>
+          </div>
+          <div class="text-slate-300 text-[10px] leading-snug">${r.text}</div>
+        </div>
+      `).join('');
+    }
+
+    function addFloatingText(x, y, text, color) {
+      game.floatingTexts.push({ x, y, text, color, life: 1.4, maxLife: 1.4 });
+    }
+
+    // Top Bar Buttons
+    document.getElementById('btn-speed').addEventListener('click', () => {
+      game.speed = game.speed === 1 ? 2 : game.speed === 2 ? 3 : 1;
+      document.getElementById('btn-speed').textContent = `速度: ${game.speed}x`;
+    });
+    document.getElementById('btn-settle-now').addEventListener('click', () => {
+      game.phase = 'ENDED';
+      showEndOfDaySummary();
+    });
+    document.getElementById('btn-restart').addEventListener('click', startNewDay);
+
+    /***************************************************************************
+     * 13. RETRO PIXEL-ART CANVAS RENDERER (NO EMOJIS EXCEPT ☕, 🍔, 🍝, 🥩!)
+     ***************************************************************************/
+    function renderCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawRestaurantBackground();
+      drawKitchenAndCounter();
+      drawDineInTables();
+      drawQueueZones();
+      drawCustomers();
+      drawCPUClerk();
+      drawFloatingTexts();
+    }
+
+    function drawRestaurantBackground() {
+      // Main Floor Checkerboard Tile Pattern
+      const tileSize = 30;
+      for (let y = 0; y < canvas.height; y += tileSize) {
+        for (let x = 0; x < canvas.width; x += tileSize) {
+          const isAlt = ((x / tileSize) + (y / tileSize)) % 2 === 0;
+          // Kitchen floor area (top-left)
+          if (x < 330 && y < 270) {
+            ctx.fillStyle = isAlt ? '#293040' : '#232938';
+          }
+          // Takeout zone floor (bottom-left)
+          else if (x < 330 && y >= 270) {
+            ctx.fillStyle = isAlt ? '#2c2538' : '#251f30';
+          }
+          // Dine-in floor (right side)
+          else {
+            ctx.fillStyle = isAlt ? '#2a243b' : '#231e32';
+          }
+          ctx.fillRect(x, y, tileSize, tileSize);
+        }
+      }
+
+      // Outer Pixel Wall Border
+      ctx.strokeStyle = '#5c547d';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+    }
+
+    function drawKitchenAndCounter() {
+      // Kitchen Partition Header
+      ctx.fillStyle = '#3b4254';
+      ctx.fillRect(10, 10, 315, 30);
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(10, 10, 315, 30);
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 13px "DotGothic16", monospace';
+      ctx.textAlign = 'left';
+      const modeTag = game.currentAlgo === 'RR' ? '[RR 三鍋並行模式]' : '[單鍋專注模式]';
+      ctx.fillText(`廚房 KITCHEN ${modeTag}`, 18, 30);
+
+      // Draw 3 Distinct Stoves / Pots (#1, #2, #3)
+      for (let i = 0; i < 3; i++) {
+        const stove = POS.stoves[i];
+        const sx = stove.x - 42;
+        const sy = 48;
+        const sw = 84;
+        const sh = 74;
+
+        const assignedOrder = game.stoveSlots[i];
+        const isActivelyStirred = (game.cpu.activeStoveIndex === i && game.cpu.state === 'COOKING' && assignedOrder);
+        const isSwitchingToThis = (game.cpu.activeStoveIndex === i && game.cpu.state === 'SWITCHING' && assignedOrder);
+        const isDisabledInSingleMode = (game.currentAlgo !== 'RR' && i > 0);
+
+        // Stove Base Box
+        ctx.fillStyle = isDisabledInSingleMode ? '#1e293b' : '#475569';
+        ctx.fillRect(sx, sy, sw, sh);
+        ctx.strokeStyle = isActivelyStirred ? '#4ade80' : (assignedOrder ? '#38bdf8' : '#94a3b8');
+        ctx.lineWidth = isActivelyStirred ? 3 : 2;
+        ctx.strokeRect(sx, sy, sw, sh);
+
+        // Stove Title (#1, #2, #3)
+        ctx.fillStyle = isDisabledInSingleMode ? '#64748b' : '#e2e8f0';
+        ctx.font = 'bold 11px "DotGothic16", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(stove.label, stove.x, sy + 14);
+
+        // Pixel Pot & Flame inside Stove
+        const potX = stove.x - 24;
+        const potY = sy + 20;
+        const potW = 48;
+        const potH = 34;
+
+        // Flame under pot if an order is on this stove
+        if (assignedOrder) {
+          ctx.fillStyle = isActivelyStirred ? '#ef4444' : '#f59e0b';
+          ctx.fillRect(potX + 6, potY + potH - 3, potW - 12, 6);
+          if (isActivelyStirred) {
+            ctx.fillStyle = '#fde047';
+            ctx.fillRect(potX + 12, potY + potH - 4, potW - 24, 5);
+          }
+        }
+
+        // Pot Body
+        ctx.fillStyle = assignedOrder ? '#0f172a' : '#1e293b';
+        ctx.fillRect(potX, potY, potW, potH);
+        ctx.strokeStyle = assignedOrder ? '#cbd5e1' : '#475569';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(potX, potY, potW, potH);
+
+        // Pot Handles (pixel ears)
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(potX - 5, potY + 8, 5, 6);
+        ctx.fillRect(potX + potW, potY + 8, 5, 6);
+
+        if (assignedOrder) {
+          // Draw Food Emoji + Remaining seconds inside the pot!
+          ctx.font = 'bold 15px sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText(assignedOrder.food.emoji, potX + 4, potY + 21);
+
+          ctx.fillStyle = isActivelyStirred ? '#4ade80' : '#38bdf8';
+          ctx.font = 'bold 10px monospace';
+          ctx.fillText(`${assignedOrder.workRemaining.toFixed(1)}s`, potX + 22, potY + 20);
+
+          // Mini Progress Bar inside Stove
+          const pct = Math.max(0, Math.min(1, (assignedOrder.workTotal - assignedOrder.workRemaining) / assignedOrder.workTotal));
+          ctx.fillStyle = '#090d16';
+          ctx.fillRect(sx + 6, sy + sh - 12, sw - 12, 7);
+          ctx.fillStyle = isActivelyStirred ? '#22c55e' : '#38bdf8';
+          ctx.fillRect(sx + 6, sy + sh - 12, (sw - 12) * pct, 7);
+        } else {
+          ctx.fillStyle = '#64748b';
+          ctx.font = '10px "DotGothic16", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(isDisabledInSingleMode ? '單鍋未用' : '空鍋待機', stove.x, potY + 21);
+        }
+
+        if (isSwitchingToThis) {
+          ctx.fillStyle = '#fb7185';
+          ctx.font = 'bold 10px "DotGothic16", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('換鍋中..', stove.x, sy - 3);
+        }
+      }
+
+      // Active Cooking Status Bar inside Kitchen (bottom of kitchen area)
+      const ord = game.cpu.activeOrderCustomer;
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(20, 195, 295, 58);
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(20, 195, 295, 58);
+
+      ctx.font = 'bold 12px "DotGothic16", monospace';
+      ctx.textAlign = 'left';
+      if (game.cpu.state === 'SWITCHING') {
+        ctx.fillStyle = '#fb7185';
+        ctx.fillText(`>> 換鍋切換中 (前往鍋子 #${game.cpu.activeStoveIndex + 1})...`, 30, 215);
+        const pct = Math.min(1, game.cpu.actionTimer / (game.cpu.actionDuration || 1));
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(30, 225, 275, 14);
+        ctx.fillStyle = '#f43f5e';
+        ctx.fillRect(30, 225, 275 * pct, 14);
+      } else if (game.cpu.state === 'COOKING' && ord) {
+        ctx.fillStyle = '#4ade80';
+        ctx.fillText(`[鍋子#${game.cpu.activeStoveIndex + 1}] 烹調 ${ord.food.emoji}${ord.food.name} (${ord.label})`, 30, 215);
+        const pct = Math.max(0, Math.min(1, (ord.workTotal - ord.workRemaining) / ord.workTotal));
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(30, 225, 275, 14);
+        ctx.fillStyle = '#22c55e';
+        ctx.fillRect(30, 225, 275 * pct, 14);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(`${Math.round(pct * 100)}% (剩 ${ord.workRemaining.toFixed(1)}s)`, 115, 237);
+      } else {
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText('爐台待命中 — 等待 CPU 店員排程執行', 30, 228);
+      }
+
+      // Central Serving Counter (L-shaped wooden pixel counter)
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(330, 50, 46, 315); // Vertical counter bar
+      ctx.fillRect(10, 325, 366, 40); // Horizontal takeout counter bar
+      ctx.strokeStyle = '#b45309';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(330, 50, 46, 315);
+      ctx.strokeRect(10, 325, 366, 40);
+
+      // Counter Label
+      ctx.save();
+      ctx.fillStyle = '#fde68a';
+      ctx.font = 'bold 13px "DotGothic16", monospace';
+      ctx.fillText('出餐櫃台 COUNTER', 225, 350);
+      ctx.restore();
+    }
+
+    function drawDineInTables() {
+      // Zone Header
+      ctx.fillStyle = '#312e48';
+      ctx.fillRect(435, 10, 450, 32);
+      ctx.strokeStyle = '#6366f1';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(435, 10, 450, 32);
+      ctx.fillStyle = '#e0e7ff';
+      ctx.font = 'bold 14px "DotGothic16", monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText('內用座位區 DINE-IN AREA (共 6 桌)', 450, 31);
+
+      POS.tables.forEach((t, idx) => {
+        // Chair
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(t.seatX - 18, t.seatY - 14, 36, 18);
+        ctx.strokeStyle = '#94a3b8';
+        ctx.strokeRect(t.seatX - 18, t.seatY - 14, 36, 18);
+
+        // Table Top
+        ctx.fillStyle = '#854d0e';
+        ctx.fillRect(t.x - 42, t.y - 18, 84, 52);
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(t.x - 42, t.y - 18, 84, 52);
+
+        // Tablecloth center detail
+        ctx.fillStyle = '#a16207';
+        ctx.fillRect(t.x - 32, t.y - 10, 64, 36);
+
+        // Table Number
+        ctx.fillStyle = '#fef08a';
+        ctx.font = 'bold 11px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`桌 ${idx + 1}`, t.x, t.y + 26);
+      });
+    }
+
+    function drawQueueZones() {
+      // 1. Bottom-Left Takeout Waiting Zone
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+      ctx.fillRect(15, 415, 315, 110);
+      ctx.strokeStyle = '#38bdf8';
+      ctx.setLineDash([5, 4]);
+      ctx.strokeRect(15, 415, 315, 110);
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#7dd3fc';
+      ctx.font = 'bold 13px "DotGothic16", monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText('外帶點餐與領餐區 (TAKEOUT ZONE)', 25, 515);
+
+      POS.takeoutSlots.forEach((s, idx) => {
+        ctx.strokeStyle = '#475569';
+        ctx.strokeRect(s.x - 18, s.y - 12, 36, 24);
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`外帶${idx + 1}`, s.x, s.y + 4);
+      });
+
+      // 2. Bottom-Right Dine-In Waiting Queue Area
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+      ctx.fillRect(585, 450, 298, 76);
+      ctx.strokeStyle = '#f59e0b';
+      ctx.setLineDash([5, 4]);
+      ctx.strokeRect(585, 450, 298, 76);
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#fcd34d';
+      ctx.font = 'bold 13px "DotGothic16", monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText('內用候位區 (WAITING QUEUE) [入口]', 598, 516);
+    }
+
+    /***************************************************************************
+     * 14. PIXEL SPRITES & VIP BADGE RENDERING (PURE CANVAS SHAPES)
+     ***************************************************************************/
+    function drawCustomers() {
+      // Sort by Y coordinate for proper depth overlap
+      const sorted = [...game.customers].sort((a, b) => a.y - b.y);
+
+      for (let c of sorted) {
+        ctx.save();
+        ctx.translate(Math.round(c.x), Math.round(c.y));
+
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.fillRect(-12, 12, 24, 6);
+
+        // Pixel Body / Shirt
+        ctx.fillStyle = c.state === 'LEAVING_ANGRY' ? '#ef4444' : c.shirtColor;
+        ctx.fillRect(-10, -4, 20, 18);
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-10, -4, 20, 18);
+
+        // Pixel Head
+        ctx.fillStyle = '#fde68a';
+        ctx.fillRect(-9, -20, 18, 16);
+        ctx.strokeRect(-9, -20, 18, 16);
+
+        // Pixel Hair
+        ctx.fillStyle = c.hairColor;
+        ctx.fillRect(-10, -22, 20, 6);
+
+        // Pixel Eyes
+        ctx.fillStyle = '#0f172a';
+        if (c.state === 'LEAVING_ANGRY') {
+          // Angry slanted eyes
+          ctx.fillRect(-6, -13, 4, 3);
+          ctx.fillRect(2, -13, 4, 3);
+        } else {
+          ctx.fillRect(-5, -13, 3, 4);
+          ctx.fillRect(2, -13, 3, 4);
+        }
+
+        // Customer Role Label below feet
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '10px "DotGothic16", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(c.label, 0, 26);
+
+        // Draw VIP Pixel Badge on top of head if VIP
+        if (c.isVIP && c.vipType) {
+          drawPixelVIPBadge(0, -30, c.vipType);
+        }
+
+        // Draw Overhead Order Bubble & Bars
+        drawCustomerBubble(c);
+
+        ctx.restore();
+      }
+    }
+
+    function drawPixelVIPBadge(x, y, type) {
+      ctx.save();
+      ctx.translate(x, y);
+      if (type === 'CROWN') {
+        // Golden pixel crown
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath();
+        ctx.moveTo(-10, 0);
+        ctx.lineTo(-10, -10);
+        ctx.lineTo(-4, -4);
+        ctx.lineTo(0, -12);
+        ctx.lineTo(4, -4);
+        ctx.lineTo(10, -10);
+        ctx.lineTo(10, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#713f12';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      } else if (type === 'CROSS') {
+        // Medical Red Cross box
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-9, -14, 18, 14);
+        ctx.strokeStyle = '#ef4444';
+        ctx.strokeRect(-9, -14, 18, 14);
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(-2, -12, 4, 10);
+        ctx.fillRect(-6, -9, 12, 4);
+      } else if (type === 'SKULL') {
+        // Boss Skull Badge
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(-8, -14, 16, 11);
+        ctx.fillRect(-5, -3, 10, 4);
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-5, -11, 3, 3);
+        ctx.fillRect(2, -11, 3, 3);
+      } else if (type === 'SHIELD') {
+        // Inspector Shield Badge
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.moveTo(0, -15);
+        ctx.lineTo(9, -11);
+        ctx.lineTo(7, -2);
+        ctx.lineTo(0, 2);
+        ctx.lineTo(-7, -2);
+        ctx.lineTo(-9, -11);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      } else if (type === 'DIAMOND') {
+        // CEO Cyan Diamond
+        ctx.fillStyle = '#22d3ee';
+        ctx.beginPath();
+        ctx.moveTo(0, -16);
+        ctx.lineTo(9, -8);
+        ctx.lineTo(0, 0);
+        ctx.lineTo(-9, -8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawCustomerBubble(c) {
+      const by = c.isVIP ? -68 : -54;
+
+      if (c.state === 'WAITING_SEAT') {
+        drawBubbleBox(-32, by, 64, 24, '#1e293b', '#f59e0b');
+        ctx.fillStyle = '#fcd34d';
+        ctx.font = 'bold 11px "DotGothic16", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('候位中', 0, by + 15);
+        drawMiniPatienceBar(-28, by + 20, 56, c.patience / c.maxPatience);
+        return;
+      }
+
+      if (c.state === 'WAIT_ORDER' || c.state === 'BEING_ORDERED') {
+        // Unresolved order: show pixel-art [ ? ] bubble!
+        drawBubbleBox(-28, by, 56, 26, '#0f172a', '#fbbf24');
+        ctx.fillStyle = '#fde047';
+        ctx.font = 'bold 13px "DotGothic16", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(c.state === 'BEING_ORDERED' ? '點餐..' : '[ ? ]', 0, by + 16);
+        drawMiniPatienceBar(-24, by + 21, 48, c.patience / c.maxPatience);
+        return;
+      }
+
+      if (c.state === 'WAIT_FOOD') {
+        // Resolved order: show ONLY the allowed food emoji + progress bar + patience bar
+        const isBeingCooked = (game.cpu.activeOrderCustomer === c && game.cpu.state === 'COOKING');
+        const borderCol = isBeingCooked ? '#4ade80' : (c.isVIP ? '#c084fc' : '#94a3b8');
+        drawBubbleBox(-36, by - 6, 72, 34, '#0f172a', borderCol);
+
+        // Allowed Food Emoji + Remaining seconds
+        ctx.font = 'bold 14px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(c.food.emoji, -31, by + 11);
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 11px monospace';
+        ctx.fillText(`${c.workRemaining.toFixed(0)}s`, -8, by + 11);
+
+        // Trait indicator text tag (No Emoji)
+        if (c.isVIP) {
+          ctx.fillStyle = '#e879f9';
+          ctx.font = 'bold 9px monospace';
+          ctx.fillText('VIP', 16, by + 10);
+        } else if (c.needsResponse) {
+          ctx.fillStyle = '#38bdf8';
+          ctx.font = 'bold 9px monospace';
+          ctx.fillText('焦慮', 12, by + 10);
+        } else if (c.strictOrder) {
+          ctx.fillStyle = '#fbbf24';
+          ctx.font = 'bold 9px monospace';
+          ctx.fillText('守序', 12, by + 10);
+        }
+
+        // Cooking Progress Bar (Green)
+        const cookPct = Math.max(0, Math.min(1, (c.workTotal - c.workRemaining) / c.workTotal));
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(-30, by + 15, 60, 4);
+        ctx.fillStyle = '#22c55e';
+        ctx.fillRect(-30, by + 15, 60 * cookPct, 4);
+
+        // Patience Bar (Red/Amber/Cyan)
+        drawMiniPatienceBar(-30, by + 21, 60, c.patience / c.maxPatience);
+      }
+    }
+
+    function drawBubbleBox(x, y, w, h, bg, border) {
+      ctx.fillStyle = bg;
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeStyle = border;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, w, h);
+    }
+
+    function drawMiniPatienceBar(x, y, w, ratio) {
+      const clamped = Math.max(0, Math.min(1, ratio));
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(x, y, w, 4);
+      ctx.fillStyle = clamped > 0.5 ? '#38bdf8' : clamped > 0.25 ? '#f59e0b' : '#ef4444';
+      ctx.fillRect(x, y, w * clamped, 4);
+    }
+
+    function drawCPUClerk() {
+      const cpu = game.cpu;
+      ctx.save();
+      ctx.translate(Math.round(cpu.x), Math.round(cpu.y));
+
+      const bounce = (cpu.state.startsWith('MOVE')) ? Math.sin(cpu.animFrame * 2) * 2.5 : 0;
+
+      // Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.fillRect(-14, 14, 28, 6);
+
+      ctx.translate(0, bounce);
+
+      // Clerk Apron & Body
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(-12, -4, 24, 19);
+      ctx.strokeStyle = '#e0f2fe';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-12, -4, 24, 19);
+
+      // White Chef Hat / CPU Cap
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(-12, -30, 24, 9);
+      ctx.strokeStyle = '#38bdf8';
+      ctx.strokeRect(-12, -30, 24, 9);
+
+      // Head
+      ctx.fillStyle = '#fde68a';
+      ctx.fillRect(-10, -21, 20, 17);
+      ctx.strokeStyle = '#0f172a';
+      ctx.strokeRect(-10, -21, 20, 17);
+
+      // Eyes
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(-6, -15, 3, 4);
+      ctx.fillRect(3, -15, 3, 4);
+
+      // CPU Badge on chest
+      ctx.fillStyle = '#facc15';
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('CPU', 0, 9);
+
+      // If delivering food, render plate with food emoji in hand!
+      if (cpu.state === 'MOVE_TO_SERVE' && cpu.targetCustomer) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(10, -14, 22, 18);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.strokeRect(10, -14, 22, 18);
+        ctx.font = '14px sans-serif';
+        ctx.fillText(cpu.targetCustomer.food.emoji, 21, 0);
+      }
+
+      ctx.restore();
+    }
+
+    function drawFloatingTexts() {
+      for (let i = game.floatingTexts.length - 1; i >= 0; i--) {
+        const ft = game.floatingTexts[i];
+        ft.life -= 0.016 * game.speed;
+        ft.y -= 0.45 * game.speed;
+        if (ft.life <= 0) {
+          game.floatingTexts.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, ft.life / ft.maxLife);
+        ctx.font = 'bold 12px "DotGothic16", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#000000';
+        ctx.fillText(ft.text, ft.x + 1, ft.y + 1);
+        ctx.fillStyle = ft.color;
+        ctx.fillText(ft.text, ft.x, ft.y);
+        ctx.restore();
+      }
+    }
+
+    // Boot Game on Load
+    window.onload = function() {
+      startNewDay();
+      requestAnimationFrame(gameLoop);
+    };
+  </script>
+</body>
+</html>

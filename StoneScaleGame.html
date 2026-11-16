@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>皇家鑄幣局的試煉：天平上的異數</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --card-dark: #131b2e;
+      --brass-light: #fde68a;
+      --brass-main: #d97706;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1e293b 0%, #090d16 75%);
+      color: #f1f5f9;
+      height: 100vh;
+      max-height: 100vh;
+      overflow: hidden;
+    }
+
+    @media (max-width: 1023px) {
+      body {
+        height: auto;
+        max-height: none;
+        overflow-y: auto;
+      }
+    }
+
+    .serif-title {
+      font-family: 'Noto Serif TC', serif;
+    }
+
+    .mono-num {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .lab-card {
+      background: rgba(19, 27, 46, 0.88);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(8px);
+    }
+
+    .brass-border {
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      box-shadow: 0 0 24px rgba(245, 158, 11, 0.08), inset 0 1px 0 rgba(254, 243, 199, 0.15);
+    }
+
+    .brass-btn {
+      background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+      color: #0f172a;
+      font-weight: 700;
+      border: 1px solid #fde68a;
+      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+      transition: all 0.2s ease;
+    }
+
+    .brass-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+    }
+
+    .brass-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .brass-btn:disabled {
+      background: #1e293b;
+      color: #64748b;
+      border-color: #334155;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    /* Enlarged Sphere Ball Styling */
+    .sphere-ball {
+      width: 68px;
+      height: 68px;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: grab;
+      touch-action: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1.5rem;
+      border: 2px solid #94a3b8;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6), inset 2px 4px 8px rgba(255, 255, 255, 0.55);
+      transition: transform 0.16s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .sphere-ball:hover {
+      transform: translateY(-3px) scale(1.06);
+    }
+
+    .sphere-ball:active {
+      cursor: grabbing;
+    }
+
+    /* Automatic Logical State Styles */
+    .sphere-ball[data-auto-mark="untested"] {
+      background: radial-gradient(circle at 32% 28%, #f8fafc 0%, #cbd5e1 38%, #64748b 82%, #334155 100%);
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+
+    .sphere-ball[data-auto-mark="standard"] {
+      background: radial-gradient(circle at 32% 28%, #94a3b8 0%, #475569 48%, #1e293b 90%, #0f172a 100%);
+      border-color: #475569;
+      color: #cbd5e1;
+      opacity: 0.62;
+    }
+
+    .sphere-ball[data-auto-mark="heavy"] {
+      background: radial-gradient(circle at 32% 28%, #ffe4e6 0%, #fda4af 36%, #e11d48 84%, #881337 100%);
+      border-color: #fb7185;
+      color: #4c0519;
+    }
+
+    .sphere-ball[data-auto-mark="light"] {
+      background: radial-gradient(circle at 32% 28%, #e0f2fe 0%, #7dd3fc 36%, #0284c7 84%, #0c4a6e 100%);
+      border-color: #38bdf8;
+      color: #082f49;
+    }
+
+    .sphere-ball[data-auto-mark="both"] {
+      background: radial-gradient(circle at 32% 28%, #fef3c7 0%, #fcd34d 36%, #d97706 84%, #78350f 100%);
+      border-color: #fbbf24;
+      color: #451a03;
+    }
+
+    .sphere-ball[data-auto-mark="confirmed"] {
+      background: radial-gradient(circle at 32% 28%, #fef9c3 0%, #facc15 36%, #ca8a04 82%, #713f12 100%);
+      border-color: #fef08a;
+      color: #422006;
+      box-shadow: 0 0 18px rgba(250, 204, 21, 0.8), inset 2px 3px 6px rgba(255, 255, 255, 0.9);
+    }
+
+    .mark-badge {
+      position: absolute;
+      top: -10px;
+      right: -12px;
+      padding: 2px 8px;
+      height: 24px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.75);
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 2;
+    }
+
+    /* Drop Zones */
+    .drop-zone {
+      transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .drop-zone.drag-over {
+      border-color: #fbbf24 !important;
+      background-color: rgba(245, 158, 11, 0.14) !important;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+    }
+
+    /* Balance Scale Beam Animation */
+    #scale-beam-group {
+      transition: transform 0.65s cubic-bezier(0.34, 1.4, 0.64, 1);
+      transform-origin: center 12px;
+    }
+
+    .pan-hanger {
+      transition: transform 0.65s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+
+    /* Floating Drag Ghost */
+    #drag-ghost {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 72px;
+      height: 72px;
+      border-radius: 9999px;
+      pointer-events: none;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1.55rem;
+      transform: translate(-50%, -50%) scale(1.12);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.7);
+    }
+
+    .tutorial-pulse {
+      animation: pulseBorder 2s infinite;
+    }
+
+    @keyframes pulseBorder {
+      0%, 100% {
+        border-color: rgba(251, 191, 36, 0.45);
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.25);
+      }
+      50% {
+        border-color: rgba(251, 191, 36, 0.95);
+        box-shadow: 0 0 0 6px rgba(251, 191, 36, 0);
+      }
+    }
+  </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+  <!-- Main Content: Single-Screen Non-Scrolling Layout (No Title Bar) -->
+  <main class="max-w-[1600px] w-full h-full mx-auto px-4 py-3 flex flex-col justify-between gap-3">
+
+    <!-- 1. Compact Status & Interactive Guide Strip -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-3 shrink-0">
+      <div class="lg:col-span-7 lab-card rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <div class="flex items-center gap-1.5" id="level-indicators"></div>
+          <div class="h-6 w-px bg-slate-700 hidden sm:block"></div>
+          <span id="level-badge" class="hidden">第 1 關</span>
+          <h2 id="level-title" class="serif-title text-lg sm:text-xl font-bold text-white">初入鑄幣局：三球定真偽</h2>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 bg-slate-950/80 px-3.5 py-1.5 rounded-xl border border-slate-800">
+          <div class="flex items-center gap-1.5">
+            <span class="text-sm text-slate-400">條件:</span>
+            <span id="level-target-type" class="text-base font-bold text-rose-400">已知異常球較重</span>
+          </div>
+          <div class="h-5 w-px bg-slate-800"></div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-sm text-slate-400">最佳:</span>
+            <span id="level-opt-count" class="mono-num text-base font-bold text-emerald-400">1</span>
+          </div>
+          <div class="h-5 w-px bg-slate-800"></div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-sm text-slate-400">已秤:</span>
+            <span id="level-used-count" class="mono-num text-base font-bold text-amber-300">0</span>
+          </div>
+          <div class="h-5 w-px bg-slate-800"></div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-sm text-slate-400">分數:</span>
+            <span id="header-total-score" class="mono-num text-lg font-bold text-amber-400">100</span>
+          </div>
+          <button id="btn-open-story" type="button" class="ml-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-sm font-medium transition">
+            故事
+          </button>
+        </div>
+        <p id="level-desc" class="hidden"></p>
+      </div>
+
+      <div id="guide-banner" class="lg:col-span-5 lab-card rounded-xl px-4 py-2.5 border border-amber-500/40 bg-amber-500/10 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-amber-400/20 border border-amber-400/50 text-amber-300 flex items-center justify-center text-sm font-bold shrink-0">
+          引
+        </div>
+        <div class="text-sm sm:text-base leading-snug">
+          <span id="guide-step-title" class="font-bold text-amber-300">教學引導：</span>
+          <span id="guide-step-text" class="text-slate-100 font-medium"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. TOP-CENTER GRAND BALANCE SCALE STAGE -->
+    <section class="lab-card brass-border rounded-2xl px-6 py-4 flex-1 min-h-0 flex flex-col justify-between relative overflow-hidden">
+      <!-- Scale Top Control Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-3">
+          <span class="serif-title text-xl font-bold text-amber-200 tracking-wide">雙盤天平</span>
+          <span id="scale-status-pill" class="px-4 py-1 rounded-full text-base font-bold bg-slate-800 text-slate-200 border border-slate-700">
+            等待放置球體...
+          </span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <button id="btn-weigh" type="button" class="brass-btn px-8 py-2.5 rounded-xl text-base tracking-wide flex items-center justify-center gap-2">
+            <span>進行秤重</span>
+          </button>
+          <button id="btn-clear-scale" type="button" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-base font-medium transition">
+            清空秤盤
+          </button>
+          <button id="btn-reset-level" type="button" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-base font-medium transition">
+            重置本關
+          </button>
+        </div>
+      </div>
+
+      <!-- Grand Mechanical Scale Visual & Large Left/Right Drop Pans -->
+      <div class="relative my-auto max-w-6xl w-full mx-auto flex flex-col justify-center">
+        <div id="scale-beam-group" class="w-full">
+          <!-- Long Horizontal Brass Beam -->
+          <div class="mx-auto w-11/12 sm:w-5/6 h-3.5 rounded-full bg-gradient-to-r from-amber-800 via-amber-400 to-amber-800 shadow-lg relative flex items-center justify-center">
+            <div class="w-6 h-6 rounded-full bg-amber-200 border-2 border-amber-700 shadow"></div>
+          </div>
+
+          <!-- Left and Right Spacious Pans -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-14 mt-2">
+            <!-- Left Pan -->
+            <div id="left-pan-hanger" class="pan-hanger flex flex-col items-center">
+              <div class="w-0.5 h-5 bg-amber-500/70"></div>
+              <div id="zone-left" data-zone="left" class="drop-zone w-full min-h-[165px] sm:min-h-[185px] rounded-2xl bg-slate-950/90 border-2 border-dashed border-amber-500/45 p-4 flex flex-col justify-between shadow-inner">
+                <div class="flex items-center justify-between text-base text-slate-300 border-b border-slate-800/80 pb-1.5 mb-2">
+                  <span class="font-bold text-amber-200">左秤盤</span>
+                  <span id="left-pan-count" class="mono-num font-bold text-amber-400">0 顆</span>
+                </div>
+                <div id="left-pan-balls" class="flex flex-wrap items-center justify-center gap-4 my-auto py-2 min-h-[82px]"></div>
+                <div class="text-sm text-center text-slate-400 pt-1">拖曳球至此（雙擊球退回下方球架）</div>
+              </div>
+              <div class="w-5/6 h-3 rounded-b-xl bg-gradient-to-r from-amber-800 via-amber-500 to-amber-800 shadow"></div>
+            </div>
+
+            <!-- Right Pan -->
+            <div id="right-pan-hanger" class="pan-hanger flex flex-col items-center">
+              <div class="w-0.5 h-5 bg-amber-500/70"></div>
+              <div id="zone-right" data-zone="right" class="drop-zone w-full min-h-[165px] sm:min-h-[185px] rounded-2xl bg-slate-950/90 border-2 border-dashed border-amber-500/45 p-4 flex flex-col justify-between shadow-inner">
+                <div class="flex items-center justify-between text-base text-slate-300 border-b border-slate-800/80 pb-1.5 mb-2">
+                  <span class="font-bold text-amber-200">右秤盤</span>
+                  <span id="right-pan-count" class="mono-num font-bold text-amber-400">0 顆</span>
+                </div>
+                <div id="right-pan-balls" class="flex flex-wrap items-center justify-center gap-4 my-auto py-2 min-h-[82px]"></div>
+                <div class="text-sm text-center text-slate-400 pt-1">拖曳球至此（雙擊球退回下方球架）</div>
+              </div>
+              <div class="w-5/6 h-3 rounded-b-xl bg-gradient-to-r from-amber-800 via-amber-500 to-amber-800 shadow"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center Fulcrum Pillar -->
+        <div class="flex flex-col items-center mt-2">
+          <div class="w-5 h-5 bg-gradient-to-b from-amber-500 to-amber-800 rounded-t"></div>
+          <div class="w-44 h-3 bg-gradient-to-r from-slate-800 via-amber-600 to-slate-800 rounded-full border border-amber-500/30 shadow"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. BOTTOM AREA: SPHERE TRAY + ANSWER SLOT + LOG -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-3 shrink-0">
+      <!-- Bottom-Center / Left: Large Sphere Holding Tray -->
+      <div class="lg:col-span-6 lab-card rounded-2xl p-4 flex flex-col justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2">
+            <h3 class="serif-title text-lg font-bold text-slate-100">待測金球陳列架</h3>
+            <span id="remaining-possibilities-badge" class="px-2.5 py-0.5 rounded-md text-sm font-bold bg-slate-800 text-amber-300 border border-slate-700">
+              剩餘可能球：3 顆
+            </span>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5 text-sm font-medium">
+            <span class="flex items-center gap-1 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-slate-300 inline-block"></span>待測</span>
+            <span class="flex items-center gap-1 text-slate-400"><span class="w-2.5 h-2.5 rounded-full bg-slate-600 inline-block"></span>標準</span>
+            <span class="flex items-center gap-1 text-rose-400"><span class="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block"></span>偏重?</span>
+            <span class="flex items-center gap-1 text-sky-400"><span class="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block"></span>偏輕?</span>
+            <span class="flex items-center gap-1 text-amber-400"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>未知</span>
+          </div>
+        </div>
+
+        <div id="zone-tray" data-zone="tray" class="drop-zone min-h-[115px] rounded-2xl bg-slate-950/85 border-2 border-dashed border-slate-700/90 px-4 py-3 flex flex-wrap items-center justify-center gap-4 sm:gap-5 shadow-inner">
+        </div>
+      </div>
+
+      <!-- Answer Submission Box -->
+      <div class="lg:col-span-3 lab-card brass-border rounded-2xl p-4 flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="serif-title text-lg font-bold text-amber-200">異常球鑑定槽</h3>
+          <span class="text-sm text-slate-300">放 1 顆球</span>
+        </div>
+
+        <div id="zone-answer" data-zone="answer" class="drop-zone h-24 rounded-2xl bg-slate-950/90 border-2 border-dashed border-amber-500/50 flex flex-col items-center justify-center relative mb-2.5">
+          <div id="answer-placeholder" class="text-base font-medium text-amber-300/70 pointer-events-none text-center px-2">
+            將唯一異常球拖曳至此
+          </div>
+          <div id="answer-ball-slot" class="flex items-center justify-center"></div>
+        </div>
+
+        <button id="btn-submit-answer" type="button" disabled class="brass-btn w-full py-2.5 rounded-xl text-base">
+          確認提交鑑定結果
+        </button>
+      </div>
+
+      <!-- Weighing Log -->
+      <div class="lg:col-span-3 lab-card rounded-2xl p-4 flex flex-col justify-between max-h-[195px]">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="serif-title text-lg font-bold text-slate-200">測量紀錄</h3>
+          <span class="text-xs text-slate-400">最新置頂</span>
+        </div>
+
+        <div id="history-list" class="flex-1 flex flex-col gap-2 overflow-y-auto pr-1"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Floating Ghost Element for Pointer Dragging -->
+  <div id="drag-ghost" class="sphere-ball"></div>
+
+  <!-- Toast Notification -->
+  <div id="toast-msg" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-200">
+    <div class="px-4 py-2.5 rounded-xl bg-slate-900/95 border border-amber-400/50 text-amber-200 text-xs sm:text-sm font-medium shadow-2xl">
+      <span id="toast-text">提示訊息</span>
+    </div>
+  </div>
+
+  <!-- Intro Story Modal (Shown at start) -->
+  <div id="story-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="lab-card brass-border max-w-2xl w-full rounded-2xl p-7 sm:p-9">
+      <div class="inline-block px-3.5 py-1 rounded-full text-sm font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30 mb-3">
+        皇家鑄幣局・首席檢驗官卷宗
+      </div>
+      <h2 class="serif-title text-3xl sm:text-4xl font-bold text-white mb-5">《天平上的異數》</h2>
+
+      <div class="space-y-4 text-base sm:text-lg text-slate-200 leading-relaxed">
+        <p>
+          歡迎上任，皇家首席檢驗官。王國金庫近日收到五批貢品金球，每一批金球之中，都混入了<strong class="text-amber-300">唯一一顆重量異常的偽造球</strong>。
+        </p>
+        <p>
+          你手中只有一座雙盤天平，沒有任何砝碼。更棘手的是，這座古老的天平受到<strong class="text-amber-300">「墨菲定律（最壞情況法則）」</strong>支配：
+        </p>
+        <div class="p-4 sm:p-5 rounded-xl bg-amber-500/10 border-l-4 border-amber-400 text-amber-100 text-base sm:text-lg leading-relaxed">
+          無論你如何擺放天平，天平每次傾倒或平衡的結果，都會自動導向<strong>「剩餘嫌疑球最多、最難立刻猜出答案」</strong>的最壞分支！若你尚未把嫌疑縮小至唯一一顆就貿然提交，偽造球必定會躲進你沒排除的另一顆球裡。
+        </div>
+      </div>
+
+      <div class="mt-7 flex justify-end">
+        <button id="btn-start-game" type="button" class="brass-btn px-8 py-3 rounded-xl text-lg">
+          開始試煉
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level Result / Feedback Modal -->
+  <div id="feedback-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="lab-card brass-border max-w-md w-full rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <div id="feedback-badge" class="px-2.5 py-1 rounded-md text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40">
+          鑑定報告
+        </div>
+        <h3 id="feedback-title" class="serif-title text-xl font-bold text-white">標題</h3>
+      </div>
+
+      <p id="feedback-body" class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-5"></p>
+
+      <div id="feedback-stats" class="hidden grid-cols-3 gap-2.5 p-3 rounded-xl bg-slate-950/85 border border-slate-800 mb-5 text-center">
+        <div>
+          <div class="text-xs text-slate-400">最佳次數</div>
+          <div id="fb-opt" class="mono-num text-base font-bold text-emerald-400 mt-0.5">1</div>
+        </div>
+        <div>
+          <div class="text-xs text-slate-400">您的次數</div>
+          <div id="fb-used" class="mono-num text-base font-bold text-amber-300 mt-0.5">1</div>
+        </div>
+        <div>
+          <div class="text-xs text-slate-400">目前分數</div>
+          <div id="fb-score" class="mono-num text-base font-bold text-amber-400 mt-0.5">100</div>
+        </div>
+      </div>
+
+      <div id="feedback-actions" class="flex flex-wrap items-center justify-end gap-2.5"></div>
+    </div>
+  </div>
+
+  <!-- Final Victory Scoreboard Modal -->
+  <div id="final-modal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="lab-card brass-border max-w-2xl w-full rounded-2xl p-6 sm:p-8">
+      <div class="text-center mb-6">
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40">五關試煉全數完成</span>
+        <h2 class="serif-title text-2xl sm:text-3xl font-bold text-white mt-2">皇家鑄幣局・最終鑑定證書</h2>
+        <p id="final-rank-title" class="text-amber-400 font-bold text-base sm:text-lg mt-1">榮譽頭銜：皇家首席天平大宗師</p>
+      </div>
+
+      <div class="flex items-center justify-center gap-8 p-4 rounded-xl bg-slate-950/85 border border-slate-800 mb-5">
+        <div class="text-center">
+          <div class="text-xs text-slate-400">目前分數</div>
+          <div id="final-total-score" class="mono-num text-3xl font-bold text-amber-400 mt-1">100</div>
+        </div>
+        <div class="h-10 w-px bg-slate-800"></div>
+        <div class="text-center">
+          <div class="text-xs text-slate-400">總秤重次數</div>
+          <div class="mono-num text-2xl font-bold text-slate-200 mt-1">
+            <span id="final-total-weighs">10</span>
+            <span class="text-xs text-slate-400 font-normal">次 (理論最佳 10 次)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="overflow-hidden rounded-xl border border-slate-800 mb-6">
+        <table class="w-full text-left text-xs sm:text-sm">
+          <thead class="bg-slate-900 text-slate-400">
+            <tr>
+              <th class="py-2.5 px-3">關卡</th>
+              <th class="py-2.5 px-3">題目配置</th>
+              <th class="py-2.5 px-3 text-center">最佳次數</th>
+              <th class="py-2.5 px-3 text-center">實際次數</th>
+              <th class="py-2.5 px-3 text-right">本關紀錄</th>
+            </tr>
+          </thead>
+          <tbody id="final-table-body" class="divide-y divide-slate-800/80 bg-slate-950/50"></tbody>
+        </table>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <button id="btn-close-final" type="button" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-medium transition">
+          返回檢視關卡
+        </button>
+        <button id="btn-restart-all" type="button" class="brass-btn px-6 py-2.5 rounded-xl text-xs sm:text-sm">
+          重新挑戰全關卡
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /********************************************************************
+     * 1. LEVEL DEFINITIONS & BADGE CONFIGURATION
+     ********************************************************************/
+    const LEVELS = [
+      {
+        id: 1,
+        title: "初入鑄幣局：三球定真偽",
+        balls: 3,
+        mode: "heavy",
+        modeLabel: "已知異常球較重",
+        optimalWeighs: 1,
+        desc: "共有 3 顆金球，其中 1 顆異常球【比標準球更重】。請跟隨上方引導，體驗如何用 1 次秤重對抗最壞情況！"
+      },
+      {
+        id: 2,
+        title: "輕量偽幣：七球尋蹤",
+        balls: 7,
+        mode: "light",
+        modeLabel: "已知異常球較輕",
+        optimalWeighs: 2,
+        desc: "共有 7 顆金球，其中 1 顆異常球【比標準球更輕】。利用三分法思維，在 2 次秤重內鎖定真兇。"
+      },
+      {
+        id: 3,
+        title: "黃金三分法：九球試煉",
+        balls: 9,
+        mode: "heavy",
+        modeLabel: "已知異常球較重",
+        optimalWeighs: 2,
+        desc: "共有 9 顆金球，其中 1 顆異常球【比標準球更重】。天平有「左重、右重、平衡」三種結果，2 次最多可分辨 9 顆球！"
+      },
+      {
+        id: 4,
+        title: "迷霧初現：四球未知輕重",
+        balls: 4,
+        mode: "unknown",
+        modeLabel: "異常球不知輕重",
+        optimalWeighs: 2,
+        desc: "共有 4 顆金球，其中 1 顆重量異常，但【不知道它是偏重還是偏輕】。善用系統自動標記出的「標準球」作為對照基準，在 2 次內找出異常球！"
+      },
+      {
+        id: 5,
+        title: "終極試煉：十二球天平謎題",
+        balls: 12,
+        mode: "unknown",
+        modeLabel: "異常球不知輕重",
+        optimalWeighs: 3,
+        desc: "傳說級邏輯謎題！12 顆金球中有 1 顆重量異常且【不知輕重】。請借助自動邏輯標記，在 3 次秤重內找出唯一異常球！"
+      }
+    ];
+
+    const AUTO_BADGE_CONFIG = {
+      untested: { label: "待測", cls: "bg-slate-700 text-slate-200 border border-slate-500" },
+      standard: { label: "標準", cls: "bg-slate-800 text-slate-400 border border-slate-600" },
+      heavy: { label: "偏重?", cls: "bg-rose-600 text-white border border-rose-300" },
+      light: { label: "偏輕?", cls: "bg-sky-500 text-slate-950 border border-sky-200" },
+      both: { label: "未知", cls: "bg-amber-500 text-slate-950 border border-amber-200" },
+      confirmed_heavy: { label: "確定重", cls: "bg-amber-400 text-slate-950 border border-white" },
+      confirmed_light: { label: "確定輕", cls: "bg-amber-400 text-slate-950 border border-white" },
+      confirmed_ball: { label: "確定異常", cls: "bg-amber-400 text-slate-950 border border-white" }
+    };
+
+    /********************************************************************
+     * 2. APPLICATION STATE
+     ********************************************************************/
+    const state = {
+      currentLevelIdx: 0,
+      ballZones: {}, // { [ballId]: 'tray' | 'left' | 'right' | 'answer' }
+      candidates: [], // Array of { ball: number, nature: 'heavy' | 'light' }
+      weighCount: 0,
+      wrongSubmissions: 0,
+      history: [],
+      levelResults: LEVELS.map(() => ({
+        completed: false,
+        penalty: 0,
+        weighs: 0
+      }))
+    };
+
+    /********************************************************************
+     * 3. DOM ELEMENT REFERENCES
+     ********************************************************************/
+    const dom = {
+      levelIndicators: document.getElementById("level-indicators"),
+      headerTotalScore: document.getElementById("header-total-score"),
+      levelBadge: document.getElementById("level-badge"),
+      levelTitle: document.getElementById("level-title"),
+      levelDesc: document.getElementById("level-desc"),
+      levelTargetType: document.getElementById("level-target-type"),
+      levelOptCount: document.getElementById("level-opt-count"),
+      levelUsedCount: document.getElementById("level-used-count"),
+      guideBanner: document.getElementById("guide-banner"),
+      guideStepTitle: document.getElementById("guide-step-title"),
+      guideStepText: document.getElementById("guide-step-text"),
+      zoneTray: document.getElementById("zone-tray"),
+      zoneLeft: document.getElementById("zone-left"),
+      zoneRight: document.getElementById("zone-right"),
+      zoneAnswer: document.getElementById("zone-answer"),
+      leftPanBalls: document.getElementById("left-pan-balls"),
+      rightPanBalls: document.getElementById("right-pan-balls"),
+      leftPanCount: document.getElementById("left-pan-count"),
+      rightPanCount: document.getElementById("right-pan-count"),
+      answerBallSlot: document.getElementById("answer-ball-slot"),
+      answerPlaceholder: document.getElementById("answer-placeholder"),
+      scaleBeamGroup: document.getElementById("scale-beam-group"),
+      leftPanHanger: document.getElementById("left-pan-hanger"),
+      rightPanHanger: document.getElementById("right-pan-hanger"),
+      scaleStatusPill: document.getElementById("scale-status-pill"),
+      btnWeigh: document.getElementById("btn-weigh"),
+      btnClearScale: document.getElementById("btn-clear-scale"),
+      btnResetLevel: document.getElementById("btn-reset-level"),
+      btnSubmitAnswer: document.getElementById("btn-submit-answer"),
+      remainingBadge: document.getElementById("remaining-possibilities-badge"),
+      historyList: document.getElementById("history-list"),
+      storyModal: document.getElementById("story-modal"),
+      feedbackModal: document.getElementById("feedback-modal"),
+      feedbackBadge: document.getElementById("feedback-badge"),
+      feedbackTitle: document.getElementById("feedback-title"),
+      feedbackBody: document.getElementById("feedback-body"),
+      feedbackStats: document.getElementById("feedback-stats"),
+      fbOpt: document.getElementById("fb-opt"),
+      fbUsed: document.getElementById("fb-used"),
+      fbScore: document.getElementById("fb-score"),
+      feedbackActions: document.getElementById("feedback-actions"),
+      finalModal: document.getElementById("final-modal"),
+      finalTotalScore: document.getElementById("final-total-score"),
+      finalTotalWeighs: document.getElementById("final-total-weighs"),
+      finalRankTitle: document.getElementById("final-rank-title"),
+      finalTableBody: document.getElementById("final-table-body"),
+      toastMsg: document.getElementById("toast-msg"),
+      toastText: document.getElementById("toast-text"),
+      dragGhost: document.getElementById("drag-ghost")
+    };
+
+    /********************************************************************
+     * 4. HELPER FUNCTIONS: CANDIDATES, SCORING & AUTO-MARKING
+     ********************************************************************/
+    function getUniqueCandidateBalls(candList) {
+      const set = new Set();
+      candList.forEach((c) => set.add(c.ball));
+      return Array.from(set).sort((a, b) => a - b);
+    }
+
+    // Score starts at 100, deducts 5 per extra weigh or wrong submission, minimum 70
+    function computeCurrentScore() {
+      let totalPenalty = 0;
+
+      LEVELS.forEach((lvl, idx) => {
+        if (idx === state.currentLevelIdx) {
+          const extra = Math.max(0, state.weighCount - lvl.optimalWeighs);
+          const livePenalty = (extra + state.wrongSubmissions) * 5;
+          totalPenalty += livePenalty;
+        } else if (state.levelResults[idx].completed) {
+          totalPenalty += state.levelResults[idx].penalty;
+        }
+      });
+
+      return Math.max(70, 100 - totalPenalty);
+    }
+
+    // Automatic logical deduction for each ball based on remaining candidate set S
+    function getAutoBallStatus(ballId) {
+      if (state.weighCount === 0) {
+        return { styleKey: "untested", badgeKey: "untested" };
+      }
+
+      const matching = state.candidates.filter((c) => c.ball === ballId);
+      const uniqueBalls = getUniqueCandidateBalls(state.candidates);
+
+      if (matching.length === 0) {
+        return { styleKey: "standard", badgeKey: "standard" };
+      }
+
+      const hasHeavy = matching.some((c) => c.nature === "heavy");
+      const hasLight = matching.some((c) => c.nature === "light");
+
+      if (uniqueBalls.length === 1 && uniqueBalls[0] === ballId) {
+        if (hasHeavy && !hasLight) {
+          return { styleKey: "confirmed", badgeKey: "confirmed_heavy" };
+        } else if (hasLight && !hasHeavy) {
+          return { styleKey: "confirmed", badgeKey: "confirmed_light" };
+        } else {
+          return { styleKey: "confirmed", badgeKey: "confirmed_ball" };
+        }
+      }
+
+      if (hasHeavy && hasLight) {
+        return { styleKey: "both", badgeKey: "both" };
+      } else if (hasHeavy) {
+        return { styleKey: "heavy", badgeKey: "heavy" };
+      } else {
+        return { styleKey: "light", badgeKey: "light" };
+      }
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+      dom.toastText.textContent = message;
+      dom.toastMsg.classList.remove("opacity-0");
+      dom.toastMsg.classList.add("opacity-100");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        dom.toastMsg.classList.remove("opacity-100");
+        dom.toastMsg.classList.add("opacity-0");
+      }, 2600);
+    }
+
+    /********************************************************************
+     * 5. LEVEL INITIALIZATION & UI RENDERING
+     ********************************************************************/
+    function initLevel(levelIdx) {
+      state.currentLevelIdx = levelIdx;
+      const lvl = LEVELS[levelIdx];
+
+      state.ballZones = {};
+      state.candidates = [];
+      state.weighCount = 0;
+      state.wrongSubmissions = 0;
+      state.history = [];
+
+      for (let i = 1; i <= lvl.balls; i++) {
+        state.ballZones[i] = "tray";
+        if (lvl.mode === "heavy") {
+          state.candidates.push({ ball: i, nature: "heavy" });
+        } else if (lvl.mode === "light") {
+          state.candidates.push({ ball: i, nature: "light" });
+        } else {
+          state.candidates.push({ ball: i, nature: "heavy" });
+          state.candidates.push({ ball: i, nature: "light" });
+        }
+      }
+
+      setScaleTilt("level", "等待放置球體...");
+
+      dom.levelBadge.textContent = `第 ${lvl.id} 關`;
+      dom.levelTitle.textContent = lvl.title;
+      dom.levelDesc.textContent = lvl.desc;
+      dom.levelTargetType.textContent = lvl.modeLabel;
+      dom.levelTargetType.className =
+        lvl.mode === "heavy"
+          ? "text-base font-bold text-rose-400"
+          : lvl.mode === "light"
+          ? "text-base font-bold text-sky-400"
+          : "text-base font-bold text-amber-300";
+
+      dom.levelOptCount.textContent = String(lvl.optimalWeighs);
+      dom.levelUsedCount.textContent = "0";
+
+      renderLevelIndicators();
+      renderAllZones();
+      renderHistory();
+    }
+
+    function renderLevelIndicators() {
+      dom.levelIndicators.innerHTML = "";
+      LEVELS.forEach((lvl, idx) => {
+        const res = state.levelResults[idx];
+        const isCurrent = idx === state.currentLevelIdx;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `px-3 py-1 rounded-lg text-sm font-bold transition flex items-center gap-1 border ${
+          isCurrent
+            ? "bg-amber-500 text-slate-950 border-amber-300 shadow"
+            : res.completed
+            ? "bg-slate-800 text-emerald-300 border-emerald-600/50 hover:bg-slate-700"
+            : "bg-slate-900 text-slate-400 border-slate-800 hover:bg-slate-800"
+        }`;
+        btn.innerHTML = `<span>${lvl.id}</span>${
+          res.completed ? `<span class="text-xs opacity-90">✓</span>` : ""
+        }`;
+        btn.addEventListener("click", () => initLevel(idx));
+        dom.levelIndicators.appendChild(btn);
+      });
+
+      dom.headerTotalScore.textContent = String(computeCurrentScore());
+    }
+
+    function setScaleTilt(tiltState, statusText) {
+      let angle = 0;
+      let pillClass = "px-4 py-1 rounded-full text-base font-bold bg-slate-800 text-slate-200 border border-slate-700";
+
+      if (tiltState === "left") {
+        angle = -6.5;
+        pillClass = "px-4 py-1 rounded-full text-base font-bold bg-rose-500/20 text-rose-300 border border-rose-400/40";
+      } else if (tiltState === "right") {
+        angle = 6.5;
+        pillClass = "px-4 py-1 rounded-full text-base font-bold bg-sky-500/20 text-sky-300 border border-sky-400/40";
+      } else if (tiltState === "balanced") {
+        angle = 0;
+        pillClass = "px-4 py-1 rounded-full text-base font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40";
+      }
+
+      dom.scaleBeamGroup.style.transform = `rotate(${angle}deg)`;
+      // Counter-rotate the two pans so they stay upright while tilting
+      dom.leftPanHanger.style.transform = `rotate(${-angle}deg)`;
+      dom.rightPanHanger.style.transform = `rotate(${-angle}deg)`;
+
+      dom.scaleStatusPill.className = pillClass;
+      dom.scaleStatusPill.textContent = statusText;
+    }
+
+    function createBallElement(ballId) {
+      const el = document.createElement("div");
+      el.className = "sphere-ball";
+      el.dataset.ballId = String(ballId);
+
+      const autoStatus = getAutoBallStatus(ballId);
+      el.dataset.autoMark = autoStatus.styleKey;
+      el.innerHTML = `<span>${ballId}</span>`;
+
+      const badgeInfo = AUTO_BADGE_CONFIG[autoStatus.badgeKey];
+      if (badgeInfo) {
+        const badge = document.createElement("span");
+        badge.className = `mark-badge ${badgeInfo.cls}`;
+        badge.textContent = badgeInfo.label;
+        el.appendChild(badge);
+      }
+
+      // Double-click any ball on a pan or answer slot to quickly return it to the bottom tray
+      el.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        if (state.ballZones[ballId] !== "tray") {
+          moveBallToZone(ballId, "tray");
+        }
+      });
+
+      setupPointerDrag(el, ballId);
+      return el;
+    }
+
+    function renderAllZones() {
+      const lvl = LEVELS[state.currentLevelIdx];
+      dom.zoneTray.innerHTML = "";
+      dom.leftPanBalls.innerHTML = "";
+      dom.rightPanBalls.innerHTML = "";
+      dom.answerBallSlot.innerHTML = "";
+
+      let leftCount = 0;
+      let rightCount = 0;
+      let answerBall = null;
+
+      for (let i = 1; i <= lvl.balls; i++) {
+        const zone = state.ballZones[i];
+        const ballEl = createBallElement(i);
+
+        if (zone === "tray") {
+          dom.zoneTray.appendChild(ballEl);
+        } else if (zone === "left") {
+          leftCount++;
+          dom.leftPanBalls.appendChild(ballEl);
+        } else if (zone === "right") {
+          rightCount++;
+          dom.rightPanBalls.appendChild(ballEl);
+        } else if (zone === "answer") {
+          answerBall = i;
+          dom.answerBallSlot.appendChild(ballEl);
+        }
+      }
+
+      dom.leftPanCount.textContent = `${leftCount} 顆`;
+      dom.rightPanCount.textContent = `${rightCount} 顆`;
+
+      if (answerBall !== null) {
+        dom.answerPlaceholder.classList.add("hidden");
+        dom.btnSubmitAnswer.disabled = false;
+      } else {
+        dom.answerPlaceholder.classList.remove("hidden");
+        dom.btnSubmitAnswer.disabled = true;
+      }
+
+      const uniqueBalls = getUniqueCandidateBalls(state.candidates);
+      dom.remainingBadge.textContent = `剩餘可能球：${uniqueBalls.length} 顆`;
+      dom.headerTotalScore.textContent = String(computeCurrentScore());
+
+      updateGuideBanner();
+    }
+
+    /********************************************************************
+     * 6. UNIFIED POINTER DRAG & DROP (MOUSE + TOUCH + TRACKPAD)
+     ********************************************************************/
+    function clearDragHighlights() {
+      document.querySelectorAll(".drop-zone").forEach((z) => z.classList.remove("drag-over"));
+    }
+
+    function moveBallToZone(ballId, targetZone) {
+      ballId = Number(ballId);
+      if (!ballId || !targetZone) return;
+
+      // Only 1 ball allowed in the Answer Slot at a time
+      if (targetZone === "answer") {
+        const lvl = LEVELS[state.currentLevelIdx];
+        for (let i = 1; i <= lvl.balls; i++) {
+          if (state.ballZones[i] === "answer" && i !== ballId) {
+            state.ballZones[i] = "tray";
+          }
+        }
+      }
+
+      state.ballZones[ballId] = targetZone;
+      setScaleTilt("level", "請確保左右秤盤球數相同後點擊「進行秤重」");
+      renderAllZones();
+    }
+
+    function setupPointerDrag(el, ballId) {
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+
+      el.addEventListener("pointerdown", (e) => {
+        if (e.button !== 0 && e.pointerType === "mouse") return;
+        e.preventDefault();
+        el.setPointerCapture(e.pointerId);
+
+        startX = e.clientX;
+        startY = e.clientY;
+        isDragging = true;
+
+        const autoStatus = getAutoBallStatus(ballId);
+        dom.dragGhost.dataset.autoMark = autoStatus.styleKey;
+        dom.dragGhost.textContent = String(ballId);
+        dom.dragGhost.style.left = `${e.clientX}px`;
+        dom.dragGhost.style.top = `${e.clientY}px`;
+        dom.dragGhost.style.display = "flex";
+
+        el.classList.add("opacity-30");
+      });
+
+      el.addEventListener("pointermove", (e) => {
+        if (!isDragging) return;
+        dom.dragGhost.style.left = `${e.clientX}px`;
+        dom.dragGhost.style.top = `${e.clientY}px`;
+
+        clearDragHighlights();
+        const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
+        const dropZone = elemBelow ? elemBelow.closest(".drop-zone") : null;
+        if (dropZone) {
+          dropZone.classList.add("drag-over");
+        }
+      });
+
+      const finishDrag = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        dom.dragGhost.style.display = "none";
+        el.classList.remove("opacity-30");
+        clearDragHighlights();
+
+        const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
+        const dropZone = elemBelow ? elemBelow.closest(".drop-zone") : null;
+
+        if (dropZone && dropZone.dataset.zone) {
+          moveBallToZone(ballId, dropZone.dataset.zone);
+        }
+      };
+
+      el.addEventListener("pointerup", finishDrag);
+      el.addEventListener("pointercancel", () => {
+        isDragging = false;
+        dom.dragGhost.style.display = "none";
+        el.classList.remove("opacity-30");
+        clearDragHighlights();
+      });
+    }
+
+    /********************************************************************
+     * 7. ADVERSARIAL (WORST-CASE) WEIGHING ENGINE
+     ********************************************************************/
+    function getBallsInZone(zoneName) {
+      const lvl = LEVELS[state.currentLevelIdx];
+      const list = [];
+      for (let i = 1; i <= lvl.balls; i++) {
+        if (state.ballZones[i] === zoneName) list.push(i);
+      }
+      return list;
+    }
+
+    function performWeighing() {
+      const leftBalls = getBallsInZone("left");
+      const rightBalls = getBallsInZone("right");
+
+      if (leftBalls.length === 0 && rightBalls.length === 0) {
+        showToast("請先將待測球拖曳至左秤盤與右秤盤！");
+        return;
+      }
+
+      if (leftBalls.length !== rightBalls.length) {
+        showToast(`左右秤盤球數必須相同！（目前左盤 ${leftBalls.length} 顆，右盤 ${rightBalls.length} 顆）`);
+        return;
+      }
+
+      const leftSet = new Set(leftBalls);
+      const rightSet = new Set(rightBalls);
+
+      // Partition current candidate set S into 3 possible outcomes
+      const sLeftHeavy = [];
+      const sRightHeavy = [];
+      const sBalanced = [];
+
+      state.candidates.forEach((cand) => {
+        const inLeft = leftSet.has(cand.ball);
+        const inRight = rightSet.has(cand.ball);
+
+        if (inLeft) {
+          if (cand.nature === "heavy") sLeftHeavy.push(cand);
+          else sRightHeavy.push(cand);
+        } else if (inRight) {
+          if (cand.nature === "heavy") sRightHeavy.push(cand);
+          else sLeftHeavy.push(cand);
+        } else {
+          sBalanced.push(cand);
+        }
+      });
+
+      const outcomes = [
+        {
+          key: "balanced",
+          label: "天平保持水平（兩盤等重）",
+          shortLabel: "平衡",
+          candidates: sBalanced,
+          uniqueBallCount: getUniqueCandidateBalls(sBalanced).length,
+          stateCount: sBalanced.length
+        },
+        {
+          key: "left",
+          label: "左秤盤下沉（左重右輕）",
+          shortLabel: "左盤較重",
+          candidates: sLeftHeavy,
+          uniqueBallCount: getUniqueCandidateBalls(sLeftHeavy).length,
+          stateCount: sLeftHeavy.length
+        },
+        {
+          key: "right",
+          label: "右秤盤下沉（右重左輕）",
+          shortLabel: "右盤較重",
+          candidates: sRightHeavy,
+          uniqueBallCount: getUniqueCandidateBalls(sRightHeavy).length,
+          stateCount: sRightHeavy.length
+        }
+      ];
+
+      // Adversarial worst-case selection:
+      // Pick the outcome that leaves the LARGEST number of unique candidate balls,
+      // breaking ties by largest number of candidate states.
+      outcomes.sort((a, b) => {
+        if (b.uniqueBallCount !== a.uniqueBallCount) {
+          return b.uniqueBallCount - a.uniqueBallCount;
+        }
+        return b.stateCount - a.stateCount;
+      });
+
+      const chosen = outcomes[0];
+      state.candidates = chosen.candidates;
+      state.weighCount++;
+
+      const remainingBalls = getUniqueCandidateBalls(state.candidates);
+      state.history.unshift({
+        step: state.weighCount,
+        left: leftBalls,
+        right: rightBalls,
+        outcomeKey: chosen.key,
+        outcomeLabel: chosen.shortLabel,
+        remainingCount: remainingBalls.length,
+        remainingBalls: remainingBalls
+      });
+
+      dom.levelUsedCount.textContent = String(state.weighCount);
+      setScaleTilt(chosen.key, `第 ${state.weighCount} 次結果：${chosen.label}`);
+
+      renderAllZones();
+      renderHistory();
+    }
+
+    function renderHistory() {
+      dom.historyList.innerHTML = "";
+      if (state.history.length === 0) {
+        dom.historyList.innerHTML = `
+          <div class="text-sm text-slate-400 text-center py-6 border border-dashed border-slate-800 rounded-xl my-auto">
+            尚無測量紀錄。<br/>將球拖入秤盤後點擊「進行秤重」。
+          </div>
+        `;
+        return;
+      }
+
+      state.history.forEach((item) => {
+        let badgeCls = "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
+        if (item.outcomeKey === "left") {
+          badgeCls = "bg-rose-500/20 text-rose-300 border-rose-500/40";
+        } else if (item.outcomeKey === "right") {
+          badgeCls = "bg-sky-500/20 text-sky-300 border-sky-500/40";
+        }
+
+        const card = document.createElement("div");
+        card.className = "p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-sm space-y-1";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-200">第 ${item.step} 秤：左[${item.left.join(",")}] vs 右[${item.right.join(",")}]</span>
+            <span class="px-2 py-0.5 rounded border text-xs font-bold ${badgeCls}">${item.outcomeLabel}</span>
+          </div>
+          <div class="text-amber-300 text-xs sm:text-sm">
+            留存 (${item.remainingCount}顆)：<span class="mono-num font-bold">${item.remainingBalls.join(", ")} 號</span>
+          </div>
+        `;
+        dom.historyList.appendChild(card);
+      });
+    }
+
+    /********************************************************************
+     * 8. INTERACTIVE GUIDE BANNER (LEVEL 1 STEP-BY-STEP + HINTS)
+     ********************************************************************/
+    function updateGuideBanner() {
+      const lvl = LEVELS[state.currentLevelIdx];
+      const uniqueBalls = getUniqueCandidateBalls(state.candidates);
+
+      if (lvl.id === 1) {
+        dom.guideBanner.classList.add("tutorial-pulse");
+        const leftBalls = getBallsInZone("left");
+        const rightBalls = getBallsInZone("right");
+        const answerBalls = getBallsInZone("answer");
+
+        if (state.weighCount === 0) {
+          if (leftBalls.length === 1 && rightBalls.length === 1) {
+            dom.guideStepTitle.textContent = "教學步驟 2 / 3：";
+            dom.guideStepText.textContent =
+              "太好了！現在左右秤盤各有 1 顆球，請點擊下方的「進行秤重」按鈕，觀察天平結果與球體上的自動標記！";
+          } else {
+            dom.guideStepTitle.textContent = "教學步驟 1 / 3：";
+            dom.guideStepText.textContent =
+              "第 1 關共有 3 顆球（已知異常球較重）。請按住任意 1 顆球拖曳到「左秤盤」，再將另 1 顆球拖曳到「右秤盤」（留 1 顆在置放架上）。";
+          }
+        } else if (uniqueBalls.length === 1) {
+          const culprit = uniqueBalls[0];
+          if (answerBalls.includes(culprit)) {
+            dom.guideStepTitle.textContent = "教學步驟 3 / 3（完成）：";
+            dom.guideStepText.textContent = `您已將唯一的異常球「${culprit} 號球」放入鑑定槽！現在請點擊右側「確認提交鑑定結果」即可過關。`;
+          } else {
+            dom.guideStepTitle.textContent = "教學步驟 3 / 3：";
+            dom.guideStepText.textContent = `天平已排除秤盤上的標準球！請看球體右上角的自動標記：「${culprit} 號球」已被自動標示為【確定重】，請將「${culprit} 號球」拖曳到右側的「提交異常球鑑定槽」！`;
+          }
+        } else {
+          dom.guideStepTitle.textContent = "教學提示：";
+          dom.guideStepText.textContent = "請將左右秤盤各放 1 顆嫌疑球進行秤重，即可鎖定唯一的異常球！";
+        }
+      } else {
+        dom.guideBanner.classList.remove("tutorial-pulse");
+        dom.guideStepTitle.textContent = `第 ${lvl.id} 關策略提示：`;
+        if (lvl.id === 2) {
+          dom.guideStepText.textContent = `7 顆球找較輕球：第一秤建議放「2 顆對 2 顆」（留 3 顆在架上）。在最壞情況下天平會平衡並排除秤上 4 顆標準球，第二秤再從剩餘 3 顆中「1 對 1」即可破局！`;
+        } else if (lvl.id === 3) {
+          dom.guideStepText.textContent = `9 顆球找較重球：將 9 顆球分為三等份，第一秤放「3 顆對 3 顆」（留 3 顆），第二秤從留存的 3 顆嫌疑球中放「1 顆對 1 顆」即可在 2 次內鎖定答案！`;
+        } else if (lvl.id === 4) {
+          dom.guideStepText.textContent = `4 顆球不知輕重：第一秤先放「1 顆對 1 顆」。若平衡，秤上 2 顆會自動標記為「標準」；第二秤拿其中 1 顆「標準球」與剩下 2 顆嫌疑球中的 1 顆對秤，即可確定哪一顆是異常球！`;
+        } else if (lvl.id === 5) {
+          dom.guideStepText.textContent = `12 顆球終極謎題：第一秤務必放「4 顆對 4 顆」（留 4 顆）。每次秤重後系統會自動標記各球為「標準」、「偏重?」或「偏輕?」，善用混搭對調與標準球參照，即可在 3 次內鎖定唯一異常球！`;
+        }
+      }
+    }
+
+    /********************************************************************
+     * 9. ANSWER SUBMISSION & ADVERSARIAL VERIFICATION
+     ********************************************************************/
+    function submitAnswer() {
+      const answerBalls = getBallsInZone("answer");
+      if (answerBalls.length === 0) return;
+
+      const submittedBall = answerBalls[0];
+      const uniqueBalls = getUniqueCandidateBalls(state.candidates);
+      const isSubmittedPossible = uniqueBalls.includes(submittedBall);
+      const otherPossibleBalls = uniqueBalls.filter((b) => b !== submittedBall);
+
+      if (isSubmittedPossible && otherPossibleBalls.length === 0) {
+        handleLevelSuccess(submittedBall);
+      } else if (!isSubmittedPossible) {
+        state.wrongSubmissions++;
+        renderAllZones();
+        const exampleCand = state.candidates[0];
+        const natureText = exampleCand.nature === "heavy" ? "偏重" : "偏輕";
+        showFeedbackModal({
+          success: false,
+          title: "推理矛盾：該球已被排除為標準球！",
+          body: `根據先前的天平測量紀錄，您提交的「${submittedBall} 號球」已經被 100% 排除（自動標記為標準球）。目前符合所有測量紀錄的可能異常球包含「${exampleCand.ball} 號球（${natureText}）」，請檢視球體上的自動標記！`
+        });
+      } else {
+        // Murphy's Law triggers if more than 1 ball is still possible
+        state.wrongSubmissions++;
+        renderAllZones();
+        const rivalBall = otherPossibleBalls[0];
+        const rivalCand = state.candidates.find((c) => c.ball === rivalBall);
+        const rivalNature = rivalCand.nature === "heavy" ? "偏重" : "偏輕";
+
+        showFeedbackModal({
+          success: false,
+          title: "墨菲定律發動：尚未排除其他嫌疑球！",
+          body: `雖然「${submittedBall} 號球」仍在嫌疑名單中，但「${rivalBall} 號球（可能${rivalNature}）」也同樣符合目前所有的天平紀錄！在最壞情況法則下，真正的異常球躲進了「${rivalBall} 號球」。請繼續使用天平，直到只剩唯一一顆異常球！`
+        });
+      }
+    }
+
+    function handleLevelSuccess(culpritBall) {
+      const lvl = LEVELS[state.currentLevelIdx];
+      const extraWeighs = Math.max(0, state.weighCount - lvl.optimalWeighs);
+      const levelPenalty = (extraWeighs + state.wrongSubmissions) * 5;
+
+      const prev = state.levelResults[state.currentLevelIdx];
+      if (!prev.completed || levelPenalty <= prev.penalty) {
+        state.levelResults[state.currentLevelIdx] = {
+          completed: true,
+          penalty: levelPenalty,
+          weighs: state.weighCount
+        };
+      }
+
+      renderLevelIndicators();
+      const currentScore = computeCurrentScore();
+
+      const matching = state.candidates.filter((c) => c.ball === culpritBall);
+      const natureStr =
+        matching.length > 1
+          ? "重量異常"
+          : matching[0].nature === "heavy"
+          ? "偏重"
+          : "偏輕";
+
+      showFeedbackModal({
+        success: true,
+        title: `第 ${lvl.id} 關鑑定成功！`,
+        body: `嚴密的邏輯推理！您已在最壞情況下將可能性縮小至唯一解，成功找出異常的「${culpritBall} 號球（${natureStr}）」。`,
+        stats: {
+          opt: `${lvl.optimalWeighs} 次`,
+          used: `${state.weighCount} 次`,
+          score: `${currentScore}`
+        }
+      });
+    }
+
+    function showFeedbackModal({ success, title, body, stats }) {
+      dom.feedbackTitle.textContent = title;
+      dom.feedbackBody.textContent = body;
+      dom.feedbackActions.innerHTML = "";
+
+      if (success) {
+        dom.feedbackBadge.textContent = "破局成功";
+        dom.feedbackBadge.className = "px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40";
+        dom.feedbackStats.classList.remove("hidden");
+        dom.feedbackStats.classList.add("grid");
+        dom.fbOpt.textContent = stats.opt;
+        dom.fbUsed.textContent = stats.used;
+        dom.fbScore.textContent = stats.score;
+
+        const retryBtn = document.createElement("button");
+        retryBtn.type = "button";
+        retryBtn.className = "px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-medium transition";
+        retryBtn.textContent = "重玩本關";
+        retryBtn.addEventListener("click", () => {
+          closeFeedbackModal();
+          initLevel(state.currentLevelIdx);
+        });
+        dom.feedbackActions.appendChild(retryBtn);
+
+        const nextBtn = document.createElement("button");
+        nextBtn.type = "button";
+        nextBtn.className = "brass-btn px-5 py-2 rounded-xl text-xs sm:text-sm";
+        if (state.currentLevelIdx < LEVELS.length - 1) {
+          nextBtn.textContent = `前往第 ${state.currentLevelIdx + 2} 關`;
+          nextBtn.addEventListener("click", () => {
+            closeFeedbackModal();
+            initLevel(state.currentLevelIdx + 1);
+          });
+        } else {
+          nextBtn.textContent = "查看最終鑑定總結";
+          nextBtn.addEventListener("click", () => {
+            closeFeedbackModal();
+            openFinalScoreboard();
+          });
+        }
+        dom.feedbackActions.appendChild(nextBtn);
+      } else {
+        dom.feedbackBadge.textContent = "鑑定駁回";
+        dom.feedbackBadge.className = "px-2.5 py-1 rounded-md text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-400/40";
+        dom.feedbackStats.classList.add("hidden");
+        dom.feedbackStats.classList.remove("grid");
+
+        const continueBtn = document.createElement("button");
+        continueBtn.type = "button";
+        continueBtn.className = "brass-btn px-5 py-2 rounded-xl text-xs sm:text-sm";
+        continueBtn.textContent = "返回天平繼續推理";
+        continueBtn.addEventListener("click", () => {
+          // Move ball out of answer slot back to tray so user can weigh it
+          const lvl = LEVELS[state.currentLevelIdx];
+          for (let i = 1; i <= lvl.balls; i++) {
+            if (state.ballZones[i] === "answer") state.ballZones[i] = "tray";
+          }
+          closeFeedbackModal();
+          renderAllZones();
+        });
+        dom.feedbackActions.appendChild(continueBtn);
+      }
+
+      dom.feedbackModal.classList.remove("hidden");
+      dom.feedbackModal.classList.add("flex");
+    }
+
+    function closeFeedbackModal() {
+      dom.feedbackModal.classList.add("hidden");
+      dom.feedbackModal.classList.remove("flex");
+    }
+
+    function openFinalScoreboard() {
+      let totalWeighs = 0;
+      dom.finalTableBody.innerHTML = "";
+
+      LEVELS.forEach((lvl, idx) => {
+        const res = state.levelResults[idx];
+        totalWeighs += res.weighs;
+
+        let perfText = "未完成";
+        if (res.completed) {
+          perfText = res.penalty === 0 ? "完美最佳解" : `扣 ${res.penalty} 分`;
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-bold text-amber-300">第 ${lvl.id} 關</td>
+          <td class="py-2.5 px-3 text-slate-300">${lvl.balls} 顆球・${lvl.modeLabel}</td>
+          <td class="py-2.5 px-3 text-center mono-num text-emerald-400">${lvl.optimalWeighs} 次</td>
+          <td class="py-2.5 px-3 text-center mono-num text-slate-200">${res.completed ? `${res.weighs} 次` : "未完成"}</td>
+          <td class="py-2.5 px-3 text-right mono-num font-bold text-amber-400">${perfText}</td>
+        `;
+        dom.finalTableBody.appendChild(tr);
+      });
+
+      const finalScore = computeCurrentScore();
+      dom.finalTotalScore.textContent = String(finalScore);
+      dom.finalTotalWeighs.textContent = String(totalWeighs);
+
+      if (finalScore >= 95) {
+        dom.finalRankTitle.textContent = "榮譽頭銜：皇家首席天平大宗師";
+      } else if (finalScore >= 85) {
+        dom.finalRankTitle.textContent = "榮譽頭銜：皇家資深邏輯鑑定官";
+      } else {
+        dom.finalRankTitle.textContent = "榮譽頭銜：皇家鑄幣局合格司秤員";
+      }
+
+      dom.finalModal.classList.remove("hidden");
+      dom.finalModal.classList.add("flex");
+    }
+
+    /********************************************************************
+     * 10. BUTTON EVENT LISTENERS & INITIALIZATION
+     ********************************************************************/
+    dom.btnWeigh.addEventListener("click", performWeighing);
+
+    dom.btnClearScale.addEventListener("click", () => {
+      const lvl = LEVELS[state.currentLevelIdx];
+      for (let i = 1; i <= lvl.balls; i++) {
+        if (state.ballZones[i] === "left" || state.ballZones[i] === "right") {
+          state.ballZones[i] = "tray";
+        }
+      }
+      setScaleTilt("level", "已清空秤盤，等待放置球體...");
+      renderAllZones();
+    });
+
+    dom.btnResetLevel.addEventListener("click", () => {
+      initLevel(state.currentLevelIdx);
+      showToast("已重置本關進度");
+    });
+
+    dom.btnSubmitAnswer.addEventListener("click", submitAnswer);
+
+    document.getElementById("btn-open-story").addEventListener("click", () => {
+      dom.storyModal.classList.remove("hidden");
+      dom.storyModal.classList.add("flex");
+    });
+
+    document.getElementById("btn-start-game").addEventListener("click", () => {
+      dom.storyModal.classList.add("hidden");
+      dom.storyModal.classList.remove("flex");
+    });
+
+    document.getElementById("btn-close-final").addEventListener("click", () => {
+      dom.finalModal.classList.add("hidden");
+      dom.finalModal.classList.remove("flex");
+    });
+
+    document.getElementById("btn-restart-all").addEventListener("click", () => {
+      state.levelResults = LEVELS.map(() => ({
+        completed: false,
+        penalty: 0,
+        weighs: 0
+      }));
+      dom.finalModal.classList.add("hidden");
+      dom.finalModal.classList.remove("flex");
+      initLevel(0);
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      initLevel(0);
+    });
+  </script>
+</body>
+</html>

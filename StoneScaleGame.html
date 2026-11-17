@@ -478,7 +478,7 @@
     <div id="tutorial-dialog" class="lab-card brass-border rounded-xl p-5 w-[380px] flex flex-col gap-4 shadow-2xl">
       <div class="text-amber-300 font-bold text-lg border-b border-amber-500/30 pb-2 flex items-center justify-between">
         <span>系統教學指引</span>
-        <span id="tutorial-step-indicator" class="text-sm text-amber-400/70">1/5</span>
+        <span id="tutorial-step-indicator" class="text-sm text-amber-400/70">1/6</span>
       </div>
       <p id="tutorial-text" class="text-slate-100 text-lg leading-relaxed min-h-[80px]">
         教學內容
@@ -563,7 +563,7 @@
     <!-- 這個區塊將被 html2canvas 截圖 -->
     <div id="certificate-area" class="lab-card brass-border max-w-2xl w-full rounded-2xl p-8 shrink-0 relative bg-[#0b0f19]">
       <div class="text-center mb-6">
-        <h2 class="serif-title text-3xl font-bold text-white mt-2">皇家鑄幣局・試煉總結與成績證明</h2>
+        <h2 class="serif-title text-3xl font-bold text-white mt-2">試煉總結與成績</h2>
       </div>
 
       <div class="flex items-center justify-around p-4 rounded-xl bg-slate-900/80 border border-slate-700 mb-6 text-xl">
@@ -1041,7 +1041,8 @@
         scale: 2
       }).then(canvas => {
         const link = document.createElement("a");
-        link.download = "皇家鑄幣局_成績證明.png";
+		file_name = document.getElementById("cert-student-name").innerText;
+        link.download = file_name+".png";
         link.href = canvas.toDataURL("image/png");
         link.click();
       });
@@ -1065,7 +1066,8 @@
         { id: 'balls-rack', text: "天平前方的桌面上擺放著「待測金球」。每過一秤，系統會自動在球體右上方加上文字標記（如：標準、偏重、確定異常），幫您快速排除邏輯！" },
         { id: 'scale-wrapper', text: "畫面中央是「雙盤大天平」。您可以直接從桌面將金球拖曳至左、右秤盤中。" },
         { id: 'action-panel', text: "放置完成後，點擊左秤盤旁的大按鈕「進行秤重」。請注意，天平必定會導出讓您最難猜出答案的最壞結果（墨菲定律）！" },
-        { id: 'answer-zone', text: "最後，當您靠著標記將嫌疑犯鎖定至唯一 1 顆時，請將它放入右秤盤旁的「鑑定小圓盤」並點擊提交鑑定結案！" }
+        { id: 'answer-zone', text: "當您靠著標記將嫌疑犯鎖定至唯一 1 顆時，請將它放入右秤盤旁的「鑑定小圓盤」並點擊提交鑑定結案！" },
+        { id: 'scale-wrapper', text: "現在可以把兩顆球分別放上天平左右，按下「進行秤重」（左右的數量要一樣），就可以將兩顆球比較重量了！" }
       ]
     };
 

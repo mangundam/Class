@@ -223,8 +223,9 @@
           <span class="text-amber-300 font-bold">價目:</span>
           <span>☕2s/$50</span>
           <span>🍔5s/$120</span>
-          <span>🍝9s/$250</span>
-          <span>🥩15s/$450</span>
+          <span>🍝8s/$250</span>
+          <span>🥩13s/$450</span>
+          <span class="text-cyan-300 font-bold">套餐(🧋🥗🍝🍰)$520</span>
         </div>
       </div>
     </div>
@@ -434,32 +435,47 @@
   <script>
     /***************************************************************************
      * 1. MENU & ALGORITHM DEFINITIONS
-     * Note: ONLY ☕, 🍔, 🍝, 🥩 emojis are used anywhere in the entire file!
+     * Note: ONLY food emojis (☕, 🍔, 🍝, 🥩, 🧋, 🥗, 🍰) are used in the entire file!
      ***************************************************************************/
     const MENU = {
-      COFFEE: { id: 'COFFEE', name: '美式咖啡', emoji: '☕', burst: 2.0, price: 50, color: '#38bdf8' },
-      BURGER: { id: 'BURGER', name: '美味漢堡', emoji: '🍔', burst: 5.0, price: 120, color: '#f59e0b' },
-      PASTA:  { id: 'PASTA',  name: '義大利麵', emoji: '🍝', burst: 9.0, price: 250, color: '#fb7185' },
-      STEAK:  { id: 'STEAK',  name: '豪華牛排', emoji: '🥩', burst: 15.0, price: 450, color: '#e879f9' }
+      COFFEE:  { id: 'COFFEE',  name: '美式咖啡', emoji: '☕', burst: 2.0,  price: 50,  color: '#38bdf8' },
+      BURGER:  { id: 'BURGER',  name: '美味漢堡', emoji: '🍔', burst: 5.0,  price: 120, color: '#f59e0b' },
+      PASTA:   { id: 'PASTA',   name: '義大利麵', emoji: '🍝', burst: 8.0,  price: 250, color: '#fb7185' },
+      STEAK:   { id: 'STEAK',   name: '豪華牛排', emoji: '🥩', burst: 13.0, price: 450, color: '#e879f9' },
+      // Combo Course Sub-items (飲料 -> 小菜 -> 主餐 -> 甜點)
+      DRINK:   { id: 'DRINK',   name: '冰釀茶飲', emoji: '🧋', burst: 2.2,  price: 80,  color: '#38bdf8', stageLabel: '飲料' },
+      SALAD:   { id: 'SALAD',   name: '凱薩沙拉', emoji: '🥗', burst: 2.5,  price: 110, color: '#4ade80', stageLabel: '小菜' },
+      MAIN_P:  { id: 'MAIN_P',  name: '主廚義麵', emoji: '🍝', burst: 3.0,  price: 190, color: '#fb7185', stageLabel: '主餐' },
+      MAIN_S:  { id: 'MAIN_S',  name: '嫩煎牛排', emoji: '🥩', burst: 3.0,  price: 190, color: '#e879f9', stageLabel: '主餐' },
+      DESSERT: { id: 'DESSERT', name: '草莓蛋糕', emoji: '🍰', burst: 2.5,  price: 140, color: '#f472b6', stageLabel: '甜點' }
     };
+
+    function createComboCourses(mainType = 'PASTA') {
+      return [
+        { ...MENU.DRINK },
+        { ...MENU.SALAD },
+        mainType === 'STEAK' ? { ...MENU.MAIN_S } : { ...MENU.MAIN_P },
+        { ...MENU.DESSERT }
+      ];
+    }
 
     const ALGO_INFO = {
       FCFS: {
         code: 'FCFS',
         name: 'FCFS 先到先服務',
-        rule: '單鍋(#1)依點餐順序一口氣做完，無切換延遲',
+        rule: '單鍋(#1)依最早點餐順序做完所有餐點，無切換延遲',
         color: '#fbbf24'
       },
       SJF: {
         code: 'SJF',
         name: 'SJF 最短工作優先',
-        rule: '單鍋(#1)優先製作時間最短餐點 (☕>🍔>🍝>🥩)',
+        rule: '單鍋(#1)優先製作總剩餘工時最短的訂單',
         color: '#34d399'
       },
       RR: {
         code: 'RR',
-        name: 'RR 循環排程 (三鍋並行)',
-        rule: '同時開 3 個鍋子，每 3 秒輪流換鍋翻炒 (切換 0.6s)',
+        name: 'RR 循環排程 (三鍋套餐神技)',
+        rule: '3鍋並行輪流做各桌下一道菜，每送一道菜重置耐心100%',
         color: '#38bdf8'
       },
       PRIORITY: {
@@ -471,7 +487,7 @@
     };
 
     /***************************************************************************
-     * 2. ALL 20 EVENTS DATABASE
+     * 2. ALL 20 EVENTS DATABASE (HIGH DENSITY + FULL 6 TABLES + COMBO SYSTEM)
      ***************************************************************************/
     const EVENTS_DB = [
       // ======================== A. FCFS (1 - 5) ========================
@@ -479,74 +495,90 @@
         id: 1,
         bestAlgo: 'FCFS',
         title: '退休長輩早茶團',
-        desc: '一群退休長輩來喝早茶，大家都點一模一樣的 🍔。但長輩們非常計較先來後到，誰慢來卻先拿到餐點，或是店員做一半換鍋子，長輩就會大吵大鬧！',
-        hintTraits: ['重視先來後到 (嚴禁插隊)', '討厭料理中斷換鍋', '全員皆點 🍔 (5秒)'],
-        whyBest: '全員餐點長度相同且極度計較公平與專注，FCFS 零切換成本且保證先到先得。',
+        desc: '大批退休長輩湧入餐廳把 6 張內用桌全坐滿還排到候位區！長輩們大多點 🍔，少數點了精緻套餐，但長輩極度計較「先來後到」，誰慢來卻先拿到餐、或廚師做菜做到一半換鍋，長輩就會大發雷霆！',
+        hintTraits: ['內用滿座+候位排隊', '嚴格計較先來後到 (嚴禁插隊)', '討厭半途換鍋'],
+        whyBest: '長輩極度重視公平與專注，FCFS 零切換成本且保證嚴格按照進門順序服務。',
         spawns: [
-          { food: 'BURGER', mode: 'DINE', delay: 0.3, patience: 34, strictOrder: true, noInterrupt: true, label: '長輩' },
-          { food: 'BURGER', mode: 'DINE', delay: 1.5, patience: 35, strictOrder: true, noInterrupt: true, label: '長輩' },
-          { food: 'BURGER', mode: 'DINE', delay: 2.8, patience: 36, strictOrder: true, noInterrupt: true, label: '長輩' },
-          { food: 'BURGER', mode: 'DINE', delay: 4.0, patience: 38, strictOrder: true, noInterrupt: true, label: '長輩' },
-          { food: 'BURGER', mode: 'TAKEOUT', delay: 5.2, patience: 40, strictOrder: true, noInterrupt: true, label: '長輩' }
+          { food: 'BURGER', mode: 'DINE', delay: 0.1, patience: 40, strictOrder: true, noInterrupt: true, label: '長輩會長' },
+          { food: 'BURGER', mode: 'DINE', delay: 0.5, patience: 42, strictOrder: true, noInterrupt: true, label: '退休長輩' },
+          { food: 'BURGER', mode: 'DINE', delay: 0.9, patience: 44, strictOrder: true, noInterrupt: true, label: '退休長輩' },
+          { food: 'BURGER', mode: 'DINE', delay: 1.3, patience: 46, strictOrder: true, noInterrupt: true, label: '退休長輩' },
+          { food: 'BURGER', mode: 'DINE', delay: 1.7, patience: 48, strictOrder: true, noInterrupt: true, label: '退休長輩' },
+          { food: 'COMBO',  mode: 'DINE', delay: 2.1, patience: 52, strictOrder: true, noInterrupt: true, label: '長輩副會長' },
+          { food: 'BURGER', mode: 'DINE', delay: 2.6, patience: 54, strictOrder: true, noInterrupt: true, label: '候位長輩' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 3.1, patience: 54, strictOrder: true, noInterrupt: true, label: '外帶長輩' }
         ]
       },
       {
         id: 2,
         bestAlgo: 'FCFS',
         title: '完美主義建築師聚會',
-        desc: '一群建築師來用餐，全部點了 🍝。他們有嚴重的完美主義，要求廚師一旦開始做某個人的餐點，就必須一口氣做完，絕不能做到一半換做別人的！',
-        hintTraits: ['嚴禁料理中斷 (RR 切換直接翻臉)', '重視順序公平', '全員皆點 🍝 (9秒)'],
-        whyBest: '建築師厭惡 RR 的半途切換（Context Switch），且餐點時間一致，FCFS 最穩定。',
+        desc: '建築師學會包下全場 6 張餐桌並排隊候位，分別點了 🍝 與全套套餐。他們有嚴重的強迫症，要求廚師一旦開始做某張桌子的訂單，就必須一口氣把該桌餐點全數出齊，絕不能換鍋做別桌！',
+        hintTraits: ['嚴禁料理中斷換鍋 (選 RR 必翻臉)', '重視順序公平', '6桌滿座高密度'],
+        whyBest: '建築師厭惡 RR 的半途切換（Context Switch），唯有 FCFS 能專注逐桌完成。',
         spawns: [
-          { food: 'PASTA', mode: 'DINE', delay: 0.4, patience: 48, strictOrder: true, noInterrupt: true, label: '建築師' },
-          { food: 'PASTA', mode: 'DINE', delay: 1.8, patience: 50, strictOrder: true, noInterrupt: true, label: '建築師' },
-          { food: 'PASTA', mode: 'DINE', delay: 3.2, patience: 52, strictOrder: true, noInterrupt: true, label: '建築師' },
-          { food: 'PASTA', mode: 'DINE', delay: 4.5, patience: 55, strictOrder: true, noInterrupt: true, label: '建築師' }
+          { food: 'PASTA', mode: 'DINE', delay: 0.1, patience: 50, strictOrder: true, noInterrupt: true, label: '總建築師' },
+          { food: 'PASTA', mode: 'DINE', delay: 0.6, patience: 52, strictOrder: true, noInterrupt: true, label: '結構技師' },
+          { food: 'COMBO', mode: 'DINE', delay: 1.1, patience: 55, strictOrder: true, noInterrupt: true, label: '景觀設計師' },
+          { food: 'PASTA', mode: 'DINE', delay: 1.6, patience: 56, strictOrder: true, noInterrupt: true, label: '室內設計師' },
+          { food: 'PASTA', mode: 'DINE', delay: 2.1, patience: 58, strictOrder: true, noInterrupt: true, label: '建築師' },
+          { food: 'BURGER', mode: 'DINE', delay: 2.5, patience: 58, strictOrder: true, noInterrupt: true, label: '繪圖員' },
+          { food: 'PASTA', mode: 'DINE', delay: 3.0, patience: 60, strictOrder: true, noInterrupt: true, label: '候位建築師' }
         ]
       },
       {
         id: 3,
         bestAlgo: 'FCFS',
         title: '正義感爆棚的排隊糾察隊',
-        desc: '店裡來了一群排隊糾察隊，分別點了 🍝 與 🍔。他們手拿碼錶互相監督，只要發現「晚點餐的人比早點餐的人先拿到餐點」，早到的人就會立刻給一星負評並離場！',
-        hintTraits: ['嚴格監督先來後到 (選 SJF 插隊必死)', '討厭頻繁換鍋', '混合 🍝 與 🍔'],
-        whyBest: '雖然有短單 🍔 在後面，但糾察隊絕不容許 SJF 插隊，必須以 FCFS 依序完成。',
+        desc: '排隊糾察隊坐滿整間餐廳！前面幾桌點了耗時的套餐與 🍝，後面幾桌點了快速的 🍔 與 ☕。他們手拿碼錶監督，只要發現「晚點餐的人比早點餐的人先拿到餐點」，早到的人就會立刻給一星負評離場！',
+        hintTraits: ['嚴格監督先來後到 (選 SJF 插隊必死)', '前長單、後短單的陷阱題'],
+        whyBest: '雖然後面有短單 ☕/🍔，但糾察隊絕不容許 SJF 插隊，必須以 FCFS 依序完成。',
         spawns: [
-          { food: 'PASTA',  mode: 'DINE', delay: 0.3, patience: 45, strictOrder: true, noInterrupt: true, label: '糾察隊長' },
-          { food: 'BURGER', mode: 'DINE', delay: 1.5, patience: 45, strictOrder: true, noInterrupt: true, label: '糾察隊員' },
-          { food: 'PASTA',  mode: 'DINE', delay: 2.7, patience: 48, strictOrder: true, noInterrupt: true, label: '糾察隊員' },
-          { food: 'BURGER', mode: 'TAKEOUT', delay: 4.0, patience: 48, strictOrder: true, noInterrupt: true, label: '糾察隊員' }
+          { food: 'COMBO',  mode: 'DINE', delay: 0.1, patience: 48, strictOrder: true, noInterrupt: true, label: '糾察大隊長' },
+          { food: 'PASTA',  mode: 'DINE', delay: 0.5, patience: 48, strictOrder: true, noInterrupt: true, label: '糾察副隊長' },
+          { food: 'BURGER', mode: 'DINE', delay: 1.0, patience: 50, strictOrder: true, noInterrupt: true, label: '糾察隊員' },
+          { food: 'COFFEE', mode: 'DINE', delay: 1.5, patience: 50, strictOrder: true, noInterrupt: true, label: '糾察隊員' },
+          { food: 'BURGER', mode: 'DINE', delay: 2.0, patience: 52, strictOrder: true, noInterrupt: true, label: '糾察隊員' },
+          { food: 'COFFEE', mode: 'DINE', delay: 2.5, patience: 52, strictOrder: true, noInterrupt: true, label: '糾察隊員' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 3.0, patience: 54, strictOrder: true, noInterrupt: true, label: '外帶糾察員' },
+          { food: 'COFFEE', mode: 'DINE', delay: 3.4, patience: 55, strictOrder: true, noInterrupt: true, label: '候位糾察員' }
         ]
       },
       {
         id: 4,
         bestAlgo: 'FCFS',
-        title: '尖峰時段的單一特餐日',
-        desc: '現在是商業午餐時段，所有進門的客人全部只點今日特餐 🍔，且大家的耐心時間都算得剛剛好，廚房爐火不能有任何一秒鐘的切換或檢查浪費！',
-        hintTraits: ['時間極緊湊 (零容忍切換延遲)', '全員皆點 🍔 (5秒)', '共 6 位上班族'],
-        whyBest: '所有工作長度相同且時間緊迫，RR 的切換延遲或 SJF/Priority 的比對延遲都會導致後面客人超時。',
+        title: '尖峰時段的商業午餐潮',
+        desc: '商業午餐尖峰時刻！9 位上班族瞬間塞爆 6 張內用桌、候位區與外帶櫃台，幾乎全部點今日特餐 🍔，時間算得極準，廚房爐火不能有任何切換或比對浪費！',
+        hintTraits: ['9人塞爆全場 (6桌全滿+候位+外帶)', '零容忍切換延遲'],
+        whyBest: '工作長度一致且人數極多，FCFS 零切換與零比對延遲是唯一能全員過關的排程。',
         spawns: [
-          { food: 'BURGER', mode: 'DINE', delay: 0.2, patience: 16, strictOrder: true, noInterrupt: true, label: '上班族' },
-          { food: 'BURGER', mode: 'DINE', delay: 1.0, patience: 21, strictOrder: true, noInterrupt: true, label: '上班族' },
-          { food: 'BURGER', mode: 'DINE', delay: 1.8, patience: 26, strictOrder: true, noInterrupt: true, label: '上班族' },
-          { food: 'BURGER', mode: 'TAKEOUT', delay: 2.6, patience: 31, strictOrder: true, noInterrupt: true, label: '上班族' },
-          { food: 'BURGER', mode: 'TAKEOUT', delay: 3.4, patience: 36, strictOrder: true, noInterrupt: true, label: '上班族' },
-          { food: 'BURGER', mode: 'DINE', delay: 4.2, patience: 41, strictOrder: true, noInterrupt: true, label: '上班族' }
+          { food: 'BURGER', mode: 'DINE',    delay: 0.1, patience: 22, strictOrder: true, noInterrupt: true, label: '部門經理' },
+          { food: 'BURGER', mode: 'DINE',    delay: 0.4, patience: 25, strictOrder: true, noInterrupt: true, label: '專案主管' },
+          { food: 'BURGER', mode: 'DINE',    delay: 0.7, patience: 28, strictOrder: true, noInterrupt: true, label: '工程師' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.0, patience: 31, strictOrder: true, noInterrupt: true, label: '設計師' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.3, patience: 34, strictOrder: true, noInterrupt: true, label: '行銷專員' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.6, patience: 37, strictOrder: true, noInterrupt: true, label: '財務專員' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 2.0, patience: 40, strictOrder: true, noInterrupt: true, label: '外帶上班族' },
+          { food: 'BURGER', mode: 'DINE',    delay: 2.4, patience: 43, strictOrder: true, noInterrupt: true, label: '候位上班族' },
+          { food: 'BURGER', mode: 'DINE',    delay: 2.8, patience: 46, strictOrder: true, noInterrupt: true, label: '候位實習生' }
         ]
       },
       {
         id: 5,
         bestAlgo: 'FCFS',
         title: '深夜的疲憊下班族',
-        desc: '深夜時段，下班族陸續進門點了 🍔 或 ☕。他們非常討厭店員在廚房裡頻繁換鍋具發出噪音，也很在乎先來後到的秩序。',
-        hintTraits: ['厭惡換鍋噪音 (禁選 RR)', '重視先來後到 (禁選 SJF 插隊)', '深夜療癒客群'],
+        desc: '深夜時段，8 位下班族湧入餐廳坐滿內用區，點了套餐、🍔 與 ☕。他們非常討厭店員在廚房頻繁換鍋具發出噪音，也很在乎先來後到的秩序。',
+        hintTraits: ['厭惡換鍋噪音 (禁選 RR)', '重視先來後到 (禁選 SJF 插隊)', '內用滿座療癒客群'],
         whyBest: 'FCFS 安靜穩定地依序出餐，不會觸發換鍋噪音或被插隊的心態崩潰。',
         spawns: [
-          { food: 'BURGER', mode: 'DINE', delay: 0.3, patience: 35, strictOrder: true, noInterrupt: true, label: '夜歸人' },
-          { food: 'COFFEE', mode: 'DINE', delay: 1.6, patience: 35, strictOrder: true, noInterrupt: true, label: '夜歸人' },
-          { food: 'BURGER', mode: 'DINE', delay: 3.0, patience: 38, strictOrder: true, noInterrupt: true, label: '夜歸人' },
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 4.4, patience: 38, strictOrder: true, noInterrupt: true, label: '夜歸人' },
-          { food: 'BURGER', mode: 'DINE', delay: 5.8, patience: 40, strictOrder: true, noInterrupt: true, label: '夜歸人' }
+          { food: 'COMBO',  mode: 'DINE',    delay: 0.1, patience: 44, strictOrder: true, noInterrupt: true, label: '夜歸主管' },
+          { food: 'BURGER', mode: 'DINE',    delay: 0.6, patience: 45, strictOrder: true, noInterrupt: true, label: '夜歸人' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 1.1, patience: 46, strictOrder: true, noInterrupt: true, label: '夜歸人' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.6, patience: 48, strictOrder: true, noInterrupt: true, label: '夜歸人' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 2.1, patience: 49, strictOrder: true, noInterrupt: true, label: '夜歸人' },
+          { food: 'BURGER', mode: 'DINE',    delay: 2.6, patience: 50, strictOrder: true, noInterrupt: true, label: '夜歸人' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 3.1, patience: 52, strictOrder: true, noInterrupt: true, label: '外帶夜歸人' },
+          { food: 'BURGER', mode: 'DINE',    delay: 3.6, patience: 54, strictOrder: true, noInterrupt: true, label: '候位夜歸人' }
         ]
       },
 
@@ -554,156 +586,184 @@
       {
         id: 6,
         bestAlgo: 'SJF',
-        title: '大胃王與趕火車的旅客',
-        desc: '一位悠閒的大胃王一進門就點了耗時 15 秒的 🥩（但他願意慢慢等），緊接著後面衝進來 6 個趕火車的旅客，全部只點 2 秒的 ☕，沒馬上拿到就會趕不上火車！',
-        hintTraits: ['經典護航效應 (Convoy Effect) 危機', '1位超長單 🥩 + 6位極短單 ☕', '趕火車旅客耐心極低'],
-        whyBest: 'SJF 能優先秒殺 6 杯 2 秒的 ☕，避免所有旅客被 15 秒的 🥩 卡死！',
+        title: '大胃王與趕火車的旅客潮',
+        desc: '兩位悠閒的大胃王一進門就點了耗時極長的 🥩 與全套套餐（願意慢慢等），緊接著衝進來 8 個趕火車的旅客把內用桌與外帶區塞爆，全部只點 2 秒的 ☕，沒馬上拿到就會趕不上火車！',
+        hintTraits: ['經典護航效應 (Convoy Effect) 危機', '2位長單(🥩/套餐) + 8位極短單 ☕', '全場客滿+候位排隊'],
+        whyBest: 'SJF 能優先秒殺 8 杯 2 秒的 ☕ 並快速翻桌，避免所有旅客被牛排與套餐卡死！',
         spawns: [
-          { food: 'STEAK',  mode: 'DINE',    delay: 0.2, patience: 75, label: '悠閒大胃王' },
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.2, patience: 16, convoyVictim: true, label: '趕火車旅客' },
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.7, patience: 17, convoyVictim: true, label: '趕火車旅客' },
-          { food: 'COFFEE', mode: 'DINE',    delay: 2.2, patience: 18, convoyVictim: true, label: '趕火車旅客' },
-          { food: 'COFFEE', mode: 'DINE',    delay: 2.7, patience: 19, convoyVictim: true, label: '趕火車旅客' },
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 3.2, patience: 20, convoyVictim: true, label: '趕火車旅客' },
-          { food: 'COFFEE', mode: 'DINE',    delay: 3.7, patience: 21, convoyVictim: true, label: '趕火車旅客' }
+          { food: 'STEAK',  mode: 'DINE',    delay: 0.1, patience: 90, label: '悠閒大胃王' },
+          { food: 'COMBO',  mode: 'DINE',    delay: 0.3, patience: 95, label: '慢活美食家' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 0.8, patience: 17, convoyVictim: true, label: '趕火車旅客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 1.1, patience: 18, convoyVictim: true, label: '趕火車旅客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 1.4, patience: 19, convoyVictim: true, label: '趕火車旅客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 1.7, patience: 20, convoyVictim: true, label: '趕火車旅客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 2.0, patience: 21, convoyVictim: true, label: '外帶旅客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 2.3, patience: 22, convoyVictim: true, label: '外帶旅客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 2.6, patience: 23, convoyVictim: true, label: '候位旅客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 2.9, patience: 24, convoyVictim: true, label: '候位旅客' }
         ]
       },
       {
         id: 7,
         bestAlgo: 'SJF',
         title: '午休最後十分鐘的學生潮',
-        desc: '附近高中的午休快結束了！一位不趕時間的休假老師先點了 🥩，但後面湧入一大群只點 ☕ 和 🍔 的高中生，鐘聲響前沒拿到就會遲到！',
-        hintTraits: ['休假老師有耐心 (🥩)', '高中生趕上課耐心極短 (☕/🍔)', '需最大化平均周轉率'],
-        whyBest: '透過 SJF 先消化完所有學生的 ☕ 與 🍔，最後再幫老師煎 🥩，全員不遲到。',
+        desc: '附近高中的午休快結束了！兩位不趕時間的休假老師先坐下點了 🥩 與全套套餐，但後面湧入 8 位只點 ☕ 和 🍔 的高中生塞滿內用與候位區，鐘聲響前沒拿到就會遲到！',
+        hintTraits: ['休假老師有耐心 (🥩/套餐)', '8位高中生趕上課耐心極短 (☕/🍔)', '需快速翻桌騰出座位'],
+        whyBest: '透過 SJF 先消化完所有學生的 ☕ 與 🍔 讓候位學生也能入座，最後再做老師的大餐。',
         spawns: [
-          { food: 'STEAK',  mode: 'DINE',    delay: 0.2, patience: 80, label: '休假老師' },
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.2, patience: 16, convoyVictim: true, label: '高中生' },
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.8, patience: 18, convoyVictim: true, label: '高中生' },
-          { food: 'BURGER', mode: 'DINE',    delay: 2.4, patience: 22, convoyVictim: true, label: '高中生' },
-          { food: 'COFFEE', mode: 'DINE',    delay: 3.0, patience: 19, convoyVictim: true, label: '高中生' },
-          { food: 'BURGER', mode: 'TAKEOUT', delay: 3.6, patience: 25, convoyVictim: true, label: '高中生' }
+          { food: 'STEAK',  mode: 'DINE',    delay: 0.1, patience: 90, label: '休假主任' },
+          { food: 'COMBO',  mode: 'DINE',    delay: 0.3, patience: 95, label: '休假老師' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 0.8, patience: 18, convoyVictim: true, label: '高三學生' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 1.1, patience: 19, convoyVictim: true, label: '高二學生' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.4, patience: 23, convoyVictim: true, label: '高一學生' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 1.7, patience: 20, convoyVictim: true, label: '值日生' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 2.0, patience: 21, convoyVictim: true, label: '外帶學生' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 2.3, patience: 25, convoyVictim: true, label: '社團幹部' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 2.6, patience: 24, convoyVictim: true, label: '候位學生' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 2.9, patience: 25, convoyVictim: true, label: '候位學生' }
         ]
       },
       {
         id: 8,
         bestAlgo: 'SJF',
-        title: '內用滿座的翻桌危機',
-        desc: '內用區瞬間坐滿了 6 桌，而且門外候位區還排了 2 位急著入座的客人！場內第 1 桌點了 🥩（很有耐心），其他桌都只點了 ☕。必須立刻騰出內用空位！',
-        hintTraits: ['內用 6 桌全滿 + 門外候位排隊', '先清掉 ☕ 才能翻桌讓候位客入座'],
-        whyBest: 'SJF 先秒出場內的 ☕ 迅速騰出餐桌，門外候位的客人才能及時入座點餐。',
+        title: '內用滿座的極限翻桌危機',
+        desc: '內用區 6 張桌子瞬間全滿，而且門外候位區還排了 4 位急著入座的客人！場內第 1、2 桌點了耗時的 🥩 與套餐（很有耐心），其他桌與候位客都只點 2 秒的 ☕。必須立刻秒殺短單騰出內用桌！',
+        hintTraits: ['內用 6 桌全滿 + 候位區大排長龍(4人)', '先清掉 ☕ 才能翻桌讓候位客入座'],
+        whyBest: 'SJF 先秒出場內的 ☕ 迅速騰出 4 張餐桌，門外候位的 4 位客人才能及時入座點餐。',
         spawns: [
-          { food: 'STEAK',  mode: 'DINE', delay: 0.1, patience: 85, label: '慢活食客' },
-          { food: 'COFFEE', mode: 'DINE', delay: 0.8, patience: 18, convoyVictim: true, label: '內用茶客' },
-          { food: 'COFFEE', mode: 'DINE', delay: 1.2, patience: 19, convoyVictim: true, label: '內用茶客' },
-          { food: 'COFFEE', mode: 'DINE', delay: 1.6, patience: 20, convoyVictim: true, label: '內用茶客' },
-          { food: 'COFFEE', mode: 'DINE', delay: 2.0, patience: 21, convoyVictim: true, label: '內用茶客' },
-          { food: 'COFFEE', mode: 'DINE', delay: 2.4, patience: 22, convoyVictim: true, label: '內用茶客' },
-          { food: 'COFFEE', mode: 'DINE', delay: 2.8, patience: 24, convoyVictim: true, label: '候位急客' },
-          { food: 'COFFEE', mode: 'DINE', delay: 3.2, patience: 25, convoyVictim: true, label: '候位急客' }
+          { food: 'STEAK',  mode: 'DINE', delay: 0.1, patience: 95, label: '慢活牛排客' },
+          { food: 'COMBO',  mode: 'DINE', delay: 0.2, patience: 95, label: '慢活套餐客' },
+          { food: 'COFFEE', mode: 'DINE', delay: 0.5, patience: 18, convoyVictim: true, label: '內用茶客' },
+          { food: 'COFFEE', mode: 'DINE', delay: 0.7, patience: 19, convoyVictim: true, label: '內用茶客' },
+          { food: 'COFFEE', mode: 'DINE', delay: 0.9, patience: 20, convoyVictim: true, label: '內用茶客' },
+          { food: 'COFFEE', mode: 'DINE', delay: 1.1, patience: 21, convoyVictim: true, label: '內用茶客' },
+          { food: 'COFFEE', mode: 'DINE', delay: 1.4, patience: 24, convoyVictim: true, label: '候位急客A' },
+          { food: 'COFFEE', mode: 'DINE', delay: 1.7, patience: 25, convoyVictim: true, label: '候位急客B' },
+          { food: 'COFFEE', mode: 'DINE', delay: 2.0, patience: 26, convoyVictim: true, label: '候位急客C' },
+          { food: 'COFFEE', mode: 'DINE', delay: 2.3, patience: 27, convoyVictim: true, label: '候位急客D' }
         ]
       },
       {
         id: 9,
         bestAlgo: 'SJF',
-        title: '外帶快閃咖啡團',
-        desc: '內用區有兩位慢活客人點了 🍝 與 🥩，此時外帶區突然出現「快閃咖啡團」共 6 人，每個人都只買一杯 2 秒的 ☕，但只願意等一下下！',
-        hintTraits: ['外帶區大排長龍', '快閃團只點 2 秒 ☕ 但極沒耐心'],
-        whyBest: 'SJF 能瞬間清空外帶區的 2 秒咖啡單，避免外帶隊伍塞車崩潰。',
+        title: '外帶與內用快閃咖啡團',
+        desc: '內用區有 2 位慢活客人點了全套套餐與 🥩，此時「快閃咖啡團」共 8 人同時湧入內用空桌與外帶區，每個人都只買一杯 2 秒的 ☕，但只願意等極短時間！',
+        hintTraits: ['內用滿座 + 外帶區大排長龍', '快閃團只點 2 秒 ☕ 但極沒耐心'],
+        whyBest: 'SJF 能瞬間清空全場的 2 秒咖啡單，避免整間餐廳被大單塞車崩潰。',
         spawns: [
-          { food: 'STEAK',  mode: 'DINE',    delay: 0.2, patience: 85, label: '慢活牛排客' },
-          { food: 'PASTA',  mode: 'DINE',    delay: 0.6, patience: 75, label: '慢活義麵客' },
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.4, patience: 16, convoyVictim: true, label: '快閃咖啡客' },
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.9, patience: 18, convoyVictim: true, label: '快閃咖啡客' },
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 2.4, patience: 20, convoyVictim: true, label: '快閃咖啡客' },
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 3.0, patience: 22, convoyVictim: true, label: '快閃咖啡客' },
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 3.6, patience: 24, convoyVictim: true, label: '快閃咖啡客' }
+          { food: 'STEAK',  mode: 'DINE',    delay: 0.1, patience: 90, label: '慢活牛排客' },
+          { food: 'COMBO',  mode: 'DINE',    delay: 0.3, patience: 95, label: '慢活套餐客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 0.7, patience: 17, convoyVictim: true, label: '快閃團員' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 1.0, patience: 18, convoyVictim: true, label: '快閃團員' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 1.3, patience: 19, convoyVictim: true, label: '快閃團員' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 1.6, patience: 20, convoyVictim: true, label: '快閃團員' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.9, patience: 20, convoyVictim: true, label: '外帶快閃客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 2.2, patience: 21, convoyVictim: true, label: '外帶快閃客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 2.5, patience: 22, convoyVictim: true, label: '外帶快閃客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 2.8, patience: 24, convoyVictim: true, label: '候位快閃客' }
         ]
       },
       {
         id: 10,
         bestAlgo: 'SJF',
-        title: '美食攝影師與一般食客',
-        desc: '一位美食攝影師先點了 🥩 準備慢慢架燈擺拍（完全不在乎等待時間），但同時間店裡湧入 5 位飢腸轆轆的一般食客點了 🍔 與 ☕，這群食客餓到快昏倒了！',
-        hintTraits: ['攝影師點 🥩 耐心無限', '5 位飢餓食客點 ☕/🍔 急需果腹'],
-        whyBest: 'SJF 先餵飽所有短單食客，最後再出攝影師的 🥩，達成最短平均等待時間。',
+        title: '美食攝影師與飢餓食客潮',
+        desc: '兩位美食攝影師先入座點了全套套餐與 🥩 準備慢慢架燈擺拍（完全不在乎等待時間），但同時間店裡湧入 7 位飢腸轆轆的一般食客點了 ☕ 與 🍔 把座位區與候位區擠滿！',
+        hintTraits: ['攝影師點套餐與 🥩 耐心極長', '7 位飢餓食客點 ☕/🍔 急需果腹'],
+        whyBest: 'SJF 先餵飽所有短單食客並快速翻桌，最後再出攝影師的套餐與牛排，達成最短平均等待時間。',
         spawns: [
-          { food: 'STEAK',  mode: 'DINE',    delay: 0.2, patience: 90, label: '美食攝影師' },
-          { food: 'COFFEE', mode: 'DINE',    delay: 1.2, patience: 17, convoyVictim: true, label: '飢餓食客' },
-          { food: 'BURGER', mode: 'DINE',    delay: 1.8, patience: 21, convoyVictim: true, label: '飢餓食客' },
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 2.4, patience: 19, convoyVictim: true, label: '飢餓食客' },
-          { food: 'BURGER', mode: 'DINE',    delay: 3.0, patience: 25, convoyVictim: true, label: '飢餓食客' },
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 3.6, patience: 21, convoyVictim: true, label: '飢餓食客' }
+          { food: 'COMBO',  mode: 'DINE',    delay: 0.1, patience: 95, label: '專欄攝影師' },
+          { food: 'STEAK',  mode: 'DINE',    delay: 0.3, patience: 95, label: '商業攝影師' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 0.8, patience: 18, convoyVictim: true, label: '飢餓食客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.1, patience: 22, convoyVictim: true, label: '飢餓食客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 1.4, patience: 19, convoyVictim: true, label: '飢餓食客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.7, patience: 24, convoyVictim: true, label: '飢餓食客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 2.0, patience: 20, convoyVictim: true, label: '外帶食客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 2.4, patience: 24, convoyVictim: true, label: '候位食客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 2.8, patience: 27, convoyVictim: true, label: '候位食客' }
         ]
       },
 
-      // ======================== C. RR (11 - 15) ========================
+      // ======================== C. RR (11 - 15) [COMBO MEAL SPECIALISTS!] ========================
       {
         id: 11,
         bestAlgo: 'RR',
-        title: '手機沒電的焦慮客人們',
-        desc: '店裡 Wi-Fi 斷線，4 位客人同時點了 🍝。因為沒手機滑，他們每隔幾秒就會盯著廚房看，只要超過 11 秒發現店員「完全沒動自己的麵」就會抓狂；但只要每輪有煮 3 秒推進進度，他們的耐心就會補滿！',
-        hintTraits: ['極度重視回應時間 (Response Time)', '每獲得 3 秒料理進度就會恢復耐心', '選 FCFS/SJF 後面客人必焦慮抓狂'],
-        whyBest: 'RR 循環排程每 3 秒輪流炒一盤麵，讓所有客人都看到進度推進並持續恢復耐心！',
+        title: '全桌精緻套餐：手機沒電的焦慮客人們',
+        desc: '店裡 Wi-Fi 斷線，6 張內用桌全數坐滿，且大家都點了「四道式套餐 (🧋飲料→🥗小菜→🍝主餐→🍰甜點)」！因為沒手機滑，每桌客人只要等太久沒收到下一道菜就會抓狂；但每收到一道菜，耐心值就會立刻重置回 100% 滿格！',
+        hintTraits: ['6桌全滿皆點四道式套餐 (🧋🥗🍝🍰)', '每送達一道菜立即重置該桌等待時間 100%', '選 FCFS/SJF 單鍋做完一桌4道菜會害死其他5桌'],
+        whyBest: 'RR 同時啟動 3 個鍋子輪流為各桌製作下一道料理（先出各桌 🧋、再出 🥗...），每送達一道菜就將客人耐心重置回 100%，全場 6 桌套餐客都能開開心心吃到甜點！',
         spawns: [
-          { food: 'PASTA', mode: 'DINE', delay: 0.2, patience: 15, needsResponse: true, label: '焦慮低頭族' },
-          { food: 'PASTA', mode: 'DINE', delay: 0.8, patience: 15, needsResponse: true, label: '焦慮低頭族' },
-          { food: 'PASTA', mode: 'DINE', delay: 1.4, patience: 16, needsResponse: true, label: '焦慮低頭族' },
-          { food: 'PASTA', mode: 'DINE', delay: 2.0, patience: 16, needsResponse: true, label: '焦慮低頭族' }
+          { food: 'COMBO', mode: 'DINE', delay: 0.1, patience: 16, needsResponse: true, label: '套餐客#1' },
+          { food: 'COMBO', mode: 'DINE', delay: 0.4, patience: 16, needsResponse: true, label: '套餐客#2' },
+          { food: 'COMBO', mode: 'DINE', delay: 0.7, patience: 17, needsResponse: true, label: '套餐客#3' },
+          { food: 'COMBO', mode: 'DINE', delay: 1.0, patience: 17, needsResponse: true, label: '套餐客#4' },
+          { food: 'COMBO', mode: 'DINE', delay: 1.3, patience: 18, needsResponse: true, label: '套餐客#5' },
+          { food: 'COMBO', mode: 'DINE', delay: 1.6, patience: 18, needsResponse: true, label: '套餐客#6' }
         ]
       },
       {
         id: 12,
         bestAlgo: 'RR',
-        title: '開放式廚房的圍觀群眾',
-        desc: '一群好奇心旺盛的遊客圍在櫃台前，每個人都點了 🍝。他們喜歡看廚師同時展現多工料理秀，如果誰的餐點太久沒有動靜，就會覺得被冷落而給負評！',
-        hintTraits: ['渴望看到多工料理進度', '進度有推進即補滿耐心條'],
-        whyBest: 'RR 讓每張訂單每隔幾秒就推進一次，滿足所有圍觀遊客對即時回應的需求。',
+        title: '開放式廚房的套餐品鑑團',
+        desc: '美食協會 7 位品鑑委員把 6 張內用桌坐滿還有人在候位，全員點了「四道式套餐 (🧋→🥗→🥩→🍰)」！委員們要求每隔幾秒就要在桌上看到新的一道料理端上來重置等待時間，若哪一桌空等太久就會認定受到冷落！',
+        hintTraits: ['全員四道式牛排套餐 (🧋🥗🥩🍰)', '每拿到一道菜耐心立即回滿 100%', '需靠 RR 三鍋輪流上菜安撫全場'],
+        whyBest: 'RR 利用三鍋並行輪流完成各桌的飲料、小菜、主餐與甜點，讓每桌不斷收到餐點並重置耐心。',
         spawns: [
-          { food: 'PASTA', mode: 'DINE',    delay: 0.2, patience: 15, needsResponse: true, label: '圍觀遊客' },
-          { food: 'PASTA', mode: 'TAKEOUT', delay: 0.7, patience: 15, needsResponse: true, label: '圍觀遊客' },
-          { food: 'PASTA', mode: 'DINE',    delay: 1.2, patience: 16, needsResponse: true, label: '圍觀遊客' },
-          { food: 'PASTA', mode: 'TAKEOUT', delay: 1.7, patience: 16, needsResponse: true, label: '圍觀遊客' }
+          { food: 'COMBO', comboMain: 'STEAK', mode: 'DINE', delay: 0.1, patience: 16, needsResponse: true, label: '品鑑委員A' },
+          { food: 'COMBO', comboMain: 'STEAK', mode: 'DINE', delay: 0.4, patience: 16, needsResponse: true, label: '品鑑委員B' },
+          { food: 'COMBO', comboMain: 'PASTA', mode: 'DINE', delay: 0.7, patience: 17, needsResponse: true, label: '品鑑委員C' },
+          { food: 'COMBO', comboMain: 'STEAK', mode: 'DINE', delay: 1.0, patience: 17, needsResponse: true, label: '品鑑委員D' },
+          { food: 'COMBO', comboMain: 'PASTA', mode: 'DINE', delay: 1.3, patience: 18, needsResponse: true, label: '品鑑委員E' },
+          { food: 'COMBO', comboMain: 'STEAK', mode: 'DINE', delay: 1.6, patience: 18, needsResponse: true, label: '品鑑委員F' },
+          { food: 'COMBO', comboMain: 'PASTA', mode: 'DINE', delay: 2.2, patience: 26, needsResponse: true, label: '候位委員G' }
         ]
       },
       {
         id: 13,
         bestAlgo: 'RR',
-        title: '懷疑論者的試探',
-        desc: '來了 4 位生性多疑的客人，分別點了 🍝 與 🍔。點完餐後只要太久沒看到自己的食材下鍋動工，就會懷疑店員「根本忘記畫單了」而立刻翻桌走人！',
-        hintTraits: ['點餐後需儘快看到動工 (First Response)', '每次輪流料理可消除疑慮'],
-        whyBest: 'RR 確保所有訂單在第一輪都能快速動工 3 秒，消除所有多疑客人的漏單恐懼。',
+        title: '懷疑論者的四道菜試探',
+        desc: '6 位生性多疑的客人坐滿全部內用桌，都點了四道式套餐 (🧋🥗🍝🍰)。他們點完餐後只要太久沒收到下一道餐點，就會懷疑店員「漏單了」而翻桌走人；但只要一收到飲料或小菜，疑慮就會完全消除並重置等待時間！',
+        hintTraits: ['6桌全滿四道式套餐', '收到任一道餐點立即消除疑慮 (耐心100%)'],
+        whyBest: 'RR 確保每張桌子的第一道飲料 🧋、第二道沙拉 🥗 都能在短時間內輪流端上桌，消除所有人的漏單恐懼。',
         spawns: [
-          { food: 'PASTA',  mode: 'DINE', delay: 0.2, patience: 14, needsResponse: true, label: '多疑食客' },
-          { food: 'PASTA',  mode: 'DINE', delay: 0.7, patience: 14, needsResponse: true, label: '多疑食客' },
-          { food: 'BURGER', mode: 'DINE', delay: 1.2, patience: 15, needsResponse: true, label: '多疑食客' },
-          { food: 'PASTA',  mode: 'DINE', delay: 1.7, patience: 15, needsResponse: true, label: '多疑食客' }
+          { food: 'COMBO', mode: 'DINE', delay: 0.1, patience: 15, needsResponse: true, label: '多疑食客1' },
+          { food: 'COMBO', mode: 'DINE', delay: 0.4, patience: 15, needsResponse: true, label: '多疑食客2' },
+          { food: 'COMBO', mode: 'DINE', delay: 0.7, patience: 16, needsResponse: true, label: '多疑食客3' },
+          { food: 'COMBO', mode: 'DINE', delay: 1.0, patience: 16, needsResponse: true, label: '多疑食客4' },
+          { food: 'COMBO', mode: 'DINE', delay: 1.3, patience: 17, needsResponse: true, label: '多疑食客5' },
+          { food: 'COMBO', mode: 'DINE', delay: 1.6, patience: 17, needsResponse: true, label: '多疑食客6' }
         ]
       },
       {
         id: 14,
         bestAlgo: 'RR',
-        title: '帶著哭鬧小孩的家長們',
-        desc: '4 組帶小孩的家長入座，都點了 🍝。小孩非常沒耐心，店員必須每幾秒就推進一點料理進度哄小孩，否則小孩哭鬧超過十幾秒家長就會崩潰離開！',
-        hintTraits: ['小孩哭鬧倒數快', '每次輪流推進 3 秒進度即可安撫小孩'],
-        whyBest: '透過 RR 分時段輪流推進每桌進度，成功安撫所有小孩直到正餐完成。',
+        title: '帶著哭鬧小孩的親子套餐團',
+        desc: '6 組帶小孩的家長把內用 6 桌全坐滿，外加 1 組在候位區，全部點了四道式親子套餐 (🧋🥗🍝🍰)！小孩非常沒耐心，店員必須先輪流送上 🧋 飲料哄小孩（重置耐心）、接著輪流送上 🥗 小菜、🍝 主餐與 🍰 甜點，否則小孩哭鬧超時家長就會崩潰離場！',
+        hintTraits: ['6桌滿座親子套餐 + 候位排隊', '每送上一道副餐/主餐立刻哄好小孩 (重置等待時間)'],
+        whyBest: '透過 RR 分階段輪流為每桌端上飲料、小菜、主餐與甜點，成功安撫所有小孩直到套餐完食。',
         spawns: [
-          { food: 'PASTA', mode: 'DINE', delay: 0.2, patience: 15, needsResponse: true, label: '崩潰家長' },
-          { food: 'PASTA', mode: 'DINE', delay: 0.8, patience: 15, needsResponse: true, label: '崩潰家長' },
-          { food: 'PASTA', mode: 'DINE', delay: 1.4, patience: 16, needsResponse: true, label: '崩潰家長' },
-          { food: 'PASTA', mode: 'DINE', delay: 2.0, patience: 16, needsResponse: true, label: '崩潰家長' }
+          { food: 'COMBO', mode: 'DINE', delay: 0.1, patience: 16, needsResponse: true, label: '親子家庭1' },
+          { food: 'COMBO', mode: 'DINE', delay: 0.4, patience: 16, needsResponse: true, label: '親子家庭2' },
+          { food: 'COMBO', mode: 'DINE', delay: 0.7, patience: 17, needsResponse: true, label: '親子家庭3' },
+          { food: 'COMBO', mode: 'DINE', delay: 1.0, patience: 17, needsResponse: true, label: '親子家庭4' },
+          { food: 'COMBO', mode: 'DINE', delay: 1.3, patience: 18, needsResponse: true, label: '親子家庭5' },
+          { food: 'COMBO', mode: 'DINE', delay: 1.6, patience: 18, needsResponse: true, label: '親子家庭6' },
+          { food: 'COMBO', mode: 'DINE', delay: 2.2, patience: 26, needsResponse: true, label: '候位家庭7' }
         ]
       },
       {
         id: 15,
         bestAlgo: 'RR',
-        title: '直播主們的同步開箱',
-        desc: '3 位美食直播主同時進店，都點了耗時 15 秒的 🥩。他們正在開直播，需要每隔幾秒就拍一下「廚師正在煎我的牛排」的畫面。誰太久沒畫面拍，就會在直播痛罵餐廳！',
-        hintTraits: ['3 份 15 秒 🥩 同步直播', '必須輪流給畫面才能維持直播熱度'],
-        whyBest: '一次煎完一塊要 15 秒會讓後面的直播主斷播，RR 輪流煎 3 秒讓每個人都有畫面拍！',
+        title: '美食直播主們的全套開箱秀',
+        desc: '6 位百萬美食直播主同時進店坐滿 6 張餐桌，全部點了頂級四道式牛排套餐 (🧋🥗🥩🍰) 同步開直播！他們需要每隔幾秒就有新的一道菜端上桌拍特寫跟觀眾互動（每次上菜立即補滿直播熱度與耐心）。誰太久沒新菜色可拍，就會在直播痛罵餐廳！',
+        hintTraits: ['6桌直播主同步開箱四道式套餐', '每道菜上桌立即補滿耐心條 100%'],
+        whyBest: '如果單鍋從頭到尾只服務一位直播主，另外 5 位會斷播翻臉；RR 三鍋輪流上菜讓 6 位直播主都有源源不絕的畫面拍！',
         spawns: [
-          { food: 'STEAK', mode: 'DINE', delay: 0.2, patience: 15, needsResponse: true, label: '美食直播主' },
-          { food: 'STEAK', mode: 'DINE', delay: 0.8, patience: 15, needsResponse: true, label: '美食直播主' },
-          { food: 'STEAK', mode: 'DINE', delay: 1.4, patience: 16, needsResponse: true, label: '美食直播主' }
+          { food: 'COMBO', comboMain: 'STEAK', mode: 'DINE', delay: 0.1, patience: 16, needsResponse: true, label: '直播主阿凱' },
+          { food: 'COMBO', comboMain: 'STEAK', mode: 'DINE', delay: 0.4, patience: 16, needsResponse: true, label: '直播主小葵' },
+          { food: 'COMBO', comboMain: 'STEAK', mode: 'DINE', delay: 0.7, patience: 17, needsResponse: true, label: '直播主大衛' },
+          { food: 'COMBO', comboMain: 'PASTA', mode: 'DINE', delay: 1.0, patience: 17, needsResponse: true, label: '直播主妮妮' },
+          { food: 'COMBO', comboMain: 'STEAK', mode: 'DINE', delay: 1.3, patience: 18, needsResponse: true, label: '直播主老王' },
+          { food: 'COMBO', comboMain: 'PASTA', mode: 'DINE', delay: 1.6, patience: 18, needsResponse: true, label: '直播主米亞' }
         ]
       },
 
@@ -712,72 +772,85 @@
         id: 16,
         bestAlgo: 'PRIORITY',
         title: '微服出巡的神秘美食評論家',
-        desc: '店裡已有 3 位一般客人在等 ☕ 與 🍔，此時頭戴「黃金皇冠」的美食評論家進門點了 🍝！評論家自視甚高，若不第一時間優先為他下廚，將給出毀滅性負評並扣款！',
-        hintTraits: ['出現皇冠標記 VIP (點 🍝)', '選 SJF 會先做 ☕ 惹怒評論家', 'VIP 準時完餐享 3 倍小費'],
-        whyBest: '評論家點的是 9 秒 🍝，選 FCFS 或 SJF 都會讓他排在一般人後面，唯有 Priority 能讓他插隊！',
+        desc: '店裡內用 6 桌已經坐滿一般食客（點了套餐、🍔 與 ☕），此時頭戴「黃金皇冠」的神秘美食評論家與助理進門點了 🍝 與套餐！評論家自視甚高，若不第一時間優先為他插隊下廚，將給出毀滅性負評並重罰！',
+        hintTraits: ['出現皇冠標記 VIP', '選 SJF 會先做 ☕ 惹怒評論家', 'VIP 準時完餐享 3 倍小費'],
+        whyBest: '評論家點的是中長單，選 FCFS 或 SJF 都會讓他排在一般人後面，唯有 Priority 能讓他無條件插隊！',
         spawns: [
-          { food: 'BURGER', mode: 'DINE',    delay: 0.2, patience: 48, label: '一般食客' },
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 0.6, patience: 48, label: '一般食客' },
-          { food: 'BURGER', mode: 'DINE',    delay: 1.0, patience: 48, label: '一般食客' },
-          { food: 'PASTA',  mode: 'DINE',    delay: 2.2, patience: 14, isVIP: true, vipType: 'CROWN', vipMult: 3, label: '美食評論家' }
+          { food: 'COMBO',  mode: 'DINE',    delay: 0.1, patience: 60, label: '一般套餐客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 0.4, patience: 55, label: '一般食客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 0.7, patience: 55, label: '一般茶客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.0, patience: 55, label: '一般食客' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.3, patience: 55, label: '外帶茶客' },
+          { food: 'PASTA',  mode: 'DINE',    delay: 1.7, patience: 14, isVIP: true, vipType: 'CROWN', vipMult: 3, label: '美食評論家' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 2.1, patience: 17, isVIP: true, vipType: 'CROWN', vipMult: 2, label: '評論家助理' }
         ]
       },
       {
         id: 17,
         bestAlgo: 'PRIORITY',
-        title: '值勤中的急診室醫師',
-        desc: '幾位悠閒的客人剛點完 ☕ 與 🍔，突然衝進兩位頭頂有「紅十字標記」的急診室醫師，點了補充體力的 🥩 與 🍝 外帶，隨時會被醫院 Call 回去，必須無條件第一順位製作！',
-        hintTraits: ['紅十字標記急診醫師 (點長單 🥩/🍝)', '一般客人很有耐心，但醫師時間極緊迫'],
-        whyBest: '醫師點的是耗時長的 🥩 與 🍝，若選 SJF 會跑去泡咖啡，唯有 Priority 能拯救急診醫師！',
+        title: '值勤中的急診室醫師團',
+        desc: '6 位悠閒的客人剛坐滿內用桌點完 ☕、🍔 與套餐，突然衝進兩位頭頂有「紅十字標記」的急診室醫師，點了補充體力的 🥩 與 🍝 外帶，隨時會被醫院 Call 回去，必須無條件第一順位製作！',
+        hintTraits: ['紅十字標記急診醫師 (點長單 🥩/🍝)', '內用滿座一般客很有耐心，但醫師時間極緊迫'],
+        whyBest: '醫師點的是耗時長的 🥩 與 🍝，若選 SJF 會跑去泡咖啡，唯有 Priority 能立刻拯救急診醫師！',
         spawns: [
-          { food: 'COFFEE', mode: 'DINE',    delay: 0.2, patience: 65, label: '悠閒茶客' },
-          { food: 'BURGER', mode: 'DINE',    delay: 0.6, patience: 65, label: '悠閒食客' },
-          { food: 'COFFEE', mode: 'DINE',    delay: 1.0, patience: 65, label: '悠閒茶客' },
-          { food: 'PASTA',  mode: 'TAKEOUT', delay: 2.0, patience: 14, isVIP: true, vipType: 'CROSS', vipMult: 2, label: '急診室主治醫師' },
-          { food: 'STEAK',  mode: 'TAKEOUT', delay: 2.6, patience: 29, isVIP: true, vipType: 'CROSS', vipMult: 2, label: '急診室住院醫師' }
+          { food: 'COFFEE', mode: 'DINE',    delay: 0.1, patience: 70, label: '悠閒茶客' },
+          { food: 'COMBO',  mode: 'DINE',    delay: 0.3, patience: 75, label: '悠閒套餐客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 0.6, patience: 70, label: '悠閒食客' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 0.9, patience: 70, label: '悠閒茶客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.2, patience: 70, label: '悠閒食客' },
+          { food: 'PASTA',  mode: 'TAKEOUT', delay: 1.7, patience: 14, isVIP: true, vipType: 'CROSS', vipMult: 2, label: '急診主治醫師' },
+          { food: 'STEAK',  mode: 'TAKEOUT', delay: 2.1, patience: 26, isVIP: true, vipType: 'CROSS', vipMult: 2, label: '急診住院醫師' }
         ]
       },
       {
         id: 18,
         bestAlgo: 'PRIORITY',
         title: '黑道老大的包場宵夜',
-        desc: '店裡正忙著做一般客人的 ☕ 與 🍔，突然走進頭上有「骷髏標記」的黑道老大與二當家，點了 🍝！老大脾氣暴躁，誰敢讓他的餐點排在普通人後面，就會砸店扣錢！',
-        hintTraits: ['骷髏標記黑道老大', '氣走將遭砸店重罰 -$300'],
+        desc: '店裡正忙著做滿場一般客人的套餐、☕ 與 🍔，突然走進頭上有「骷髏標記」的黑道老大與二當家，點了 🍝 與 🍔！老大脾氣暴躁，誰敢讓他的餐點排在普通人後面，就會砸店扣錢！',
+        hintTraits: ['骷髏標記黑道老大', '氣走將遭砸店重罰 -$250'],
         whyBest: 'Priority 排程能立即辨識高優先權標記並插隊製作，確保黑道老大零等待。',
         spawns: [
-          { food: 'BURGER', mode: 'DINE', delay: 0.2, patience: 55, label: '宵夜路人' },
-          { food: 'COFFEE', mode: 'DINE', delay: 0.6, patience: 55, label: '宵夜路人' },
-          { food: 'BURGER', mode: 'TAKEOUT', delay: 1.0, patience: 55, label: '宵夜路人' },
-          { food: 'PASTA',  mode: 'DINE', delay: 2.0, patience: 14, isVIP: true, vipType: 'SKULL', vipMult: 2, label: '黑道老大' },
-          { food: 'BURGER', mode: 'DINE', delay: 2.5, patience: 20, isVIP: true, vipType: 'SKULL', vipMult: 2, label: '黑道二當家' }
+          { food: 'COMBO',  mode: 'DINE',    delay: 0.1, patience: 65, label: '宵夜套餐客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 0.4, patience: 60, label: '宵夜路人' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 0.7, patience: 60, label: '宵夜路人' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.0, patience: 60, label: '宵夜路人' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.3, patience: 60, label: '外帶路人' },
+          { food: 'PASTA',  mode: 'DINE',    delay: 1.7, patience: 14, isVIP: true, vipType: 'SKULL', vipMult: 2, label: '黑道老大' },
+          { food: 'BURGER', mode: 'DINE',    delay: 2.1, patience: 19, isVIP: true, vipType: 'SKULL', vipMult: 2, label: '黑道二當家' }
         ]
       },
       {
         id: 19,
         bestAlgo: 'PRIORITY',
         title: '衛生局突擊檢查員',
-        desc: '店裡有數名客人點了 ☕，此時衛生局檢查員（頭頂「警徽標記」）進店抽查，點了一份 🍝 檢驗熟度。檢查員趕著去下一家，若不優先出餐給他檢驗，將直接開立罰單！',
-        hintTraits: ['警徽標記衛生檢查員 (點 🍝)', '選 SJF 會被 ☕ 吸引而耽誤檢查員'],
-        whyBest: '利用 Priority 忽略短單 ☕ 的誘惑，直接優先完成檢查員的 🍝 通過抽檢。',
+        desc: '內用區坐滿了點套餐與 ☕ 的市民，此時衛生局檢查員與稽核員（頭頂「警徽標記」）進店抽查，點了 🍝 與 🍔 檢驗熟度。檢查員趕著去下一家，若不優先出餐給他檢驗，將直接開立罰單！',
+        hintTraits: ['警徽標記衛生檢查員 (點 🍝/🍔)', '選 SJF 會被 ☕ 吸引而耽誤檢查員'],
+        whyBest: '利用 Priority 忽略短單 ☕ 的誘惑，直接優先完成檢查員的餐點通過抽檢。',
         spawns: [
-          { food: 'COFFEE', mode: 'TAKEOUT', delay: 0.2, patience: 50, label: '排隊市民' },
-          { food: 'COFFEE', mode: 'DINE',    delay: 0.6, patience: 50, label: '排隊市民' },
-          { food: 'BURGER', mode: 'DINE',    delay: 1.0, patience: 50, label: '排隊市民' },
-          { food: 'PASTA',  mode: 'DINE',    delay: 1.8, patience: 14, isVIP: true, vipType: 'SHIELD', vipMult: 2, label: '衛生局檢查員' }
+          { food: 'COFFEE', mode: 'DINE',    delay: 0.1, patience: 60, label: '內用市民' },
+          { food: 'COMBO',  mode: 'DINE',    delay: 0.4, patience: 65, label: '聚餐市民' },
+          { food: 'COFFEE', mode: 'DINE',    delay: 0.7, patience: 60, label: '內用市民' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.0, patience: 60, label: '內用市民' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 1.3, patience: 60, label: '外帶市民' },
+          { food: 'PASTA',  mode: 'DINE',    delay: 1.7, patience: 14, isVIP: true, vipType: 'SHIELD', vipMult: 2, label: '衛生局檢查員' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 2.1, patience: 19, isVIP: true, vipType: 'SHIELD', vipMult: 2, label: '衛生局稽核員' }
         ]
       },
       {
         id: 20,
         bestAlgo: 'PRIORITY',
         title: '趕飛機的跨國企業總裁',
-        desc: '店裡前面已經排了 3 張 🍔 的訂單，此時一位頭頂「鑽石標記」的跨國總裁在去機場路上順道來買 🍔，願意支付 5 倍價錢，但要求零等待立刻動工！',
-        hintTraits: ['鑽石標記總裁 (5倍高額獎勵)', '所有人都點 🍔，FCFS 與 SJF 皆無法讓總裁插隊'],
-        whyBest: '因為大家都點 🍔（時間相同），選 FCFS 或 SJF 總裁都會排第 4 個而趕不上飛機，只有 Priority 能插隊！',
+        desc: '店裡內用區已經坐滿 5 桌點 🍔 與套餐的客人，此時頭頂「鑽石標記」的跨國總裁與秘書在去機場路上順道來買 🍔，願意支付 5 倍價錢，但要求零等待立刻動工！',
+        hintTraits: ['鑽石標記總裁 (5倍高額獎勵)', '選 FCFS 或 SJF 總裁都會排在後面而趕不上飛機'],
+        whyBest: '因為前面已經排了一堆同時間的 🍔，選 FCFS 或 SJF 總裁都會排在後面，只有 Priority 能插隊！',
         spawns: [
-          { food: 'BURGER', mode: 'DINE',    delay: 0.2, patience: 50, label: '一般顧客' },
-          { food: 'BURGER', mode: 'DINE',    delay: 0.6, patience: 50, label: '一般顧客' },
-          { food: 'BURGER', mode: 'TAKEOUT', delay: 1.0, patience: 50, label: '一般顧客' },
-          { food: 'BURGER', mode: 'TAKEOUT', delay: 2.0, patience: 10, isVIP: true, vipType: 'DIAMOND', vipMult: 5, label: '跨國企業總裁' }
+          { food: 'BURGER', mode: 'DINE',    delay: 0.1, patience: 60, label: '一般顧客' },
+          { food: 'COMBO',  mode: 'DINE',    delay: 0.4, patience: 65, label: '套餐顧客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 0.7, patience: 60, label: '一般顧客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.0, patience: 60, label: '一般顧客' },
+          { food: 'BURGER', mode: 'DINE',    delay: 1.3, patience: 60, label: '一般顧客' },
+          { food: 'BURGER', mode: 'TAKEOUT', delay: 1.8, patience: 11, isVIP: true, vipType: 'DIAMOND', vipMult: 5, label: '跨國企業總裁' },
+          { food: 'COFFEE', mode: 'TAKEOUT', delay: 2.2, patience: 14, isVIP: true, vipType: 'DIAMOND', vipMult: 3, label: '總裁特助' }
         ]
       }
     ];
@@ -865,7 +938,7 @@
         actionTimer: 0,
         actionDuration: 0,
         rrQuantumUsed: 0,
-        rrQuantumMax: 3.0,
+        rrQuantumMax: 2.6,
         animFrame: 0
       }
     };
@@ -917,14 +990,14 @@
       game.eventHistory = [];
       game.customers = [];
       game.floatingTexts = [];
-      game.reviews = [];
-      resetCPU();
-
-      // Load 3 warmup customers
+      // Load 6 warmup customers (fills tables + includes a Combo dine-in customer so warmup is lively!)
       game.spawnQueue = [
-        { food: 'COFFEE', mode: 'DINE',    delay: 0.3, patience: 40, label: '早鳥鄰居' },
-        { food: 'BURGER', mode: 'DINE',    delay: 1.5, patience: 45, label: '常客學生' },
-        { food: 'COFFEE', mode: 'TAKEOUT', delay: 2.8, patience: 40, label: '通勤上班族' }
+        { food: 'COFFEE', mode: 'DINE',    delay: 0.1, patience: 48, label: '早鳥鄰居' },
+        { food: 'BURGER', mode: 'DINE',    delay: 0.5, patience: 50, label: '常客學生' },
+        { food: 'COMBO',  mode: 'DINE',    delay: 0.9, patience: 55, label: '套餐饕客' },
+        { food: 'COFFEE', mode: 'DINE',    delay: 1.3, patience: 50, label: '晨間讀者' },
+        { food: 'BURGER', mode: 'DINE',    delay: 1.7, patience: 52, label: '自由工作者' },
+        { food: 'COFFEE', mode: 'TAKEOUT', delay: 2.1, patience: 48, label: '通勤上班族' }
       ];
       game.phaseTimer = 0;
       game.interEventCooldown = 0;
@@ -1032,11 +1105,16 @@
     };
 
     /***************************************************************************
-     * 7. CUSTOMER SPAWNING & SEAT ALLOCATION
+     * 7. CUSTOMER SPAWNING & SEAT ALLOCATION (WITH 4-COURSE COMBO SYSTEM)
      ***************************************************************************/
     function spawnCustomer(spec) {
-      const foodItem = MENU[spec.food];
       const id = game.nextCustomerId++;
+      const isCombo = spec.food === 'COMBO';
+      const courses = isCombo ? createComboCourses(spec.comboMain || 'PASTA') : null;
+      const firstFood = isCombo ? courses[0] : MENU[spec.food];
+      const totalBurst = isCombo
+        ? courses.reduce((sum, item) => sum + item.burst, 0)
+        : firstFood.burst;
 
       // Randomize pixel shirt/hair palette
       const palettes = [
@@ -1051,8 +1129,14 @@
 
       let c = {
         id,
-        label: spec.label || '顧客',
-        food: foodItem,
+        label: spec.label || (isCombo ? '套餐貴賓' : '顧客'),
+        isCombo,
+        courses,
+        currentCourseIndex: 0,
+        deliveredEmojis: [], // Courses already served onto this customer's table!
+        totalPrice: isCombo ? 520 : firstFood.price,
+
+        food: firstFood, // Points to current active course (or single food item)
         mode: spec.mode || 'DINE', // 'DINE' or 'TAKEOUT'
         x: spec.mode === 'TAKEOUT' ? POS.takeoutEntrance.x : POS.entrance.x,
         y: spec.mode === 'TAKEOUT' ? POS.takeoutEntrance.y : POS.entrance.y,
@@ -1065,8 +1149,9 @@
 
         state: 'WALKING_IN', // 'WAITING_SEAT', 'WALKING_IN', 'WAIT_ORDER', 'BEING_ORDERED', 'WAIT_FOOD', 'LEAVING_HAPPY', 'LEAVING_ANGRY'
         orderTime: null,
-        workRemaining: foodItem.burst,
-        workTotal: foodItem.burst,
+        workRemaining: firstFood.burst,
+        workTotal: firstFood.burst,
+        totalComboRemaining: totalBurst,
         patience: spec.patience || 38,
         maxPatience: spec.patience || 38,
 
@@ -1113,6 +1198,16 @@
 
       game.customers.push(c);
       repositionWaitingQueues();
+    }
+
+    // Helper for total remaining burst time across all remaining courses (used by SJF so SJF sees a full Combo as a long ~10.2s job!)
+    function getCustomerTotalRemainingWork(c) {
+      if (!c.isCombo) return c.workRemaining;
+      let sum = c.workRemaining;
+      for (let i = c.currentCourseIndex + 1; i < c.courses.length; i++) {
+        sum += c.courses[i].burst;
+      }
+      return sum;
     }
 
     function getFreeTable() {
@@ -1213,7 +1308,7 @@
         const c = game.customers[i];
 
         // Movement towards target
-        const moveSpeed = (c.state === 'LEAVING_HAPPY' || c.state === 'LEAVING_ANGRY') ? 210 : 175;
+        const moveSpeed = (c.state === 'LEAVING_HAPPY' || c.state === 'LEAVING_ANGRY') ? 260 : 220;
         const dx = c.targetX - c.x;
         const dy = c.targetY - c.y;
         const dist = Math.hypot(dx, dy);
@@ -1234,12 +1329,52 @@
           }
         }
 
-        // Patience countdown for active waiting customers
+        // Patience & OS Penalty Logic for active waiting customers
         if (c.state === 'WAITING_SEAT' || c.state === 'WAIT_ORDER' || c.state === 'WAIT_FOOD') {
-          // Pause patience drain slightly while CPU is actively delivering or taking order
+          const isOptimalPolicy = !game.activeEvent || (game.currentAlgo === game.activeEvent.bestAlgo);
           const isBeingCookedRightNow = (game.cpu.state === 'COOKING' && game.cpu.activeOrderCustomer === c);
-          const drainRate = isBeingCookedRightNow ? 0.35 : 1.0;
-          c.patience -= dt * drainRate;
+          const isOnAnyStove = game.stoveSlots.includes(c);
+
+          // Track time without cooking progress for RR response-anxious / Combo customers
+          if (c.state === 'WAIT_FOOD') {
+            if (isBeingCookedRightNow || (game.currentAlgo === 'RR' && isOnAnyStove)) {
+              c.noProgressTimer = 0;
+            } else {
+              c.noProgressTimer = (c.noProgressTimer || 0) + dt;
+            }
+          }
+
+          // PATIENCE PROTECTION: If actively being cooked or on any of the 3 RR stoves, DO NOT drop patience; regenerate instead!
+          if (isBeingCookedRightNow || (game.currentAlgo === 'RR' && isOnAnyStove)) {
+            c.patience = Math.min(c.maxPatience, c.patience + dt * 2.5);
+          } else {
+            let drainRate = 1.0;
+
+            if (isOptimalPolicy) {
+              // When the student selects the CORRECT algorithm, waiting customers calmly trust the queue!
+              drainRate = 0.30;
+              // Big orders (Steak/Pasta/Combo) waiting patiently during SJF events barely lose any patience
+              if (game.currentAlgo === 'SJF' && getCustomerTotalRemainingWork(c) >= 8) {
+                drainRate = 0.10;
+              }
+            } else {
+              // WRONG ALGORITHM PENALTIES:
+              // 1. RR Combo Event but player didn't pick RR -> other tables wait too long for their next course and rage!
+              if (c.needsResponse && c.state === 'WAIT_FOOD' && (c.noProgressTimer || 0) > 5.0) {
+                drainRate = 3.4;
+              }
+              // 2. Priority Event but player didn't pick Priority -> VIP loses patience rapidly!
+              if (c.isVIP && game.currentAlgo !== 'PRIORITY') {
+                drainRate = 2.4;
+              }
+              // 3. SJF Event but player didn't pick SJF -> short orders stuck behind Steak/Combo lose patience fast!
+              if (c.convoyVictim && game.currentAlgo !== 'SJF') {
+                drainRate = 1.75;
+              }
+            }
+
+            c.patience -= dt * drainRate;
+          }
 
           if (c.patience <= 0) {
             triggerCustomerRageQuit(c, 'TIMEOUT');
@@ -1269,7 +1404,7 @@
     }
 
     /***************************************************************************
-     * 9. CPU CLERK AI & SCHEDULING ALGORITHMS (WITH 3-STOVE RR SUPPORT)
+     * 9. CPU CLERK AI & SCHEDULING ALGORITHMS (WITH 3-STOVE RR & COMBO SYSTEM)
      ***************************************************************************/
     function getReadyQueue() {
       const waitingFood = game.customers.filter(c => c.state === 'WAIT_FOOD' && c.workRemaining > 0.001);
@@ -1278,9 +1413,12 @@
         return waitingFood.sort((a, b) => a.orderTime - b.orderTime);
       }
       if (game.currentAlgo === 'SJF') {
+        // SJF compares total remaining work (so a 4-course Combo is 10.2s total, allowing 2s ☕ to jump ahead!)
         return waitingFood.sort((a, b) => {
-          if (Math.abs(a.workRemaining - b.workRemaining) > 0.01) {
-            return a.workRemaining - b.workRemaining;
+          const remA = getCustomerTotalRemainingWork(a);
+          const remB = getCustomerTotalRemainingWork(b);
+          if (Math.abs(remA - remB) > 0.01) {
+            return remA - remB;
           }
           return a.orderTime - b.orderTime;
         });
@@ -1292,7 +1430,7 @@
         });
       }
       if (game.currentAlgo === 'RR') {
-        // Round Robin cycles by order of least recently sliced / round-robin timestamp
+        // Round Robin cycles by order of least recently served/sliced timestamp
         return waitingFood.sort((a, b) => (a.rrLastQueueTime || a.orderTime) - (b.rrLastQueueTime || b.orderTime));
       }
       return waitingFood;
@@ -1367,6 +1505,7 @@
       const dx = tx - game.cpu.x;
       const dy = ty - game.cpu.y;
       const dist = Math.hypot(dx, dy);
+
       if (dist <= speed * dt) {
         game.cpu.x = tx;
         game.cpu.y = ty;
@@ -1379,7 +1518,8 @@
 
     function updateCPU(dt) {
       const cpu = game.cpu;
-      const cpuSpeed = 420; // Fast pixel clerk!
+      const cpuSpeed = 680; // Super energetic, lightning-fast CPU clerk darting around the busy bistro!
+      const isOptimalPolicy = !game.activeEvent || (game.currentAlgo === game.activeEvent.bestAlgo);
 
       syncStoveAssignments();
 
@@ -1404,7 +1544,7 @@
         }
 
         // Return to center idle position
-        moveCpuTowards(POS.idleSpot.x, POS.idleSpot.y, cpuSpeed * 0.6, dt);
+        moveCpuTowards(POS.idleSpot.x, POS.idleSpot.y, cpuSpeed * 0.7, dt);
       }
 
       else if (cpu.state === 'MOVE_TO_ORDER') {
@@ -1417,7 +1557,7 @@
           cpu.state = 'TAKING_ORDER';
           target.state = 'BEING_ORDERED';
           cpu.actionTimer = 0;
-          cpu.actionDuration = 0.38; // Quick 0.38s order taking
+          cpu.actionDuration = 0.12; // Super snappy 0.12s order-taking!
         }
       }
 
@@ -1432,11 +1572,34 @@
           target.state = 'WAIT_FOOD';
           target.orderTime = game.phaseTimer;
           target.rrLastQueueTime = game.phaseTimer;
-          addFloatingText(target.x, target.y - 35, `點餐: ${target.food.emoji}`, '#fbbf24');
+          target.noProgressTimer = 0;
+
+          if (target.isCombo) {
+            const icons = target.courses.map(item => item.emoji).join('');
+            addFloatingText(target.x, target.y - 35, `點套餐: ${icons}`, '#38bdf8');
+          } else {
+            addFloatingText(target.x, target.y - 35, `點餐: ${target.food.emoji}`, '#fbbf24');
+          }
+
+          // Batch order-taking: if any nearby seated/takeout customer is also waiting to order within 180px, take their order immediately too!
+          const nearbyUnordered = game.customers.filter(
+            other => other.state === 'WAIT_ORDER' && Math.hypot(other.x - target.x, other.y - target.y) <= 185
+          );
+          for (let nearCust of nearbyUnordered) {
+            nearCust.state = 'WAIT_FOOD';
+            nearCust.orderTime = game.phaseTimer + 0.001 * nearCust.id;
+            nearCust.rrLastQueueTime = nearCust.orderTime;
+            nearCust.noProgressTimer = 0;
+            const nearLabel = nearCust.isCombo
+              ? `點套餐: ${nearCust.courses.map(i => i.emoji).join('')}`
+              : `點餐: ${nearCust.food.emoji}`;
+            addFloatingText(nearCust.x, nearCust.y - 35, nearLabel, '#fbbf24');
+          }
+
           syncStoveAssignments();
           renderReadyQueue();
 
-          // Check if another customer also needs ordering right now before running back to kitchen
+          // Check if any remaining customer still needs ordering before running back to kitchen
           const moreUnordered = game.customers.filter(c => c.state === 'WAIT_ORDER');
           if (moreUnordered.length > 0) {
             cpu.targetCustomer = moreUnordered[0];
@@ -1480,12 +1643,29 @@
       }
 
       else if (cpu.state === 'COOKING') {
-        // If an urgent new customer sat down during VIP/SJF events, check if we need to take their order!
+        // If a new customer sits down and needs ordering:
+        // Interrupt immediately ONLY if we are NOT locking a long Steak in FCFS/RR whenSJF was needed,
+        // or if the current algorithm is SJF / Priority / RR so new short/VIP orders can enter the Ready Queue!
         const urgentNew = game.customers.find(c => c.state === 'WAIT_ORDER');
-        if (urgentNew && cpu.rrQuantumUsed < 0.2) {
-          cpu.targetCustomer = urgentNew;
-          cpu.state = 'MOVE_TO_ORDER';
-          return;
+        if (urgentNew) {
+          const canPauseToTakeOrder =
+            game.currentAlgo === 'SJF' ||
+            game.currentAlgo === 'PRIORITY' ||
+            game.currentAlgo === 'RR' ||
+            cpu.rrQuantumUsed < 0.35;
+
+          if (canPauseToTakeOrder) {
+            cpu.targetCustomer = urgentNew;
+            cpu.state = 'MOVE_TO_ORDER';
+            return;
+          }
+        }
+
+        // Dynamic Preemption for SJF & Priority when a higher-priority or shorter order just got ordered!
+        const bestCandidate = pickNextStoveAndOrder();
+        if (bestCandidate.order && bestCandidate.order !== cpu.activeOrderCustomer && game.currentAlgo !== 'FCFS' && game.currentAlgo !== 'RR') {
+          cpu.activeStoveIndex = bestCandidate.stoveIndex;
+          cpu.activeOrderCustomer = bestCandidate.order;
         }
 
         const ord = cpu.activeOrderCustomer;
@@ -1498,22 +1678,28 @@
         const stovePos = POS.stoves[cpu.activeStoveIndex];
         moveCpuTowards(stovePos.cookX, stovePos.cookY, cpuSpeed, dt);
 
-        ord.workRemaining -= dt;
+        // OPTIMAL SCHEDULING SYNERGY: 1.45x cooking efficiency when the student selects the right algorithm!
+        const cookMult = isOptimalPolicy ? 1.45 : 1.0;
+        ord.workRemaining -= dt * cookMult;
         cpu.rrQuantumUsed += dt;
         cpu.lastCookedCustomer = ord;
 
-        // In RR mode, all customers whose orders are currently sitting on ANY of the 3 stoves feel reassured!
+        // In RR mode, all 3 stoves gently simmer in parallel while the CPU rotates between them!
         if (game.currentAlgo === 'RR') {
           for (let s = 0; s < 3; s++) {
             const stoveCust = game.stoveSlots[s];
-            if (stoveCust && stoveCust.needsResponse) {
-              // Gentle patience stabilization while their pot is on one of the 3 active stoves
-              stoveCust.patience = Math.min(stoveCust.maxPatience, stoveCust.patience + dt * 0.45);
+            if (stoveCust) {
+              stoveCust.patience = Math.min(stoveCust.maxPatience, stoveCust.patience + dt * 2.8);
+              stoveCust.noProgressTimer = 0;
+              // Parallel multi-pot simmer bonus when RR is the optimal choice!
+              if (s !== cpu.activeStoveIndex && isOptimalPolicy && stoveCust.workRemaining > 0.15) {
+                stoveCust.workRemaining = Math.max(0.08, stoveCust.workRemaining - dt * 0.45);
+              }
             }
           }
         }
 
-        // Check if dish is 100% finished
+        // Check if current course / dish is 100% finished
         if (ord.workRemaining <= 0.001) {
           ord.workRemaining = 0;
           game.stoveSlots[cpu.activeStoveIndex] = null;
@@ -1525,15 +1711,15 @@
           return;
         }
 
-        // Check Round Robin Time Quantum (3.0s)
-        if (game.currentAlgo === 'RR' && cpu.rrQuantumUsed >= cpu.rrQuantumMax) {
+        // Check Round Robin Time Quantum (2.4s brisk rotation across the 3 pots)
+        if (game.currentAlgo === 'RR' && cpu.rrQuantumUsed >= 2.4) {
           ord.rrSlicesReceived++;
           ord.rrLastQueueTime = game.phaseTimer + 0.01;
 
           // If customer is an anti-interruption customer (Events 1-5), they hate RR interrupting their dish!
           if (ord.noInterrupt) {
-            ord.patience -= 10;
-            addFloatingText(ord.x, ord.y - 38, '討厭換鍋中斷! 耐心-10s', '#f87171');
+            ord.patience -= 14;
+            addFloatingText(ord.x, ord.y - 38, '討厭換鍋中斷! 耐心-14s', '#f87171');
             if (ord.patience <= 0) {
               triggerCustomerRageQuit(ord, 'NO_INTERRUPT');
               cpu.state = 'IDLE';
@@ -1541,13 +1727,14 @@
             }
           }
 
-          // If customer is an RR response-anxious customer (Events 11-15), completing a 3s quantum restores their patience!
+          // If customer is an RR response-anxious customer, completing a slice boosts patience!
           if (ord.needsResponse) {
             ord.patience = ord.maxPatience;
-            addFloatingText(ord.x, ord.y - 38, '鍋子翻炒推進! 耐心補滿', '#4ade80');
+            ord.noProgressTimer = 0;
+            addFloatingText(ord.x, ord.y - 38, '三鍋輪炒推進! 耐心100%', '#4ade80');
           }
 
-          // If there are more than 3 orders waiting in the Ready Queue, swap out this pot with a waiting order not on a stove so all orders get a turn!
+          // Swap this pot with any waiting order not currently on a stove so all 6 tables get served in turn!
           const rq = getReadyQueue();
           const waitingOffStove = rq.find(c => !game.stoveSlots.includes(c));
           if (waitingOffStove) {
@@ -1561,11 +1748,19 @@
           if (nextTarget.order && nextTarget.order !== ord) {
             cpu.activeStoveIndex = nextTarget.stoveIndex;
             cpu.activeOrderCustomer = nextTarget.order;
-            cpu.state = 'SWITCHING';
-            cpu.actionTimer = 0;
-            cpu.actionDuration = 0.6; // 0.6s Context Switch overhead between pots
-            const targetStove = POS.stoves[cpu.activeStoveIndex];
-            addFloatingText(targetStove.x, targetStove.y - 22, `換炒${targetStove.label} (0.6s)`, '#38bdf8');
+
+            // Zero switch penalty when RR is the optimal algorithm; heavy 1.1s penalty when RR is misused!
+            if (isOptimalPolicy) {
+              cpu.state = 'COOKING';
+              const targetStove = POS.stoves[cpu.activeStoveIndex];
+              addFloatingText(targetStove.x, targetStove.y - 22, `流暢換炒${targetStove.label}`, '#4ade80');
+            } else {
+              cpu.state = 'SWITCHING';
+              cpu.actionTimer = 0;
+              cpu.actionDuration = 1.1; // 1.1s Context Switch penalty when RR is wrong
+              const targetStove = POS.stoves[cpu.activeStoveIndex];
+              addFloatingText(targetStove.x, targetStove.y - 22, `換鍋延遲 (1.1s)`, '#f87171');
+            }
           }
           renderReadyQueue();
         }
@@ -1586,23 +1781,27 @@
 
     function startCookingOrOverhead(ord) {
       const cpu = game.cpu;
+      const isOptimalPolicy = !game.activeEvent || (game.currentAlgo === game.activeEvent.bestAlgo);
       let overhead = 0;
       let overheadReason = '';
 
-      // 1. If RR switches from one unfinished dish to another dish -> 0.6s Context Switch
-      if (game.currentAlgo === 'RR' && cpu.lastCookedCustomer && cpu.lastCookedCustomer !== ord && cpu.lastCookedCustomer.workRemaining > 0) {
-        overhead = 0.6;
-        overheadReason = 'Context Switch 換鍋 0.6s';
-      }
-      // 2. If Priority is chosen in an event with NO VIPs -> 0.55s Priority Check Overhead
-      else if (game.currentAlgo === 'PRIORITY' && !ord.isVIP) {
-        overhead = 0.55;
-        overheadReason = '檢查優先權耗時 0.55s';
-      }
-      // 3. If SJF is chosen when all orders have identical burst times (e.g. Event 4) -> 0.45s Length Scan Overhead
-      else if (game.currentAlgo === 'SJF' && ord.strictOrder && ord.noInterrupt) {
-        overhead = 0.45;
-        overheadReason = '比對工時耗時 0.45s';
+      // Zero overhead when the player picked the CORRECT algorithm for the current event!
+      if (!isOptimalPolicy) {
+        // 1. If RR is chosen in a non-RR event -> 1.1s Context Switch overhead
+        if (game.currentAlgo === 'RR' && cpu.lastCookedCustomer && cpu.lastCookedCustomer !== ord) {
+          overhead = 1.1;
+          overheadReason = 'Context Switch 換鍋延遲 1.1s';
+        }
+        // 2. If Priority is chosen in an event with NO VIPs -> 0.8s Priority Check Overhead
+        else if (game.currentAlgo === 'PRIORITY' && !ord.isVIP) {
+          overhead = 0.8;
+          overheadReason = '無VIP卻檢查優先權 0.8s';
+        }
+        // 3. If SJF is chosen when all orders have identical burst times (e.g. Event 4) -> 0.7s Length Scan Overhead
+        else if (game.currentAlgo === 'SJF' && ord.strictOrder && ord.noInterrupt) {
+          overhead = 0.7;
+          overheadReason = '比對工時延遲 0.7s';
+        }
       }
 
       if (overhead > 0) {
@@ -1618,34 +1817,98 @@
     }
 
     /***************************************************************************
-     * 10. DELIVERY, RAGE QUIT & CONTEXTUAL OS REVIEWS
+     * 10. DELIVERY (WITH COMBO COURSE PATIENCE RESET), RAGE QUIT & OS REVIEWS
      ***************************************************************************/
     function completeCustomerDelivery(c) {
+      const isOptimalPolicy = !game.activeEvent || (game.currentAlgo === game.activeEvent.bestAlgo);
+
       // Check if any OTHER waiting customer with `strictOrder` ordered earlier than `c`!
       // (Punishment for choosing SJF or Priority during FCFS fairness events 1, 3, 5)
-      const cutVictims = game.customers.filter(
-        other => other !== c && other.state === 'WAIT_FOOD' && other.strictOrder && other.orderTime < c.orderTime - 0.1
-      );
-      for (let victim of cutVictims) {
-        victim.patience -= 25;
-        addFloatingText(victim.x, victim.y - 40, '抗議被插隊! 憤怒值飆升', '#ef4444');
-        if (victim.patience <= 0) {
-          triggerCustomerRageQuit(victim, 'CUT_IN_LINE');
+      if (!isOptimalPolicy) {
+        const cutVictims = game.customers.filter(
+          other => other !== c && other.state === 'WAIT_FOOD' && other.strictOrder && other.orderTime < c.orderTime - 0.1
+        );
+        for (let victim of cutVictims) {
+          victim.patience -= 30;
+          addFloatingText(victim.x, victim.y - 40, '抗議被插隊! 憤怒值飆升', '#ef4444');
+          if (victim.patience <= 0) {
+            triggerCustomerRageQuit(victim, 'CUT_IN_LINE');
+          }
         }
       }
 
-      // Calculate payment & rating
+      // =========================================================================
+      // MULTI-COURSE COMBO MEAL INTERMEDIATE DELIVERY:
+      // Each delivered course (飲料 -> 小菜 -> 主餐 -> 甜點) RESETS waiting patience to 100%!
+      // =========================================================================
+      if (c.isCombo && c.currentCourseIndex < c.courses.length - 1) {
+        const finishedCourse = c.food;
+        c.deliveredEmojis.push(finishedCourse.emoji);
+
+        // Advance to next course in combo
+        c.currentCourseIndex++;
+        c.food = c.courses[c.currentCourseIndex];
+        c.workTotal = c.food.burst;
+        c.workRemaining = c.food.burst;
+
+        // RESET WAITING TIME / PATIENCE TO 100% FULL!
+        c.patience = c.maxPatience;
+        c.noProgressTimer = 0;
+
+        // In RR mode, move timestamp to the back of the cycle so the clerk rotates to serve other tables' courses next!
+        // In FCFS / SJF / Priority, keep original orderTime so single-pot modes stay locked on this customer!
+        c.rrLastQueueTime = game.phaseTimer + 0.05;
+
+        // If customer hates interruption (FCFS events 1-5) and player picked RR, switching away after partial course annoys them
+        if (!isOptimalPolicy && c.noInterrupt && game.currentAlgo === 'RR') {
+          c.patience -= 12;
+          addFloatingText(c.x, c.y - 38, '套餐被拆單換鍋! 耐心-12s', '#f87171');
+        } else {
+          addFloatingText(
+            c.x,
+            c.y - 38,
+            `送達${finishedCourse.stageLabel}${finishedCourse.emoji}! 耐心重置100% (${c.currentCourseIndex}/${c.courses.length})`,
+            '#38bdf8'
+          );
+        }
+
+        syncStoveAssignments();
+        updateTopBarUI();
+        renderReadyQueue();
+        return;
+      }
+
+      // Final Course (or Single Dish) Delivered -> Customer finishes meal, pays, and leaves!
+      if (c.isCombo) {
+        c.deliveredEmojis.push(c.food.emoji);
+      }
+
+      // Calculate payment & generous star rating
       const patRatio = c.patience / c.maxPatience;
       let stars = 5;
-      if (patRatio < 0.25) stars = 3;
-      else if (patRatio < 0.5) stars = 4;
 
-      // If RR was used in a non-RR event and wasted time with context switches, cap rating
-      if (game.currentAlgo === 'RR' && !c.needsResponse && c.rrSlicesReceived > 0) {
+      // Guaranteed 5 stars when using the optimal scheduling policy or when customer has >= 30% patience left
+      if (isOptimalPolicy || patRatio >= 0.30) {
+        stars = 5;
+      } else if (patRatio >= 0.15) {
+        stars = 4;
+      } else {
+        stars = 3;
+      }
+
+      // If RR was misused in a non-RR event and wasted time with context switches, cap rating at 3 stars
+      if (!isOptimalPolicy && game.currentAlgo === 'RR' && !c.needsResponse && c.rrSlicesReceived > 0) {
         stars = Math.min(stars, 3);
       }
 
-      const earned = c.food.price * (c.isVIP ? c.vipMult : 1);
+      // Base price + Optimal Scheduling Bonus Tip (+$60 regular / +$100 Combo / +$150 VIP)
+      const basePrice = c.isCombo ? c.totalPrice : c.food.price;
+      const baseEarned = basePrice * (c.isVIP ? c.vipMult : 1);
+      const synergyBonus = (isOptimalPolicy && game.phase === 'EVENT')
+        ? (c.isVIP ? 150 : c.isCombo ? 100 : 60)
+        : 0;
+      const earned = baseEarned + synergyBonus;
+
       game.revenue += earned;
       game.ratings.push(stars);
       game.servedCount++;
@@ -1655,10 +1918,12 @@
       }
 
       // Generate contextual review comment
+      const reviewEmoji = c.isCombo ? '🧋🥗🍝🍰' : c.food.emoji;
       let comment = getPositiveOrNeutralReview(c, stars);
-      addReviewLog(c.label, c.food.emoji, stars, comment, 'GOOD');
+      addReviewLog(c.label, reviewEmoji, stars, comment, 'GOOD');
 
-      addFloatingText(c.x, c.y - 35, `+$${earned} (${stars}星)`, '#4ade80');
+      const bonusTag = synergyBonus > 0 ? ` (含排程獎金+$${synergyBonus})` : '';
+      addFloatingText(c.x, c.y - 35, `套餐完食 +$${earned}${bonusTag} ★${stars}`, '#4ade80');
 
       c.state = 'LEAVING_HAPPY';
       c.targetX = c.mode === 'TAKEOUT' ? POS.takeoutEntrance.x : POS.entrance.x;
@@ -1689,8 +1954,9 @@
         penaltyText = `VIP震怒罰款 -$${fine}!`;
       }
 
+      const reviewEmoji = c.isCombo ? '🧋🥗🍝🍰' : c.food.emoji;
       const reviewText = getAngryOSReview(c, reasonCode);
-      addReviewLog(c.label, c.food.emoji, 1, reviewText, 'BAD');
+      addReviewLog(c.label, reviewEmoji, 1, reviewText, 'BAD');
       addFloatingText(c.x, c.y - 40, penaltyText, '#ef4444');
 
       if (game.cpu.activeOrderCustomer === c) {
@@ -1706,21 +1972,24 @@
     function getPositiveOrNeutralReview(c, stars) {
       if (stars === 3) {
         if (game.currentAlgo === 'RR' && !c.needsResponse) {
-          return '【切換成本過高】店員每煮 3 秒就換一個鍋子，光看他換鍋子就浪費一堆時間，大家都被拖慢了！';
+          return '【切換成本過高】店員每煮一下就換鍋子，光看他換鍋就浪費一堆時間，大家都被拖慢了！';
         }
         return '東西是不錯吃啦，但店員在廚房跑來跑去不知道在忙什麼，等得有點久。';
       }
       if (c.isVIP && game.currentAlgo === 'PRIORITY') {
         return '【Priority 專屬好評】懂得看場合變通！知道我有緊急狀況立刻優先插隊幫我做餐，五顆星推薦！';
       }
+      if (c.isCombo && game.currentAlgo === 'RR') {
+        return '【RR 套餐神級好評】飲料🧋、小菜🥗、主餐🍝到甜點🍰一道接一道準時端上桌重置等待時間，全場6桌都沒冷場！';
+      }
       if (c.needsResponse && game.currentAlgo === 'RR') {
-        return '【RR 專屬好評】雖然客人很多，但店員每隔幾秒就推進我的餐點進度，高回應性讓人超安心！';
+        return '【RR 專屬好評】雖然客人爆滿，但店員輪流為每桌送上套餐料理，高回應性讓人超安心！';
       }
       if (c.convoyVictim && game.currentAlgo === 'SJF') {
-        return '【SJF 專屬好評】我只買短單馬上就拿到了，完全沒被前面點牛排的大單卡住，翻桌率太神啦！';
+        return '【SJF 專屬好評】我只買短單馬上就拿到了，完全沒被前面點牛排或全套套餐的大單卡住，翻桌率太神啦！';
       }
       if (c.strictOrder && game.currentAlgo === 'FCFS') {
-        return '【FCFS 專屬好評】這家店非常守規矩，嚴格按照先來後到一口氣出餐，令人尊敬！';
+        return '【FCFS 專屬好評】這家店非常守規矩，嚴格按照先來後到一口氣出齊餐點，令人尊敬！';
       }
       return '店員手腳超快，餐點熱騰騰的，下次還要來！';
     }
@@ -1735,14 +2004,17 @@
       if (c.isVIP) {
         return '【忽視高優先權 VIP】知道我是誰嗎？居然沒選優先權排程讓我跟一般人一起乾等，扣分罰款！';
       }
+      if (c.isCombo && c.needsResponse) {
+        return '【套餐回應時間過長】我們點的是四道菜套餐(🧋🥗🍝🍰)，結果店員只顧著把第1桌從飲料做到甜點，害我們連第一杯飲料都等不到！該用RR循環排程吧！';
+      }
       if (c.needsResponse) {
-        return '【回應時間過長 Poor Response Time】點完餐過了十幾秒，我的餐點進度還是 0%！店員根本忘記我的單了吧？氣死人了！';
+        return '【回應時間過長 Poor Response Time】點完餐過了十幾秒，連一道前菜都沒送來！店員根本忘記我的單了吧？氣死人了！';
       }
       if (c.convoyVictim && game.currentAlgo !== 'SJF') {
-        return '【護航效應 Convoy Effect】太扯了！前面那個人點了超難做的豪華牛排，我只是買個短單居然要陪他乾等？火車都跑了！';
+        return '【護航效應 Convoy Effect】太扯了！前面那個人點了超難做的牛排與全套套餐，我只是買個2秒短單居然要陪他乾等？火車都跑了！';
       }
       if (c.state === 'WAITING_SEAT') {
-        return '【翻桌率過低】內用區被大單卡死都沒人出來，我們在候位區等到天荒地老，不吃了！';
+        return '【翻桌率過低】內用區6桌被大單卡死都沒人出來，我們在候位區等到天荒地老，不吃了！';
       }
       return '【排程不當超時】出餐順序亂七八糟，等到餓昏還沒拿到餐點，負評離開！';
     }
@@ -1777,12 +2049,13 @@
         : 5.0;
 
       const correctCount = game.eventHistory.filter(h => h.isCorrect).length;
-      const totalEvents = game.eventHistory.length;
+      const totalEvents = game.eventHistory.length || 1;
+      const totalScore = Math.min(100, Math.round((correctCount / totalEvents) * 60 + (avgRating / 5) * 40));
 
       document.getElementById('sum-revenue').textContent = `$${game.revenue}`;
       document.getElementById('sum-rating').textContent = avgRating.toFixed(1);
       document.getElementById('sum-served').textContent = `${game.servedCount} 人 / ${game.angryCount} 人`;
-      document.getElementById('sum-accuracy').textContent = `${correctCount} / ${totalEvents} 正確`;
+      document.getElementById('sum-accuracy').textContent = `${correctCount} / ${game.eventHistory.length} 正確 (${totalScore}分)`;
 
       // Render pixel stars
       const starsHtml = [1, 2, 3, 4, 5].map(i =>
@@ -1790,19 +2063,19 @@
       ).join('');
       document.getElementById('sum-stars').innerHTML = starsHtml;
 
-      // Grade Badge
+      // Grade Badge (Generous S/A/B/C Grading based on Score & Accuracy)
       const gradeBadge = document.getElementById('summary-grade-badge');
-      if (correctCount === totalEvents && game.angryCount === 0) {
-        gradeBadge.textContent = 'S 級 — 作業系統排程宗師';
+      if (totalScore >= 90 || (correctCount >= totalEvents - 1 && avgRating >= 4.5)) {
+        gradeBadge.textContent = `S 級 (${totalScore}分) — 作業系統排程宗師`;
         gradeBadge.className = 'px-4 py-1.5 text-lg font-black bg-amber-400 text-slate-950 border-2 border-white';
-      } else if (avgRating >= 4.0) {
-        gradeBadge.textContent = 'A 級 — 資深排程店長';
+      } else if (totalScore >= 75 || avgRating >= 4.0) {
+        gradeBadge.textContent = `A 級 (${totalScore}分) — 資深排程店長`;
         gradeBadge.className = 'px-4 py-1.5 text-lg font-black bg-emerald-500 text-slate-950 border-2 border-emerald-200';
-      } else if (avgRating >= 3.0) {
-        gradeBadge.textContent = 'B 級 — 實習排程店員';
+      } else if (totalScore >= 60 || avgRating >= 3.0) {
+        gradeBadge.textContent = `B 級 (${totalScore}分) — 實習排程店員`;
         gradeBadge.className = 'px-4 py-1.5 text-lg font-black bg-cyan-500 text-slate-950 border-2 border-cyan-200';
       } else {
-        gradeBadge.textContent = 'C 級 — 系統瀕臨死結 (需重修)';
+        gradeBadge.textContent = `C 級 (${totalScore}分) — 系統瀕臨死結 (需重修)`;
         gradeBadge.className = 'px-4 py-1.5 text-lg font-black bg-rose-600 text-white border-2 border-rose-300';
       }
 
@@ -1916,20 +2189,34 @@
       if (game.currentAlgo === 'RR') {
         rrBox.classList.remove('hidden');
         const pct = Math.min(100, (cpu.rrQuantumUsed / cpu.rrQuantumMax) * 100);
-        document.getElementById('rr-quantum-val').textContent = `${cpu.rrQuantumUsed.toFixed(1)}s / 3.0s`;
+        document.getElementById('rr-quantum-val').textContent = `${cpu.rrQuantumUsed.toFixed(1)}s / ${cpu.rrQuantumMax.toFixed(1)}s`;
         document.getElementById('rr-quantum-bar').style.width = `${pct}%`;
       } else {
         rrBox.classList.add('hidden');
       }
 
+      const ord = cpu.activeOrderCustomer;
+      const cookDesc = ord
+        ? (ord.isCombo
+            ? `煮 ${ord.food.emoji}${ord.food.stageLabel}(${ord.currentCourseIndex + 1}/4) - ${ord.label}`
+            : `煮 ${ord.food.emoji}${ord.food.name} (${ord.label})`)
+        : '製作餐點中';
+
+      const serveCust = cpu.targetCustomer;
+      const serveDesc = serveCust
+        ? (serveCust.isCombo
+            ? `閃電端送 ${serveCust.food.emoji}${serveCust.food.stageLabel} (重置耐心!)`
+            : `閃電端送 ${serveCust.food.emoji} 結帳`)
+        : '端送完成餐點';
+
       const stateMap = {
-        IDLE:          { label: '待機巡視', color: 'bg-slate-800 text-slate-300 border-slate-600', desc: '等待新任務中' },
-        MOVE_TO_ORDER: { label: '前往點餐', color: 'bg-amber-900 text-amber-200 border-amber-500', desc: '跑向客人點餐' },
-        TAKING_ORDER:  { label: '點餐中',   color: 'bg-amber-700 text-white border-amber-300',     desc: '讀取餐點需求' },
-        MOVE_TO_COOK:  { label: '返回廚房', color: 'bg-indigo-900 text-indigo-200 border-indigo-500', desc: '準備執行訂單' },
-        SWITCHING:     { label: '切換延遲', color: 'bg-rose-900 text-rose-200 border-rose-500',     desc: '換鍋/檢查耗時中' },
-        COOKING:       { label: '料理執行', color: 'bg-emerald-900 text-emerald-200 border-emerald-500', desc: cpu.activeOrderCustomer ? `煮 ${cpu.activeOrderCustomer.food.emoji} (${cpu.activeOrderCustomer.label})` : '製作餐點中' },
-        MOVE_TO_SERVE: { label: '送餐結帳', color: 'bg-cyan-900 text-cyan-200 border-cyan-400',     desc: '端送完成餐點' }
+        IDLE:          { label: '高速巡視', color: 'bg-slate-800 text-slate-300 border-slate-600', desc: '隨時待命接單' },
+        MOVE_TO_ORDER: { label: '衝刺點餐', color: 'bg-amber-900 text-amber-200 border-amber-500', desc: '高速跑向客人點餐' },
+        TAKING_ORDER:  { label: '閃電點餐', color: 'bg-amber-700 text-white border-amber-300',     desc: '瞬間讀取客人需求' },
+        MOVE_TO_COOK:  { label: '衝回廚房', color: 'bg-indigo-900 text-indigo-200 border-indigo-500', desc: '奔向爐台執行排程' },
+        SWITCHING:     { label: '換鍋切換', color: 'bg-rose-900 text-rose-200 border-rose-500',     desc: 'Context Switch 切換中' },
+        COOKING:       { label: '大火快炒', color: 'bg-emerald-900 text-emerald-200 border-emerald-500', desc: cookDesc },
+        MOVE_TO_SERVE: { label: '飛速上菜', color: 'bg-cyan-900 text-cyan-200 border-cyan-400',     desc: serveDesc }
       };
 
       const info = stateMap[cpu.state] || stateMap.IDLE;
@@ -1957,16 +2244,37 @@
           : '';
         const pct = Math.max(0, Math.min(100, ((c.workTotal - c.workRemaining) / c.workTotal) * 100));
         const vipBadge = c.isVIP ? `<span class="px-1 bg-purple-700 text-white text-[9px]">VIP</span>` : '';
+
+        // Show 4-course progression strip if this is a Combo order
+        let comboStripHtml = '';
+        if (c.isCombo) {
+          const stages = c.courses.map((item, sIdx) => {
+            if (sIdx < c.currentCourseIndex) {
+              return `<span class="opacity-40 line-through">${item.emoji}</span>`;
+            } else if (sIdx === c.currentCourseIndex) {
+              return `<span class="px-0.5 bg-cyan-900 text-cyan-200 border border-cyan-400 font-bold">${item.emoji}${item.stageLabel}</span>`;
+            } else {
+              return `<span class="opacity-75">${item.emoji}</span>`;
+            }
+          }).join('<span class="text-slate-600">→</span>');
+          comboStripHtml = `<div class="flex items-center gap-0.5 text-[10px] bg-slate-900/90 px-1 py-0.5 border border-slate-800">${stages}</div>`;
+        }
+
+        const itemTitle = c.isCombo
+          ? `套餐(${c.currentCourseIndex + 1}/4) ${c.food.emoji}${c.food.stageLabel}`
+          : `${c.food.emoji}${c.food.name}`;
+
         return `
           <div class="p-1.5 bg-slate-950/90 border ${isCooking ? 'border-emerald-400' : stoveIdx !== -1 ? 'border-cyan-600' : 'border-slate-700'} flex flex-col gap-0.5">
             <div class="flex items-center justify-between gap-1">
               <span class="font-bold text-slate-200 truncate text-[11px]">
-                #${idx + 1} ${c.food.emoji}${c.food.name} ${vipBadge} ${onStoveBadge}
+                #${idx + 1} ${itemTitle} ${vipBadge} ${onStoveBadge}
               </span>
               <span class="text-[10px] font-bold shrink-0 ${isCooking ? 'text-emerald-400' : 'text-amber-300'}">
                 ${c.workRemaining.toFixed(1)}s
               </span>
             </div>
+            ${comboStripHtml}
             <div class="flex items-center justify-between text-[10px] text-slate-400">
               <span class="truncate">${c.label} (${c.mode === 'DINE' ? '內' : '外'})</span>
               <span class="shrink-0">耐:${Math.ceil(c.patience)}s</span>
@@ -2210,16 +2518,21 @@
     }
 
     function drawDineInTables() {
+      // Count occupied tables for live header status
+      const occupiedCount = game.customers.filter(
+        c => c.tableId !== null && c.state !== 'LEAVING_HAPPY' && c.state !== 'LEAVING_ANGRY'
+      ).length;
+
       // Zone Header
       ctx.fillStyle = '#312e48';
       ctx.fillRect(435, 10, 450, 32);
-      ctx.strokeStyle = '#6366f1';
+      ctx.strokeStyle = occupiedCount >= 6 ? '#f59e0b' : '#6366f1';
       ctx.lineWidth = 2;
       ctx.strokeRect(435, 10, 450, 32);
-      ctx.fillStyle = '#e0e7ff';
+      ctx.fillStyle = occupiedCount >= 6 ? '#fde047' : '#e0e7ff';
       ctx.font = 'bold 14px "DotGothic16", monospace';
       ctx.textAlign = 'left';
-      ctx.fillText('內用座位區 DINE-IN AREA (共 6 桌)', 450, 31);
+      ctx.fillText(`內用座位區 DINE-IN (${occupiedCount}/6 桌) ${occupiedCount >= 6 ? '[滿座!]' : ''}`, 450, 31);
 
       POS.tables.forEach((t, idx) => {
         // Chair
@@ -2238,6 +2551,25 @@
         // Tablecloth center detail
         ctx.fillStyle = '#a16207';
         ctx.fillRect(t.x - 32, t.y - 10, 64, 36);
+
+        // Render already-delivered Combo Courses on the table!
+        const occupant = game.customers.find(
+          c => c.tableId === t.id && c.state !== 'LEAVING_HAPPY' && c.state !== 'LEAVING_ANGRY'
+        );
+        if (occupant && occupant.deliveredEmojis && occupant.deliveredEmojis.length > 0) {
+          occupant.deliveredEmojis.forEach((emo, eIdx) => {
+            const plateX = (t.x - 24) + eIdx * 16;
+            const plateY = t.y + 4;
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(plateX - 7, plateY - 10, 14, 12);
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(plateX - 7, plateY - 10, 14, 12);
+            ctx.font = '11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(emo, plateX, plateY);
+          });
+        }
 
         // Table Number
         ctx.fillStyle = '#fef08a';
@@ -2437,8 +2769,53 @@
       }
 
       if (c.state === 'WAIT_FOOD') {
-        // Resolved order: show ONLY the allowed food emoji + progress bar + patience bar
         const isBeingCooked = (game.cpu.activeOrderCustomer === c && game.cpu.state === 'COOKING');
+        const isOnAnyStove = game.stoveSlots.includes(c);
+
+        if (c.isCombo) {
+          // Special Wider 4-Course Combo Bubble: shows [🧋][🥗][🍝][🍰] progress + current course timer & patience bar
+          const borderCol = isBeingCooked ? '#4ade80' : (isOnAnyStove ? '#38bdf8' : '#f59e0b');
+          drawBubbleBox(-46, by - 12, 92, 42, '#0f172a', borderCol);
+
+          // Top Row: 4 Course Slots
+          c.courses.forEach((course, idx) => {
+            const slotX = -42 + idx * 21;
+            const slotY = by - 9;
+            const isDone = idx < c.currentCourseIndex;
+            const isCurr = idx === c.currentCourseIndex;
+
+            ctx.fillStyle = isDone ? '#14532d' : (isCurr ? '#1e3a8a' : '#1e293b');
+            ctx.fillRect(slotX, slotY, 19, 15);
+            ctx.strokeStyle = isDone ? '#4ade80' : (isCurr ? '#38bdf8' : '#475569');
+            ctx.lineWidth = 1;
+            ctx.strokeRect(slotX, slotY, 19, 15);
+
+            ctx.font = '11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.globalAlpha = isDone ? 0.45 : 1.0;
+            ctx.fillText(course.emoji, slotX + 9.5, slotY + 12);
+            ctx.globalAlpha = 1.0;
+          });
+
+          // Middle Label: Current stage & remaining seconds
+          ctx.fillStyle = '#fde047';
+          ctx.font = 'bold 10px "DotGothic16", monospace';
+          ctx.textAlign = 'left';
+          ctx.fillText(`${c.food.stageLabel}:${c.workRemaining.toFixed(1)}s`, -41, by + 16);
+
+          // Cooking Progress Bar (Green)
+          const cookPct = Math.max(0, Math.min(1, (c.workTotal - c.workRemaining) / c.workTotal));
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(-41, by + 19, 82, 4);
+          ctx.fillStyle = '#22c55e';
+          ctx.fillRect(-41, by + 19, 82 * cookPct, 4);
+
+          // Patience Bar (Resets to 100% on each course delivery!)
+          drawMiniPatienceBar(-41, by + 24, 82, c.patience / c.maxPatience);
+          return;
+        }
+
+        // Single-item Resolved Order Bubble
         const borderCol = isBeingCooked ? '#4ade80' : (c.isVIP ? '#c084fc' : '#94a3b8');
         drawBubbleBox(-36, by - 6, 72, 34, '#0f172a', borderCol);
 
@@ -2496,10 +2873,11 @@
 
     function drawCPUClerk() {
       const cpu = game.cpu;
+
       ctx.save();
       ctx.translate(Math.round(cpu.x), Math.round(cpu.y));
 
-      const bounce = (cpu.state.startsWith('MOVE')) ? Math.sin(cpu.animFrame * 2) * 2.5 : 0;
+      const bounce = (cpu.state.startsWith('MOVE')) ? Math.sin(cpu.animFrame * 2.6) * 3 : 0;
 
       // Shadow
       ctx.fillStyle = 'rgba(0,0,0,0.45)';
@@ -2523,7 +2901,6 @@
       // Head
       ctx.fillStyle = '#fde68a';
       ctx.fillRect(-10, -21, 20, 17);
-      ctx.strokeStyle = '#0f172a';
       ctx.strokeRect(-10, -21, 20, 17);
 
       // Eyes
@@ -2536,6 +2913,26 @@
       ctx.font = 'bold 9px monospace';
       ctx.textAlign = 'center';
       ctx.fillText('CPU', 0, 9);
+
+      // Overhead busy action tag on CPU clerk
+      if (cpu.state !== 'IDLE') {
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-26, -45, 52, 13);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(-26, -45, 52, 13);
+        ctx.fillStyle = '#7dd3fc';
+        ctx.font = 'bold 9px "DotGothic16", monospace';
+        const tagMap = {
+          MOVE_TO_ORDER: '衝刺點餐',
+          TAKING_ORDER:  '閃電點餐',
+          MOVE_TO_COOK:  '趕回廚房',
+          SWITCHING:     '換鍋切換',
+          COOKING:       `快炒鍋#${cpu.activeStoveIndex + 1}`,
+          MOVE_TO_SERVE: '飛速上菜!'
+        };
+        ctx.fillText(tagMap[cpu.state] || '忙碌中', 0, -35);
+      }
 
       // If delivering food, render plate with food emoji in hand!
       if (cpu.state === 'MOVE_TO_SERVE' && cpu.targetCustomer) {

@@ -1,0 +1,2750 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>一筆畫幾何大挑戰</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans TC', 'Inter', sans-serif;
+      background: #e2e8f0;
+      min-height: 100vh;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow-x: hidden;
+    }
+    .stage-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: radial-gradient(circle at 36% 50%, #ffffff 0%, #f1f5f9 80%, #e2e8f0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .canvas-stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 25rem 0.75rem 0.75rem;
+      touch-action: none;
+    }
+    @media (max-width: 1024px) {
+      .canvas-stage {
+        padding: 3.5rem 0.5rem 16rem 0.5rem;
+      }
+    }
+    .canvas-container {
+      position: relative;
+      width: min(94vh, 100%);
+      height: min(94vh, 100%);
+      max-width: 900px;
+      max-height: 900px;
+      aspect-ratio: 1 / 1;
+      background: #ffffff;
+      border-radius: 1.5rem;
+      box-shadow: 0 16px 40px -10px rgba(15, 23, 42, 0.14), 0 0 0 2px rgba(148, 163, 184, 0.3);
+      overflow: hidden;
+      touch-action: none;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      touch-action: none;
+    }
+    .floating-glass {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1.5px solid rgba(203, 213, 225, 0.95);
+      box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.12);
+    }
+    .choice-btn.active-yes {
+      background-color: #10b981;
+      color: white;
+      border-color: #059669;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    }
+    .choice-btn.active-no {
+      background-color: #f43f5e;
+      color: white;
+      border-color: #e11d48;
+      box-shadow: 0 4px 12px rgba(244, 63, 94, 0.35);
+    }
+    .num-chip-odd.active {
+      background-color: #e11d48;
+      color: #ffffff;
+      border-color: #be123c;
+      transform: scale(1.04);
+    }
+    .num-chip-even.active {
+      background-color: #4f46e5;
+      color: #ffffff;
+      border-color: #4338ca;
+      transform: scale(1.04);
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.99); opacity: 0.95; }
+      50% { transform: scale(1.03); opacity: 0.8; }
+      100% { transform: scale(0.99); opacity: 0.95; }
+    }
+    .animate-soft-pulse {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+    .spotlight-target {
+      position: relative;
+      z-index: 60 !important;
+      box-shadow: 0 0 0 5px #fbbf24, 0 0 36px rgba(251, 191, 36, 0.95) !important;
+      transition: box-shadow 0.3s ease;
+    }
+    .spotlight-screen-dim {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.72);
+      z-index: 35;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased">
+
+  <main class="w-full min-h-screen relative">
+
+    <!-- VIEW 1: INTRO / RULES VIEW (Only ONE Start Challenge Button) -->
+    <section id="viewIntro" class="min-h-screen w-full flex items-center justify-center p-3 bg-slate-100">
+      <div class="max-w-3xl w-full bg-white rounded-3xl p-5 sm:p-6 shadow-xl border border-slate-200 space-y-4">
+        <div class="pb-3 border-b border-slate-100">
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 mb-1">
+            歐拉一筆畫規則
+          </span>
+          <h1 class="text-2xl sm:text-3xl font-black text-slate-900">一筆畫幾何大挑戰</h1>
+        </div>
+
+        <!-- 3 Compact Concept Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="rounded-2xl bg-slate-50 p-4 border border-slate-200">
+            <div class="flex items-center gap-2 font-black text-slate-900 text-base mb-1.5">
+              <span class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center text-sm font-black">1</span>
+              <span>奇數點與偶數點</span>
+            </div>
+            <p class="text-sm text-slate-700 leading-snug">
+              • 連 <strong class="text-rose-600">1, 3, 5... 條線</strong> ＝ <strong class="text-rose-600">奇數點</strong><br>
+              • 連 <strong class="text-indigo-600">2, 4, 6... 條線</strong> ＝ <strong class="text-indigo-600">偶數點</strong>
+            </p>
+          </div>
+
+          <div class="rounded-2xl bg-emerald-50/80 p-4 border border-emerald-200">
+            <div class="flex items-center gap-2 font-black text-emerald-950 text-base mb-1.5">
+              <span class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-sm font-black">2</span>
+              <span>可以一筆畫出</span>
+            </div>
+            <p class="text-sm text-emerald-900 leading-snug">
+              • <strong>奇數點 = 0 個</strong>（任意點出發）<br>
+              • <strong>奇數點 = 2 個</strong>（奇點出發、奇點結束）
+            </p>
+          </div>
+
+          <div class="rounded-2xl bg-rose-50/80 p-4 border border-rose-200">
+            <div class="flex items-center gap-2 font-black text-rose-950 text-base mb-1.5">
+              <span class="w-7 h-7 rounded-lg bg-rose-600 text-white flex items-center justify-center text-sm font-black">3</span>
+              <span>無法一筆畫出</span>
+            </div>
+            <p class="text-sm text-rose-900 leading-snug">
+              • <strong>奇數點 4 個以上</strong>（4, 6, 8...），絕對無法一筆畫完。
+            </p>
+          </div>
+        </div>
+
+        <!-- Compact 3-Step Flow -->
+        <div class="bg-indigo-50/70 rounded-2xl p-3.5 border border-indigo-100">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-sm text-slate-700">
+            <div class="bg-white p-3 rounded-xl border border-indigo-100">
+              <strong class="text-indigo-700 block">1. 切換奇偶球點選標記</strong>
+              點選切換「奇數球」或「偶數球」，直接點擊頂點標記並統計數量。
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-indigo-100">
+              <strong class="text-indigo-700 block">2. 點選頂點畫線</strong>
+              選「可以」即解鎖畫布，依序點選頂點把線畫完。
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-indigo-100">
+              <strong class="text-indigo-700 block">3. 計分與下載證書</strong>
+              完成 10 題後輸入學號與姓名，即可產生並下載成績圖片。
+            </div>
+          </div>
+        </div>
+
+        <!-- Single Start Action Button -->
+        <div class="pt-2 border-t border-slate-100 flex justify-center">
+          <button id="btnStartGameBottom" type="button" class="w-full sm:w-auto min-w-[260px] px-10 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl shadow-lg shadow-emerald-600/25 transition">
+            開始挑戰
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: MAIN GAMEPLAY VIEW -->
+    <section id="viewGame" class="hidden stage-wrapper">
+
+      <!-- Main Full-Viewport Drawing Stage -->
+      <div class="canvas-stage">
+        <div id="canvasBox" class="canvas-container">
+          <canvas id="graphCanvas" width="820" height="820"></canvas>
+        </div>
+      </div>
+
+      <!-- FLOATING TOP-LEFT HUD: Question Number, Progress & Score -->
+      <div class="fixed top-2.5 left-2.5 z-20 flex flex-wrap items-center gap-2 max-w-[calc(100vw-1.25rem)] lg:max-w-[calc(100vw-25.5rem)]">
+        <div class="floating-glass rounded-2xl px-4 py-2 flex items-center gap-3">
+          <span id="badgeQuestionIndex" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white font-black text-base">
+            1 / 10
+          </span>
+          <span id="questionTitle" class="font-black text-slate-900 text-lg">#1</span>
+          <div id="progressDots" class="hidden xl:flex items-center gap-1 pl-2 border-l border-slate-200"></div>
+        </div>
+
+        <!-- Score & Large Utility Buttons -->
+        <div class="floating-glass rounded-2xl px-3 py-1.5 flex items-center gap-2">
+          <div class="flex items-center gap-1.5 pr-2 border-r border-slate-200">
+            <span class="text-xs font-bold text-slate-500">總分</span>
+            <span id="scoreDisplay" class="text-lg font-black text-amber-600">0</span>
+          </div>
+          <button id="btnNavRules" type="button" class="px-3.5 py-2 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition">
+            規則說明
+          </button>
+          <button id="btnMute" type="button" class="px-3.5 py-2 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition" title="切換音效" aria-label="切換音效">
+            音效：開
+          </button>
+          <button id="btnRestartTop" type="button" class="px-3.5 py-2 rounded-xl text-sm font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition">
+            重新開始
+          </button>
+        </div>
+      </div>
+
+      <!-- FULL-SCREEN DARK MASK OVERLAY FOR SPOTLIGHT TUTORIAL -->
+      <div id="spotlightScreenMask" class="hidden spotlight-screen-dim"></div>
+
+      <!-- TOP-RIGHT SMALL RED DOT INDICATOR WHEN TUTORIAL IS SKIPPED -->
+      <div id="skippedTutorialRedDot" class="hidden fixed top-3 right-3 z-[80] w-3.5 h-3.5 rounded-full bg-rose-600 ring-2 ring-white shadow-md pointer-events-none" title="已跳過引導"></div>
+
+      <!-- FLOATING TOP-CENTER SPOTLIGHT TUTORIAL BANNER (Level 1 Guided Spotlight) -->
+      <div id="tutorialBanner" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-[70] w-[92vw] max-w-xl bg-slate-900/95 text-white rounded-2xl px-5 py-3.5 shadow-2xl border-2 border-amber-400 flex items-center justify-between gap-4">
+        <div class="space-y-1">
+          <span id="tutorialStepTag" class="inline-block px-2.5 py-0.5 rounded-md bg-amber-400 text-slate-950 font-black text-xs">
+            第一關遮罩式引導
+          </span>
+          <p id="tutorialStepText" class="text-sm sm:text-base font-bold text-amber-50 leading-snug">
+            請先點選下方藍色的「偶數球」，再點選正方形的 4 個頂點標記。
+          </p>
+        </div>
+        <button id="btnCloseTutorial" type="button" class="px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-xs sm:text-sm font-bold text-slate-100 shrink-0 transition">
+          跳過引導
+        </button>
+      </div>
+
+      <!-- FLOATING RIGHT PANEL -->
+      <aside id="rightControlAside" class="fixed z-20 right-2.5 bottom-2.5 lg:top-1/2 lg:bottom-auto lg:-translate-y-1/2 w-[calc(100vw-1.25rem)] sm:w-96 max-h-[95vh] overflow-y-auto">
+
+        <!-- STEP 1 PANEL: VERTEX COUNTS & BIG BUTTONS -->
+        <div id="panelStep1" class="floating-glass rounded-3xl p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-black flex items-center justify-center">1</span>
+              <h3 class="font-black text-slate-900 text-base">填寫頂點數與判斷</h3>
+            </div>
+            <span class="text-xs font-bold text-slate-500">總頂點：<strong id="step1TotalV" class="text-slate-900">0</strong></span>
+          </div>
+
+          <div id="step1CountSection" class="space-y-2.5 rounded-2xl transition">
+            <!-- Convenient Odd Vertex Count Selector -->
+            <div class="bg-rose-50/80 border border-rose-200 rounded-2xl p-2.5 space-y-2">
+              <div class="flex items-center justify-between">
+                <label for="inputOddCount" class="text-sm font-black text-rose-950">
+                  奇數點數量 <span class="text-xs font-semibold text-rose-700">(1,3,5條線)</span>
+                </label>
+                <div class="flex items-center gap-1">
+                  <button type="button" data-Spin="odd-dec" class="w-9 h-9 rounded-xl bg-white border border-rose-300 text-rose-700 font-black text-lg hover:bg-rose-100 transition">-</button>
+                  <input id="inputOddCount" type="number" min="0" max="30" placeholder="?" class="w-14 h-9 text-center font-black text-lg text-rose-900 bg-white border border-rose-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500" />
+                  <button type="button" data-Spin="odd-inc" class="w-9 h-9 rounded-xl bg-white border border-rose-300 text-rose-700 font-black text-lg hover:bg-rose-100 transition">+</button>
+                </div>
+              </div>
+              <div id="quickOddPad" class="grid grid-cols-6 gap-1.5">
+                <button type="button" data-quick-odd="0" class="num-chip-odd py-2 rounded-xl bg-white border border-rose-200 font-black text-sm text-rose-900 hover:bg-rose-100 transition">0</button>
+                <button type="button" data-quick-odd="2" class="num-chip-odd py-2 rounded-xl bg-white border border-rose-200 font-black text-sm text-rose-900 hover:bg-rose-100 transition">2</button>
+                <button type="button" data-quick-odd="4" class="num-chip-odd py-2 rounded-xl bg-white border border-rose-200 font-black text-sm text-rose-900 hover:bg-rose-100 transition">4</button>
+                <button type="button" data-quick-odd="6" class="num-chip-odd py-2 rounded-xl bg-white border border-rose-200 font-black text-sm text-rose-900 hover:bg-rose-100 transition">6</button>
+                <button type="button" data-quick-odd="8" class="num-chip-odd py-2 rounded-xl bg-white border border-rose-200 font-black text-sm text-rose-900 hover:bg-rose-100 transition">8</button>
+                <button type="button" id="btnAutoFillOdd" data-fill-odd="1" class="py-2 rounded-xl bg-rose-100 border border-rose-300 font-bold text-xs text-rose-900 hover:bg-rose-200 transition">補滿</button>
+              </div>
+            </div>
+
+            <!-- Convenient Even Vertex Count Selector -->
+            <div class="bg-indigo-50/80 border border-indigo-200 rounded-2xl p-2.5 space-y-2">
+              <div class="flex items-center justify-between">
+                <label for="inputEvenCount" class="text-sm font-black text-indigo-950">
+                  偶數點數量 <span class="text-xs font-semibold text-indigo-700">(2,4,6條線)</span>
+                </label>
+                <div class="flex items-center gap-1">
+                  <button type="button" data-Spin="even-dec" class="w-9 h-9 rounded-xl bg-white border border-indigo-300 text-indigo-700 font-black text-lg hover:bg-indigo-100 transition">-</button>
+                  <input id="inputEvenCount" type="number" min="0" max="30" placeholder="?" class="w-14 h-9 text-center font-black text-lg text-indigo-900 bg-white border border-indigo-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <button type="button" data-Spin="even-inc" class="w-9 h-9 rounded-xl bg-white border border-indigo-300 text-indigo-700 font-black text-lg hover:bg-indigo-100 transition">+</button>
+                </div>
+              </div>
+              <div id="quickEvenPad" class="grid grid-cols-6 gap-1.5">
+                <button type="button" data-quick-even="0" class="num-chip-even py-2 rounded-xl bg-white border border-indigo-200 font-black text-sm text-indigo-900 hover:bg-indigo-100 transition">0</button>
+                <button type="button" data-quick-even="2" class="num-chip-even py-2 rounded-xl bg-white border border-indigo-200 font-black text-sm text-indigo-900 hover:bg-indigo-100 transition">2</button>
+                <button type="button" data-quick-even="3" class="num-chip-even py-2 rounded-xl bg-white border border-indigo-200 font-black text-sm text-indigo-900 hover:bg-indigo-100 transition">3</button>
+                <button type="button" data-quick-even="4" class="num-chip-even py-2 rounded-xl bg-white border border-indigo-200 font-black text-sm text-indigo-900 hover:bg-indigo-100 transition">4</button>
+                <button type="button" data-quick-even="6" class="num-chip-even py-2 rounded-xl bg-white border border-indigo-200 font-black text-sm text-indigo-900 hover:bg-indigo-100 transition">6</button>
+                <button type="button" id="btnAutoFillEven" data-fill-even="1" class="py-2 rounded-xl bg-indigo-100 border border-indigo-300 font-bold text-xs text-indigo-900 hover:bg-indigo-200 transition">補滿</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Can It Be Drawn in One Stroke? Large Buttons -->
+          <div id="step1ChoiceSection" class="grid grid-cols-2 gap-2.5 rounded-2xl transition">
+            <button type="button" id="btnChooseYes" class="choice-btn py-3.5 px-3 rounded-2xl border-2 border-slate-300 font-black text-base text-slate-700 hover:border-emerald-500 transition">
+              可以一筆畫出
+            </button>
+            <button type="button" id="btnChooseNo" class="choice-btn py-3.5 px-3 rounded-2xl border-2 border-slate-300 font-black text-base text-slate-700 hover:border-rose-500 transition">
+              無法一筆畫出
+            </button>
+          </div>
+
+          <!-- Inline Alert / Hint Message in Step 1 -->
+          <div id="step1FeedbackBox" class="hidden rounded-xl p-2.5 text-xs font-semibold leading-snug"></div>
+
+          <!-- Primary Action Buttons for Step 1 -->
+          <div class="flex flex-col gap-2">
+            <button type="button" id="btnSubmitJudgment" class="w-full py-4 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg shadow-md shadow-indigo-600/25 transition">
+              確認判斷
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2 PANEL: CLICK-TO-DRAW CHALLENGE & BIG BUTTONS -->
+        <div id="panelStep2" class="hidden floating-glass rounded-3xl p-4 border-2 border-indigo-500/80 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-black flex items-center justify-center">2</span>
+              <h3 class="font-black text-slate-900 text-base">依序點選頂點畫線</h3>
+            </div>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">畫布已解鎖</span>
+          </div>
+
+          <div class="bg-slate-100 rounded-xl p-2.5 text-xs font-bold flex items-center justify-between text-slate-700">
+            <span>奇數點：<strong id="summaryOdd" class="text-rose-600 text-sm">0</strong></span>
+            <span>偶數點：<strong id="summaryEven" class="text-indigo-600 text-sm">0</strong></span>
+            <span class="text-emerald-700">判斷：可以一筆畫</span>
+          </div>
+
+          <div id="drawingInstructionBox" class="rounded-xl bg-indigo-50 p-2.5 border border-indigo-200 text-xs font-semibold text-indigo-950 leading-snug">
+            請在左圖<strong>依序點選頂點</strong>（若有雙弧線可點弧線上的綠點）完成一筆畫。
+          </div>
+
+          <!-- Live Drawing Status Feedback -->
+          <div id="drawingLiveStatus" class="hidden rounded-xl p-2.5 text-xs font-bold"></div>
+
+          <!-- Quick Canvas Undo / Clear inside Right Panel -->
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="btnUndoStepSide" class="py-3 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-black text-sm transition">
+              退回一步
+            </button>
+            <button type="button" id="btnClearDrawSide" class="py-3 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-sm transition">
+              清空重畫
+            </button>
+          </div>
+
+          <!-- Back to Step 1 Big Buttons -->
+          <div class="pt-2 border-t border-slate-200 flex flex-col gap-2">
+            <button type="button" id="btnBackToStep1" class="w-full py-3.5 px-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-base shadow-sm transition">
+              回到上一步重新判斷
+            </button>
+            <button type="button" id="btnVerifyImpossibleOrGiveUp" class="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition">
+              結束本題並查看解析
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3 PANEL: QUESTION RESULT & BIG NEXT BUTTON -->
+        <div id="panelStep3" class="hidden floating-glass rounded-3xl p-4 space-y-3">
+          <div id="resultBanner" class="rounded-2xl p-3 border">
+            <div class="flex items-center justify-between mb-1">
+              <span id="resultTitle" class="font-black text-base">挑戰成功</span>
+              <span id="resultPointsBadge" class="px-3 py-0.5 rounded-full font-black text-sm bg-white shadow-sm">+10 分</span>
+            </div>
+            <p id="resultSummaryText" class="text-xs font-medium leading-snug"></p>
+          </div>
+
+          <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200 space-y-2 text-xs">
+            <div class="font-bold text-slate-900">
+              正確頂點分析（紅＝奇數點，藍＝偶數點）
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-white p-2 rounded-xl border border-slate-200">
+                <span class="text-slate-500 text-[11px] block">正確奇數點</span>
+                <strong id="ansOddCount" class="text-base font-black text-rose-600">0 個</strong>
+              </div>
+              <div class="bg-white p-2 rounded-xl border border-slate-200">
+                <span class="text-slate-500 text-[11px] block">正確偶數點</span>
+                <strong id="ansEvenCount" class="text-base font-black text-indigo-600">0 個</strong>
+              </div>
+            </div>
+            <p id="ansExplanation" class="text-slate-700 leading-snug"></p>
+          </div>
+
+          <div class="flex gap-2">
+            <button type="button" id="btnRetryCurrentQuestion" class="py-3.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-sm transition">
+              重練此題
+            </button>
+            <button type="button" id="btnNextQuestion" class="flex-1 py-3.5 px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-base shadow-md shadow-indigo-600/25 transition">
+              下一題
+            </button>
+          </div>
+        </div>
+
+      </aside>
+    </section>
+
+    <!-- VIEW 3: STUDENT ID & NAME INPUT MODAL + GENERATED SCORE CERTIFICATE IMAGE -->
+    <section id="viewSummary" class="hidden min-h-screen w-full flex items-center justify-center p-3 sm:p-6 bg-slate-200/90">
+      <div class="max-w-3xl w-full bg-white rounded-3xl p-5 sm:p-7 shadow-xl border border-slate-200 text-center space-y-5">
+
+        <!-- Sub-view A: Student ID & Name Form (Shown first when 10 questions finish) -->
+        <div id="studentFormCard" class="max-w-md mx-auto space-y-5 py-4">
+          <div>
+            <span class="inline-block px-3.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 mb-2">
+              10 題挑戰完成
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900">請輸入學號與姓名</h2>
+            <p class="text-sm text-slate-500 mt-1">輸入後將為你產生專屬的成績總結圖片供下載保存</p>
+          </div>
+
+          <div class="space-y-3 text-left">
+            <div>
+              <label for="inputStudentId" class="block text-sm font-black text-slate-700 mb-1">學號</label>
+              <input id="inputStudentId" type="text" placeholder="請輸入學號（例如：11201）" class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-300 font-bold text-base text-slate-900 focus:outline-none focus:border-indigo-600" />
+            </div>
+            <div>
+              <label for="inputStudentName" class="block text-sm font-black text-slate-700 mb-1">姓名</label>
+              <input id="inputStudentName" type="text" placeholder="請輸入姓名（下載圖片將以此命名）" class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-300 font-bold text-base text-slate-900 focus:outline-none focus:border-indigo-600" />
+            </div>
+            <p id="studentFormError" class="hidden text-xs font-bold text-rose-600"></p>
+          </div>
+
+          <button id="btnGenerateCertificate" type="button" class="w-full py-4 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg shadow-lg shadow-indigo-600/25 transition">
+            產生分數總結圖片
+          </button>
+        </div>
+
+        <!-- Sub-view B: Generated Score Summary Card & Giant Download Button -->
+        <div id="certificateResultCard" class="hidden space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900">一筆畫挑戰成績總結</h2>
+            <button id="btnEditStudentInfo" type="button" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+              修改學號姓名
+            </button>
+          </div>
+
+          <!-- Hidden / Preview Canvas & Rendered Image of the Certificate -->
+          <div class="bg-slate-100 p-3 rounded-2xl border border-slate-200">
+            <canvas id="certificateCanvas" width="900" height="620" class="hidden"></canvas>
+            <img id="certificatePreviewImg" alt="成績總結圖片" class="w-full h-auto rounded-xl shadow-md mx-auto" />
+          </div>
+
+          <!-- GIANT DOWNLOAD IMAGE BUTTON (Filename = Student Name.png) -->
+          <div class="space-y-3 pt-1">
+            <button id="btnDownloadCertificate" type="button" class="w-full py-5 px-8 rounded-3xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-black text-xl sm:text-2xl shadow-xl shadow-emerald-600/30 transition flex flex-col items-center justify-center gap-1">
+              <span>下載成績總結圖片</span>
+              <span id="downloadFileNameHint" class="text-xs sm:text-sm font-bold text-emerald-100">檔案名稱：姓名.png</span>
+            </button>
+
+            <div class="pt-2">
+              <button id="btnPlayAgainRandom" type="button" class="px-8 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-sm transition">
+                再玩一次
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /********************************************************************
+     * 1. SOUND ENGINE (Web Audio API - Safe, Zero External Files)
+     ********************************************************************/
+    const SoundFX = {
+      ctx: null,
+      muted: false,
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      playTone(freq, duration = 0.12, type = 'sine', gainVal = 0.12) {
+        if (this.muted) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {}
+      },
+      pop() { this.playTone(520, 0.08, 'sine', 0.1); },
+      step(idx) { this.playTone(360 + (idx % 10) * 45, 0.1, 'triangle', 0.12); },
+      success() {
+        [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+          setTimeout(() => this.playTone(f, 0.18, 'triangle', 0.14), i * 85);
+        });
+      },
+      warn() {
+        [300, 240].forEach((f, i) => {
+          setTimeout(() => this.playTone(f, 0.16, 'sawtooth', 0.09), i * 110);
+        });
+      }
+    };
+
+    /********************************************************************
+     * 2. COMPLETE 36-PUZZLE DATABASE (Labeled by Number Only)
+     * Note: Vertices are centered in y: 12..82 so the bottom draggable
+     * Odd/Even balls dock (at y = 92) never overlaps the graph!
+     ********************************************************************/
+    function createRawPuzzles() {
+      const list = [];
+
+      list.push({
+        id: 1,
+        vertices: [
+          { x: 25, y: 20 },
+          { x: 75, y: 20 },
+          { x: 75, y: 70 },
+          { x: 25, y: 70 }
+        ],
+        edges: [
+          { u: 0, v: 1 },
+          { u: 1, v: 2 },
+          { u: 2, v: 3 },
+          { u: 3, v: 0 }
+        ]
+      });
+
+      list.push({
+        id: 2,
+        vertices: [
+          { x: 50, y: 10 },
+          { x: 24, y: 38 },
+          { x: 76, y: 38 },
+          { x: 24, y: 78 },
+          { x: 76, y: 78 }
+        ],
+        edges: [
+          { u: 0, v: 1 },
+          { u: 0, v: 2 },
+          { u: 1, v: 2 },
+          { u: 1, v: 3 },
+          { u: 2, v: 4 },
+          { u: 3, v: 4 }
+        ]
+      });
+
+      list.push({
+        id: 3,
+        vertices: [
+          { x: 50, y: 10 },
+          { x: 24, y: 38 },
+          { x: 76, y: 38 },
+          { x: 24, y: 78 },
+          { x: 76, y: 78 }
+        ],
+        edges: [
+          { u: 0, v: 1 },
+          { u: 0, v: 2 },
+          { u: 1, v: 2 },
+          { u: 1, v: 3 },
+          { u: 2, v: 4 },
+          { u: 3, v: 4 },
+          { u: 3, v: 2 }
+        ]
+      });
+
+      list.push({
+        id: 4,
+        vertices: [
+          { x: 50, y: 10 },
+          { x: 24, y: 38 },
+          { x: 76, y: 38 },
+          { x: 24, y: 78 },
+          { x: 76, y: 78 },
+          { x: 50, y: 58 }
+        ],
+        edges: [
+          { u: 0, v: 1 },
+          { u: 0, v: 2 },
+          { u: 1, v: 2 },
+          { u: 1, v: 3 },
+          { u: 2, v: 4 },
+          { u: 3, v: 4 },
+          { u: 1, v: 5 },
+          { u: 5, v: 4 },
+          { u: 2, v: 5 },
+          { u: 5, v: 3 }
+        ]
+      });
+
+      list.push({
+        id: 5,
+        vertices: [
+          { x: 46, y: 10 },
+          { x: 75, y: 30 },
+          { x: 46, y: 30 },
+          { x: 46, y: 56 },
+          { x: 16, y: 56 },
+          { x: 84, y: 56 },
+          { x: 28, y: 78 },
+          { x: 72, y: 78 }
+        ],
+        edges: [
+          { u: 0, v: 1 },
+          { u: 1, v: 2 },
+          { u: 0, v: 2 },
+          { u: 2, v: 3 },
+          { u: 4, v: 3 },
+          { u: 3, v: 5 },
+          { u: 4, v: 6 },
+          { u: 6, v: 7 },
+          { u: 7, v: 5 }
+        ]
+      });
+
+      list.push({
+        id: 6,
+        vertices: [
+          { x: 12, y: 45 },
+          { x: 28, y: 45 },
+          { x: 72, y: 45 },
+          { x: 88, y: 45 }
+        ],
+        edges: [
+          { u: 0, v: 1 },
+          { u: 1, v: 2 },
+          { u: 2, v: 3 },
+          { u: 1, v: 2, cp: [50, 6] },
+          { u: 1, v: 2, cp: [50, 84] }
+        ]
+      });
+
+      list.push({
+        id: 7,
+        vertices: [
+          { x: 8,  y: 45 },
+          { x: 20, y: 45 },
+          { x: 44, y: 45 },
+          { x: 56, y: 45 },
+          { x: 80, y: 45 },
+          { x: 92, y: 45 }
+        ],
+        edges: [
+          { u: 0, v: 1 },
+          { u: 1, v: 2 },
+          { u: 2, v: 3 },
+          { u: 3, v: 4 },
+          { u: 4, v: 5 },
+          { u: 1, v: 2, cp: [32, 14] },
+          { u: 1, v: 2, cp: [32, 76] },
+          { u: 3, v: 4, cp: [68, 14] },
+          { u: 3, v: 4, cp: [68, 76] }
+        ]
+      });
+
+      list.push({
+        id: 8,
+        vertices: [
+          { x: 35, y: 36 },
+          { x: 65, y: 36 },
+          { x: 50, y: 42 },
+          { x: 41, y: 55 },
+          { x: 59, y: 55 },
+          { x: 50, y: 70 }
+        ],
+        edges: [
+          { u: 0, v: 1, cp: [50, 8] },
+          { u: 1, v: 4, cp: [72, 47] },
+          { u: 4, v: 3, cp: [50, 61] },
+          { u: 3, v: 0, cp: [28, 47] },
+          { u: 0, v: 2, cp: [43, 34] },
+          { u: 2, v: 4, cp: [57, 47] },
+          { u: 4, v: 5, cp: [58, 64] },
+          { u: 5, v: 0, cp: [12, 66] },
+          { u: 1, v: 2, cp: [57, 34] },
+          { u: 2, v: 3, cp: [43, 47] },
+          { u: 3, v: 5, cp: [42, 64] },
+          { u: 5, v: 1, cp: [88, 66] }
+        ]
+      });
+
+      list.push({
+        id: 9,
+        vertices: [
+          { x: 36, y: 10 },
+          { x: 64, y: 10 },
+          { x: 12, y: 32 },
+          { x: 36, y: 32 },
+          { x: 64, y: 32 },
+          { x: 88, y: 32 },
+          { x: 12, y: 56 },
+          { x: 36, y: 56 },
+          { x: 64, y: 56 },
+          { x: 88, y: 56 },
+          { x: 36, y: 78 },
+          { x: 64, y: 78 }
+        ],
+        edges: [
+          { u: 0, v: 1 }, { u: 0, v: 3 }, { u: 1, v: 4 },
+          { u: 2, v: 3 }, { u: 3, v: 4 }, { u: 4, v: 5 },
+          { u: 2, v: 6 }, { u: 3, v: 7 }, { u: 4, v: 8 }, { u: 5, v: 9 },
+          { u: 6, v: 7 }, { u: 7, v: 8 }, { u: 8, v: 9 },
+          { u: 7, v: 10 }, { u: 8, v: 11 }, { u: 10, v: 11 },
+          { u: 3, v: 8 }
+        ]
+      });
+
+      list.push({
+        id: 10,
+        vertices: [
+          { x: 14, y: 18 },
+          { x: 86, y: 18 },
+          { x: 86, y: 72 },
+          { x: 14, y: 72 },
+          { x: 32, y: 34 },
+          { x: 68, y: 34 },
+          { x: 68, y: 56 },
+          { x: 32, y: 56 }
+        ],
+        edges: [
+          { u: 0, v: 1 }, { u: 1, v: 2 }, { u: 2, v: 3 }, { u: 3, v: 0 },
+          { u: 4, v: 5 }, { u: 5, v: 6 }, { u: 6, v: 7 }, { u: 7, v: 4 },
+          { u: 0, v: 4 }, { u: 1, v: 5 }, { u: 2, v: 6 }, { u: 3, v: 7 }
+        ]
+      });
+
+      list.push({
+        id: 11,
+        vertices: [
+          { x: 14, y: 45 },
+          { x: 48, y: 12 },
+          { x: 86, y: 45 },
+          { x: 48, y: 78 }
+        ],
+        edges: [
+          { u: 0, v: 2 },
+          { u: 1, v: 2 },
+          { u: 3, v: 2 },
+          { u: 0, v: 1, cp: [22, 14] },
+          { u: 0, v: 1, cp: [38, 35] },
+          { u: 0, v: 3, cp: [22, 76] },
+          { u: 0, v: 3, cp: [38, 55] }
+        ]
+      });
+
+      list.push({
+        id: 12,
+        vertices: [
+          { x: 26, y: 34 },
+          { x: 44, y: 20 },
+          { x: 74, y: 20 },
+          { x: 44, y: 52 },
+          { x: 74, y: 52 },
+          { x: 44, y: 78 },
+          { x: 74, y: 78 },
+          { x: 92, y: 52 },
+          { x: 10, y: 34 }
+        ],
+        edges: [
+          { u: 8, v: 0, cp: [18, 21] },
+          { u: 8, v: 0, cp: [18, 47] },
+          { u: 0, v: 1 },
+          { u: 0, v: 3 },
+          { u: 1, v: 2, cp: [59, 8] },
+          { u: 1, v: 2, cp: [59, 32] },
+          { u: 1, v: 3 },
+          { u: 2, v: 4 },
+          { u: 3, v: 4 },
+          { u: 3, v: 5 },
+          { u: 5, v: 6 },
+          { u: 4, v: 6 },
+          { u: 4, v: 7 },
+          { u: 6, v: 7 }
+        ]
+      });
+
+      list.push({
+        id: 13,
+        vertices: [
+          { x: 50, y: 12 },
+          { x: 30, y: 45 },
+          { x: 78, y: 45 },
+          { x: 50, y: 78 }
+        ],
+        edges: [
+          { u: 0, v: 1, cp: [26, 22] },
+          { u: 0, v: 1, cp: [48, 32] },
+          { u: 3, v: 1, cp: [26, 68] },
+          { u: 3, v: 1, cp: [48, 58] },
+          { u: 0, v: 2, cp: [68, 24] },
+          { u: 1, v: 2 },
+          { u: 3, v: 2, cp: [68, 66] }
+        ]
+      });
+
+      list.push({
+        id: 14,
+        vertices: [
+          { x: 18, y: 20 },
+          { x: 18, y: 70 },
+          { x: 50, y: 45 },
+          { x: 82, y: 20 },
+          { x: 82, y: 70 }
+        ],
+        edges: [
+          { u: 0, v: 1 }, { u: 1, v: 2 }, { u: 2, v: 0 },
+          { u: 3, v: 4 }, { u: 4, v: 2 }, { u: 2, v: 3 }
+        ]
+      });
+
+      list.push({
+        id: 15,
+        vertices: [
+          { x: 32, y: 16 },
+          { x: 68, y: 16 },
+          { x: 15, y: 40 },
+          { x: 50, y: 40 },
+          { x: 85, y: 40 },
+          { x: 50, y: 78 }
+        ],
+        edges: [
+          { u: 0, v: 1 },
+          { u: 0, v: 2 }, { u: 0, v: 3 },
+          { u: 1, v: 3 }, { u: 1, v: 4 },
+          { u: 2, v: 3 }, { u: 3, v: 4 },
+          { u: 2, v: 5 }, { u: 3, v: 5 }, { u: 4, v: 5 }
+        ]
+      });
+
+      list.push({
+        id: 16,
+        vertices: [
+          { x: 50, y: 10 },
+          { x: 86, y: 34 },
+          { x: 72, y: 76 },
+          { x: 28, y: 76 },
+          { x: 14, y: 34 }
+        ],
+        edges: [
+          { u: 0, v: 1 }, { u: 1, v: 2 }, { u: 2, v: 3 }, { u: 3, v: 4 }, { u: 4, v: 0 },
+          { u: 0, v: 2 }, { u: 2, v: 4 }, { u: 4, v: 1 }, { u: 1, v: 3 }, { u: 3, v: 0 }
+        ]
+      });
+
+      list.push({
+        id: 17,
+        vertices: [
+          { x: 20, y: 16 }, { x: 50, y: 16 }, { x: 80, y: 16 },
+          { x: 20, y: 46 }, { x: 50, y: 46 }, { x: 80, y: 46 },
+          { x: 20, y: 76 }, { x: 50, y: 76 }, { x: 80, y: 76 }
+        ],
+        edges: [
+          { u: 0, v: 1 }, { u: 1, v: 2 },
+          { u: 3, v: 4 }, { u: 4, v: 5 },
+          { u: 6, v: 7 }, { u: 7, v: 8 },
+          { u: 0, v: 3 }, { u: 3, v: 6 },
+          { u: 1, v: 4 }, { u: 4, v: 7 },
+          { u: 2, v: 5 }, { u: 5, v: 8 }
+        ]
+      });
+
+      list.push({
+        id: 18,
+        vertices: [
+          { x: 26, y: 14 }, { x: 74, y: 14 },
+          { x: 26, y: 46 }, { x: 74, y: 46 },
+          { x: 26, y: 78 }, { x: 74, y: 78 }
+        ],
+        edges: [
+          { u: 0, v: 1 }, { u: 2, v: 3 }, { u: 4, v: 5 },
+          { u: 0, v: 2 }, { u: 2, v: 4 },
+          { u: 1, v: 3 }, { u: 3, v: 5 }
+        ]
+      });
+
+      list.push({
+        id: 19,
+        vertices: [
+          { x: 28, y: 12 }, { x: 72, y: 12 },
+          { x: 28, y: 34 }, { x: 72, y: 34 },
+          { x: 28, y: 56 }, { x: 72, y: 56 },
+          { x: 28, y: 78 }, { x: 72, y: 78 }
+        ],
+        edges: [
+          { u: 0, v: 1 }, { u: 2, v: 3 }, { u: 4, v: 5 }, { u: 6, v: 7 },
+          { u: 0, v: 2 }, { u: 2, v: 4 }, { u: 4, v: 6 },
+          { u: 1, v: 3 }, { u: 3, v: 5 }, { u: 5, v: 7 }
+        ]
+      });
+
+      list.push({
+        id: 20,
+        vertices: [
+          { x: 50, y: 8 },
+          { x: 50, y: 26 },
+          { x: 20, y: 26 },
+          { x: 80, y: 26 },
+          { x: 20, y: 62 },
+          { x: 80, y: 62 },
+          { x: 50, y: 62 },
+          { x: 50, y: 80 }
+        ],
+        edges: [
+          { u: 0, v: 1 },
+          { u: 2, v: 1 }, { u: 1, v: 3 },
+          { u: 2, v: 4 }, { u: 3, v: 5 },
+          { u: 4, v: 6 }, { u: 6, v: 5 },
+          { u: 1, v: 6 },
+          { u: 6, v: 7 }
+        ]
+      });
+
+      list.push({
+        id: 21,
+        vertices: [
+          { x: 50, y: 10 },
+          { x: 20, y: 38 },
+          { x: 80, y: 38 },
+          { x: 50, y: 38 },
+          { x: 50, y: 64 },
+          { x: 50, y: 80 }
+        ],
+        edges: [
+          { u: 0, v: 1 }, { u: 1, v: 4 }, { u: 4, v: 2 }, { u: 2, v: 0 },
+          { u: 0, v: 3 }, { u: 3, v: 4 },
+          { u: 1, v: 3 }, { u: 3, v: 2 },
+          { u: 4, v: 5 }
+        ]
+      });
+
+      list.push({
+        id: 22,
+        vertices: [
+          { x: 30, y: 18 },
+          { x: 70, y: 18 },
+          { x: 30, y: 58 },
+          { x: 70, y: 58 },
+          { x: 50, y: 78 }
+        ],
+        edges: [
+          { u: 0, v: 1 },
+          { u: 0, v: 2 },
+          { u: 1, v: 3 },
+          { u: 2, v: 3 },
+          { u: 0, v: 2, cp: [8, 38] },
+          { u: 1, v: 3, cp: [92, 38] },
+          { u: 2, v: 4 },
+          { u: 3, v: 4 }
+        ]
+      });
+
+      list.push({
+        id: 23,
+        vertices: [
+          { x: 50, y: 45 },
+          { x: 50, y: 12 },
+          { x: 86, y: 45 },
+          { x: 50, y: 78 },
+          { x: 14, y: 45 }
+        ],
+        edges: [
+          { u: 0, v: 1, cp: [30, 20] }, { u: 0, v: 1, cp: [70, 20] },
+          { u: 0, v: 2, cp: [76, 26] }, { u: 0, v: 2, cp: [76, 64] },
+          { u: 0, v: 3, cp: [70, 70] }, { u: 0, v: 3, cp: [30, 70] },
+          { u: 0, v: 4, cp: [24, 64] }, { u: 0, v: 4, cp: [24, 26] }
+        ]
+      });
+
+      list.push({
+        id: 24,
+        vertices: [
+          { x: 50, y: 12 },
+          { x: 32, y: 44 },
+          { x: 68, y: 44 },
+          { x: 14, y: 76 },
+          { x: 50, y: 76 },
+          { x: 86, y: 76 }
+        ],
+        edges: [
+          { u: 0, v: 1 }, { u: 0, v: 2 },
+          { u: 1, v: 2 },
+          { u: 1, v: 3 }, { u: 1, v: 4 },
+          { u: 2, v: 4 }, { u: 2, v: 5 },
+          { u: 3, v: 4 }, { u: 4, v: 5 }
+        ]
+      });
+
+      list.push({
+        id: 25,
+        vertices: [
+          { x: 50, y: 10 },
+          { x: 34, y: 32 },
+          { x: 66, y: 32 },
+          { x: 34, y: 62 },
+          { x: 66, y: 62 },
+          { x: 16, y: 78 },
+          { x: 84, y: 78 }
+        ],
+        edges: [
+          { u: 0, v: 1 }, { u: 0, v: 2 },
+          { u: 1, v: 2 },
+          { u: 1, v: 3 }, { u: 2, v: 4 },
+          { u: 3, v: 4 },
+          { u: 3, v: 5 }, { u: 5, v: 1 },
+          { u: 4, v: 6 }, { u: 6, v: 2 }
+        ]
+      });
+
+      list.push({
+        id: 26,
+        vertices: [
+          { x: 50, y: 45 },
+          { x: 50, y: 12 },
+          { x: 86, y: 45 },
+          { x: 50, y: 78 },
+          { x: 14, y: 45 }
+        ],
+        edges: [
+          { u: 1, v: 2, cp: [78, 18] },
+          { u: 2, v: 3, cp: [78, 72] },
+          { u: 3, v: 4, cp: [22, 72] },
+          { u: 4, v: 1, cp: [22, 18] },
+          { u: 0, v: 1 }, { u: 0, v: 2 }, { u: 0, v: 3 }, { u: 0, v: 4 }
+        ]
+      });
+
+      list.push({
+        id: 27,
+        vertices: [
+          { x: 50, y: 12 },
+          { x: 86, y: 45 },
+          { x: 50, y: 78 },
+          { x: 14, y: 45 }
+        ],
+        edges: [
+          { u: 0, v: 2 },
+          { u: 3, v: 1 },
+          { u: 0, v: 1, cp: [78, 18] },
+          { u: 1, v: 2, cp: [78, 72] },
+          { u: 2, v: 3, cp: [22, 72] },
+          { u: 3, v: 0, cp: [22, 18] },
+          { u: 0, v: 2, cp: [30, 45] }
+        ]
+      });
+
+      list.push({
+        id: 28,
+        vertices: [
+          { x: 16, y: 22 },
+          { x: 50, y: 14 },
+          { x: 84, y: 22 },
+          { x: 36, y: 46 },
+          { x: 64, y: 46 },
+          { x: 20, y: 74 },
+          { x: 80, y: 74 }
+        ],
+        edges: [
+          { u: 5, v: 0 }, { u: 0, v: 3 },
+          { u: 3, v: 1 }, { u: 1, v: 4 },
+          { u: 4, v: 2 }, { u: 2, v: 6 },
+          { u: 5, v: 3 }, { u: 3, v: 4 }, { u: 4, v: 6 },
+          { u: 5, v: 6 }
+        ]
+      });
+
+      list.push({
+        id: 29,
+        vertices: [
+          { x: 12, y: 45 },
+          { x: 40, y: 18 },
+          { x: 40, y: 72 },
+          { x: 68, y: 45 },
+          { x: 88, y: 22 },
+          { x: 88, y: 68 }
+        ],
+        edges: [
+          { u: 0, v: 1, cp: [22, 24] },
+          { u: 0, v: 2, cp: [22, 66] },
+          { u: 1, v: 2 },
+          { u: 1, v: 3 },
+          { u: 2, v: 3 },
+          { u: 3, v: 4 },
+          { u: 4, v: 5 },
+          { u: 5, v: 3 }
+        ]
+      });
+
+      list.push({
+        id: 30,
+        vertices: [
+          { x: 14, y: 32 },
+          { x: 32, y: 18 },
+          { x: 50, y: 32 },
+          { x: 50, y: 58 },
+          { x: 32, y: 74 },
+          { x: 14, y: 58 },
+          { x: 68, y: 18 },
+          { x: 86, y: 32 },
+          { x: 86, y: 58 },
+          { x: 68, y: 74 }
+        ],
+        edges: [
+          { u: 0, v: 1 }, { u: 1, v: 2 }, { u: 2, v: 3 }, { u: 3, v: 4 }, { u: 4, v: 5 }, { u: 5, v: 0 },
+          { u: 2, v: 6 }, { u: 6, v: 7 }, { u: 7, v: 8 }, { u: 8, v: 9 }, { u: 9, v: 3 }
+        ]
+      });
+
+      list.push({
+        id: 31,
+        vertices: [
+          { x: 22, y: 24 },
+          { x: 50, y: 24 },
+          { x: 78, y: 24 },
+          { x: 10, y: 68 },
+          { x: 36, y: 68 },
+          { x: 64, y: 68 },
+          { x: 90, y: 68 }
+        ],
+        edges: [
+          { u: 0, v: 1 }, { u: 1, v: 2 },
+          { u: 3, v: 4 }, { u: 4, v: 5 }, { u: 5, v: 6 },
+          { u: 3, v: 0 }, { u: 0, v: 4 },
+          { u: 4, v: 1 }, { u: 1, v: 5 },
+          { u: 5, v: 2 }, { u: 2, v: 6 }
+        ]
+      });
+
+      list.push({
+        id: 32,
+        vertices: [
+          { x: 50, y: 45 },
+          { x: 36, y: 14 },
+          { x: 64, y: 14 },
+          { x: 86, y: 56 },
+          { x: 66, y: 76 },
+          { x: 34, y: 76 },
+          { x: 14, y: 56 }
+        ],
+        edges: [
+          { u: 0, v: 1 }, { u: 1, v: 2 }, { u: 2, v: 0 },
+          { u: 0, v: 3 }, { u: 3, v: 4 }, { u: 4, v: 0 },
+          { u: 0, v: 5 }, { u: 5, v: 6 }, { u: 6, v: 0 },
+          { u: 2, v: 3, cp: [82, 30] },
+          { u: 4, v: 5, cp: [50, 84] },
+          { u: 6, v: 1, cp: [18, 30] }
+        ]
+      });
+
+      list.push({
+        id: 33,
+        vertices: [
+          { x: 24, y: 12 },
+          { x: 76, y: 12 },
+          { x: 12, y: 36 },
+          { x: 36, y: 36 },
+          { x: 64, y: 36 },
+          { x: 88, y: 36 },
+          { x: 12, y: 76 },
+          { x: 36, y: 76 },
+          { x: 64, y: 76 },
+          { x: 88, y: 76 }
+        ],
+        edges: [
+          { u: 0, v: 2 }, { u: 0, v: 3 }, { u: 2, v: 3 },
+          { u: 1, v: 4 }, { u: 1, v: 5 }, { u: 4, v: 5 },
+          { u: 3, v: 4 },
+          { u: 2, v: 6 }, { u: 3, v: 7 }, { u: 4, v: 8 }, { u: 5, v: 9 },
+          { u: 6, v: 7 }, { u: 7, v: 8 }, { u: 8, v: 9 },
+          { u: 3, v: 8 }
+        ]
+      });
+
+      list.push({
+        id: 34,
+        vertices: [
+          { x: 50, y: 12 },
+          { x: 50, y: 78 },
+          { x: 24, y: 45 },
+          { x: 76, y: 45 }
+        ],
+        edges: [
+          { u: 0, v: 1, cp: [8, 45] },
+          { u: 0, v: 1, cp: [92, 45] },
+          { u: 0, v: 2 }, { u: 2, v: 1 },
+          { u: 0, v: 3 }, { u: 3, v: 1 },
+          { u: 2, v: 3 }
+        ]
+      });
+
+      list.push({
+        id: 35,
+        vertices: [
+          { x: 34, y: 14 }, { x: 82, y: 14 }, { x: 82, y: 58 }, { x: 34, y: 58 },
+          { x: 18, y: 32 }, { x: 66, y: 32 }, { x: 66, y: 76 }, { x: 18, y: 76 }
+        ],
+        edges: [
+          { u: 0, v: 1 }, { u: 1, v: 2 }, { u: 2, v: 3 }, { u: 3, v: 0 },
+          { u: 4, v: 5 }, { u: 5, v: 6 }, { u: 6, v: 7 }, { u: 7, v: 4 },
+          { u: 0, v: 4 }, { u: 1, v: 5 }, { u: 2, v: 6 }, { u: 3, v: 7 }
+        ]
+      });
+
+      list.push({
+        id: 36,
+        vertices: [
+          { x: 20, y: 12 },
+          { x: 80, y: 12 },
+          { x: 18, y: 38 },
+          { x: 38, y: 30 },
+          { x: 62, y: 30 },
+          { x: 82, y: 38 },
+          { x: 50, y: 52 },
+          { x: 50, y: 78 }
+        ],
+        edges: [
+          { u: 0, v: 2 }, { u: 0, v: 3 }, { u: 2, v: 3 },
+          { u: 1, v: 4 }, { u: 1, v: 5 }, { u: 4, v: 5 },
+          { u: 3, v: 4 },
+          { u: 3, v: 6 }, { u: 4, v: 6 },
+          { u: 2, v: 7, cp: [18, 68] },
+          { u: 5, v: 7, cp: [82, 68] },
+          { u: 2, v: 6 }, { u: 5, v: 6 },
+          { u: 6, v: 7, cp: [38, 66] },
+          { u: 6, v: 7, cp: [62, 66] }
+        ]
+      });
+
+      return list.map(p => {
+        const degrees = new Array(p.vertices.length).fill(0);
+        p.edges.forEach((e, idx) => {
+          e.id = idx;
+          degrees[e.u]++;
+          degrees[e.v]++;
+        });
+        let oddCount = 0;
+        let evenCount = 0;
+        degrees.forEach(d => {
+          if (d % 2 === 1) oddCount++;
+          else evenCount++;
+        });
+        const canDraw = (oddCount === 0 || oddCount === 2);
+        let explanation = '';
+        if (oddCount === 0) {
+          explanation = `共 ${evenCount} 個偶數點、0 個奇數點，從任意點出發皆可一筆畫完。`;
+        } else if (oddCount === 2) {
+          explanation = `共 ${oddCount} 個奇數點、${evenCount} 個偶數點，從奇數點（紅點）出發即可一筆畫完。`;
+        } else {
+          explanation = `共 ${oddCount} 個奇數點（超過 2 個），無法不重複線段一筆畫出。`;
+        }
+        return {
+          ...p,
+          degrees,
+          oddCount,
+          evenCount,
+          canDraw,
+          explanation
+        };
+      });
+    }
+
+    const ALL_PUZZLES = createRawPuzzles();
+
+    /********************************************************************
+     * 3. APPLICATION STATE
+     ********************************************************************/
+    const ODD_BALL_DOCK = { x: 32, y: 92 };
+    const EVEN_BALL_DOCK = { x: 68, y: 92 };
+
+    const state = {
+      questions: [],
+      currentIndex: 0,
+      results: [],
+
+      phase: 'judge', // 'judge' | 'draw' | 'result'
+      selectedCanDraw: null,
+      vertexDisplayNumbers: [], // Randomized 1..N per question
+      userMarkedVertices: {}, // vIdx -> 'odd' | 'even'
+
+      // Toggleable Odd/Even Marker Ball state (in Phase 1)
+      activeMarkerBall: 'odd', // 'odd' | 'even'
+
+      // Click-to-draw state (in Phase 2)
+      currentVertex: null,
+      drawnSteps: [],
+      judgeAttempts: 0,
+
+      // Spotlight Tutorial state (Active on Q1 when starting)
+      tutorialActive: true,
+      tutorialSkipped: false
+    };
+
+    /********************************************************************
+     * 4. QUIZ SESSION MANAGEMENT (Q1 is ALWAYS #1 Square, + 9 Random)
+     ********************************************************************/
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function startNewSession() {
+      const easiestFirst = ALL_PUZZLES.find(p => p.id === 1);
+      const remainingPool = shuffleArray(ALL_PUZZLES.filter(p => p.id !== 1));
+      state.questions = [easiestFirst, ...remainingPool.slice(0, 9)];
+      state.currentIndex = 0;
+      state.tutorialActive = true;
+      state.results = state.questions.map(q => ({
+        puzzleId: q.id,
+        completed: false,
+        points: 0,
+        judgeOk: false,
+        drawOk: false
+      }));
+
+      switchView('game');
+      loadCurrentQuestion();
+    }
+
+    function loadCurrentQuestion() {
+      const q = currentPuzzle();
+      state.phase = 'judge';
+      state.selectedCanDraw = null;
+      state.userMarkedVertices = {};
+      // On Q1 tutorial, start with 'odd' so Step 1 guides the player to click & switch to 'even' ball!
+      state.activeMarkerBall = (state.currentIndex === 0 && state.tutorialActive) ? 'odd' : 'even';
+      state.currentVertex = null;
+      state.drawnSteps = [];
+      state.judgeAttempts = 0;
+
+      // Randomize vertex display numbers (1..N in random order)
+      const nums = Array.from({ length: q.vertices.length }, (_, i) => i + 1);
+      state.vertexDisplayNumbers = shuffleArray(nums);
+
+      document.getElementById('inputOddCount').value = '';
+      document.getElementById('inputEvenCount').value = '';
+      document.getElementById('step1TotalV').textContent = q.vertices.length;
+
+      renderDynamicQuickPads(q.vertices.length);
+      syncQuickPadHighlights();
+      updateChoiceButtonsUI();
+      hideStep1Feedback();
+
+      document.getElementById('badgeQuestionIndex').textContent = `${state.currentIndex + 1} / ${state.questions.length}`;
+      document.getElementById('questionTitle').textContent = `#${q.id}`;
+
+      renderProgressDots();
+      updateScoreUI();
+      updatePhasePanelsUI();
+      updateCanvasStatsUI();
+      updateSpotlightTutorial();
+      drawCanvas();
+    }
+
+    function currentPuzzle() {
+      return state.questions[state.currentIndex];
+    }
+
+    function getVertexLabel(idx) {
+      return state.vertexDisplayNumbers[idx] || (idx + 1);
+    }
+
+    /********************************************************************
+     * 5. LEVEL 1 SPOTLIGHT GUIDED TUTORIAL
+     ********************************************************************/
+    function getTutorialStep() {
+      if (!state.tutorialActive || state.currentIndex !== 0) return 0;
+      const q = currentPuzzle();
+      if (state.phase === 'judge') {
+        const markedCount = Object.keys(state.userMarkedVertices).length;
+        const oddStr = document.getElementById('inputOddCount').value.trim();
+        const evenStr = document.getElementById('inputEvenCount').value.trim();
+        const countsFilled = (oddStr === String(q.oddCount) && evenStr === String(q.evenCount));
+
+        if (markedCount < q.vertices.length && !countsFilled) {
+          return 1; // Step 1: Drag the Blue Even Ball onto the 4 vertices
+        }
+        if (state.selectedCanDraw === null) {
+          return 2; // Step 2: Click "可以一筆畫出"
+        }
+        return 3; // Step 3: Click "確認判斷"
+      }
+      if (state.phase === 'draw') {
+        if (state.drawnSteps.length < q.edges.length) {
+          return 4; // Step 4: Click vertices sequentially to draw
+        }
+      }
+      return 0;
+    }
+
+    // Helper for Level 1 guided drawing: returns the next target vertex index during Step 4
+    function getTutorialNextDrawVertex(q) {
+      if (state.currentVertex === null) {
+        return 0; // Guide player to click Vertex 0 (top-left) as the starting point
+      }
+      // Follow the clockwise cycle 0 -> 1 -> 2 -> 3 -> 0 or any available incident edge
+      const preferredOrder = [1, 2, 3, 0];
+      for (const cand of preferredOrder) {
+        const avail = getAvailableEdgesBetween(state.currentVertex, cand);
+        if (avail.length > 0) return cand;
+      }
+      const fallbackEdge = q.edges.find(e => !isEdgeUsed(e.id) && (e.u === state.currentVertex || e.v === state.currentVertex));
+      if (!fallbackEdge) return -1;
+      return fallbackEdge.u === state.currentVertex ? fallbackEdge.v : fallbackEdge.u;
+    }
+
+    function updateSpotlightTutorial() {
+      const step = getTutorialStep();
+      const banner = document.getElementById('tutorialBanner');
+      const screenMask = document.getElementById('spotlightScreenMask');
+      const rightAside = document.getElementById('rightControlAside');
+      const tag = document.getElementById('tutorialStepTag');
+      const text = document.getElementById('tutorialStepText');
+
+      const canvasBox = document.getElementById('canvasBox');
+      const countSec = document.getElementById('step1CountSection');
+      const choiceSec = document.getElementById('step1ChoiceSection');
+      const submitBtn = document.getElementById('btnSubmitJudgment');
+
+      [canvasBox, countSec, choiceSec, submitBtn].forEach(el => {
+        if (el) el.classList.remove('spotlight-target');
+      });
+      if (rightAside) {
+        rightAside.style.zIndex = '20';
+      }
+
+      if (step === 0) {
+        banner.classList.add('hidden');
+        screenMask.classList.add('hidden');
+        return;
+      }
+
+      banner.classList.remove('hidden');
+      screenMask.classList.remove('hidden');
+      const q = currentPuzzle();
+      const markedCount = Object.keys(state.userMarkedVertices).length;
+
+      if (step === 1) {
+        const targetVIdx = q.vertices.findIndex((_, idx) => !state.userMarkedVertices[idx]);
+        const vNum = targetVIdx !== -1 ? getVertexLabel(targetVIdx) : '';
+        if (state.activeMarkerBall !== 'even') {
+          tag.textContent = `步驟一遮罩教學：切換偶數球`;
+          text.textContent = `正方形每個頂點都連 2 條線（偶數點）。請先點選下方聚光燈照亮的藍色「偶數球」切換標記模式！`;
+        } else {
+          tag.textContent = `步驟一遮罩教學：點選標記頂點 (${markedCount}/${q.vertices.length})`;
+          text.textContent = `已切換為「偶數球」！請直接點選聚光燈照亮的「頂點 #${vNum}」將它標記為偶數點。`;
+        }
+        canvasBox.classList.add('spotlight-target');
+      } else if (step === 2) {
+        tag.textContent = '步驟一遮罩教學：選擇是否可一筆畫';
+        text.textContent = '4 個偶數點已標記完成（奇數點 0 個）！請點選右方聚光燈照亮的「可以一筆畫出」按鈕。';
+        if (rightAside) rightAside.style.zIndex = '60';
+        choiceSec.classList.add('spotlight-target');
+      } else if (step === 3) {
+        tag.textContent = '步驟一遮罩教學：確認送出判斷';
+        text.textContent = '判斷選擇完成！現在請點選右方聚光燈照亮的「確認判斷」按鈕，進入畫線教學。';
+        if (rightAside) rightAside.style.zIndex = '60';
+        submitBtn.classList.add('spotlight-target');
+      } else if (step === 4) {
+        const nextV = getTutorialNextDrawVertex(q);
+        const nextLabel = nextV !== -1 ? getVertexLabel(nextV) : '';
+        if (state.currentVertex === null) {
+          tag.textContent = '步驟二畫線教學：點選起點頂點 (0/4 條線)';
+          text.textContent = `畫布已解鎖！請直接點選聚光燈照亮的「頂點 #${nextLabel}」作為一筆畫的起點。`;
+        } else {
+          const curLabel = getVertexLabel(state.currentVertex);
+          tag.textContent = `步驟二畫線教學：依序點選連線 (${state.drawnSteps.length}/4 條線)`;
+          text.textContent = `目前已從頂點 #${curLabel} 出發！請點選聚光燈照亮的下一個相鄰「頂點 #${nextLabel}」畫出線段。`;
+        }
+        canvasBox.classList.add('spotlight-target');
+      }
+    }
+
+    /********************************************************************
+     * 6. CONVENIENT QUICK-PAD & AUTO-COMPLEMENT INPUT HELPERS
+     ********************************************************************/
+    function renderDynamicQuickPads(totalV) {
+      const oddOptions = [0, 2, 4, 6, 8];
+      const oddPad = document.getElementById('quickOddPad');
+      oddPad.innerHTML = '';
+      oddOptions.forEach(n => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('data-quick-odd', String(n));
+        btn.className = 'num-chip-odd py-2 rounded-xl bg-white border border-rose-200 font-black text-base text-rose-900 hover:bg-rose-100 transition';
+        btn.textContent = String(n);
+        btn.addEventListener('click', () => {
+          SoundFX.pop();
+          setOddAndAutoEven(n);
+          updateSpotlightTutorial();
+          drawCanvas();
+        });
+        oddPad.appendChild(btn);
+      });
+      const fillOddBtn = document.createElement('button');
+      fillOddBtn.type = 'button';
+      fillOddBtn.className = 'py-2 rounded-xl bg-rose-100 border border-rose-300 font-black text-xs text-rose-900 hover:bg-rose-200 transition';
+      fillOddBtn.textContent = '補滿';
+      fillOddBtn.addEventListener('click', () => {
+        SoundFX.pop();
+        const evenVal = parseInt(document.getElementById('inputEvenCount').value, 10);
+        if (!isNaN(evenVal)) {
+          document.getElementById('inputOddCount').value = Math.max(0, totalV - evenVal);
+          syncQuickPadHighlights();
+          updateSpotlightTutorial();
+          drawCanvas();
+        }
+      });
+      oddPad.appendChild(fillOddBtn);
+
+      const evenSet = new Set([0, Math.max(0, totalV - 4), Math.max(0, totalV - 2), totalV, 2, 4, 6]);
+      const evenOptions = Array.from(evenSet).filter(x => x >= 0 && x <= totalV + 2).sort((a, b) => a - b).slice(0, 5);
+      const evenPad = document.getElementById('quickEvenPad');
+      evenPad.innerHTML = '';
+      evenOptions.forEach(n => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('data-quick-even', String(n));
+        btn.className = 'num-chip-even py-2 rounded-xl bg-white border border-indigo-200 font-black text-base text-indigo-900 hover:bg-indigo-100 transition';
+        btn.textContent = String(n);
+        btn.addEventListener('click', () => {
+          SoundFX.pop();
+          document.getElementById('inputEvenCount').value = n;
+          syncQuickPadHighlights();
+          updateSpotlightTutorial();
+          drawCanvas();
+        });
+        evenPad.appendChild(btn);
+      });
+      const fillEvenBtn = document.createElement('button');
+      fillEvenBtn.type = 'button';
+      fillEvenBtn.className = 'py-2 rounded-xl bg-indigo-100 border border-indigo-300 font-black text-xs text-indigo-900 hover:bg-indigo-200 transition';
+      fillEvenBtn.textContent = '補滿';
+      fillEvenBtn.addEventListener('click', () => {
+        SoundFX.pop();
+        const oddVal = parseInt(document.getElementById('inputOddCount').value, 10);
+        if (!isNaN(oddVal)) {
+          document.getElementById('inputEvenCount').value = Math.max(0, totalV - oddVal);
+          syncQuickPadHighlights();
+          updateSpotlightTutorial();
+          drawCanvas();
+        }
+      });
+      evenPad.appendChild(fillEvenBtn);
+    }
+
+    function setOddAndAutoEven(oddVal) {
+      const q = currentPuzzle();
+      const totalV = q ? q.vertices.length : 0;
+      document.getElementById('inputOddCount').value = oddVal;
+      if (totalV >= oddVal) {
+        document.getElementById('inputEvenCount').value = totalV - oddVal;
+      }
+      syncQuickPadHighlights();
+    }
+
+    function syncQuickPadHighlights() {
+      const oddVal = document.getElementById('inputOddCount').value.trim();
+      const evenVal = document.getElementById('inputEvenCount').value.trim();
+      document.querySelectorAll('[data-quick-odd]').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-quick-odd') === oddVal);
+      });
+      document.querySelectorAll('[data-quick-even]').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-quick-even') === evenVal);
+      });
+    }
+
+    /********************************************************************
+     * 7. UI VIEW & PANEL SWITCHING
+     ********************************************************************/
+    function switchView(viewName) {
+      document.getElementById('viewIntro').classList.toggle('hidden', viewName !== 'intro');
+      document.getElementById('viewGame').classList.toggle('hidden', viewName !== 'game');
+      document.getElementById('viewSummary').classList.toggle('hidden', viewName !== 'summary');
+      if (viewName === 'game') drawCanvas();
+    }
+
+    function updatePhasePanelsUI() {
+      const panel1 = document.getElementById('panelStep1');
+      const panel2 = document.getElementById('panelStep2');
+      const panel3 = document.getElementById('panelStep3');
+
+      panel1.classList.toggle('hidden', state.phase !== 'judge');
+      panel2.classList.toggle('hidden', state.phase !== 'draw');
+      panel3.classList.toggle('hidden', state.phase !== 'result');
+    }
+
+    function updateChoiceButtonsUI() {
+      const btnYes = document.getElementById('btnChooseYes');
+      const btnNo = document.getElementById('btnChooseNo');
+      btnYes.classList.toggle('active-yes', state.selectedCanDraw === true);
+      btnNo.classList.toggle('active-no', state.selectedCanDraw === false);
+    }
+
+    function renderProgressDots() {
+      const container = document.getElementById('progressDots');
+      container.innerHTML = '';
+      state.questions.forEach((q, idx) => {
+        const r = state.results[idx];
+        const dot = document.createElement('span');
+        let cls = 'w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center ';
+        if (idx === state.currentIndex) {
+          cls += 'ring-2 ring-offset-1 ring-indigo-600 bg-indigo-600 text-white';
+        } else if (r.completed && r.points >= 8) {
+          cls += 'bg-emerald-500 text-white';
+        } else if (r.completed) {
+          cls += 'bg-amber-400 text-amber-950';
+        } else {
+          cls += 'bg-slate-200 text-slate-500';
+        }
+        dot.className = cls;
+        dot.textContent = idx + 1;
+        container.appendChild(dot);
+      });
+    }
+
+    function updateScoreUI() {
+      const total = state.results.reduce((acc, r) => acc + (r.points || 0), 0);
+      document.getElementById('scoreDisplay').textContent = total;
+    }
+
+    function updateCanvasStatsUI() {
+      // Bottom-left bar removed per user request; stats are reflected directly on canvas & right panel
+    }
+
+    function showStep1Feedback(msg, type = 'warn') {
+      const box = document.getElementById('step1FeedbackBox');
+      box.classList.remove('hidden');
+      if (type === 'warn') {
+        box.className = 'rounded-xl p-2.5 text-xs font-semibold leading-snug bg-rose-50 border border-rose-200 text-rose-900';
+      } else if (type === 'info') {
+        box.className = 'rounded-xl p-2.5 text-xs font-semibold leading-snug bg-amber-50 border border-amber-200 text-amber-900';
+      } else {
+        box.className = 'rounded-xl p-2.5 text-xs font-semibold leading-snug bg-emerald-50 border border-emerald-200 text-emerald-900';
+      }
+      box.innerHTML = msg;
+    }
+
+    function hideStep1Feedback() {
+      document.getElementById('step1FeedbackBox').classList.add('hidden');
+    }
+
+    /********************************************************************
+     * 8. STEP 1 JUDGMENT LOGIC & BACK-TO-STEP-1 FLOW
+     ********************************************************************/
+    function handleJudgmentSubmit() {
+      const q = currentPuzzle();
+      const oddStr = document.getElementById('inputOddCount').value.trim();
+      const evenStr = document.getElementById('inputEvenCount').value.trim();
+
+      if (oddStr === '' || evenStr === '') {
+        SoundFX.warn();
+        showStep1Feedback('請先拉動奇偶球標記頂點，或點選「奇數點」與「偶數點」數量。', 'warn');
+        return;
+      }
+      if (state.selectedCanDraw === null) {
+        SoundFX.warn();
+        showStep1Feedback('請選擇「可以一筆畫出」或「無法一筆畫出」。', 'warn');
+        return;
+      }
+
+      const userOdd = parseInt(oddStr, 10);
+      const userEven = parseInt(evenStr, 10);
+      const countsMatch = (userOdd === q.oddCount && userEven === q.evenCount);
+
+      state.judgeAttempts++;
+
+      if (state.selectedCanDraw === true) {
+        SoundFX.pop();
+        state.phase = 'draw';
+        state.currentVertex = null;
+        state.drawnSteps = [];
+        document.getElementById('summaryOdd').textContent = userOdd;
+        document.getElementById('summaryEven').textContent = userEven;
+
+        const instr = document.getElementById('drawingInstructionBox');
+        if (countsMatch && q.canDraw) {
+          instr.className = 'rounded-xl bg-emerald-50 p-2.5 border border-emerald-200 text-xs font-semibold text-emerald-950 leading-snug';
+          if (q.oddCount === 2) {
+            instr.innerHTML = `奇偶點數正確。請<strong>先點選其中一個奇數點作為起點</strong>，再依序點選相鄰頂點完成一筆畫。`;
+          } else {
+            instr.innerHTML = `奇偶點數正確。請<strong>點選任意頂點作為起點</strong>，再依序點選相鄰頂點完成一筆畫。`;
+          }
+        } else {
+          instr.className = 'rounded-xl bg-indigo-50 p-2.5 border border-indigo-200 text-xs font-semibold text-indigo-950 leading-snug';
+          instr.innerHTML = `請點選任一頂點作為起點，再依序點選相鄰頂點畫線。若發現無法畫完或算錯頂點，請點「回到上一步重新判斷」。`;
+        }
+
+        updateLiveDrawingStatus('請點選左圖任一頂點作為起點。', 'neutral');
+        updatePhasePanelsUI();
+        updateCanvasStatsUI();
+        updateSpotlightTutorial();
+        drawCanvas();
+        return;
+      }
+
+      if (state.selectedCanDraw === false) {
+        if (!q.canDraw && countsMatch) {
+          SoundFX.success();
+          const pts = state.judgeAttempts === 1 ? 10 : 8;
+          finalizeQuestionResult({
+            points: pts,
+            judgeOk: true,
+            drawOk: true,
+            title: '判斷完全正確',
+            summary: `正確數出奇數點 ${q.oddCount} 個、偶數點 ${q.evenCount} 個，並判定無法一筆畫出，得 ${pts} 分。`,
+            isSuccess: true
+          });
+        } else if (!q.canDraw && !countsMatch) {
+          SoundFX.warn();
+          showStep1Feedback(
+            `「無法一筆畫」判斷正確，但奇偶點數量有誤（總頂點數為 ${q.vertices.length}），請重新檢查各點連接線數。`,
+            'warn'
+          );
+          drawCanvas();
+        } else {
+          SoundFX.warn();
+          showStep1Feedback(
+            `這張圖奇數點只有 ${q.oddCount} 個，其實可以一筆畫出。請重選數量並改按「可以一筆畫出」。`,
+            'warn'
+          );
+          drawCanvas();
+        }
+      }
+    }
+
+    function returnToStep1FromDraw() {
+      SoundFX.pop();
+      state.phase = 'judge';
+      state.currentVertex = null;
+      state.drawnSteps = [];
+
+      showStep1Feedback('已返回步驟一，請重新拉動奇偶球標記或修改判斷。', 'info');
+      updatePhasePanelsUI();
+      updateCanvasStatsUI();
+      updateSpotlightTutorial();
+      drawCanvas();
+    }
+
+    function finalizeQuestionResult({ points, judgeOk, drawOk, title, summary, isSuccess }) {
+      const q = currentPuzzle();
+      state.phase = 'result';
+      
+      const prev = state.results[state.currentIndex];
+      state.results[state.currentIndex] = {
+        puzzleId: q.id,
+        completed: true,
+        points: Math.max(prev.points, points),
+        judgeOk: prev.judgeOk || judgeOk,
+        drawOk: prev.drawOk || drawOk
+      };
+
+      const banner = document.getElementById('resultBanner');
+      if (isSuccess) {
+        banner.className = 'rounded-2xl p-3 border bg-emerald-50 border-emerald-200 text-emerald-950';
+      } else {
+        banner.className = 'rounded-2xl p-3 border bg-amber-50 border-amber-200 text-amber-950';
+      }
+
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultPointsBadge').textContent = `+${points} 分`;
+      document.getElementById('resultSummaryText').innerHTML = summary;
+      document.getElementById('ansOddCount').textContent = `${q.oddCount} 個`;
+      document.getElementById('ansEvenCount').textContent = `${q.evenCount} 個`;
+      document.getElementById('ansExplanation').textContent = q.explanation;
+
+      const nextBtn = document.getElementById('btnNextQuestion');
+      if (state.currentIndex === state.questions.length - 1) {
+        nextBtn.textContent = '完成挑戰並輸入姓名';
+      } else {
+        nextBtn.textContent = `下一題 (${state.currentIndex + 2}/${state.questions.length})`;
+      }
+
+      renderProgressDots();
+      updateScoreUI();
+      updatePhasePanelsUI();
+      updateSpotlightTutorial();
+      drawCanvas();
+    }
+
+    /********************************************************************
+     * 9. DRAWING ENGINE & GEOMETRY HIT-TESTING
+     ********************************************************************/
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function canvasToNorm(cx, cy) {
+      const pad = 42;
+      const w = canvas.width - pad * 2;
+      const h = canvas.height - pad * 2;
+      return {
+        x: ((cx - pad) / w) * 100,
+        y: ((cy - pad) / h) * 100
+      };
+    }
+
+    function getEdgeMidpoint(q, edge) {
+      const p1 = q.vertices[edge.u];
+      const p2 = q.vertices[edge.v];
+      if (edge.cp) {
+        return {
+          x: 0.25 * p1.x + 0.5 * edge.cp[0] + 0.25 * p2.x,
+          y: 0.25 * p1.y + 0.5 * edge.cp[1] + 0.25 * p2.y
+        };
+      }
+      return {
+        x: (p1.x + p2.x) / 2,
+        y: (p1.y + p2.y) / 2
+      };
+    }
+
+    function dist2D(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    function findNearestVertex(normPt, threshold = 8.5) {
+      const q = currentPuzzle();
+      let bestIdx = -1;
+      let bestDist = threshold;
+      q.vertices.forEach((v, idx) => {
+        const d = dist2D(normPt, v);
+        if (d < bestDist) {
+          bestDist = d;
+          bestIdx = idx;
+        }
+      });
+      return bestIdx;
+    }
+
+    function isEdgeUsed(edgeId) {
+      return state.drawnSteps.some(s => s.edgeId === edgeId);
+    }
+
+    function getAvailableEdgesBetween(u, v) {
+      const q = currentPuzzle();
+      return q.edges.filter(e => !isEdgeUsed(e.id) && ((e.u === u && e.v === v) || (e.u === v && e.v === u)));
+    }
+
+    function findEdgeFromCurrentByMidpoint(normPt, threshold = 8.5) {
+      if (state.currentVertex === null) return null;
+      const q = currentPuzzle();
+      let bestEdge = null;
+      let bestD = threshold;
+      q.edges.forEach(e => {
+        if (isEdgeUsed(e.id)) return;
+        if (e.u !== state.currentVertex && e.v !== state.currentVertex) return;
+        const mid = getEdgeMidpoint(q, e);
+        const d = dist2D(normPt, mid);
+        if (d < bestD) {
+          bestD = d;
+          bestEdge = e;
+        }
+      });
+      return bestEdge;
+    }
+
+    function stepAlongEdge(edge, fromV) {
+      const toV = edge.u === fromV ? edge.v : edge.u;
+      state.drawnSteps.push({ edgeId: edge.id, from: fromV, to: toV });
+      state.currentVertex = toV;
+      SoundFX.step(state.drawnSteps.length);
+      updateCanvasStatsUI();
+      updateSpotlightTutorial();
+      checkDrawingProgress();
+      drawCanvas();
+    }
+
+    function checkDrawingProgress() {
+      const q = currentPuzzle();
+      const totalEdges = q.edges.length;
+      const drawnCount = state.drawnSteps.length;
+
+      if (drawnCount === totalEdges) {
+        SoundFX.success();
+        const userOdd = parseInt(document.getElementById('inputOddCount').value, 10);
+        const userEven = parseInt(document.getElementById('inputEvenCount').value, 10);
+        const countsOk = (userOdd === q.oddCount && userEven === q.evenCount);
+
+        const pts = countsOk ? 10 : 6;
+        const summary = countsOk
+          ? `奇偶點數正確且完成全部 ${totalEdges} 條線一筆畫，獲得滿分 10 分。`
+          : `完成一筆畫，但步驟一填寫的奇偶點數有誤（正確為奇點 ${q.oddCount}、偶點 ${q.evenCount}），得 6 分。`;
+
+        setTimeout(() => {
+          finalizeQuestionResult({
+            points: pts,
+            judgeOk: countsOk,
+            drawOk: true,
+            title: '一筆畫挑戰成功',
+            summary,
+            isSuccess: true
+          });
+        }, 250);
+        return;
+      }
+
+      const remainingIncident = q.edges.filter(
+        e => !isEdgeUsed(e.id) && (e.u === state.currentVertex || e.v === state.currentVertex)
+      );
+
+      if (remainingIncident.length === 0) {
+        SoundFX.warn();
+        if (!q.canDraw) {
+          updateLiveDrawingStatus(
+            `沒路可走了（剩 ${totalEdges - drawnCount} 條線）。這題其實無法一筆畫，請點「回到上一步重新判斷」。`,
+            'warn'
+          );
+        } else {
+          updateLiveDrawingStatus(
+            `沒路可走了（剩 ${totalEdges - drawnCount} 條線）。請點「退回一步」或「清空重畫」換個起點或順序。`,
+            'warn'
+          );
+        }
+      } else {
+        updateLiveDrawingStatus(
+          `目前在頂點 #${getVertexLabel(state.currentVertex)}（已畫 ${drawnCount}/${totalEdges} 條），請點選下一個相鄰頂點。`,
+          'ok'
+        );
+      }
+    }
+
+    function updateLiveDrawingStatus(html, statusType = 'neutral') {
+      const box = document.getElementById('drawingLiveStatus');
+      box.classList.remove('hidden');
+      if (statusType === 'warn') {
+        box.className = 'rounded-xl p-2.5 text-xs font-bold bg-rose-50 border border-rose-200 text-rose-900';
+      } else if (statusType === 'ok') {
+        box.className = 'rounded-xl p-2.5 text-xs font-bold bg-emerald-50 border border-emerald-200 text-emerald-900';
+      } else {
+        box.className = 'rounded-xl p-2.5 text-xs font-bold bg-slate-100 border border-slate-200 text-slate-700';
+      }
+      box.innerHTML = html;
+    }
+
+    function undoDrawingStep() {
+      if (state.drawnSteps.length > 0) {
+        SoundFX.pop();
+        const popped = state.drawnSteps.pop();
+        state.currentVertex = state.drawnSteps.length > 0
+          ? state.drawnSteps[state.drawnSteps.length - 1].to
+          : popped.from;
+        updateCanvasStatsUI();
+        updateSpotlightTutorial();
+        updateLiveDrawingStatus(`已退回頂點 #${getVertexLabel(state.currentVertex)}，請點選下一個相鄰頂點。`, 'neutral');
+        drawCanvas();
+      } else if (state.currentVertex !== null) {
+        SoundFX.pop();
+        state.currentVertex = null;
+        updateSpotlightTutorial();
+        updateLiveDrawingStatus('已取消起點，請重新點選任一頂點作為起點。', 'neutral');
+        drawCanvas();
+      }
+    }
+
+    function clearDrawingAll() {
+      SoundFX.pop();
+      state.drawnSteps = [];
+      state.currentVertex = null;
+      updateCanvasStatsUI();
+      updateSpotlightTutorial();
+      updateLiveDrawingStatus('已清空畫布，請點選任一頂點作為起點。', 'neutral');
+      drawCanvas();
+    }
+
+    /********************************************************************
+     * 10. CANVAS RENDERING (Graph + Draggable Odd/Even Marker Balls + Spotlight)
+     ********************************************************************/
+    function drawGraphOnContext(targetCtx, w, h, q, opts = {}) {
+      const pad = opts.pad || 42;
+      const innerW = w - pad * 2;
+      const innerH = h - pad * 2;
+      const toPx = (pt) => ({
+        x: pad + (pt.x / 100) * innerW,
+        y: pad + (pt.y / 100) * innerH
+      });
+
+      targetCtx.clearRect(0, 0, w, h);
+
+      targetCtx.fillStyle = '#e2e8f0';
+      for (let gx = 28; gx < w; gx += 28) {
+        for (let gy = 28; gy < h; gy += 28) {
+          targetCtx.beginPath();
+          targetCtx.arc(gx, gy, 1.3, 0, Math.PI * 2);
+          targetCtx.fill();
+        }
+      }
+
+      const drawnMap = new Map();
+      if (opts.drawnSteps) {
+        opts.drawnSteps.forEach((s, idx) => drawnMap.set(s.edgeId, { ...s, stepNum: idx + 1 }));
+      }
+
+      // 1. Draw all edges
+      q.edges.forEach(edge => {
+        const p1 = toPx(q.vertices[edge.u]);
+        const p2 = toPx(q.vertices[edge.v]);
+        const cp = edge.cp ? toPx({ x: edge.cp[0], y: edge.cp[1] }) : null;
+        const drawnInfo = drawnMap.get(edge.id);
+
+        const isAvailableNext = (
+          opts.phase === 'draw' &&
+          !drawnInfo &&
+          opts.currentVertex !== null &&
+          (edge.u === opts.currentVertex || edge.v === opts.currentVertex)
+        );
+
+        targetCtx.beginPath();
+        targetCtx.moveTo(p1.x, p1.y);
+        if (cp) {
+          targetCtx.quadraticCurveTo(cp.x, cp.y, p2.x, p2.y);
+        } else {
+          targetCtx.lineTo(p2.x, p2.y);
+        }
+
+        if (drawnInfo) {
+          targetCtx.strokeStyle = '#4f46e5';
+          targetCtx.lineWidth = 8;
+          targetCtx.setLineDash([]);
+        } else if (isAvailableNext) {
+          targetCtx.strokeStyle = '#10b981';
+          targetCtx.lineWidth = 6;
+          targetCtx.setLineDash([10, 6]);
+        } else {
+          targetCtx.strokeStyle = '#94a3b8';
+          targetCtx.lineWidth = 4.8;
+          targetCtx.setLineDash([]);
+        }
+        targetCtx.lineCap = 'round';
+        targetCtx.lineJoin = 'round';
+        targetCtx.stroke();
+        targetCtx.setLineDash([]);
+
+        const midNorm = getEdgeMidpoint(q, edge);
+        const midPx = toPx(midNorm);
+
+        if (drawnInfo) {
+          targetCtx.fillStyle = '#4f46e5';
+          targetCtx.beginPath();
+          targetCtx.arc(midPx.x, midPx.y, 12, 0, Math.PI * 2);
+          targetCtx.fill();
+          targetCtx.fillStyle = '#ffffff';
+          targetCtx.font = 'bold 12px Inter, sans-serif';
+          targetCtx.textAlign = 'center';
+          targetCtx.textBaseline = 'middle';
+          targetCtx.fillText(String(drawnInfo.stepNum), midPx.x, midPx.y);
+        } else if (isAvailableNext && edge.cp) {
+          targetCtx.fillStyle = '#10b981';
+          targetCtx.beginPath();
+          targetCtx.arc(midPx.x, midPx.y, 10, 0, Math.PI * 2);
+          targetCtx.fill();
+          targetCtx.strokeStyle = '#ffffff';
+          targetCtx.lineWidth = 2.5;
+          targetCtx.stroke();
+        }
+      });
+
+      // 2. Draw all vertices (Always show randomized vertex labels!)
+      q.vertices.forEach((v, idx) => {
+        const p = toPx(v);
+        const deg = q.degrees[idx];
+        const isOdd = deg % 2 === 1;
+        const isCurrent = (opts.phase === 'draw' && opts.currentVertex === idx);
+
+        let r = 17;
+        if (isCurrent) r = 21;
+
+        if (isCurrent) {
+          targetCtx.beginPath();
+          targetCtx.arc(p.x, p.y, 30, 0, Math.PI * 2);
+          targetCtx.fillStyle = 'rgba(16, 185, 129, 0.25)';
+          targetCtx.fill();
+        }
+
+        targetCtx.beginPath();
+        targetCtx.arc(p.x, p.y, r, 0, Math.PI * 2);
+
+        if (isCurrent) {
+          targetCtx.fillStyle = '#10b981';
+        } else if (opts.phase === 'result') {
+          targetCtx.fillStyle = isOdd ? '#f43f5e' : '#4f46e5';
+        } else if (opts.userMarked && opts.userMarked[idx]) {
+          targetCtx.fillStyle = opts.userMarked[idx] === 'odd' ? '#e11d48' : '#4f46e5';
+        } else {
+          targetCtx.fillStyle = '#1e293b';
+        }
+
+        targetCtx.fill();
+        targetCtx.lineWidth = 3;
+        targetCtx.strokeStyle = '#ffffff';
+        targetCtx.stroke();
+
+        // Always show randomized vertex number (never show degree count)
+        targetCtx.fillStyle = '#ffffff';
+        targetCtx.font = 'bold 13px Inter, sans-serif';
+        targetCtx.textAlign = 'center';
+        targetCtx.textBaseline = 'middle';
+        targetCtx.fillText(String(getVertexLabel(idx)), p.x, p.y);
+      });
+
+      // 3. In Phase 1 (Judge mode): Draw the Toggleable Odd & Even Balls Dock at Bottom of Canvas
+      if (opts.phase === 'judge') {
+        const dockY = toPx({ x: 50, y: 92 }).y;
+        const oddDockPx = toPx(ODD_BALL_DOCK);
+        const evenDockPx = toPx(EVEN_BALL_DOCK);
+
+        // Dock tray background
+        targetCtx.fillStyle = 'rgba(248, 250, 252, 0.96)';
+        targetCtx.strokeStyle = '#cbd5e1';
+        targetCtx.lineWidth = 2;
+        targetCtx.beginPath();
+        targetCtx.roundRect(w * 0.14, dockY - 38, w * 0.72, 72, 22);
+        targetCtx.fill();
+        targetCtx.stroke();
+
+        targetCtx.fillStyle = '#475569';
+        targetCtx.font = 'bold 13px "Noto Sans TC", sans-serif';
+        targetCtx.textAlign = 'center';
+        targetCtx.textBaseline = 'middle';
+        targetCtx.fillText('點選切換奇偶球，再點頂點標記', w * 0.5, dockY);
+
+        // Draw Odd Ball in Dock (active if opts.activeMarkerBall === 'odd')
+        drawMarkerBall(targetCtx, oddDockPx.x, oddDockPx.y, 'odd', opts.activeMarkerBall === 'odd');
+        // Draw Even Ball in Dock (active if opts.activeMarkerBall === 'even')
+        drawMarkerBall(targetCtx, evenDockPx.x, evenDockPx.y, 'even', opts.activeMarkerBall === 'even');
+      }
+
+      // 4. Mask-Style Spotlight Overlay on Canvas (for Level 1 Step 1, 2, 3, and Step 4 Drawing Tutorial)
+      const tutStep = getTutorialStep();
+      if (tutStep === 1) {
+        const evenDockPx = toPx(EVEN_BALL_DOCK);
+        const targetVIdx = q.vertices.findIndex((_, idx) => !state.userMarkedVertices[idx]);
+        if (opts.activeMarkerBall !== 'even') {
+          drawCanvasSpotlightMask(targetCtx, w, h, [
+            { x: evenDockPx.x, y: evenDockPx.y, r: 46 }
+          ]);
+          drawPulsingRing(targetCtx, evenDockPx.x, evenDockPx.y, 38, '#fbbf24');
+          drawCanvasCalloutBadge(targetCtx, evenDockPx.x, evenDockPx.y - 62, '第 1 步：點選切換為「偶數球」');
+        } else if (targetVIdx !== -1) {
+          const targetVPx = toPx(q.vertices[targetVIdx]);
+          drawCanvasSpotlightMask(targetCtx, w, h, [
+            { x: targetVPx.x, y: targetVPx.y, r: 42 }
+          ]);
+          drawPulsingRing(targetCtx, targetVPx.x, targetVPx.y, 34, '#fbbf24');
+          drawCanvasCalloutBadge(targetCtx, targetVPx.x, targetVPx.y - 52, `點選頂點 #${getVertexLabel(targetVIdx)} 標記偶數點 (${Object.keys(state.userMarkedVertices).length + 1}/4)`);
+        }
+      } else if (tutStep === 2 || tutStep === 3) {
+        // Dim the canvas completely so the user focuses on the spotlighted right-side buttons
+        drawCanvasSpotlightMask(targetCtx, w, h, []);
+      } else if (tutStep === 4) {
+        const nextV = getTutorialNextDrawVertex(q);
+        if (state.currentVertex === null && nextV !== -1) {
+          const startPx = toPx(q.vertices[nextV]);
+          drawCanvasSpotlightMask(targetCtx, w, h, [
+            { x: startPx.x, y: startPx.y, r: 44 }
+          ]);
+          drawPulsingRing(targetCtx, startPx.x, startPx.y, 34, '#fbbf24');
+          drawCanvasCalloutBadge(targetCtx, startPx.x, startPx.y - 54, `第 1 步：點選此頂點 #${getVertexLabel(nextV)} 作為起點`);
+        } else if (state.currentVertex !== null && nextV !== -1) {
+          const curPx = toPx(q.vertices[state.currentVertex]);
+          const nextPx = toPx(q.vertices[nextV]);
+          drawCanvasSpotlightMask(targetCtx, w, h, [
+            { x: curPx.x, y: curPx.y, r: 36 },
+            { x: nextPx.x, y: nextPx.y, r: 44 }
+          ]);
+          drawSpotlightGuideArrow(targetCtx, curPx, nextPx, '#fbbf24', `點選下一個頂點 #${getVertexLabel(nextV)} 畫線 (${state.drawnSteps.length + 1}/4)`);
+        }
+      }
+    }
+
+    function drawMarkerBall(targetCtx, x, y, kind, isActive) {
+      const r = isActive ? 29 : 23;
+      const color = kind === 'odd' ? '#e11d48' : '#4f46e5';
+      const glowColor = kind === 'odd' ? 'rgba(225, 29, 72, 0.28)' : 'rgba(79, 70, 229, 0.28)';
+      const label = kind === 'odd' ? '奇數球' : '偶數球';
+
+      targetCtx.save();
+      if (isActive) {
+        targetCtx.beginPath();
+        targetCtx.arc(x, y, r + 8, 0, Math.PI * 2);
+        targetCtx.fillStyle = glowColor;
+        targetCtx.fill();
+
+        targetCtx.shadowColor = 'rgba(15, 23, 42, 0.28)';
+        targetCtx.shadowBlur = 12;
+        targetCtx.shadowOffsetY = 4;
+      } else {
+        targetCtx.globalAlpha = 0.55;
+      }
+
+      targetCtx.beginPath();
+      targetCtx.arc(x, y, r, 0, Math.PI * 2);
+      targetCtx.fillStyle = color;
+      targetCtx.fill();
+      targetCtx.lineWidth = isActive ? 4 : 2.5;
+      targetCtx.strokeStyle = isActive ? '#fbbf24' : '#ffffff';
+      targetCtx.stroke();
+
+      targetCtx.fillStyle = '#ffffff';
+      targetCtx.font = isActive ? '900 14px "Noto Sans TC", sans-serif' : 'bold 12px "Noto Sans TC", sans-serif';
+      targetCtx.textAlign = 'center';
+      targetCtx.textBaseline = 'middle';
+      targetCtx.fillText(label, x, y);
+      targetCtx.restore();
+    }
+
+    function drawPulsingRing(targetCtx, x, y, radius, color) {
+      targetCtx.save();
+      targetCtx.beginPath();
+      targetCtx.arc(x, y, radius, 0, Math.PI * 2);
+      targetCtx.strokeStyle = color;
+      targetCtx.lineWidth = 4;
+      targetCtx.setLineDash([8, 6]);
+      targetCtx.stroke();
+      targetCtx.restore();
+    }
+
+    // Draws a dark semi-transparent mask over the canvas with circular spotlight cutouts
+    function drawCanvasSpotlightMask(targetCtx, w, h, holes) {
+      targetCtx.save();
+      targetCtx.fillStyle = 'rgba(15, 23, 42, 0.62)';
+      targetCtx.beginPath();
+      targetCtx.rect(0, 0, w, h);
+      holes.forEach(hole => {
+        targetCtx.moveTo(hole.x + hole.r, hole.y);
+        targetCtx.arc(hole.x, hole.y, hole.r, 0, Math.PI * 2, true);
+      });
+      targetCtx.fill('evenodd');
+      targetCtx.restore();
+    }
+
+    function drawCanvasCalloutBadge(targetCtx, x, y, text) {
+      targetCtx.save();
+      targetCtx.font = '900 15px "Noto Sans TC", sans-serif';
+      const tw = targetCtx.measureText(text).width;
+      const bw = tw + 28;
+      const bh = 36;
+      const bx = Math.max(16, Math.min(820 - bw - 16, x - bw / 2));
+      const by = Math.max(16, Math.min(820 - bh - 16, y - bh / 2));
+
+      targetCtx.fillStyle = '#fbbf24';
+      targetCtx.strokeStyle = '#ffffff';
+      targetCtx.lineWidth = 2.5;
+      targetCtx.beginPath();
+      targetCtx.roundRect(bx, by, bw, bh, 12);
+      targetCtx.fill();
+      targetCtx.stroke();
+
+      targetCtx.fillStyle = '#0f172a';
+      targetCtx.textAlign = 'center';
+      targetCtx.textBaseline = 'middle';
+      targetCtx.fillText(text, bx + bw / 2, by + bh / 2);
+      targetCtx.restore();
+    }
+
+    function drawSpotlightGuideArrow(targetCtx, fromPx, toPx, color, labelText) {
+      targetCtx.save();
+      drawPulsingRing(targetCtx, fromPx.x, fromPx.y, 36, color);
+      drawPulsingRing(targetCtx, toPx.x, toPx.y, 34, color);
+
+      const angle = Math.atan2(toPx.y - fromPx.y, toPx.x - fromPx.x);
+      const startX = fromPx.x + Math.cos(angle) * 38;
+      const startY = fromPx.y + Math.sin(angle) * 38;
+      const endX = toPx.x - Math.cos(angle) * 38;
+      const endY = toPx.y - Math.sin(angle) * 38;
+
+      targetCtx.beginPath();
+      targetCtx.moveTo(startX, startY);
+      targetCtx.lineTo(endX, endY);
+      targetCtx.strokeStyle = color;
+      targetCtx.lineWidth = 5;
+      targetCtx.setLineDash([10, 6]);
+      targetCtx.stroke();
+      targetCtx.setLineDash([]);
+
+      // Arrowhead at endX, endY
+      const headLen = 16;
+      targetCtx.beginPath();
+      targetCtx.moveTo(endX, endY);
+      targetCtx.lineTo(endX - headLen * Math.cos(angle - Math.PI / 6), endY - headLen * Math.sin(angle - Math.PI / 6));
+      targetCtx.lineTo(endX - headLen * Math.cos(angle + Math.PI / 6), endY - headLen * Math.sin(angle + Math.PI / 6));
+      targetCtx.closePath();
+      targetCtx.fillStyle = color;
+      targetCtx.fill();
+      targetCtx.restore();
+
+      if (labelText) {
+        const midX = (fromPx.x + toPx.x) / 2;
+        const midY = (fromPx.y + toPx.y) / 2;
+        drawCanvasCalloutBadge(targetCtx, midX, midY, labelText);
+      }
+    }
+
+    function drawCanvas() {
+      const q = currentPuzzle();
+      if (!q) return;
+      drawGraphOnContext(ctx, canvas.width, canvas.height, q, {
+        phase: state.phase,
+        drawnSteps: state.drawnSteps,
+        currentVertex: state.currentVertex,
+        userMarked: state.userMarkedVertices,
+        activeMarkerBall: state.activeMarkerBall
+      });
+    }
+
+    /********************************************************************
+     * 11. CANVAS POINTER INTERACTION
+     * - Phase 1 (judge): Drag Odd/Even Ball onto vertices to mark & auto-count!
+     * - Phase 2 (draw): Click vertices sequentially to draw lines!
+     ********************************************************************/
+    function getCanvasNormCoords(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const touch = (evt.touches && evt.touches[0]) || (evt.changedTouches && evt.changedTouches[0]);
+      const clientX = touch ? touch.clientX : evt.clientX;
+      const clientY = touch ? touch.clientY : evt.clientY;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const cx = (clientX - rect.left) * scaleX;
+      const cy = (clientY - rect.top) * scaleY;
+      return canvasToNorm(cx, cy);
+    }
+
+    function syncCountsFromMarkedVertices() {
+      const marks = Object.values(state.userMarkedVertices);
+      const markedOdd = marks.filter(v => v === 'odd').length;
+      const markedEven = marks.filter(v => v === 'even').length;
+      document.getElementById('inputOddCount').value = markedOdd;
+      document.getElementById('inputEvenCount').value = markedEven;
+      syncQuickPadHighlights();
+      updateCanvasStatsUI();
+      updateSpotlightTutorial();
+    }
+
+    function handleCanvasPointerDown(evt) {
+      evt.preventDefault();
+      const normPt = getCanvasNormCoords(evt);
+
+      // PHASE 1: Click Odd/Even Ball in Dock to Switch Mode, then Click Vertex to Mark!
+      if (state.phase === 'judge') {
+        if (dist2D(normPt, ODD_BALL_DOCK) < 9.5) {
+          SoundFX.pop();
+          state.activeMarkerBall = 'odd';
+          updateSpotlightTutorial();
+          drawCanvas();
+          return;
+        }
+        if (dist2D(normPt, EVEN_BALL_DOCK) < 9.5) {
+          SoundFX.pop();
+          state.activeMarkerBall = 'even';
+          updateSpotlightTutorial();
+          drawCanvas();
+          return;
+        }
+
+        // Click a vertex to mark it with activeMarkerBall (or unmark if already marked with the same type)
+        const hitV = findNearestVertex(normPt, 8.8);
+        if (hitV !== -1) {
+          SoundFX.pop();
+          if (state.userMarkedVertices[hitV] === state.activeMarkerBall) {
+            delete state.userMarkedVertices[hitV];
+          } else {
+            state.userMarkedVertices[hitV] = state.activeMarkerBall;
+          }
+          syncCountsFromMarkedVertices();
+          drawCanvas();
+        }
+        return;
+      }
+
+      // PHASE 2: Click-to-Draw Line Segments
+      if (state.phase !== 'draw') return;
+
+      const hitMidEdge = findEdgeFromCurrentByMidpoint(normPt, 8.8);
+      if (hitMidEdge && state.currentVertex !== null) {
+        stepAlongEdge(hitMidEdge, state.currentVertex);
+        return;
+      }
+
+      const hitV = findNearestVertex(normPt, 9.0);
+      if (hitV !== -1) {
+        if (state.currentVertex === null) {
+          state.currentVertex = hitV;
+          SoundFX.pop();
+          updateSpotlightTutorial();
+          updateLiveDrawingStatus(
+            `已選擇頂點 #${getVertexLabel(hitV)} 作為起點，請點選相鄰的頂點（或弧線上的綠點）畫線。`,
+            'ok'
+          );
+          drawCanvas();
+        } else if (hitV !== state.currentVertex) {
+          const avail = getAvailableEdgesBetween(state.currentVertex, hitV);
+          if (avail.length > 0) {
+            const chosenEdge = avail.find(e => !e.cp) || avail[0];
+            stepAlongEdge(chosenEdge, state.currentVertex);
+          } else {
+            SoundFX.warn();
+            updateLiveDrawingStatus(
+              `頂點 #${getVertexLabel(state.currentVertex)} 與頂點 #${getVertexLabel(hitV)} 之間沒有未畫過的線段。`,
+              'warn'
+            );
+          }
+        }
+      }
+    }
+
+    canvas.addEventListener('mousedown', handleCanvasPointerDown);
+    canvas.addEventListener('touchstart', handleCanvasPointerDown, { passive: false });
+
+    /********************************************************************
+     * 12. FINAL SUMMARY: STUDENT ID & NAME INPUT + CERTIFICATE IMAGE DOWNLOAD
+     ********************************************************************/
+    let currentCertificateDataUrl = '';
+    let currentStudentName = '';
+
+    function showFinalSummary() {
+      switchView('summary');
+      document.getElementById('studentFormCard').classList.remove('hidden');
+      document.getElementById('certificateResultCard').classList.add('hidden');
+      document.getElementById('studentFormError').classList.add('hidden');
+    }
+
+    function renderCertificateImage(studentId, studentName) {
+      const certCanvas = document.getElementById('certificateCanvas');
+      const cCtx = certCanvas.getContext('2d');
+      const w = certCanvas.width;
+      const h = certCanvas.height;
+
+      const totalScore = state.results.reduce((acc, r) => acc + (r.points || 0), 0);
+      const judgeCount = state.results.filter(r => r.judgeOk).length;
+      const drawCount = state.results.filter(r => r.drawOk).length;
+
+      // Background gradient
+      const bgGrad = cCtx.createLinearGradient(0, 0, w, h);
+      bgGrad.addColorStop(0, '#eef2ff');
+      bgGrad.addColorStop(0.5, '#ffffff');
+      bgGrad.addColorStop(1, '#ecfdf5');
+      cCtx.fillStyle = bgGrad;
+      cCtx.fillRect(0, 0, w, h);
+
+      // Decorative border
+      cCtx.strokeStyle = '#4f46e5';
+      cCtx.lineWidth = 8;
+      cCtx.strokeRect(18, 18, w - 36, h - 36);
+
+      cCtx.strokeStyle = '#cbd5e1';
+      cCtx.lineWidth = 2;
+      cCtx.strokeRect(30, 30, w - 60, h - 60);
+
+      // Header Banner
+      cCtx.fillStyle = '#1e1b4b';
+      cCtx.font = '900 34px "Noto Sans TC", sans-serif';
+      cCtx.textAlign = 'center';
+      cCtx.fillText('一筆畫幾何大挑戰｜成績總結單', w / 2, 86);
+
+      // Student ID & Name Box
+      cCtx.fillStyle = '#f8fafc';
+      cCtx.strokeStyle = '#94a3b8';
+      cCtx.lineWidth = 2;
+      cCtx.beginPath();
+      cCtx.roundRect(70, 115, w - 140, 78, 18);
+      cCtx.fill();
+      cCtx.stroke();
+
+      cCtx.fillStyle = '#0f172a';
+      cCtx.font = '800 26px "Noto Sans TC", sans-serif';
+      cCtx.textAlign = 'left';
+      cCtx.fillText(`學號：${studentId}`, 105, 163);
+      cCtx.textAlign = 'right';
+      cCtx.fillText(`姓名：${studentName}`, w - 105, 163);
+
+      // Big Score Circle / Cards
+      // Left: Total Score
+      cCtx.fillStyle = '#4f46e5';
+      cCtx.beginPath();
+      cCtx.roundRect(70, 215, 240, 130, 22);
+      cCtx.fill();
+      cCtx.fillStyle = '#e0e7ff';
+      cCtx.font = '700 18px "Noto Sans TC", sans-serif';
+      cCtx.textAlign = 'center';
+      cCtx.fillText('挑戰總得分', 190, 250);
+      cCtx.fillStyle = '#ffffff';
+      cCtx.font = '900 54px Inter, sans-serif';
+      cCtx.fillText(`${totalScore}`, 190, 315);
+
+      // Middle: Judgment Correct
+      cCtx.fillStyle = '#059669';
+      cCtx.beginPath();
+      cCtx.roundRect(330, 215, 240, 130, 22);
+      cCtx.fill();
+      cCtx.fillStyle = '#d1fae5';
+      cCtx.font = '700 18px "Noto Sans TC", sans-serif';
+      cCtx.fillText('奇偶判斷全對', 450, 250);
+      cCtx.fillStyle = '#ffffff';
+      cCtx.font = '900 44px Inter, sans-serif';
+      cCtx.fillText(`${judgeCount} / 10 題`, 450, 312);
+
+      // Right: One-Stroke Completed
+      cCtx.fillStyle = '#d97706';
+      cCtx.beginPath();
+      cCtx.roundRect(590, 215, 240, 130, 22);
+      cCtx.fill();
+      cCtx.fillStyle = '#fef3c7';
+      cCtx.font = '700 18px "Noto Sans TC", sans-serif';
+      cCtx.fillText('一筆畫完成', 710, 250);
+      cCtx.fillStyle = '#ffffff';
+      cCtx.font = '900 44px Inter, sans-serif';
+      cCtx.fillText(`${drawCount} / 10 題`, 710, 312);
+
+      // Per-Question Mini Score Grid (2 rows of 5 questions)
+      cCtx.fillStyle = '#334155';
+      cCtx.font = '800 18px "Noto Sans TC", sans-serif';
+      cCtx.textAlign = 'left';
+      cCtx.fillText('各題作答紀錄：', 70, 382);
+
+      state.questions.forEach((q, idx) => {
+        const r = state.results[idx];
+        const col = idx % 5;
+        const row = Math.floor(idx / 5);
+        const bx = 70 + col * 154;
+        const by = 400 + row * 78;
+
+        cCtx.fillStyle = r.points >= 8 ? '#ecfdf5' : '#fffbeb';
+        cCtx.strokeStyle = r.points >= 8 ? '#10b981' : '#f59e0b';
+        cCtx.lineWidth = 2;
+        cCtx.beginPath();
+        cCtx.roundRect(bx, by, 144, 66, 12);
+        cCtx.fill();
+        cCtx.stroke();
+
+        cCtx.fillStyle = '#475569';
+        cCtx.font = '700 14px "Noto Sans TC", sans-serif';
+        cCtx.textAlign = 'left';
+        cCtx.fillText(`第${idx + 1}題 (#${q.id})`, bx + 12, by + 25);
+
+        cCtx.fillStyle = r.points >= 8 ? '#047857' : '#b45309';
+        cCtx.font = '900 20px "Noto Sans TC", sans-serif';
+        cCtx.fillText(`${r.points} 分`, bx + 12, by + 52);
+      });
+
+      // If the player skipped the tutorial, also draw a small red dot marker in the top-right corner of the summary image
+      if (state.tutorialSkipped) {
+        cCtx.beginPath();
+        cCtx.arc(w - 46, 46, 8, 0, Math.PI * 2);
+        cCtx.fillStyle = '#e11d48';
+        cCtx.fill();
+      }
+
+      currentCertificateDataUrl = certCanvas.toDataURL('image/png');
+      document.getElementById('certificatePreviewImg').src = currentCertificateDataUrl;
+      document.getElementById('downloadFileNameHint').textContent = `檔案名稱：${studentName}.png`;
+    }
+
+    function downloadCertificateImage() {
+      if (!currentCertificateDataUrl) return;
+      SoundFX.success();
+      const link = document.createElement('a');
+      const safeName = (currentStudentName || '成績單').replace(/[\\/:*?"<>|]/g, '_');
+      link.download = `${safeName}.png`;
+      link.href = currentCertificateDataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    /********************************************************************
+     * 13. EVENT LISTENERS WIRING
+     ********************************************************************/
+    function initEventListeners() {
+      document.getElementById('btnNavRules').addEventListener('click', () => {
+        SoundFX.pop();
+        switchView('intro');
+      });
+
+      document.getElementById('btnMute').addEventListener('click', (e) => {
+        SoundFX.muted = !SoundFX.muted;
+        e.currentTarget.textContent = SoundFX.muted ? '音效：關' : '音效：開';
+      });
+
+      document.getElementById('btnRestartTop').addEventListener('click', () => {
+        SoundFX.pop();
+        startNewSession();
+      });
+
+      document.getElementById('btnStartGameBottom').addEventListener('click', () => {
+        SoundFX.pop();
+        startNewSession();
+      });
+
+      document.getElementById('btnCloseTutorial').addEventListener('click', () => {
+        SoundFX.pop();
+        state.tutorialActive = false;
+        state.tutorialSkipped = true;
+        document.getElementById('skippedTutorialRedDot').classList.remove('hidden');
+        updateSpotlightTutorial();
+        drawCanvas();
+      });
+
+      document.querySelectorAll('[data-Spin]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          SoundFX.pop();
+          const action = btn.getAttribute('data-Spin');
+          const inputId = action.startsWith('odd') ? 'inputOddCount' : 'inputEvenCount';
+          const inp = document.getElementById(inputId);
+          let val = parseInt(inp.value, 10);
+          if (isNaN(val)) val = 0;
+          if (action.endsWith('inc')) val = Math.min(30, val + 1);
+          else val = Math.max(0, val - 1);
+          inp.value = val;
+          syncQuickPadHighlights();
+          updateSpotlightTutorial();
+          drawCanvas();
+        });
+      });
+
+      document.getElementById('inputOddCount').addEventListener('input', () => {
+        syncQuickPadHighlights();
+        updateSpotlightTutorial();
+        drawCanvas();
+      });
+      document.getElementById('inputEvenCount').addEventListener('input', () => {
+        syncQuickPadHighlights();
+        updateSpotlightTutorial();
+        drawCanvas();
+      });
+
+      document.getElementById('btnChooseYes').addEventListener('click', () => {
+        SoundFX.pop();
+        state.selectedCanDraw = true;
+        updateChoiceButtonsUI();
+        updateSpotlightTutorial();
+        drawCanvas();
+      });
+      document.getElementById('btnChooseNo').addEventListener('click', () => {
+        SoundFX.pop();
+        state.selectedCanDraw = false;
+        updateChoiceButtonsUI();
+        updateSpotlightTutorial();
+        drawCanvas();
+      });
+
+      document.getElementById('btnSubmitJudgment').addEventListener('click', handleJudgmentSubmit);
+
+      document.getElementById('btnUndoStepSide').addEventListener('click', undoDrawingStep);
+      document.getElementById('btnClearDrawSide').addEventListener('click', clearDrawingAll);
+
+      document.getElementById('btnBackToStep1').addEventListener('click', returnToStep1FromDraw);
+
+      document.getElementById('btnVerifyImpossibleOrGiveUp').addEventListener('click', () => {
+        SoundFX.pop();
+        const q = currentPuzzle();
+        const userOdd = parseInt(document.getElementById('inputOddCount').value, 10);
+        const userEven = parseInt(document.getElementById('inputEvenCount').value, 10);
+        const countsOk = (userOdd === q.oddCount && userEven === q.evenCount);
+        const judgeOk = countsOk && (state.selectedCanDraw === q.canDraw);
+
+        finalizeQuestionResult({
+          points: judgeOk ? 6 : 0,
+          judgeOk,
+          drawOk: false,
+          title: '本題解析',
+          summary: judgeOk
+            ? `奇偶點判斷正確（得 6 分）。`
+            : `正確答案為：奇數點 ${q.oddCount} 個、偶數點 ${q.evenCount} 個（${q.canDraw ? '可以一筆畫' : '無法一筆畫'}）。`,
+          isSuccess: judgeOk
+        });
+      });
+
+      document.getElementById('btnRetryCurrentQuestion').addEventListener('click', () => {
+        SoundFX.pop();
+        loadCurrentQuestion();
+      });
+
+      document.getElementById('btnNextQuestion').addEventListener('click', () => {
+        SoundFX.pop();
+        if (state.currentIndex < state.questions.length - 1) {
+          state.currentIndex++;
+          loadCurrentQuestion();
+        } else {
+          showFinalSummary();
+        }
+      });
+
+      // Student ID & Name Form Submission
+      document.getElementById('btnGenerateCertificate').addEventListener('click', () => {
+        const sid = document.getElementById('inputStudentId').value.trim();
+        const sname = document.getElementById('inputStudentName').value.trim();
+        const errEl = document.getElementById('studentFormError');
+
+        if (!sid || !sname) {
+          SoundFX.warn();
+          errEl.textContent = '請完整輸入「學號」與「姓名」！';
+          errEl.classList.remove('hidden');
+          return;
+        }
+
+        SoundFX.success();
+        errEl.classList.add('hidden');
+        currentStudentName = sname;
+        renderCertificateImage(sid, sname);
+        document.getElementById('studentFormCard').classList.add('hidden');
+        document.getElementById('certificateResultCard').classList.remove('hidden');
+      });
+
+      document.getElementById('btnEditStudentInfo').addEventListener('click', () => {
+        SoundFX.pop();
+        document.getElementById('certificateResultCard').classList.add('hidden');
+        document.getElementById('studentFormCard').classList.remove('hidden');
+      });
+
+      document.getElementById('btnDownloadCertificate').addEventListener('click', downloadCertificateImage);
+
+      document.getElementById('btnPlayAgainRandom').addEventListener('click', () => {
+        SoundFX.pop();
+        startNewSession();
+      });
+    }
+
+    window.onload = () => {
+      initEventListeners();
+    };
+  </script>
+</body>
+</html>

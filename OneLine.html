@@ -431,11 +431,11 @@
           <div class="space-y-3 text-left">
             <div>
               <label for="inputStudentId" class="block text-sm font-black text-slate-700 mb-1">學號</label>
-              <input id="inputStudentId" type="text" placeholder="請輸入學號（例如：11201）" class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-300 font-bold text-base text-slate-900 focus:outline-none focus:border-indigo-600" />
+              <input id="inputStudentId" type="text" placeholder="請輸入學號" class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-300 font-bold text-base text-slate-900 focus:outline-none focus:border-indigo-600" />
             </div>
             <div>
               <label for="inputStudentName" class="block text-sm font-black text-slate-700 mb-1">姓名</label>
-              <input id="inputStudentName" type="text" placeholder="請輸入姓名（下載圖片將以此命名）" class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-300 font-bold text-base text-slate-900 focus:outline-none focus:border-indigo-600" />
+              <input id="inputStudentName" type="text" placeholder="請輸入姓名" class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-300 font-bold text-base text-slate-900 focus:outline-none focus:border-indigo-600" />
             </div>
             <p id="studentFormError" class="hidden text-xs font-bold text-rose-600"></p>
           </div>
@@ -449,9 +449,6 @@
         <div id="certificateResultCard" class="hidden space-y-5">
           <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
             <h2 class="text-xl sm:text-2xl font-black text-slate-900">一筆畫挑戰成績總結</h2>
-            <button id="btnEditStudentInfo" type="button" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
-              修改學號姓名
-            </button>
           </div>
 
           <!-- Hidden / Preview Canvas & Rendered Image of the Certificate -->
@@ -464,7 +461,6 @@
           <div class="space-y-3 pt-1">
             <button id="btnDownloadCertificate" type="button" class="w-full py-5 px-8 rounded-3xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-black text-xl sm:text-2xl shadow-xl shadow-emerald-600/30 transition flex flex-col items-center justify-center gap-1">
               <span>下載成績總結圖片</span>
-              <span id="downloadFileNameHint" class="text-xs sm:text-sm font-bold text-emerald-100">檔案名稱：姓名.png</span>
             </button>
 
             <div class="pt-2">
@@ -2574,7 +2570,6 @@
 
       currentCertificateDataUrl = certCanvas.toDataURL('image/png');
       document.getElementById('certificatePreviewImg').src = currentCertificateDataUrl;
-      document.getElementById('downloadFileNameHint').textContent = `檔案名稱：${studentName}.png`;
     }
 
     function downloadCertificateImage() {
@@ -2728,11 +2723,7 @@
         document.getElementById('certificateResultCard').classList.remove('hidden');
       });
 
-      document.getElementById('btnEditStudentInfo').addEventListener('click', () => {
-        SoundFX.pop();
-        document.getElementById('certificateResultCard').classList.add('hidden');
-        document.getElementById('studentFormCard').classList.remove('hidden');
-      });
+
 
       document.getElementById('btnDownloadCertificate').addEventListener('click', downloadCertificateImage);
 
